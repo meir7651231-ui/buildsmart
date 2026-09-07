@@ -1,4 +1,4 @@
-// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
+// 🎨 schoolos_attendance.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeWaveformBars · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×1 · chip×1 · statRow×13 · button×29 · statusChip×20 · banner×22 · emptyState×7 · mediaRow×3 · section×10 · segmented×6 · meter×3 · frame×3 · timeline×8 · enumField×1 · search×1 · pageHeader×1 · table×1 · bars×2 · calendar×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🏫 SchoolOS · מודול נוכחות (ATTENDANCE) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד).
 // מפרט (SSOT): knowledge/SPEC-ATTENDANCE-FULL-2026-09-04.md · הסטנדרט: schoolos.dart (מלאי).
@@ -1032,7 +1032,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Expanded(child: ForgeStatPlain(fields: ['🗂 סיבות-שונות', '${by.length}'])),
       ]),
       _gap(10),
-      if (by.isEmpty) ForgeAnimatedEmpty(fields: ['אין חיסורים החודש', '']) else ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final e in by) (e[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      if (by.isEmpty) ForgeAnimatedEmpty(fields: ['אין חיסורים החודש', '']) else ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final e in by) (e[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
     ]]));
   }
 
@@ -1210,7 +1210,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   _gap(12),
                   const Text('חיסורים לפי סיבה', style: TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),
                   _gap(6),
-                  ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final e in reasons) (e[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+                  ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final e in reasons) (e[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
                 ],
                 _gap(12),
                 Text('השלמות · ${pend.length}', style: const TextStyle(color: _muted, fontSize: 12.5, fontWeight: FontWeight.w700)),

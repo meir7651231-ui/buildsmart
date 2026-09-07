@@ -1,4 +1,4 @@
-// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
+// 🎨 schoolos_dashboard.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeWaveformBars · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×3 · chip×10 · statRow×19 · button×25 · statusChip×17 · banner×16 · emptyState×10 · mediaRow×5 · section×15 · segmented×1 · meter×3 · frame×5 · timeline×3 · search×1 · pageHeader×1 · table×1 · bars×5 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 📊 SchoolOS · לוח-הנהלה (DASHBOARD) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-DASHBOARD-FULL-2026-09-04.
 // 🎯 המטרה: שהמנהל/ת יפתח את הבוקר ותוך 30 שניות יידע: מה דורש-החלטה היום · מה בסיכון · מה מגמתי · מה הפעולה-הראשונה.
@@ -782,11 +782,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             TrendStat(value: pct ? '${s.last}%' : '${s.last}', delta: (tr['pct'] as num).toDouble(), label: 'אחרון מול ${s.length ~/ 2} חודשים קודמים · ${dir == 'up' ? 'עולה' : dir == 'down' ? 'יורד' : 'יציב'}${good == null ? '' : good ? ' · לטובה' : ' · לרעה'}'),
             _gap(),
             if (goal == null)
-              ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final v in s) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })())
+              ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final v in s) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })())
             else ...[
               _title('פער מהיעד ($goal) פר-חודש — בר ארוך = רחוק מהיעד · 0 = ביעד'),
               _gap(6),
-              ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final v in s) math.max(0, lowerBetter ? v - goal : goal - v).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+              ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final v in s) math.max(0, lowerBetter ? v - goal : goal - v).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
             ],
           ]]));
         }(),
@@ -813,13 +813,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ForgeTitledSection(fields: ['⚖️ נוכחות לפי שכבה · ${g.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         if (g.isEmpty) ForgeAnimatedEmpty(fields: ['אין נתוני-שכבות — מקום-שמור', ''])
         else ...[
-          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final x in g) (x['attendancePct'] as num).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final x in g) (x['attendancePct'] as num).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _wrap([for (final x in out) ForgeStatusChip(items: [['⚠️ שכבה ${x['name']}: ${x['attendancePct']}% (z=${(x['z'] as num).toStringAsFixed(1)}) — חריגה-סטטיסטית']], variants: const <int>[3])]),
           if (out.isEmpty) _wrap([ForgeStatusChip(items: [['אין חריגה-סטטיסטית (|z| ≤ 1.5)']], variants: const <int>[1])]),
         ],
       ]])),
       ForgeTitledSection(fields: ['🚨 בסיכון לפי שכבה', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-        if (g.isNotEmpty) ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final x in g) (x['riskCount'] as num).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+        if (g.isNotEmpty) ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final x in g) (x['riskCount'] as num).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       ]])),
       ForgeTitledSection(fields: ['📆 השוואה לשנה-שעברה', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         vs('נוכחות-היום', att, d.input.lastYear['attendancePct'], pct: true), _gap(8),
@@ -929,7 +929,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         Expanded(child: ForgeStatPlain(fields: ['✅ טופלו היום', '${d.progress()['done']}'])),
       ]),
       _gap(12),
-      ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final m in byMod) (m[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final m in byMod) (m[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(12),
       for (var r = 0; r < d.kpiDefs.length; r += 4)
         Padding(

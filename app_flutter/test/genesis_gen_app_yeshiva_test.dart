@@ -1,9 +1,9 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של YeshivaApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_yeshiva.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_p515873_skeda887.dart' show MemberScreen, MemberFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_p27d7fd_skeda887.dart' show DonationScreen, DonationFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm_pb3f005_skeda887.dart' show RoomScreen, RoomFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_p09f962_skeda887.dart' show TeacherScreen, TeacherFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_p515873_ske93605.dart' show MemberScreen, MemberFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_p27d7fd_ske93605.dart' show DonationScreen, DonationFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm_pb3f005_ske93605.dart' show RoomScreen, RoomFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_p09f962_ske93605.dart' show TeacherScreen, TeacherFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/card/card.dart';

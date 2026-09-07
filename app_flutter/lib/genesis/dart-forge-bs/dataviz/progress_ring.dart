@@ -84,12 +84,12 @@ Path _parse(String d) {
   return path;
 }
 
-/// ProgressRing — seam:series · 1 חריצים
+/// ProgressRing — seam:series · 2 חריצים
 class ForgeProgressRing extends StatelessWidget {
-  /// תפר-דאטה (G12a): 1 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  /// תפר-דאטה (G12a): 2 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
   final List<String>? fields;
-  static const int fieldSlots = 1;
-  static const List<String> fieldDemo = <String>["Label"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  static const int fieldSlots = 2;
+  static const List<String> fieldDemo = <String>["Label", "14"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
   /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
   final Widget? child;
@@ -104,7 +104,7 @@ class ForgeProgressRing extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    final Widget body = Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [_hide(_f(0, "Label"), SizedBox(width: double.infinity, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, spacing: 10, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false))]))), SizedBox(width: double.infinity, child: Center(widthFactor: 1.0, heightFactor: 1.0, child: SizedBox(width: 118, height: 118, child: CustomPaint(painter: _SvgScene([_Op.circle(60, 60, 40, skin.hair, false, 8), _Op.arc(60, 60, 40, -1.5708, 4.7000, theme.aHi, 8), _Op.circle(60, 60, 28, skin.hair2, false, 6), _Op.arc(60, 60, 28, -1.5708, 3.9286, theme.c2, 6), _Op.text("14", 60, 65, 22, skin.ink, 1, fonts.grotesk)], 120, 120)))))]), child));
+    final Widget body = Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [_hide(_f(0, "Label"), SizedBox(width: double.infinity, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, spacing: 10, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false))]))), _hide(_f(1, "14"), SizedBox(width: double.infinity, child: Center(widthFactor: 1.0, heightFactor: 1.0, child: SizedBox(width: 118, height: 118, child: CustomPaint(painter: _SvgScene([_Op.circle(60, 60, 40, skin.hair, false, 8), _Op.arc(60, 60, 40, -1.5708, 4.7000, theme.aHi, 8), _Op.circle(60, 60, 28, skin.hair2, false, 6), _Op.arc(60, 60, 28, -1.5708, 3.9286, theme.c2, 6), _Op.text(_f(1, "14"), 60, 65, 22, skin.ink, 1, fonts.grotesk)], 120, 120))))))]), child));
     return body;
   }
 }

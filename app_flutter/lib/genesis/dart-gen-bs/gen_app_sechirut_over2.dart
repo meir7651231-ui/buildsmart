@@ -7,6 +7,7 @@ import '../dart-ui-bs/premium/dataviz/neon_bars.dart';
 import '../dart-ui-bs/auto/worker_task_detail_sheet_primary_btn.dart';
 import 'gen_app_sechirut_rec4.dart';
 import '../dart-data-bs/auto/gen_app_sechirut_over2_content.dart';
+import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutOver2Screen extends StatelessWidget {
   const GenAppSechirutOver2Screen({super.key});
@@ -34,7 +35,7 @@ class GenAppSechirutOver2Screen extends StatelessWidget {
             ),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: NeonBars(labels: appStore.records('app_sechirut_ent4').take(12).map((r) => r[gen_app_sechirut_over2_c6] ?? '').toList(), values: appStore.records('app_sechirut_ent4').take(12).map((r) => double.tryParse(r[gen_app_sechirut_over2_c5] ?? '') ?? 0).toList()),
+            child: ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = appStore.records('app_sechirut_ent4').take(12).map((r) => double.tryParse(r[gen_app_sechirut_over2_c5] ?? '') ?? 0).toList(); final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           ),
           Expanded(
             child: ListView(

@@ -1,11 +1,11 @@
-// 🎯 ShopProductScreen — retarget של schoolos_rooms.dart לישות ShopProduct (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity ShopProduct
-//   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 4 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 7
-//   id⇒id(name) · name⇒name(name) · active⇒active(name) · notes⇒notes(name) · slot⇒∅(engine-contract) · cap⇒∅(engine-contract) · location⇒∅(engine-contract) · from⇒∅(engine-contract) · to⇒∅(engine-contract) · access⇒∅(engine-contract) · eq⇒∅(engine-contract)
-//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×17 (ב-Row, Expanded) · פנימיים: button×33 statusChip×9 banner×17 emptyState×12 mediaRow×9 · StatHero⇒ForgeStatPlain ×1 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
-//   תפר-עובדות (G9b): ShopProductFacts · count=rooms.length (static-const) · מדדים 5 · hero=unavailableN · שורות-מדד (G10a) busyNowN/unavailableN · תפר-כניסה initialPanelId · תפר-סינון-מדד initialMetric · תפר-הזרקה ∅
-//   שדות-ShopProduct בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): desc, img, components · תוויות: מונחי room (חדר/חדרים) ⇒ ShopProduct (מוצר/—) · 27 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של ShopProduct
+// 🎯 RoomScreen — retarget של schoolos_rooms.dart לישות Room (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_rooms.dart --entity Room
+//   זרע-ראשי: rooms (מועמדים: rooms(11/11) events(11/12) faults(8/9) teachers(2/2)) · מיפוי שם 11 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 0 · חוזה-מנוע (לא משתנה) 0
+//   id⇒id(name) · name⇒name(name) · active⇒active(name) · slot⇒slot(name) · cap⇒cap(name) · location⇒location(name) · from⇒from(name) · to⇒to(name) · access⇒access(name) · notes⇒notes(name) · eq⇒eq(name)
+//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×7 (ב-Row, Expanded) · פנימיים: button×25 statusChip×9 banner×14 emptyState×8 mediaRow×7 · StatHero⇒ForgeStatPlain ×0 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
+//   תפר-עובדות (G9b): RoomFacts · count=rooms.length (static-const) · מדדים 0 · hero=count · שורות-מדד (G10a) ∅ · תפר-כניסה initialPanelId · תפר-סינון-מדד ∅ · תפר-הזרקה ∅
+//   שדות-Room בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): rate · תוויות: מונחי room (חדר/חדרים) ⇒ Room (חדר/חדרים) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Room
 // 🏫 SchoolOS · חדרים ויומן-מרחבים (ROOMS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי
-// המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: ShopProductScreen.
+// המפרט knowledge/SPEC-ROOMS-FULL-2026-09-04.md. קובץ יחיד · מחלקה ציבורית אחת: RoomScreen.
 //
 // 🎯 המטרה (צעד-1, ליבה): "שכל מרחב ינוצל נכון — אף חדר לא כפול-תפוס, אף שיעור לא בלי-חדר,
 //    אף ציוד לא נעלם — ורואים את השבוע של הבניין במבט-אחד."
@@ -22,6 +22,7 @@
 // 📷 צעד-6 · אימות-מול-המטרה ברנדר: בדיקת-widget ב-buildsmart (test/genesis_rooms_test.dart).
 // ⛔ §20-ג אפס-זיוף: כל שדה בדאטה = מקור-אמת (מאור Room/Course/OrgEvent · בנייה-חכמה TaskItem-defect);
 //    חסר-מקור ⇒ מקום-שמור בחוזה-הדאטה (חוק-7), לעולם לא ערך-מומצא.
+// G17c · מטרה (צעד 1, אדם): אפס התנגשויות בחדרי-הלימוד · פעולות-יסוד (צעד 2, אדם): גריד-שבועי · התנגשות · חסימה ⇒ חלקיקים (המנוע): rm.weekly · rm.clash · rm.holiday
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/bare_stat.dart'; // עובדה-אטומית: ערך+תווית (KPI, פיגמנט מוזרק)
@@ -82,12 +83,12 @@ import '../dart-maor/ics-escape.dart'; // ייצוא iCal: escaping לפי RFC55
 import '../dart-maor/fold-ics-line.dart'; // ייצוא iCal: קיפול-שורות 75 בייט (מדף)
 import '../dart-maor/day-letters.dart'; // אותיות-הימים (א׳…ו׳) — בורר-יום קומפקטי
 import '../dart-data-maor/day-letters-terms.dart' as day_letters_terms; // שקע-המונחים של dayLetters (אטום-דאטה)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -111,7 +112,7 @@ const _warning = Color(0xFFF59E0B);
 //   סטטוס-אישור-הזמנה = אוצר-המילים של TaskItem.status (proposed=ממתין-אישור · pending=מאושר · rejected=נדחה)
 //   קלט-תכנון (כמו target/rate/lead במלאי): needsEq (ציוד-נדרש-לשיעור) · utilFloor (סף-ניצולת) · policy (מדיניות-הזמנה)
 //   ⛔ ללא-מקור ⇒ מקום-שמור (חוק-7), לא בדאטה: type·floor·owner·lastCheck·updatedAt·photo·floorMap·sensor·smartLock
-class _ShopProductData {
+class _RoomData {
   static const today = '2026-09-03'; // יום חמישי — תאריך-הזרקה דטרמיניסטי (אפס Date.now במנוע)
   static final DateTime now = DateTime(2026, 9, 3, 10, 15); // "עכשיו" מוזרק ל-roomsNow
   static const int utilFloor = 30; // סף-ניצולת (%) — מתחתיו "חדר-לא-מנוצל" (קלט-תכנון)
@@ -121,10 +122,10 @@ class _ShopProductData {
   static const rooms = <Map<String, dynamic>>[
     {'id': 'r1', 'name': 'כיתה 101', 'active': true, 'slot': 60, 'cap': 32, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': true, 'לוח-חכם': true, 'מזגן': true}},
     {'id': 'r2', 'name': 'מעבדת מדעים', 'active': true, 'slot': 60, 'cap': 24, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': false, 'notes': 'כיור-חירום בכניסה', 'eq': {'מקרן': true, 'מזגן': true, 'כיורים': true}},
-    {'id': 'r3', 'name': 'מוצר מחשבים', 'active': true, 'slot': 60, 'cap': 28, 'location': 'בניין א׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מחשבים': true, 'מקרן': true, 'מזגן': false}},
+    {'id': 'r3', 'name': 'חדר מחשבים', 'active': true, 'slot': 60, 'cap': 28, 'location': 'בניין א׳ · קומה 2', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מחשבים': true, 'מקרן': true, 'מזגן': false}},
     {'id': 'r4', 'name': 'אולם ספורט', 'active': true, 'slot': 60, 'cap': 120, 'location': 'בניין ג׳ · קרקע', 'from': '08:00', 'to': '17:00', 'access': true, 'notes': '', 'eq': {'מזרנים': true, 'מגבר': true}},
     {'id': 'r5', 'name': 'כיתה 204', 'active': true, 'slot': 60, 'cap': 30, 'location': 'בניין ב׳ · קומה 2', 'from': '08:00', 'to': '15:00', 'access': true, 'notes': '', 'eq': {'מקרן': false, 'מזגן': true}},
-    {'id': 'r6', 'name': 'מוצר מורים', 'active': true, 'slot': 60, 'cap': 16, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מדפסת': true, 'מזגן': true}},
+    {'id': 'r6', 'name': 'חדר מורים', 'active': true, 'slot': 60, 'cap': 16, 'location': 'בניין א׳ · קומה 1', 'from': '08:00', 'to': '16:00', 'access': true, 'notes': '', 'eq': {'מדפסת': true, 'מזגן': true}},
     {'id': 'r7', 'name': 'אודיטוריום', 'active': false, 'slot': 60, 'cap': 220, 'location': 'בניין ג׳ · קומה 1', 'from': '08:00', 'to': '20:00', 'access': true, 'notes': 'בשיפוץ עד סוף אוקטובר', 'eq': {'מקרן': true, 'מגבר': true}},
   ];
 
@@ -199,7 +200,7 @@ class _ShopProductData {
 
   // db בצורת-הקלט של מנועי-מאור (rooms·courses·events)
   static Map<String, dynamic> get db => {'rooms': rooms, 'courses': courses, 'events': events};
-  static const config = <String, dynamic>{'terms': {'entity.course': 'שיעור', 'entity.shopproduct': 'מוצר'}}; // termOf
+  static const config = <String, dynamic>{'terms': {'entity.course': 'שיעור', 'entity.room': 'חדר'}}; // termOf
 
   // ── שקעים (חוק-1: השכנים מוזרקים, לא מיובאים ע"י האטומים) ──
   static num _t2m(dynamic t) => timeToMin(t) as num;
@@ -279,7 +280,6 @@ class _ShopProductData {
     return null;
   }
   static int get busyNowN => nowRows.where((x) => x['busyWith'] != null).length;
-  static List<Map<String, dynamic>> get rowsOf_busyNowN => nowRows.where((x) => x['busyWith'] != null).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד busyNowN (מהצורה של ה-getter, לא מילון)
   static int get freeNowN => nowRows.length - busyNowN;
 
   // ניצולת-שבועית% = weeklyRoomSessions(מאור) ÷ קיבולת-משבצות-שבועית ((to−from)/slot × ימים) — יחס מפורק
@@ -308,11 +308,6 @@ class _ShopProductData {
   static List<Map<String, dynamic>> get openFaults => liveFaults.where((f) => f['status'] != 'done').toList();
   static bool faulty(Map<String, dynamic> r) => faultsOf(r).any((f) => f['severity'] == 'חמור');
   // חדר-לא-זמין = לא-פעיל (שיפוץ/סגור) או תקלה-חמורה-פתוחה
-  static bool unavailable(Map<String, dynamic> r) => !activeOf(r) || faulty(r);
-  static int get unavailableN => liveRooms.where(unavailable).length;
-  static List<Map<String, dynamic>> get rowsOf_unavailableN => liveRooms.where(unavailable).cast<Map<String, dynamic>>().toList(); // G10a · שורות-המדד unavailableN (מהצורה של ה-getter, לא מילון)
-
-  // הזמנות-ממתינות-אישור = סטטוס proposed (אוצר-מילים של TaskItem)
   static List<Map<String, dynamic>> get pendingApprovals => liveEvents.where((e) => e['status'] == 'proposed').toList();
 
   // ציוד-חסר/תקול = ציוד-נדרש-לשיעור (needsEq) שאינו ב-eq של החדר, או ציוד שעליו תקלה-פתוחה (fault.detail)
@@ -371,11 +366,10 @@ class _ShopProductData {
   // שיעור-בלי-חדר = inactiveRoomCourses(מאור): roomId ריק/לא-קיים/חדר-לא-פעיל
   static List<Map<String, dynamic>> get orphanCourses => [
         ...inactiveRoomCourses(liveDb, today, config, (cfg, k, fb) => '${termOf(cfg, k, fb)}', INACTIVE_ROOM_COURSES_T),
-        for (final c in liveCourses) if (roomOfCourse(c).isEmpty) {'course': c, 'roomName': '— (ללא-מוצר)'},
+        for (final c in liveCourses) if (roomOfCourse(c).isEmpty) {'course': c, 'roomName': '— (ללא-חדר)'},
       ];
 
   // קיבוץ (countBy מאור) — לפי בניין (location) · לפי סטטוס
-  static List<List<Object>> get byBuilding => countBy(liveRooms, (r) => '${(r as Map)['location']}'.split(' · ').first);
   static String statusOf(Map<String, dynamic> r) {
     if (!activeOf(r)) return faultsOf(r).isNotEmpty ? 'שיפוץ' : 'סגור';
     if (faulty(r)) return 'תקול';
@@ -396,8 +390,6 @@ class _ShopProductData {
     return l;
   }
   // תא = המשבצות של החדר שמתחילות בשעה (≥1 חוג באותה-שעה ⇒ כפל-תפיסה)
-  static List<Map<String, dynamic>> cellSlots(Map<String, dynamic> r, String iso, String hh) =>
-      slotsOf(r, iso).where((sl) => sl['outOfHours'] != true && '${sl['time']}'.substring(0, 2) == hh.substring(0, 2)).toList();
   static bool cellConflict(Map<String, dynamic> r, String iso, String hh) =>
       conflictsOf(r, iso).any((c) => '${c['time']}'.substring(0, 2) == hh.substring(0, 2));
   // התפיסה-הבאה היום (אחרי "עכשיו") = buildSlots ⊕ השוואת-זמן — לעמודת "הבאה"
@@ -461,7 +453,7 @@ class _ShopProductData {
   static String _newId(String p) => '$p-new-${++_seq}';
   static void book(String who, Map<String, dynamic> r, String iso, String time, String title, {int attendees = 0, bool approved = false}) {
     extraEvents.insert(0, {'id': _newId('e'), 'title': title, 'date': iso, 'time': time, 'type': 'other', 'roomId': r['id'], 'priority': 'green', 'done': false, 'notes': '', 'status': approved ? 'pending' : 'proposed', 'requestedBy': who, 'attendees': attendees});
-    log(who, approved ? 'הזמנת-מוצר (אושרה-אוטו)' : 'הזמנת-מוצר (ממתינה-אישור)', '${r['name']} · $iso $time · $title', roomId: r['id'] as String);
+    log(who, approved ? 'הזמנת-חדר (אושרה-אוטו)' : 'הזמנת-חדר (ממתינה-אישור)', '${r['name']} · $iso $time · $title', roomId: r['id'] as String);
     invalidate();
   }
   static void bookWeekly(String who, Map<String, dynamic> r, int day, String time, String title) {
@@ -491,7 +483,7 @@ class _ShopProductData {
   static void notifyUsers(String who, Map<String, dynamic> r, String text) {
     final to = usersOf(r);
     outbox.insert(0, {'when': today, 'from': who, 'room': r['name'], 'to': to, 'text': text});
-    log(who, 'הודעה למשתמשי-המוצר (${to.length})', '${r['name']} · $text', roomId: r['id'] as String);
+    log(who, 'הודעה למשתמשי-החדר (${to.length})', '${r['name']} · $text', roomId: r['id'] as String);
   }
   // מי-משתמש-הכי-הרבה = countBy(מאור) על מפגשי-השבוע לפי-מורה
   static List<List<Object>> topUsers(Map<String, dynamic> r) => countBy([
@@ -524,11 +516,6 @@ class _ShopProductData {
   // ═══ חריגה/סינון (23-ג) = FilterChipPill ⊕ finderMatches — 11 צירי-המפרט כנעילות AND ═══
   //   בניין · קומה · סוג(מקום-שמור) · קיבולת≥N · ציוד · פנוי-במשבצת · תפוס · תקלה-פתוחה · ניצולת<סף · נגיש · (טקסט=searchRooms)
   static String floorOf(Map<String, dynamic> r) { final parts = '${r['location']}'.split(' · '); return parts.length > 1 ? parts[1] : ''; }
-  static List<String> get buildings => [for (final b in byBuilding) '${b[0]}'];
-  static List<String> get floors => {for (final r in liveRooms) if (floorOf(r).isNotEmpty) floorOf(r)}.toList()..sort();
-  static List<String> get eqKeys => {for (final r in liveRooms) ...eqOf(r).keys}.toList()..sort();
-  static List<String> get types => {for (final r in liveRooms) if (r['type'] != null) '${r['type']}'}.toList()..sort(); // מקום-שמור: ריק עד שיגיע נתון
-  static const capSteps = [30, 60, 100];
   static String axisValue(Map<dynamic, dynamic> db, dynamic f, dynamic axis) { // שקע-finderAxisValue
     final r = f as Map<String, dynamic>;
     final a = '$axis';
@@ -595,7 +582,7 @@ class _ShopProductData {
         if (alts.isNotEmpty) { moveEvent(who, e, alts.first); moved++; }
       }
     }
-    if (moved > 0) notifyUsers(who, r, 'המוצר ${r['name']} לא-זמין (תקלה) — $moved תפיסות הועברו לחדרים חלופיים, בדקו את היומן');
+    if (moved > 0) notifyUsers(who, r, 'החדר ${r['name']} לא-זמין (תקלה) — $moved תפיסות הועברו לחדרים חלופיים, בדקו את היומן');
     return moved;
   }
   // 9 · אישור-אוטו בתוך-מדיניות: תפקיד עם rooms.autoApprove (רכז/מזכירות) או הנהלה ⇒ מאושר; אחרת ⇒ ממתין-אישור
@@ -614,7 +601,7 @@ class _ShopProductData {
     {'key': 'updatedAt', 'label': 'עדכון', 'glyph': '🕒'},
     {'key': 'features', 'label': 'תכונות (חלונות/הצללה)', 'glyph': '🪟'},
     {'key': 'eqStock', 'label': 'ציוד-מפורט (כמות ממלאי)', 'glyph': '📦'}, // ⇐ מודול-מלאי
-    {'key': 'photo', 'label': 'תמונת-מוצר', 'glyph': '🖼'},
+    {'key': 'photo', 'label': 'תמונת-חדר', 'glyph': '🖼'},
     {'key': 'floorMap', 'label': 'מפת-קומה', 'glyph': '🗺'},
     {'key': 'sensor', 'label': 'חיישן-תפוסה', 'glyph': '📡'},
     {'key': 'smartLock', 'label': 'נעילה-חכמה', 'glyph': '🔐'},
@@ -647,9 +634,8 @@ class _ShopProductData {
   // ═══ חוזה-עמודות · מקום-שמור (חוק-7) — 16 עמודות-המפרט כשקעי-דאטה ═══
   //   נגזרת(get)=תמיד-מוצגת · שדה(key)=מוארת רק כשחדר נושא ערך; חסר ⇒ שקט (type/owner/lastCheck/updatedAt = מקום-שמור).
   static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
-    // ═══ חוזה-העמודות של ShopProduct (G5h · חוק-7): 2 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
-    {'key': 'desc', 'label': 'desc'}, // G5h · מקום-שמור: שדה-ShopProduct מהסכמה (string) — מאיר כשהנתון מוזרם
-    {'key': 'img', 'label': 'img'}, // G5h · מקום-שמור: שדה-ShopProduct מהסכמה (string) — מאיר כשהנתון מוזרם
+    // ═══ חוזה-העמודות של Room (G5h · חוק-7): 1 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'rate', 'label': 'rate'}, // G5h · מקום-שמור: שדה-Room מהסכמה (number) — מאיר כשהנתון מוזרם
     {'label': 'שם/מספר', 'get': (Map<String, dynamic> r) => '${r['name']}'},
     {'key': 'location', 'label': 'בניין/קומה'},
     {'key': 'type', 'label': 'סוג'},                           // מקום-שמור (כיתה/מעבדה/אולם/ספורט/מחשבים/חדר-מורים)
@@ -671,46 +657,30 @@ class _ShopProductData {
       c['get'] != null || rows.any((r) => r[c['key']] != null && '${r[c['key']]}'.trim().isNotEmpty);
 }
 
-// ═══════════ המסך · ShopProductScreen (const · ללא main) ═══════════
-class ShopProductScreen extends StatefulWidget {
-  const ShopProductScreen({this.initialMetric, this.initialPanelId, super.key});
-  final String? initialMetric; // G10b · תפר-סינון: מפתח-מדד (ShopProductFacts.metricDefs) ⇒ הטבלה מסוננת לשורות-המדד; null ⇒ ביט-זהה
+// ═══════════ המסך · RoomScreen (const · ללא main) ═══════════
+class RoomScreen extends StatefulWidget {
+  const RoomScreen({this.initialPanelId, super.key});
   final String? initialPanelId; // G10a · תפר-כניסה: מזהה-רשומה שכרטיסה נפתח אחרי הפריים-הראשון (צורת initialPanel של זהב-המורים; הרכזת קופצת לרשומת-ה-hero)
   @override
-  State<ShopProductScreen> createState() => _ShopProductScreenState();
+  State<RoomScreen> createState() => _RoomScreenState();
 }
 
-  String? _metric; // G10b · המדד הנעול (null = ללא סינון-מדד)
-class _ShopProductScreenState extends State<ShopProductScreen> {
+class _RoomScreenState extends State<RoomScreen> {
   @override
   void initState() {
     super.initState();
-    _metric = widget.initialMetric != null && ShopProductFacts.heroRows(widget.initialMetric!).isNotEmpty ? widget.initialMetric : null; // G10b · מדד בלי שורות ⇒ אין סינון (לא טבלה-ריקה בשקט)
-    final p0 = widget.initialPanelId == null ? null : ShopProductFacts.byId(widget.initialPanelId!); // G10a
+    final p0 = widget.initialPanelId == null ? null : RoomFacts.byId(widget.initialPanelId!); // G10a
     if (p0 != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _openPanel(p0); });
   }
   int _view = 0; // 0=📅 יום (גריד חדרים×שעות) · 1=🗓 שבוע (חדרים×ימים) · 2=📋 רשימה (DsTable) — SegmentedSwitch
-  int _dayIdx = _ShopProductData.dow(_ShopProductData.today); // היום-הנבחר בשבוע (0=ראשון) — בורר-יום
-  bool _loading = false; // מצב-מסך שמור: טעינה
-  String? _error; // מצב-מסך שמור: שגיאה (null בזרימה-התקינה)
+  int _dayIdx = _RoomData.dow(_RoomData.today); // היום-הנבחר בשבוע (0=ראשון) — בורר-יום
   String _q = ''; // חיפוש-איתור (DsSearch → searchRooms)
   final Map<String, String> _locks = {}; // נעילות-סינון (FilterChipPill → finderMatches, AND)
   String _slotHour = '10:00'; // המשבצת לצ׳יפ "פנוי-במשבצת" (ביום-הנבחר)
 
-  String get _iso => _ShopProductData.weekIsos[_dayIdx];
+  String get _iso => _RoomData.weekIsos[_dayIdx];
 
   // צ׳יפ-סינון מבוקר (חוק-6 הזרקת-פיגמנטים) — נעילה=ציר→ערך; לחיצה-חוזרת משחררת
-  Widget _fchip(String axis, String value, String label) => FilterChipPill(
-        label: label, selected: _locks[axis] == value,
-        onTap: () => setState(() => _locks[axis] == value ? _locks.remove(axis) : _locks[axis] = value),
-        activeFillColor: _acc, surfaceColor: const Color(0xFF14162E), activeTextColor: const Color(0xFF0B0B15), inkColor: _ink,
-        outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
-      );
-  // ציר-בוליאני: נעילה '1' (בלי ערך-מתנגש)
-  Widget _bchip(String axis, String label) => _fchip(axis, '1', label);
-  // ציר קיבולת/פנוי: ערך יחיד בכל רגע — נעילת cap30/cap60/cap100 מוצגת כקבוצה
-  void _setCap(int? n) => setState(() { _locks.removeWhere((k, v) => k.startsWith('cap')); if (n != null) _locks['cap$n'] = '1'; });
-  void _setFreeAt(bool on) => setState(() { _locks.removeWhere((k, v) => k.startsWith('freeAt:')); if (on) _locks['freeAt:$_iso@$_slotHour'] = '1'; });
   bool get _freeAtOn => _locks.keys.any((k) => k.startsWith('freeAt:'));
 
   // תא-יומן: TintedTag בפיגמנט-לפי-מצב (חוק-6 צבע=הצבה) · רוחב-קבוע ⇒ עמודות מיושרות · FittedBox מצמצם תווית-ארוכה
@@ -726,167 +696,22 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
           ),
         ),
       );
-  Color _kindColor(String kind) => switch (kind) { 'course' => _acc, 'event' => DsTokens.cyan, 'blocked' => _danger, 'cleaning' => _muted, _ => _ok };
   String _kindGlyph(String kind) => switch (kind) { 'course' => '🎓', 'event' => '📌', 'blocked' => '⛔', 'cleaning' => '🧹', _ => '·' };
 
-  @override
-  Widget build(BuildContext context) {
-    final rooms = _ShopProductData.liveRooms;
-    final active = _ShopProductData.activeRooms;
-    final conflicts = _ShopProductData.weekConflicts;
-    final openFaults = _ShopProductData.openFaults;
-    final underN = active.where(_ShopProductData.underused).length;
-    final names = dayNames();
-    final letters = dayLetters(term: (k) => day_letters_terms.kTerms[k]!); // א׳…ו׳ (dayLetters ⊕ אטום-דאטה)
-    final blocked = _ShopProductData.blockOf(_iso);
-    // איתור⊕חריגה: searchRooms=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filterRooms=finderMatches (AND על נעילות)
-    if (_freeAtOn) { _locks.removeWhere((k, v) => k.startsWith('freeAt:')); _locks['freeAt:$_iso@$_slotHour'] = '1'; } // הציר עוקב אחרי היום-הנבחר
-    final visibleAll = _ShopProductData.filterRooms(_ShopProductData.searchRooms(rooms, _q), _locks);
-    final visible = _metric == null ? visibleAll : visibleAll.where((r) => ShopProductFacts.heroRows(_metric!).any((h) => '${h[ShopProductFacts.idKey] ?? h['id']}' == '${r[ShopProductFacts.idKey] ?? r['id']}')).toList(); // G10b · סינון-לפי-מדד (זהות לפי מזהה — שורות-המדד וטבלת-המסך אותו סוג-רשומה, L66)
-    final hoursAll = _ShopProductData.gridHours(rooms, _iso);
-    return DsScaffold(
-      title: 'חדרים ויומן-מרחבים',
-      subtitle: '${rooms.length} חדרים · ${_ShopProductData.byBuilding.length} בניינים · שבוע ${_ShopProductData.weekIsos.first}',
-      icon: '🏫',
-      children: [
-        // ═══ סינון-לפי-מדד (G10b): הרכזת שלחה מדד ⇒ הטבלה מוגבלת לשורותיו; הבאנר = עובדת-הסינון, הכפתור מסיר ═══
-        if (_metric != null) ForgeToneBanner(items: [['מסונן למדד: ${ShopProductFacts.metricDefs.firstWhere((d) => d['key'] == _metric, orElse: () => const {'label': ''})['label']} · ${visible.length} מתוך ${visibleAll.length}']], variants: const <int>[1]),
-        if (_metric != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() => _metric = null), child: ForgeToneButton(items: [['✖ בטל סינון-מדד']], variants: const <int>[3]))),
-        // KPI-10 (המפרט): hero=התנגשויות (המטרה: אפס) + 10 מדדי-מצב BareStat — כולם מנועי-מדף/שדות-אמת
-        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['התנגשויות-תפיסה השבוע', '${conflicts.length}'])),
-            const SizedBox(height: 14),
-            Row(children: [
-              Expanded(child: ForgeStatPlain(fields: ['🏫 חדרים', '${rooms.length}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🔴 תפוסים-עכשיו', '${_ShopProductData.busyNowN}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🟢 פנויים-עכשיו', '${_ShopProductData.freeNowN}'])),
-              Expanded(child: ForgeStatPlain(fields: ['📊 ניצולת-שבוע', '${_ShopProductData.utilAvgPct}%'])),
-              Expanded(child: ForgeStatPlain(fields: ['⚠️ התנגשויות', '${conflicts.length}'])),
-            ]),
-            const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: ForgeStatPlain(fields: ['🔧 תקלות-פתוחות', '${openFaults.length}'])),
-              Expanded(child: ForgeStatPlain(fields: ['⛔ לא-זמינים', '${_ShopProductData.unavailableN}'])),
-              Expanded(child: ForgeStatPlain(fields: ['⏳ ממתינות-אישור', '${_ShopProductData.pendingApprovals.length}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🧰 ציוד-חסר/תקול', '${_ShopProductData.brokenEqN}'])),
-              Expanded(child: ForgeStatPlain(fields: ['🪑 לא-מנוצלים', '$underN'])),
-            ]),
-          ])),
-        const SizedBox(height: 8),
-        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות פר-תפקיד (roleOf⊕canGrantedAction)
-        Align(
-          alignment: Alignment.centerRight,
-          child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final r in _ShopProductData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() => _role = i))),
-        ),
-        const SizedBox(height: 10),
-        // 🚨 מרכז-דורש-פעולה (אוטומציות 1·3·5·6·7·9) — המערכת מתריעה ומציעה; כל שורה = מנוע-מדף ⊕ AlertBanner/SoftButton
-        ..._automationCenter(),
-        // פס-עליון · חיפוש (DsSearch) + הזמנת-חדר + דיווח-תקלה (בחירת-חדר ⇒ הזרימה של הפאנל)
-        Row(children: [
-          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
-          const SizedBox(width: 6),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
-          const SizedBox(width: 6),
-          if (_can('rooms.book')) Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pickRoom(visible, (r) => _openBook(context, r, (f) { f(); setState(() {}); })), child: ForgeToneButton(items: [['📌 הזמן-מוצר']], variants: const <int>[1]))),
-          if (_can('rooms.fault')) ...[const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _pickRoom(visible, (r) => _openFault(context, r, (f) { f(); setState(() {}); })), child: ForgeToneButton(items: [['🔧 דווח-תקלה']], variants: const <int>[3])))],
-          if (_ShopProductData.exportOk(_role)) ...[
-            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible, ical: false), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0]))),
-            const SizedBox(width: 6), Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible, ical: true), child: ForgeToneButton(items: [['📆 iCal']], variants: const <int>[0]))),
-          ],
-        ]),
-        // צ׳יפי-סינון (FilterChipPill ⊕ finderMatches) — 11 צירי-המפרט; סוג = מקום-שמור (מואר כשיגיע נתון)
-        Wrap(spacing: 8, runSpacing: 6, children: [Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[for (final b in _ShopProductData.buildings) (('🏢 $b'), _locks[('building')] == (b), () => setState(() => _locks[('building')] == (b) ? _locks.remove(('building')) : _locks[('building')] = (b))), for (final f in _ShopProductData.floors) (('🪜 $f'), _locks[('floor')] == (f), () => setState(() => _locks[('floor')] == (f) ? _locks.remove(('floor')) : _locks[('floor')] = (f))), for (final t in _ShopProductData.types) (('🏷 $t'), _locks[('type')] == (t), () => setState(() => _locks[('type')] == (t) ? _locks.remove(('type')) : _locks[('type')] = (t))), for (final n in _ShopProductData.capSteps) ('👥 ≥$n', _locks['cap$n'] == '1', () => _setCap(_locks['cap$n'] == '1' ? null : n)), for (final k in _ShopProductData.eqKeys) ((('🧰 יש $k')), _locks[(('eq:$k'))] == ('1'), () => setState(() => _locks[(('eq:$k'))] == ('1') ? _locks.remove((('eq:$k'))) : _locks[(('eq:$k'))] = ('1'))), ('🟢 פנוי-במשבצת $_slotHour', _freeAtOn, () => _setFreeAt(!_freeAtOn)), ((('🔴 תפוס-עכשיו')), _locks[(('busy'))] == ('1'), () => setState(() => _locks[(('busy'))] == ('1') ? _locks.remove((('busy'))) : _locks[(('busy'))] = ('1'))), ((('🔧 תקלה-פתוחה')), _locks[(('fault'))] == ('1'), () => setState(() => _locks[(('fault'))] == ('1') ? _locks.remove((('fault'))) : _locks[(('fault'))] = ('1'))), ((('🪑 ניצולת<${_ShopProductData.utilFloor}%')), _locks[(('under'))] == ('1'), () => setState(() => _locks[(('under'))] == ('1') ? _locks.remove((('under'))) : _locks[(('under'))] = ('1'))), ((('♿ נגיש')), _locks[(('access'))] == ('1'), () => setState(() => _locks[(('access'))] == ('1') ? _locks.remove((('access'))) : _locks[(('access'))] = ('1')))]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }), if (_locks.isNotEmpty || _q.isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setState(() { _locks.clear(); _q = ''; }), child: ForgeToneButton(items: [['✖ נקה (${visible.length}/${rooms.length})']], variants: const <int>[3]))]),
-        if (_freeAtOn && hoursAll.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Align(alignment: Alignment.centerRight, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegPickerSelection(bare: true, items: [for (final s in hoursAll) [s]], selected: {hoursAll.indexOf(_slotHour).clamp(0, hoursAll.length - 1)}, onSelect: (i) => setState(() => _slotHour = hoursAll[i])))),
-        ],
-        const SizedBox(height: 10),
-        // פס-עליון · בורר-מבט (ארגון = פעולת-יסוד עם אטום משלה: SegmentedSwitch מבוקר)
-        Align(
-          alignment: Alignment.centerRight,
-          child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['📅 יום', '🗓 שבוע', '📋 רשימה']) [s]], selected: {_view}, onSelect: (i) => setState(() => _view = i)),
-        ),
-        if (_view == 0) ...[
-          const SizedBox(height: 8),
-          // בורר-יום (dayNames של מאור) — היום-הנבחר מזין את buildSlots
-          Align(
-            alignment: Alignment.centerRight,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (var i = 0; i < letters.length; i++) '${letters[i]} ${_ShopProductData.weekIsos[i].substring(8)}']) [s]], selected: {_dayIdx}, onSelect: (i) => setState(() => _dayIdx = i)),
-            ),
-          ),
-        ],
-        const SizedBox(height: 10),
-        // מצבי-מסך שמורים (מקום-שמור): טעינה + שגיאה מאירים במצב-אמת; אחרת התוכן.
-        if (_loading)
-          _loadingView()
-        else if (_error != null)
-          ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
-        else if (rooms.isEmpty)
-          ForgeAnimatedEmpty(fields: ['אין חדרים — הוסף מוצר ראשון', ''])
-        else if (visible.isEmpty)
-          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeAnimatedEmpty(fields: ['אין חדרים תואמים לחיפוש/סינון', '']))
-        else if (_view == 2)
-          ForgeTitledSection(fields: ['📋 רשימת-חדרים · ${visible.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_table(visible)]]))
-        else if (_view == 1)
-          ForgeTitledSection(fields: ['🗓 שבוע-הבניין · ${_ShopProductData.weekIsos.first} → ${_ShopProductData.weekIsos.last}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_weekGrid(visible, names)]]))
-        else ...[
-          // מצב-מיוחד: יום-חסום (שבת/שישי/חג/צום-נדחה/חוה"מ) — blockReason מסנכרן-לוח ⇒ כל המשבצות הפנויות חסומות
-          if (blocked != null) ...[
-            ForgeToneBanner(items: [['יום חסום לתפיסה — $blocked']], variants: const <int>[3]),
-            const SizedBox(height: 8),
-          ],
-          ForgeTitledSection(fields: ['📅 יומן-חדרים · ${names[_dayIdx]} $_iso · ${visible.length} חדרים', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[_dayGrid(visible)]])),
-        ],
-      ],
-    );
-  }
-
-  // 📅 גריד-יום: כותרת-שעות + שורה-פר-חדר (שם + תא-פר-שעה מ-buildSlots · ⚠ = כפל-תפיסה מ-conflictsOf)
-  Widget _dayGrid(List<Map<String, dynamic>> rooms) {
-    final hours = _ShopProductData.gridHours(rooms, _iso);
-    if (hours.isEmpty) return ForgeAnimatedEmpty(fields: ['אין משבצות ביום זה', '']);
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          _cell('מוצר', _muted, alpha: 0.0, w: FontWeight.w800),
-          for (final h in hours) _cell(h, _ink, alpha: 0.08, w: FontWeight.w800),
-        ]),
-        for (final r in rooms)
-          Row(children: [
-            InkWell(onTap: () => _openPanel(r), child: _cell('${r['name']}${_ShopProductData.activeOf(r) ? '' : ' ⛔'} ›', _ShopProductData.activeOf(r) ? _ink : _danger, alpha: 0.06, w: FontWeight.w800)),
-            for (final h in hours)
-              () {
-                final sl = _ShopProductData.cellSlots(r, _iso, h);
-                if (!_ShopProductData.activeOf(r)) return _cell('לא-זמין', _danger, alpha: 0.10);
-                if (sl.isEmpty) return _cell('—', _muted, alpha: 0.04);
-                final clash = _ShopProductData.cellConflict(r, _iso, h) || sl.where((x) => x['kind'] == 'course' || x['kind'] == 'event').length > 1;
-                final k = '${sl.first['kind']}';
-                final lbl = k == 'course' || k == 'event' ? '${sl.first['label']}'.replaceFirst(RegExp(r'^[^:]*: '), '') : k == 'blocked' ? 'חסום' : k == 'cleaning' ? 'ניקיון' : 'פנוי';
-                return _cell(clash ? '⚠ כפל-תפיסה' : '${_kindGlyph(k)} $lbl', clash ? _danger : _kindColor(k), alpha: clash ? 0.30 : k == 'free' ? 0.10 : 0.18);
-              }(),
-          ]),
-      ]),
-    );
-  }
-
-  // 🗓 גריד-שבוע: חדרים×ימים · תא = תפוס/סך ⊕ ⚠התנגשויות ⊕ ⛔חסימה (dayCell) — "השבוע של הבניין במבט-אחד"
   Widget _weekGrid(List<Map<String, dynamic>> rooms, List<String> names) => SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            _cell('מוצר', _muted, alpha: 0.0, w: FontWeight.w800),
-            for (var i = 0; i < names.length; i++) _cell('${names[i]} ${_ShopProductData.weekIsos[i].substring(5)}', _ink, alpha: 0.08, w: FontWeight.w800),
+            _cell('חדר', _muted, alpha: 0.0, w: FontWeight.w800),
+            for (var i = 0; i < names.length; i++) _cell('${names[i]} ${_RoomData.weekIsos[i].substring(5)}', _ink, alpha: 0.08, w: FontWeight.w800),
           ]),
           for (final r in rooms)
             Row(children: [
-              InkWell(onTap: () => _openPanel(r), child: _cell('${r['name']} · ${_ShopProductData.utilPct(r)}% ›', _ShopProductData.underused(r) ? _warning : _ink, alpha: 0.06, w: FontWeight.w800)),
-              for (final iso in _ShopProductData.weekIsos)
+              InkWell(onTap: () => _openPanel(r), child: _cell('${r['name']} · ${_RoomData.utilPct(r)}% ›', _RoomData.underused(r) ? _warning : _ink, alpha: 0.06, w: FontWeight.w800)),
+              for (final iso in _RoomData.weekIsos)
                 () {
-                  final c = _ShopProductData.dayCell(r, iso);
-                  if (!_ShopProductData.activeOf(r)) return _cell('לא-זמין', _danger, alpha: 0.10);
+                  final c = _RoomData.dayCell(r, iso);
+                  if (!_RoomData.activeOf(r)) return _cell('לא-זמין', _danger, alpha: 0.10);
                   if (c['blocked'] != null) return _cell('⛔ ${c['blocked']}', _danger, alpha: 0.14);
                   final used = c['used'] as int, total = c['total'] as int, conf = c['conflicts'] as int;
                   final frac = total == 0 ? 0.0 : used / total;
@@ -898,7 +723,7 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
 
   // 📋 רשימה: DsTable מונחה-חוזה (columnDefs · מקום-שמור חוק-7). אפס-DataGrid (מזייף int rows).
   Widget _table(List<Map<String, dynamic>> rows) {
-    final cols = [for (final c in _ShopProductData.columnDefs) if (_ShopProductData.colShown(c, rows)) c];
+    final cols = [for (final c in _RoomData.columnDefs) if (_RoomData.colShown(c, rows)) c];
     final labels = [for (final c in cols) c['label'] as String];
     final data = <List<String>>[
       for (final r in rows)
@@ -908,8 +733,8 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
   }
 
   int _role = 0; // 0=רכז/ת · 1=אחזקה · 2=מורה · 3=הנהלה · 4=מזכירות · 5=צפייה (חוק-6 זהות-מוזרקת; בורר-תפקיד מדגים גידור)
-  String get _who => _ShopProductData.whoOf(_role);
-  bool _can(String k) => _ShopProductData.can(_role, k);
+  String get _who => _RoomData.whoOf(_role);
+  bool _can(String k) => _RoomData.can(_role, k);
   Widget _gap([double h = 10]) => SizedBox(height: h);
   Widget _h(String t) => Padding(padding: const EdgeInsets.only(top: 12, bottom: 6), child: Text(t, style: const TextStyle(color: _muted, fontSize: 13, fontWeight: FontWeight.w800)));
   Widget _wrap(List<Widget> kids) => Wrap(spacing: 8, runSpacing: 8, children: kids);
@@ -922,28 +747,28 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
-        final r = _ShopProductData.liveRooms.firstWhere((x) => x['id'] == room['id']);
+        final r = _RoomData.liveRooms.firstWhere((x) => x['id'] == room['id']);
         void act(void Function() f) { f(); setSheet(() {}); setState(() {}); }
-        final faults = _ShopProductData.faultsOf(r);
-        final conf = [for (final iso in _ShopProductData.weekIsos) ..._ShopProductData.conflictsOf(r, iso)];
-        final used = _ShopProductData.weeklyUsed(r), cap = _ShopProductData.weeklyCap(r);
+        final faults = _RoomData.faultsOf(r);
+        final conf = [for (final iso in _RoomData.weekIsos) ..._RoomData.conflictsOf(r, iso)];
+        final used = _RoomData.weeklyUsed(r), cap = _RoomData.weeklyCap(r);
         return DraggableScrollableSheet(
           initialChildSize: 0.78, minChildSize: 0.4, maxChildSize: 0.96, expand: false,
           builder: (ctx, scroll) => Padding(
             padding: const EdgeInsets.all(12),
             child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-                ForgeContactTile(fields: ['${r['name']}', '${r['location']} · ${_ShopProductData.roomInfo(r)}']),
+                ForgeContactTile(fields: ['${r['name']}', '${r['location']} · ${_RoomData.roomInfo(r)}']),
                 _gap(8),
                 _wrap([
-                  ForgeStatusChip(items: [[_ShopProductData.statusOf(r)]], variants: [const <int>[0, 1, 3, 2][(switch (_ShopProductData.statusOf(r)) { 'זמין' => 1, 'תפוס' => 0, 'חסום' => 3, _ => 2 }) % 4]]),
+                  ForgeStatusChip(items: [[_RoomData.statusOf(r)]], variants: [const <int>[0, 1, 3, 2][(switch (_RoomData.statusOf(r)) { 'זמין' => 1, 'תפוס' => 0, 'חסום' => 3, _ => 2 }) % 4]]),
                   if (r['access'] == true) ForgeStatusChip(items: [['♿ נגיש']], variants: const <int>[1]),
                   if ('${r['notes']}'.isNotEmpty) ForgeStatusChip(items: [['📝 ${r['notes']}']], variants: const <int>[0]),
-                  if (_ShopProductData.underused(r)) ForgeStatusChip(items: [['🪑 לא-מנוצל (<${_ShopProductData.utilFloor}%)']], variants: const <int>[2]),
+                  if (_RoomData.underused(r)) ForgeStatusChip(items: [['🪑 לא-מנוצל (<${_RoomData.utilFloor}%)']], variants: const <int>[2]),
                 ]),
                 _gap(12),
                 Row(children: [
                   Expanded(child: ForgeStatPlain(fields: ['קיבולת', '${r['cap']}'])),
-                  Expanded(child: ForgeStatPlain(fields: ['ניצולת-שבוע', '${_ShopProductData.utilPct(r)}%'])),
+                  Expanded(child: ForgeStatPlain(fields: ['ניצולת-שבוע', '${_RoomData.utilPct(r)}%'])),
                   Expanded(child: ForgeStatPlain(fields: ['תקלות-פתוחות', '${faults.length}'])),
                   Expanded(child: ForgeStatPlain(fields: ['התנגשויות', '${conf.length}'])),
                 ]),
@@ -951,10 +776,10 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
                 ForgeLinearProgressStatus(fields: ['תפיסות-שבוע מול קיבולת-משבצות', '$used מתוך $cap'], values: [cap == 0 ? 0 : used / cap]),
                 // שדות-מתקדמים · מקום-שמור (חוק-7): נוכח ⇒ שבב · חסר ⇒ נרשם בחוזה (מאיר כשיגיע נתון, אפס-שינוי-קוד)
                 _gap(8),
-                _wrap([for (final f in _ShopProductData.presentFields(r)) ForgeStatusChip(items: [['${f['glyph']} ${f['label']}: ${r[f['key']]}']], variants: const <int>[1])]),
-                if (_ShopProductData.missingFields(r).isNotEmpty) ...[
+                _wrap([for (final f in _RoomData.presentFields(r)) ForgeStatusChip(items: [['${f['glyph']} ${f['label']}: ${r[f['key']]}']], variants: const <int>[1])]),
+                if (_RoomData.missingFields(r).isNotEmpty) ...[
                   _gap(6),
-                  Text('מקום-שמור (${_ShopProductData.missingFields(r).length}): ${_ShopProductData.missingFields(r).map((f) => '${f['glyph']} ${f['label']}').join(' · ')}', style: const TextStyle(color: _muted, fontSize: 11.5)),
+                  Text('מקום-שמור (${_RoomData.missingFields(r).length}): ${_RoomData.missingFields(r).map((f) => '${f['glyph']} ${f['label']}').join(' · ')}', style: const TextStyle(color: _muted, fontSize: 11.5)),
                 ],
                 // התנגשויות (אדום) — חוסם: כפל-תפיסה בחדר זה
                 for (final c in conf) ...[
@@ -982,7 +807,7 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
   List<Widget> _tabBody(BuildContext ctx, Map<String, dynamic> r, int tab, void Function(void Function()) act) {
     switch (tab) {
       case 0: // היום · ציר-שעות (buildSlots ⊕ TimelineItem) — תפוס/פנוי/חסום/ניקיון
-        final sl = _ShopProductData.slotsOf(r, _iso);
+        final sl = _RoomData.slotsOf(r, _iso);
         if (sl.isEmpty) return [ForgeAnimatedEmpty(fields: ['אין משבצות', ''])];
         return [
           _h('ציר-שעות · ${dayNames()[_dayIdx]} $_iso'),
@@ -996,24 +821,24 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
           SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [
             for (var i = 0; i < names.length; i++)
               () {
-                final c = _ShopProductData.dayCell(r, _ShopProductData.weekIsos[i]);
+                final c = _RoomData.dayCell(r, _RoomData.weekIsos[i]);
                 final blocked = c['blocked'] != null;
                 return _cell(blocked ? '${names[i]} ⛔' : '${names[i]} ${c['used']}/${c['total']}${(c['conflicts'] as int) > 0 ? ' ⚠' : ''}', blocked ? _danger : (c['conflicts'] as int) > 0 ? _danger : _acc, alpha: 0.14);
               }(),
           ])),
           _h('מי משתמש הכי-הרבה (מפגשים/שבוע)'),
-          _wrap([for (final u in _ShopProductData.topUsers(r)) ForgeStatusChip(items: [['${u[0]}: ${u[1]}']], variants: const <int>[0])]),
+          _wrap([for (final u in _RoomData.topUsers(r)) ForgeStatusChip(items: [['${u[0]}: ${u[1]}']], variants: const <int>[0])]),
         ];
       case 2: // תפיסות · כל תפיסות-השבוע + פעולות פר-תפיסה (בטל · העבר · אשר/דחה)
-        final occ = _ShopProductData.weekOccupancies(r);
+        final occ = _RoomData.weekOccupancies(r);
         if (occ.isEmpty) return [ForgeAnimatedEmpty(fields: ['אין תפיסות השבוע', ''])];
         return [
           _h('תפיסות-השבוע · ${occ.length}'),
           for (final o in occ) _occRow(ctx, r, o, act),
         ];
       case 3: // ציוד · eq (מאור Room.eq) ⊕ תקלות-על-ציוד ⊕ פעולות · מקום-שמור: כמות/פריטי-מלאי (eqStock)
-        final eq = _ShopProductData.eqOf(r);
-        final broken = {for (final f in _ShopProductData.faultsOf(r)) if ('${f['detail']}'.isNotEmpty) '${f['detail']}'};
+        final eq = _RoomData.eqOf(r);
+        final broken = {for (final f in _RoomData.faultsOf(r)) if ('${f['detail']}'.isNotEmpty) '${f['detail']}'};
         return [
           _h('ציוד-קבוע'),
           _wrap([for (final e in eq.entries) ForgeStatusChip(items: [['${e.key}${broken.contains(e.key) ? ' · תקול' : e.value ? '' : ' · חסר'}']], variants: [const <int>[0, 1, 3, 2][(broken.contains(e.key) ? 2 : e.value ? 1 : 3) % 4]])]),
@@ -1023,37 +848,37 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
           ],
         ];
       case 4: // תקלות · פתוחות (TimelineItem) + סגור-תקלה
-        final fs = _ShopProductData.faultsOf(r);
+        final fs = _RoomData.faultsOf(r);
         if (fs.isEmpty) return [ForgeAnimatedEmpty(fields: ['אין תקלות פתוחות', ''])];
         return [
           _h('תקלות פתוחות · ${fs.length}'),
           for (final f in fs)
             Row(children: [
               Expanded(child: ForgeNotifRow(items: [['🔧 ${f['name']} · ${f['severity']}', '${f['date']}']])),
-              if (_can('rooms.faultClose')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.closeFault(_who, f)), child: ForgeToneButton(items: [['✔ סגור']], variants: const <int>[1]))),
+              if (_can('rooms.faultClose')) Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.closeFault(_who, f)), child: ForgeToneButton(items: [['✔ סגור']], variants: const <int>[1]))),
             ]),
         ];
       case 5: // אחזקה · זמינות (שיפוץ/סגור) · בדיקה-תקופתית (lastCheck = מקום-שמור) · חסימות-תאריך
         return [
           _h('אחזקה'),
           _wrap([
-            ForgeStatusChip(items: [[_ShopProductData.activeOf(r) ? 'זמין לתפיסה' : 'לא-זמין / שיפוץ']], variants: [const <int>[0, 1, 3, 2][(_ShopProductData.activeOf(r) ? 1 : 2) % 4]]),
+            ForgeStatusChip(items: [[_RoomData.activeOf(r) ? 'זמין לתפיסה' : 'לא-זמין / שיפוץ']], variants: [const <int>[0, 1, 3, 2][(_RoomData.activeOf(r) ? 1 : 2) % 4]]),
             ForgeStatusChip(items: [[r['lastCheck'] == null ? 'בדיקה-תקופתית: אין נתון (מקום-שמור)' : 'בדיקה אחרונה: ${r['lastCheck']}']], variants: [const <int>[0, 1, 3, 2][(r['lastCheck'] == null ? 3 : 1) % 4]]),
           ]),
-          if (_ShopProductData.blockedDates.isNotEmpty) ...[
+          if (_RoomData.blockedDates.isNotEmpty) ...[
             _h('חסימות-תאריך ידניות'),
-            _wrap([for (final d in _ShopProductData.blockedDates) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.unblockDate(_who, d)), child: ForgeToneButton(items: [['⛔ $d · בטל']], variants: const <int>[3]))]),
+            _wrap([for (final d in _RoomData.blockedDates) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.unblockDate(_who, d)), child: ForgeToneButton(items: [['⛔ $d · בטל']], variants: const <int>[3]))]),
           ],
         ];
       case 6: // היסטוריה · תקלות-שנסגרו ⊕ אירועים-שבוצעו/נדחו (TimelineItem)
         final hist = <Widget>[
-          for (final f in _ShopProductData.faultsOf(r, openOnly: false)) if (f['status'] == 'done') ForgeNotifRow(items: [['✔ תקלה נסגרה · ${f['name']}', '${f['date']}']]),
-          for (final e in _ShopProductData.liveEvents) if (e['roomId'] == r['id'] && e['done'] == true) ForgeNotifRow(items: [['${e['status'] == 'rejected' ? '✖ נדחה' : e['status'] == 'cancelled' ? '↩ בוטל' : '✔ בוצע'} · ${e['title']}', '${e['date']} ${e['time']}']]),
+          for (final f in _RoomData.faultsOf(r, openOnly: false)) if (f['status'] == 'done') ForgeNotifRow(items: [['✔ תקלה נסגרה · ${f['name']}', '${f['date']}']]),
+          for (final e in _RoomData.liveEvents) if (e['roomId'] == r['id'] && e['done'] == true) ForgeNotifRow(items: [['${e['status'] == 'rejected' ? '✖ נדחה' : e['status'] == 'cancelled' ? '↩ בוטל' : '✔ בוצע'} · ${e['title']}', '${e['date']} ${e['time']}']]),
         ];
         return hist.isEmpty ? [ForgeAnimatedEmpty(fields: ['אין היסטוריה', ''])] : [_h('היסטוריה · ${hist.length}'), ...hist];
       default: // אודיט · פנקס-הפעולות של החדר (מי · מה · מתי)
-        final au = _ShopProductData.audit.where((a) => a['roomId'] == r['id']).toList();
-        return au.isEmpty ? [ForgeAnimatedEmpty(fields: ['אין רשומות-אודיט למוצר', ''])] : [_h('אודיט · ${au.length}'), for (final a in au) ForgeNotifRow(items: [['${a['what']}', '${a['when']}']])];
+        final au = _RoomData.audit.where((a) => a['roomId'] == r['id']).toList();
+        return au.isEmpty ? [ForgeAnimatedEmpty(fields: ['אין רשומות-אודיט לחדר', ''])] : [_h('אודיט · ${au.length}'), for (final a in au) ForgeNotifRow(items: [['${a['what']}', '${a['when']}']])];
     }
   }
 
@@ -1062,14 +887,14 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
     final isEv = o['kind'] == 'event';
     final st = isEv ? '${o['status']}' : 'שבועי';
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      ForgeNotifRow(items: [['${isEv ? '📌' : '🎓'} ${o['name']}', '${dayNames()[o['dayIdx'] as int]} ${o['iso']} ${_ShopProductData._m2hm(o['start'])}']]),
+      ForgeNotifRow(items: [['${isEv ? '📌' : '🎓'} ${o['name']}', '${dayNames()[o['dayIdx'] as int]} ${o['iso']} ${_RoomData._m2hm(o['start'])}']]),
       _wrap([
         if (isEv && st == 'proposed' && _can('rooms.approve')) ...[
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEventStatus(_who, _ShopProductData.eventById(o['id'])!, 'pending')), child: ForgeToneButton(items: [['✔ אשר']], variants: const <int>[1])),
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEventStatus(_who, _ShopProductData.eventById(o['id'])!, 'rejected')), child: ForgeToneButton(items: [['✖ דחה']], variants: const <int>[3])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEventStatus(_who, _RoomData.eventById(o['id'])!, 'pending')), child: ForgeToneButton(items: [['✔ אשר']], variants: const <int>[1])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEventStatus(_who, _RoomData.eventById(o['id'])!, 'rejected')), child: ForgeToneButton(items: [['✖ דחה']], variants: const <int>[3])),
         ],
-        if (isEv && _can('rooms.cancel')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEventStatus(_who, _ShopProductData.eventById(o['id'])!, 'cancelled')), child: ForgeToneButton(items: [['↩ בטל-תפיסה']], variants: const <int>[3])),
-        if (_can('rooms.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(ctx, r, o, act), child: ForgeToneButton(items: [['➡ העבר למוצר-אחר']], variants: const <int>[0])),
+        if (isEv && _can('rooms.cancel')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEventStatus(_who, _RoomData.eventById(o['id'])!, 'cancelled')), child: ForgeToneButton(items: [['↩ בטל-תפיסה']], variants: const <int>[3])),
+        if (_can('rooms.move')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(ctx, r, o, act), child: ForgeToneButton(items: [['➡ העבר לחדר-אחר']], variants: const <int>[0])),
       ]),
       _gap(8),
     ]);
@@ -1078,25 +903,25 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
   // העבר-תפיסה: הצעת-חדר-חלופי (altRooms: קיבולת⊕ציוד⊕פנוי⊕קרבה) — הכרעה, לא ניחוש
   void _openMove(BuildContext ctx, Map<String, dynamic> from, Map<String, dynamic> o, void Function(void Function()) act) {
     final isEv = o['kind'] == 'event';
-    final ev = isEv ? _ShopProductData.eventById(o['id']) : null;
-    final c = isEv ? null : _ShopProductData.courseById(o['id']);
+    final ev = isEv ? _RoomData.eventById(o['id']) : null;
+    final c = isEv ? null : _RoomData.courseById(o['id']);
     final need = isEv ? ((ev?['attendees'] as int?) ?? 0) : ((c?['maxStudents'] as int?) ?? 0);
     final needsEq = isEv ? const <String>[] : [for (final k in (c?['needsEq'] as List? ?? const [])) '$k'];
-    final alts = _ShopProductData.altRooms(iso: '${o['iso']}', time: _ShopProductData._m2hm(o['start']), need: need, needsEq: needsEq, nearId: from['id'] as String, exceptId: '${o['id']}', excludeRoomId: from['id'] as String);
+    final alts = _RoomData.altRooms(iso: '${o['iso']}', time: _RoomData._m2hm(o['start']), need: need, needsEq: needsEq, nearId: from['id'] as String, exceptId: '${o['id']}', excludeRoomId: from['id'] as String);
     showModalBottomSheet<void>(
       context: ctx, backgroundColor: Colors.transparent,
       builder: (c2) => Padding(
         padding: const EdgeInsets.all(12),
         child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
-          ForgeContactTile(fields: ['העבר: ${o['name']}', '${o['iso']} ${_ShopProductData._m2hm(o['start'])} · נדרש ≥$need${needsEq.isNotEmpty ? ' · ציוד: ${needsEq.join(', ')}' : ''}']),
+          ForgeContactTile(fields: ['העבר: ${o['name']}', '${o['iso']} ${_RoomData._m2hm(o['start'])} · נדרש ≥$need${needsEq.isNotEmpty ? ' · ציוד: ${needsEq.join(', ')}' : ''}']),
           _gap(8),
           if (alts.isEmpty)
-            ForgeAnimatedEmpty(fields: ['אין מוצר חלופי פנוי שמקיים קיבולת+ציוד במשבצת', ''])
+            ForgeAnimatedEmpty(fields: ['אין חדר חלופי פנוי שמקיים קיבולת+ציוד במשבצת', ''])
           else
             for (final a in alts)
               Row(children: [
                 Expanded(child: ForgeContactTile(fields: ['${a['name']}', '${a['location']} · קיבולת ${a['cap']} (+${a['spare']})${a['sameBuilding'] == true ? ' · אותו בניין' : ''}'])),
-                Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => isEv ? _ShopProductData.moveEvent(_who, ev!, a) : _ShopProductData.moveCourse(_who, c!, a)); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['בחר']], variants: const <int>[1]))),
+                Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => isEv ? _RoomData.moveEvent(_who, ev!, a) : _RoomData.moveCourse(_who, c!, a)); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['בחר']], variants: const <int>[1]))),
               ]),
         ])),
       ),
@@ -1106,19 +931,19 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
   // הזמן-חדר: יום (SegmentedSwitch) ⊕ משבצת-פנויה (SoftButton מ-buildSlots kind=free) ⊕ כותרת (DsField)
   void _openBook(BuildContext ctx, Map<String, dynamic> r, void Function(void Function()) act, {bool weekly = false}) {
     var day = _dayIdx;
-    var title = weekly ? 'הזמנה-חוזרת' : 'הזמנת-מוצר';
+    var title = weekly ? 'הזמנה-חוזרת' : 'הזמנת-חדר';
     showModalBottomSheet<void>(
       context: ctx, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (c2) => StatefulBuilder(builder: (c2, setB) {
-        final iso = _ShopProductData.weekIsos[day];
-        final free = _ShopProductData.slotsOf(r, iso).where((x) => x['kind'] == 'free').toList();
-        final blocked = _ShopProductData.blockOf(iso) ?? (_ShopProductData.blockedDates.contains(iso) ? 'חסימה-ידנית' : null);
+        final iso = _RoomData.weekIsos[day];
+        final free = _RoomData.slotsOf(r, iso).where((x) => x['kind'] == 'free').toList();
+        final blocked = _RoomData.blockOf(iso) ?? (_RoomData.blockedDates.contains(iso) ? 'חסימה-ידנית' : null);
         return Padding(
           padding: const EdgeInsets.all(12),
           child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
-            ForgeContactTile(fields: [weekly ? 'הזמנה-חוזרת (שבועית) · ${r['name']}' : 'הזמן-מוצר · ${r['name']}', 'בחר יום ומשבצת פנויה · ${_ShopProductData.roomInfo(r)}']),
+            ForgeContactTile(fields: [weekly ? 'הזמנה-חוזרת (שבועית) · ${r['name']}' : 'הזמן-חדר · ${r['name']}', 'בחר יום ומשבצת פנויה · ${_RoomData.roomInfo(r)}']),
             _gap(8),
-            ForgeDsField(state: (title).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['כותרת', ''], control: DsField(label: 'כותרת', hint: 'למה המוצר נדרש', value: title, onChanged: (v) => title = v, bare: true)),
+            ForgeDsField(state: (title).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['כותרת', ''], control: DsField(label: 'כותרת', hint: 'למה החדר נדרש', value: title, onChanged: (v) => title = v, bare: true)),
             SingleChildScrollView(scrollDirection: Axis.horizontal, child: ForgeSegPickerSelection(bare: true, items: [for (final s in dayNames()) [s]], selected: {day}, onSelect: (i) => setB(() => day = i))),
             _gap(8),
             if (blocked != null)
@@ -1126,7 +951,7 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
             else if (free.isEmpty)
               ForgeAnimatedEmpty(fields: ['אין משבצות פנויות ביום זה', ''])
             else
-              _wrap([for (final f in free) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => weekly ? _ShopProductData.bookWeekly(_who, r, day, '${f['time']}', title) : _ShopProductData.book(_who, r, iso, '${f['time']}', title, approved: _ShopProductData.autoApprove(_role))); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['🟢 ${f['time']}']], variants: const <int>[1]))]),
+              _wrap([for (final f in free) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => weekly ? _RoomData.bookWeekly(_who, r, day, '${f['time']}', title) : _RoomData.book(_who, r, iso, '${f['time']}', title, approved: _RoomData.autoApprove(_role))); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['🟢 ${f['time']}']], variants: const <int>[1]))]),
             _gap(8),
           ])),
         );
@@ -1145,14 +970,14 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
       builder: (c2) => StatefulBuilder(builder: (c2, setB) => Padding(
         padding: const EdgeInsets.all(12),
         child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
-          ForgeContactTile(fields: ['דווח-תקלה · ${r['name']}', 'תקלה-חמורה ⇒ המוצר לא-זמין + העברת-שיעורים']),
+          ForgeContactTile(fields: ['דווח-תקלה · ${r['name']}', 'תקלה-חמורה ⇒ החדר לא-זמין + העברת-שיעורים']),
           _gap(8),
           ForgeDsField(state: (name).toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: ['תיאור', ''], control: DsField(label: 'תיאור', hint: 'מה התקלה', value: name, onChanged: (v) => name = v, bare: true)),
           ForgeSegPickerSelection(bare: true, items: [for (final s in sevs) [s]], selected: {sev}, onSelect: (i) => setB(() => sev = i)),
           _h('ציוד מעורב (אופציונלי)'),
-          _wrap([for (final k in _ShopProductData.eqOf(r).keys) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setB(() => detail = detail == k ? '' : k), child: ForgeToneButton(items: [[detail == k ? '✔ $k' : k]], variants: [const <int>[0, 1, 3, 2][(detail == k ? 1 : 0) % 4]]))]),
+          _wrap([for (final k in _RoomData.eqOf(r).keys) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => setB(() => detail = detail == k ? '' : k), child: ForgeToneButton(items: [[detail == k ? '✔ $k' : k]], variants: [const <int>[0, 1, 3, 2][(detail == k ? 1 : 0) % 4]]))]),
           _gap(10),
-          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _ShopProductData.reportFault(_who, r, name, sevs[sev], detail: detail)); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['📨 שלח דיווח']], variants: const <int>[3])),
+          GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { act(() => _RoomData.reportFault(_who, r, name, sevs[sev], detail: detail)); Navigator.of(c2).pop(); }, child: ForgeToneButton(items: [['📨 שלח דיווח']], variants: const <int>[3])),
           _gap(8),
         ])),
       )),
@@ -1161,26 +986,26 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
 
   // 14 כפתורי-הפעולה (המפרט) — כל אחד מחווט לפנקס (state) ורושם אודיט
   List<Widget> _actions(BuildContext ctx, Map<String, dynamic> r, void Function(void Function()) act) {
-    final active = _ShopProductData.activeOf(r);
+    final active = _RoomData.activeOf(r);
     final acts = <Widget>[
-      if (active && _can('rooms.book')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act), child: ForgeToneButton(items: [[_ShopProductData.autoApprove(_role) ? '📌 הזמן-מוצר' : '📌 הזמן-מוצר (לאישור)']], variants: const <int>[1])),
+      if (active && _can('rooms.book')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act), child: ForgeToneButton(items: [[_RoomData.autoApprove(_role) ? '📌 הזמן-חדר' : '📌 הזמן-חדר (לאישור)']], variants: const <int>[1])),
       if (active && _can('rooms.bookWeekly')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openBook(ctx, r, act, weekly: true), child: ForgeToneButton(items: [['🔁 הזמנה-חוזרת']], variants: const <int>[0])),
       if (_can('rooms.fault')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openFault(ctx, r, act), child: ForgeToneButton(items: [['🔧 דווח-תקלה']], variants: const <int>[3])),
-      if (_can('rooms.availability')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setActive(_who, r, !active)), child: ForgeToneButton(items: [[active ? '⛔ סמן לא-זמין/שיפוץ' : '✅ החזר לזמינות']], variants: [const <int>[0, 1, 3, 2][(active ? 2 : 1) % 4]])),
-      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEq(_who, r, 'מקרן', true)), child: ForgeToneButton(items: [['➕ הוסף-ציוד: מקרן']], variants: const <int>[0])),
-      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEq(_who, r, 'מקרן', false)), child: ForgeToneButton(items: [['📉 דווח ציוד-חסר: מקרן']], variants: const <int>[3])),
-      if (_can('rooms.block')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.blockDate(_who, _iso)), child: ForgeToneButton(items: [['📅 חסום-תאריך: $_iso']], variants: const <int>[3])),
-      if (_can('rooms.notify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.notifyUsers(_who, r, 'שינוי במוצר ${r['name']} — בדקו את היומן')), child: ForgeToneButton(items: [['✉ הודעה למשתמשי-המוצר (${_ShopProductData.usersOf(r).length})']], variants: const <int>[0])),
+      if (_can('rooms.availability')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setActive(_who, r, !active)), child: ForgeToneButton(items: [[active ? '⛔ סמן לא-זמין/שיפוץ' : '✅ החזר לזמינות']], variants: [const <int>[0, 1, 3, 2][(active ? 2 : 1) % 4]])),
+      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEq(_who, r, 'מקרן', true)), child: ForgeToneButton(items: [['➕ הוסף-ציוד: מקרן']], variants: const <int>[0])),
+      if (_can('rooms.eq')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEq(_who, r, 'מקרן', false)), child: ForgeToneButton(items: [['📉 דווח ציוד-חסר: מקרן']], variants: const <int>[3])),
+      if (_can('rooms.block')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.blockDate(_who, _iso)), child: ForgeToneButton(items: [['📅 חסום-תאריך: $_iso']], variants: const <int>[3])),
+      if (_can('rooms.notify')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.notifyUsers(_who, r, 'שינוי בחדר ${r['name']} — בדקו את היומן')), child: ForgeToneButton(items: [['✉ הודעה למשתמשי-החדר (${_RoomData.usersOf(r).length})']], variants: const <int>[0])),
       if (_can('rooms.print')) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPrint(ctx, r), child: ForgeToneButton(items: [['🖨 הדפס יומן-יומי']], variants: const <int>[0])),
       // 4 · תקלה ⇒ העברת-שיעורים-אוטו + הודעה (רק כשהחדר תקול/לא-זמין ויש תפיסות)
-      if (!active || _ShopProductData.faulty(r)) if (_can('rooms.move') && _ShopProductData.affectedByFault(r).isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.autoRelocate(_who, r)), child: ForgeToneButton(items: [['🚚 העבר-אוטו ${_ShopProductData.affectedByFault(r).length} תפיסות + הודעה']], variants: const <int>[3])),
+      if (!active || _RoomData.faulty(r)) if (_can('rooms.move') && _RoomData.affectedByFault(r).isNotEmpty) GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.autoRelocate(_who, r)), child: ForgeToneButton(items: [['🚚 העבר-אוטו ${_RoomData.affectedByFault(r).length} תפיסות + הודעה']], variants: const <int>[3])),
     ];
     return acts.isEmpty ? [ForgeToneBanner(items: [['צפייה-בלבד — אין הרשאת-פעולה לתפקיד זה']], variants: const <int>[3])] : acts;
   }
 
   // הדפס-יומן-יומי: תצוגת-הדפסה (טקסט-נקי של buildSlots) — ההדפסה עצמה = שקע-פלטפורמה (הצבה)
   void _openPrint(BuildContext ctx, Map<String, dynamic> r) {
-    final lines = [for (final x in _ShopProductData.slotsOf(r, _iso)) '${x['time']}  ${x['label']}'].join('\n');
+    final lines = [for (final x in _RoomData.slotsOf(r, _iso)) '${x['time']}  ${x['label']}'].join('\n');
     showModalBottomSheet<void>(
       context: ctx, backgroundColor: Colors.transparent,
       builder: (c2) => Padding(
@@ -1196,68 +1021,68 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
 
   // ═══ מרכז-אוטומציות (23-ג · פרואקטיבי) — הרכבה: מנוע-מדף ⊕ AlertBanner ⊕ SoftButton(פעולה-מוצעת) ═══
   List<Widget> _automationCenter() {
-    final conf = _ShopProductData.weekConflicts;
-    final pend = _ShopProductData.pendingApprovals;
-    final miss = _ShopProductData.coursesMissingEq;
-    final orphan = _ShopProductData.orphanCourses;
-    final faultyRooms = _ShopProductData.liveRooms.where(_ShopProductData.faulty).toList();
-    final under = _ShopProductData.activeRooms.where(_ShopProductData.underused).toList();
-    final hol = _ShopProductData.upcoming;
-    final unknownCheck = _ShopProductData.liveRooms.where(_ShopProductData.checkUnknown).length;
-    final dueCheck = _ShopProductData.liveRooms.where(_ShopProductData.checkDue).toList();
+    final conf = _RoomData.weekConflicts;
+    final pend = _RoomData.pendingApprovals;
+    final miss = _RoomData.coursesMissingEq;
+    final orphan = _RoomData.orphanCourses;
+    final faultyRooms = _RoomData.liveRooms.where(_RoomData.faulty).toList();
+    final under = _RoomData.activeRooms.where(_RoomData.underused).toList();
+    final hol = _RoomData.upcoming;
+    final unknownCheck = _RoomData.liveRooms.where(_RoomData.checkUnknown).length;
+    final dueCheck = _RoomData.liveRooms.where(_RoomData.checkDue).toList();
     void act(void Function() f) { f(); setState(() {}); }
     return [
-      ForgeTitledSection(fields: ['🚨 דורש-פעולה · ${_ShopProductData.actionItems}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-        if (_ShopProductData.actionItems == 0) ForgeAnimatedEmpty(fields: ['אין כפל-תפיסה · אין הזמנות ממתינות · כל שיעור במוצר עם הציוד הנדרש', '']),
+      ForgeTitledSection(fields: ['🚨 דורש-פעולה · ${_RoomData.actionItems}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+        if (_RoomData.actionItems == 0) ForgeAnimatedEmpty(fields: ['אין כפל-תפיסה · אין הזמנות ממתינות · כל שיעור בחדר עם הציוד הנדרש', '']),
         // 1 · גילוי-כפל-תפיסה בזמן-אמת (חוסם) ⇒ פתור = העברה לחדר-חלופי (altRooms)
         for (final c in conf)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
             Expanded(child: ForgeToneBanner(items: [['כפל-תפיסה ${(c['room'] as Map)['name']} · ${c['iso']} ${c['time']}: ${(c['a'] as Map)['name']} ⊕ ${(c['b'] as Map)['name']}']], variants: const <int>[3])),
-            if (_can('rooms.move')) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(context, c['room'] as Map<String, dynamic>, {...(c['b'] as Map<String, dynamic>), 'iso': c['iso'], 'dayIdx': _ShopProductData.dow('${c['iso']}')}, act), child: ForgeToneButton(items: [['➡ פתור']], variants: const <int>[3]))],
+            if (_can('rooms.move')) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openMove(context, c['room'] as Map<String, dynamic>, {...(c['b'] as Map<String, dynamic>), 'iso': c['iso'], 'dayIdx': _RoomData.dow('${c['iso']}')}, act), child: ForgeToneButton(items: [['➡ פתור']], variants: const <int>[3]))],
           ])),
         // 9 · הזמנות-ממתינות (מחוץ-למדיניות) ⇒ אשר/דחה (rooms.approve)
         for (final e in pend)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeToneBanner(items: [['ממתין-אישור: ${e['title']} · ${_ShopProductData._room('${e['roomId']}')['name']} · ${e['date']} ${e['time']} · ${_ShopProductData.teacherName(e['requestedBy'])} · ${e['attendees']} משתתפים']], variants: const <int>[2])),
+            Expanded(child: ForgeToneBanner(items: [['ממתין-אישור: ${e['title']} · ${_RoomData._room('${e['roomId']}')['name']} · ${e['date']} ${e['time']} · ${_RoomData.teacherName(e['requestedBy'])} · ${e['attendees']} משתתפים']], variants: const <int>[2])),
             if (_can('rooms.approve')) ...[
-              const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEventStatus(_who, e, 'pending')), child: ForgeToneButton(items: [['✔']], variants: const <int>[1])),
-              const SizedBox(width: 4), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.setEventStatus(_who, e, 'rejected')), child: ForgeToneButton(items: [['✖']], variants: const <int>[3])),
+              const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEventStatus(_who, e, 'pending')), child: ForgeToneButton(items: [['✔']], variants: const <int>[1])),
+              const SizedBox(width: 4), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.setEventStatus(_who, e, 'rejected')), child: ForgeToneButton(items: [['✖']], variants: const <int>[3])),
             ],
           ])),
         // 7 · ציוד-נדרש-לשיעור חסר/תקול בחדר (התרעה) ⇒ העבר לחדר עם הציוד (altRooms needsEq)
         for (final c in miss)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeToneBanner(items: [['ציוד חסר לשיעור: ${c['name']} ב-${_ShopProductData._room(_ShopProductData.roomOfCourse(c))['name']} — ${_ShopProductData.missingEqFor(c).join(', ')}']], variants: const <int>[2])),
+            Expanded(child: ForgeToneBanner(items: [['ציוד חסר לשיעור: ${c['name']} ב-${_RoomData._room(_RoomData.roomOfCourse(c))['name']} — ${_RoomData.missingEqFor(c).join(', ')}']], variants: const <int>[2])),
             if (_can('rooms.move')) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {
-              final s0 = (_ShopProductData._sess(c).first as Map);
+              final s0 = (_RoomData._sess(c).first as Map);
               final d = s0['day'] as int;
-              _openMove(context, _ShopProductData._room(_ShopProductData.roomOfCourse(c)), {'kind': 'course', 'id': c['id'], 'name': c['name'], 'who': _ShopProductData.teacherName(c['teacherId']), 'start': _ShopProductData._t2m(s0['time']), 'iso': _ShopProductData.weekIsos[d.clamp(0, 5)], 'dayIdx': d.clamp(0, 5)}, act);
+              _openMove(context, _RoomData._room(_RoomData.roomOfCourse(c)), {'kind': 'course', 'id': c['id'], 'name': c['name'], 'who': _RoomData.teacherName(c['teacherId']), 'start': _RoomData._t2m(s0['time']), 'iso': _RoomData.weekIsos[d.clamp(0, 5)], 'dayIdx': d.clamp(0, 5)}, act);
             }, child: ForgeToneButton(items: [['➡ העבר']], variants: const <int>[0]))],
           ])),
         // שיעור-בלי-חדר (inactiveRoomCourses ⊕ roomId ריק) ⇒ שבץ = חדר-חלופי
         for (final o in orphan)
-          Padding(padding: const EdgeInsets.only(bottom: 6), child: ForgeToneBanner(items: [['שיעור בלי מוצר-פעיל: ${(o['course'] as Map)['name']} (${o['roomName']})']], variants: const <int>[3])),
+          Padding(padding: const EdgeInsets.only(bottom: 6), child: ForgeToneBanner(items: [['שיעור בלי חדר-פעיל: ${(o['course'] as Map)['name']} (${o['roomName']})']], variants: const <int>[3])),
         // 4 · חדר-תקול (תקלה-חמורה פתוחה) ⇒ העברת-שיעורים-אוטו + הודעה
         for (final r in faultyRooms)
           Padding(padding: const EdgeInsets.only(bottom: 6), child: Row(children: [
-            Expanded(child: ForgeToneBanner(items: [['מוצר תקול (תקלה חמורה): ${r['name']} — ${_ShopProductData.affectedByFault(r).length} תפיסות השבוע מושפעות']], variants: const <int>[3])),
-            if (_can('rooms.move') && _ShopProductData.affectedByFault(r).isNotEmpty) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _ShopProductData.autoRelocate(_who, r)), child: ForgeToneButton(items: [['🚚 העבר-אוטו']], variants: const <int>[3]))],
+            Expanded(child: ForgeToneBanner(items: [['חדר תקול (תקלה חמורה): ${r['name']} — ${_RoomData.affectedByFault(r).length} תפיסות השבוע מושפעות']], variants: const <int>[3])),
+            if (_can('rooms.move') && _RoomData.affectedByFault(r).isNotEmpty) ...[const SizedBox(width: 6), GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => act(() => _RoomData.autoRelocate(_who, r)), child: ForgeToneButton(items: [['🚚 העבר-אוטו']], variants: const <int>[3]))],
           ])),
       ]])),
       // 6 · חדר-לא-מנוצל · 3 · סנכרון-לוח (חגים קרובים ⇒ חסימה-אוטו) · 5 · בדיקה-תקופתית (מקום-שמור)
-      if (under.isNotEmpty) ...[ForgeToneBanner(items: [['${under.length} חדרים מתחת לסף-ניצולת ${_ShopProductData.utilFloor}%: ${under.map((r) => '${r['name']} ${_ShopProductData.utilPct(r)}%').join(' · ')}']], variants: const <int>[2]), _gap(8)],
+      if (under.isNotEmpty) ...[ForgeToneBanner(items: [['${under.length} חדרים מתחת לסף-ניצולת ${_RoomData.utilFloor}%: ${under.map((r) => '${r['name']} ${_RoomData.utilPct(r)}%').join(' · ')}']], variants: const <int>[2]), _gap(8)],
       if (hol.isNotEmpty) ...[ForgeToneBanner(items: [['סנכרון-לוח · ${hol.length} חגים ב-45 יום ⇒ חסימה-אוטו: ${hol.map((h) => '${h['name']} ${h['iso']}').join(' · ')}']], variants: const <int>[0]), _gap(8)],
-      if (dueCheck.isNotEmpty) ...[ForgeToneBanner(items: [['בדיקה-תקופתית באיחור (>${_ShopProductData.checkEveryDays} יום): ${dueCheck.map((r) => r['name']).join(' · ')}']], variants: const <int>[2]), _gap(8)],
+      if (dueCheck.isNotEmpty) ...[ForgeToneBanner(items: [['בדיקה-תקופתית באיחור (>${_RoomData.checkEveryDays} יום): ${dueCheck.map((r) => r['name']).join(' · ')}']], variants: const <int>[2]), _gap(8)],
       if (unknownCheck > 0) ...[ForgeToneBanner(items: [['תזכורת-בדיקה-תקופתית (מזגן/כיבוי-אש): אין תאריך-בדיקה ל-$unknownCheck חדרים — מקום-שמור (lastCheck), מאיר כשיגיע נתון']], variants: const <int>[0]), _gap(8)],
       // 8 · ניצולת-שבועית-להנהלה (admin): NeonBars על ערכי-אמת (utilPct) — לא bar_chart המזייף
-      if (_ShopProductData.roleName(_role) == 'admin') ...[
-        ForgeTitledSection(fields: ['📊 ניצולת-שבועית להנהלה · ממוצע ${_ShopProductData.utilAvgPct}%', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final r in _ShopProductData.utilRanked) _ShopProductData.utilPct(r).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      if (_RoomData.roleName(_role) == 'admin') ...[
+        ForgeTitledSection(fields: ['📊 ניצולת-שבועית להנהלה · ממוצע ${_RoomData.utilAvgPct}%', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+          ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final r in _RoomData.utilRanked) _RoomData.utilPct(r).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _gap(6),
           Row(children: [
-            Expanded(child: ForgeStatPlain(fields: ['הכי-מנוצל', '${_ShopProductData.utilRanked.isEmpty ? '—' : _ShopProductData.utilRanked.first['name']}'])),
-            Expanded(child: ForgeStatPlain(fields: ['הכי-פחות', '${_ShopProductData.utilRanked.isEmpty ? '—' : _ShopProductData.utilRanked.last['name']}'])),
-            Expanded(child: ForgeStatPlain(fields: ['הודעות שנשלחו', '${_ShopProductData.outbox.length}'])),
+            Expanded(child: ForgeStatPlain(fields: ['הכי-מנוצל', '${_RoomData.utilRanked.isEmpty ? '—' : _RoomData.utilRanked.first['name']}'])),
+            Expanded(child: ForgeStatPlain(fields: ['הכי-פחות', '${_RoomData.utilRanked.isEmpty ? '—' : _RoomData.utilRanked.last['name']}'])),
+            Expanded(child: ForgeStatPlain(fields: ['הודעות שנשלחו', '${_RoomData.outbox.length}'])),
           ]),
         ]])),
       ],
@@ -1268,9 +1093,9 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
   //   guardExport(מדף) חוסם+מודיע; בסנדבוקס ההורדה חסומה ⇒ תצוגת-הקובץ לבדיקה+העתקה (SelectableText).
   void _openExport(List<Map<String, dynamic>> rs, {required bool ical}) {
     var blockedMsg = '';
-    final ok = guardExport(!_ShopProductData.exportOk(_role), () => blockedMsg = 'ייצוא חסום (שער-הרשאות)');
-    final body = !ok ? '' : ical ? _ShopProductData.icsOf(rs) : _ShopProductData.csvOf(rs);
-    final occN = ical ? [for (final r in rs) ..._ShopProductData.weekOccupancies(r)].length : 0;
+    final ok = guardExport(!_RoomData.exportOk(_role), () => blockedMsg = 'ייצוא חסום (שער-הרשאות)');
+    final body = !ok ? '' : ical ? _RoomData.icsOf(rs) : _RoomData.csvOf(rs);
+    final occN = ical ? [for (final r in rs) ..._RoomData.weekOccupancies(r)].length : 0;
     showModalBottomSheet<void>(
       context: context, backgroundColor: Colors.transparent, isScrollControlled: true,
       builder: (ctx) => DraggableScrollableSheet(
@@ -1278,7 +1103,7 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
         builder: (ctx, scroll) => Padding(
           padding: const EdgeInsets.all(12),
           child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(controller: scroll, padding: const EdgeInsets.all(6), children: [
-              ForgeContactTile(fields: [ical ? 'ייצוא iCal (VCALENDAR)' : 'ייצוא CSV', ical ? '${rs.length} חדרים · $occN תפיסות השבוע · RFC5545 (buildIcs)' : '${rs.length} חדרים · ${_ShopProductData.csvRows(rs).first.length} עמודות · BOM + חסימת-הזרקה']),
+              ForgeContactTile(fields: [ical ? 'ייצוא iCal (VCALENDAR)' : 'ייצוא CSV', ical ? '${rs.length} חדרים · $occN תפיסות השבוע · RFC5545 (buildIcs)' : '${rs.length} חדרים · ${_RoomData.csvRows(rs).first.length} עמודות · BOM + חסימת-הזרקה']),
               _gap(10),
               if (!ok)
                 ForgeToneBanner(items: [[blockedMsg]], variants: const <int>[3])
@@ -1295,55 +1120,44 @@ class _ShopProductScreenState extends State<ShopProductScreen> {
   }
 
   // רענון-דאטה → מצב-טעינה שמור (700ms מדגים; חיבור-אסינק אמיתי יאיר אותו זהה)
-  void _refresh() {
-    setState(() { _loading = true; _error = null; });
-    Future.delayed(const Duration(milliseconds: 700), () { if (mounted) setState(() => _loading = false); });
+  @override
+  Widget build(BuildContext context) {
+    final rooms = _RoomData.liveRooms;
+    final active = _RoomData.activeRooms;
+    final conflicts = _RoomData.weekConflicts;
+    final openFaults = _RoomData.openFaults;
+    final underN = active.where(_RoomData.underused).length;
+    final names = dayNames();
+    final letters = dayLetters(term: (k) => day_letters_terms.kTerms[k]!); // א׳…ו׳ (dayLetters ⊕ אטום-דאטה)
+    final blocked = _RoomData.blockOf(_iso);
+    // איתור⊕חריגה: searchRooms=DsSearch⊕smartFilter⊕smartScore⊕normSearch · filterRooms=finderMatches (AND על נעילות)
+    if (_freeAtOn) { _locks.removeWhere((k, v) => k.startsWith('freeAt:')); _locks['freeAt:$_iso@$_slotHour'] = '1'; } // הציר עוקב אחרי היום-הנבחר
+    final visible = _RoomData.filterRooms(_RoomData.searchRooms(rooms, _q), _locks);
+    final hoursAll = _RoomData.gridHours(rooms, _iso);
+    return DsScaffold(title: 'RoomScreen', subtitle: 'RoomScreen · מודול-משנה מחולל · 4 בונים מחווטים-לשקעי-הזהב', icon: '🧬', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'RoomScreen', 'RoomScreen · מודול-משנה מחולל · 4 בונים מחווטים-לשקעי-הזהב']), ...[
+      _weekGrid(visible, names),
+      _table(visible),
+      _gap(8),
+      ..._automationCenter(),
+      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _cell, _h, _wrap, _occRow, _actions
+      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _tabBody
+    ]]);
   }
-
-  // בורר-חדר לפעולות הפס-העליון (הזמן-חדר / דווח-תקלה): המועמדים = הרשימה-הנראית (אחרי איתור+סינון)
-  void _pickRoom(List<Map<String, dynamic>> rs, void Function(Map<String, dynamic>) then) {
-    showModalBottomSheet<void>(
-      context: context, backgroundColor: Colors.transparent,
-      builder: (c2) => Padding(
-        padding: const EdgeInsets.all(12),
-        child: ForgeStripPanelFrame(fields: ['', ''], child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
-          ForgeContactTile(fields: ['בחר מוצר', 'מהרשימה-הנראית (אחרי חיפוש וסינון)']),
-          _gap(6),
-          if (rs.isEmpty) ForgeAnimatedEmpty(fields: ['אין חדרים תואמים', '']),
-          for (final r in rs)
-            Row(children: [
-              Expanded(child: ForgeContactTile(fields: ['${r['name']}', '${r['location']} · ${_ShopProductData.statusOf(r)}'])),
-              Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () { Navigator.of(c2).pop(); then(r); }, child: ForgeToneButton(items: [['בחר']], variants: const <int>[1]))),
-            ]),
-        ])),
-      ),
-    );
-  }
-
-  // מצב-טעינה שמור (מחוון-מסגרת סטנדרטי; אפס ShimmerSkeleton מזייף) — Column ולא Center (גובה-חסום ברשימה)
-  Widget _loadingView() => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 48),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
-          CircularProgressIndicator(color: _acc),
-          SizedBox(height: 14),
-          Text('טוען חדרים…', style: TextStyle(color: _muted, fontSize: 14)),
-        ]),
-      );
 }
 
-// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): ShopProductFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
-class ShopProductFacts {
-  static const String entity = 'ShopProduct';
-  static const String label = 'מוצר'; // מונח-הישות מ-entity-terms (דאטה)
-  static int get count => _ShopProductData.rooms.length; // רשומות הזרע-הראשי "rooms" (static-const)
-  static const List<Map<String, String>> metricDefs = <Map<String, String>>[{'key': 'busyNowN', 'label': '🔴 תפוסים-עכשיו', 'tone': 'plain'}, {'key': 'freeNowN', 'label': '🟢 פנויים-עכשיו', 'tone': 'plain'}, {'key': 'utilAvgPct', 'label': '📊 ניצולת-שבוע', 'tone': 'plain'}, {'key': 'unavailableN', 'label': '⛔ לא-זמינים', 'tone': 'danger'}, {'key': 'brokenEqN', 'label': '🧰 ציוד-חסר/תקול', 'tone': 'plain'}]; // 5 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי)
-  static Map<String, String> get metrics => <String, String>{'busyNowN': '${_ShopProductData.busyNowN}', 'freeNowN': '${_ShopProductData.freeNowN}', 'utilAvgPct': '${_ShopProductData.utilAvgPct}%', 'unavailableN': '${_ShopProductData.unavailableN}', 'brokenEqN': '${_ShopProductData.brokenEqN}'};
-  static const String heroKey = 'unavailableN'; // המדד הראשון שהזהב צובע-סכנה כשאינו-אפס
+// ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): RoomFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══
+class RoomFacts {
+  static const String entity = 'Room';
+  static const String label = 'חדרים'; // מונח-הישות מ-entity-terms (דאטה)
+  static int get count => _RoomData.rooms.length; // רשומות הזרע-הראשי "rooms" (static-const)
+  static const List<Map<String, String>> metricDefs = <Map<String, String>>[]; // 0 מדדים חצובים משורת-ה-KPI של הזהב (BareStat/StatHero ⇐ getter-סטטי מספרי) — אין getter-סטטי בשורת-ה-KPI ⇒ ריק, לא מומצא
+  static Map<String, String> get metrics => <String, String>{};
+  static const String heroKey = 'count'; // אין מדדים ⇒ count
   static String get hero => metrics[heroKey] ?? '$count';
-  static String get heroLabel => '⛔ לא-זמינים';
+  static String get heroLabel => label;
   static const String idKey = 'id'; // מפתח-המזהה בזרע (אחרי retarget)
-  static List<Map<String, dynamic>> get rows => _ShopProductData.rooms; // כל רשומות הזרע-הראשי (static-const)
-  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>['busyNowN', 'unavailableN']) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
-  static List<Map<String, dynamic>> heroRows(String key) { switch (key) { case 'busyNowN': return _ShopProductData.rowsOf_busyNowN; case 'unavailableN': return _ShopProductData.rowsOf_unavailableN; default: return const []; } } // G10a · 2 מדדים עם שורות (צורת X.where(P).length)
+  static List<Map<String, dynamic>> get rows => _RoomData.rooms; // כל רשומות הזרע-הראשי (static-const)
+  static Map<String, dynamic>? byId(String id) { for (final r in [for (final k in const <String>[]) ...heroRows(k), ...rows]) { if ('${r[idKey] ?? r['id']}' == id) return r; } return null; } // שורות-המדד קודם (הן מסוג-הרשומה שהפאנל צורך — בזהב-התלמידים הפאנל פותח תלמיד, הזרע-הראשי-לפי-מפתחות הוא families), ואז הזרע-הראשי
+  static List<Map<String, dynamic>> heroRows(String key) { switch (key) {  default: return const []; } } // G10a · 0 מדדים עם שורות (צורת X.where(P).length)
   static String? get heroFirstId { final r = heroRows(heroKey); return r.isEmpty ? null : '${r.first[idKey]}'; } // הרשומה-הראשונה של ה-hero — יעד-הקפיצה מהרכזת
 }

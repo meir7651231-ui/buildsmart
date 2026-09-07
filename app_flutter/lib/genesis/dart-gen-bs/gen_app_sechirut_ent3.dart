@@ -10,6 +10,10 @@ import '../dart-ui-bs/ds/ds_store.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutEnt3Screen extends StatefulWidget {
   const GenAppSechirutEnt3Screen({super.key});
@@ -113,12 +117,7 @@ class _GenAppSechirutEnt3ScreenState extends State<GenAppSechirutEnt3Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return DsScaffold(
-      title: gen_app_sechirut_ent3_c0,
-      subtitle: gen_app_sechirut_ent3_c1,
-      icon: gen_app_sechirut_ent3_c2,
-      bottomBar: DsPrimaryButton(label: _editId == null ? gen_app_sechirut_ent3_c3 : gen_app_sechirut_ent3_c4, onTap: _save),
-      children: [
+    return DsScaffold(title: gen_app_sechirut_ent3_c0, subtitle: gen_app_sechirut_ent3_c1, icon: gen_app_sechirut_ent3_c2, bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_sechirut_ent3_c3 : gen_app_sechirut_ent3_c4]])), header: false, children: [ForgeCenteredPageHeader(fields: ['', gen_app_sechirut_ent3_c0, gen_app_sechirut_ent3_c1]), ...[
         AnimatedBuilder(animation: appStore, builder: (context, _) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [Expanded(child: DsStat(label: gen_app_sechirut_ent3_c0, value: appStore.count('app_sechirut_ent3').toString(), sub: gen_app_sechirut_ent3_c20, glyph: gen_app_sechirut_ent3_c21))]))),
         if (_err != null) Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -126,15 +125,15 @@ class _GenAppSechirutEnt3ScreenState extends State<GenAppSechirutEnt3Screen> {
           decoration: BoxDecoration(color: const Color(0x14DC2626), borderRadius: BorderRadius.circular(DsTokens.rSm), border: Border.all(color: const Color(0x40DC2626))),
           child: Row(children: [const Icon(Icons.error_outline, size: 16, color: Color(0xFFDC2626)), const SizedBox(width: 8), Expanded(child: Text(_err!, style: const TextStyle(color: Color(0xFFDC2626), fontSize: 13, fontWeight: FontWeight.w600)))]),
         ),
-        AnimatedBuilder(animation: appStore, builder: (context, _) => DsSection(title: gen_app_sechirut_ent3_c5, children: [
+        AnimatedBuilder(animation: appStore, builder: (context, _) => ForgeTitledSection(fields: [gen_app_sechirut_ent3_c5, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
           if (!_rlsHidden[_rlsRole].contains(0)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(0), child: DsSelect(label: gen_app_sechirut_ent3_c9, entity: 'app_sechirut_ent1', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v))),
-          if (!_rlsHidden[_rlsRole].contains(1)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(1), child: DsField(label: gen_app_sechirut_ent3_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v))),
-          if (!_rlsHidden[_rlsRole].contains(2)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(2), child: DsEnumField(label: gen_app_sechirut_ent3_c11, options: const [gen_app_sechirut_ent3_c12, gen_app_sechirut_ent3_c13, gen_app_sechirut_ent3_c14], value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v))),
-          if (!_rlsHidden[_rlsRole].contains(3)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(3), child: DsField(label: gen_app_sechirut_ent3_c15, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v))),
-          if (!_rlsHidden[_rlsRole].contains(4)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(4), child: DsField(label: gen_app_sechirut_ent3_c16, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v))),
-          if (!_rlsHidden[_rlsRole].contains(5)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(5), child: DsEnumField(label: gen_app_sechirut_ent3_c17, options: const [gen_app_sechirut_ent3_c18, gen_app_sechirut_ent3_c19], value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v))),
-        ])),
-        DsSection(title: gen_app_sechirut_ent3_c6, trailing: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)]), children: [
+          if (!_rlsHidden[_rlsRole].contains(1)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(1), child: ForgeDsField(state: (_v[1] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent3_c10, ''], control: DsField(label: gen_app_sechirut_ent3_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v), bare: true))),
+          if (!_rlsHidden[_rlsRole].contains(2)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(2), child: ForgeDsEnumField(fields: [gen_app_sechirut_ent3_c11], control: DsEnumField(label: gen_app_sechirut_ent3_c11, options: const [gen_app_sechirut_ent3_c12, gen_app_sechirut_ent3_c13, gen_app_sechirut_ent3_c14], value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v), bare: true))),
+          if (!_rlsHidden[_rlsRole].contains(3)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(3), child: ForgeDsField(state: (_v[3] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent3_c15, ''], control: DsField(label: gen_app_sechirut_ent3_c15, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v), bare: true))),
+          if (!_rlsHidden[_rlsRole].contains(4)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(4), child: ForgeDsField(state: (_v[4] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent3_c16, ''], control: DsField(label: gen_app_sechirut_ent3_c16, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v), bare: true))),
+          if (!_rlsHidden[_rlsRole].contains(5)) AbsorbPointer(absorbing: _rlsRO[_rlsRole].contains(5), child: ForgeDsEnumField(fields: [gen_app_sechirut_ent3_c17], control: DsEnumField(label: gen_app_sechirut_ent3_c17, options: const [gen_app_sechirut_ent3_c18, gen_app_sechirut_ent3_c19], value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v), bare: true))),
+        ]]))),
+        ForgeTitledSection(fields: [gen_app_sechirut_ent3_c6, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)])), ...[
           AnimatedBuilder(
             animation: appStore,
             builder: (context, _) {
@@ -142,17 +141,16 @@ class _GenAppSechirutEnt3ScreenState extends State<GenAppSechirutEnt3Screen> {
               if (all.isEmpty) return const DsEmpty(label: gen_app_sechirut_ent3_c7);
               final q = _q.trim().toLowerCase();
               final rs = q.isEmpty ? all : all.where((r) => r.entries.any((e) => !e.key.startsWith('__') && e.value.toLowerCase().contains(q))).toList();
-              if (_view == 1) return DsTable(labels: const [gen_app_sechirut_ent3_c9, gen_app_sechirut_ent3_c10, gen_app_sechirut_ent3_c11, gen_app_sechirut_ent3_c15, gen_app_sechirut_ent3_c16, gen_app_sechirut_ent3_c17], rows: rs.map((r) => [appStore.displayOf('app_sechirut_ent1', r[gen_app_sechirut_ent3_c9] ?? ''), r[gen_app_sechirut_ent3_c10] ?? '', r[gen_app_sechirut_ent3_c11] ?? '', r[gen_app_sechirut_ent3_c15] ?? '', r[gen_app_sechirut_ent3_c16] ?? '', r[gen_app_sechirut_ent3_c17] ?? '']).toList());
+              if (_view == 1) return ForgeDataGrid(bare: true, columns: const [gen_app_sechirut_ent3_c9, gen_app_sechirut_ent3_c10, gen_app_sechirut_ent3_c11, gen_app_sechirut_ent3_c15, gen_app_sechirut_ent3_c16, gen_app_sechirut_ent3_c17], items: rs.map((r) => [appStore.displayOf('app_sechirut_ent1', r[gen_app_sechirut_ent3_c9] ?? ''), r[gen_app_sechirut_ent3_c10] ?? '', r[gen_app_sechirut_ent3_c11] ?? '', r[gen_app_sechirut_ent3_c15] ?? '', r[gen_app_sechirut_ent3_c16] ?? '', r[gen_app_sechirut_ent3_c17] ?? '']).toList());
               return Column(children: [
-                DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
+                ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true)),
                 if (rs.isEmpty) const DsEmpty(label: gen_app_sechirut_ent3_c8),
                 for (var i = 0; i < rs.length; i++)
                   _card(rs[i]),
               ]);
             },
           ),
-        ]),
-      ],
-    );
+        ]])),
+      ]]);
   }
 }

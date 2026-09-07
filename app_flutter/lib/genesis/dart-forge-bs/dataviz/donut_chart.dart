@@ -84,12 +84,12 @@ Path _parse(String d) {
   return path;
 }
 
-/// DonutChart — seam:fields · 1 חריצים
+/// DonutChart — seam:fields · 3 חריצים
 class ForgeDonutChart extends StatelessWidget {
-  /// תפר-דאטה (G12a): 1 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
+  /// תפר-דאטה (G12a): 3 חריצי-טקסט. null ⇒ תוכן-העיצוב (כמו ב-Pure); רשימה ⇒ fields[i] או '' — אין תוכן-דמו בייצור (§20-ג)
   final List<String>? fields;
-  static const int fieldSlots = 1;
-  static const List<String> fieldDemo = <String>["Label"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
+  static const int fieldSlots = 3;
+  static const List<String> fieldDemo = <String>["Label", "70%", "Meta"];   // תוכן-העיצוב פר-חריץ — מלמד את המחולל את צורת-החריץ (מספר/טקסט), לא ערך
   String _f(int i, String d) => fields == null ? d : (i < fields!.length ? fields![i] : '');
   /// G13a · תוכן-נוסף בתוך מסגרת-האטום, אחרי זרימת-העיצוב (מקטע/כרטיס ⇒ תוכן-המודול). null ⇒ האטום לבדו.
   final Widget? child;
@@ -104,7 +104,7 @@ class ForgeDonutChart extends StatelessWidget {
     final skin = DsSeam.skinOf(context);   // מלוא-העיצוב מהחריץ
     final theme = DsSeam.of(context);       // אקצנט (מורף)
     final fonts = DsSeam.fontsOf(context);  // פונט
-    final Widget body = Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [_hide(_f(0, "Label"), SizedBox(width: double.infinity, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, spacing: 10, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false))]))), SizedBox(width: double.infinity, child: Center(widthFactor: 1.0, heightFactor: 1.0, child: SizedBox(width: 118, height: 118, child: CustomPaint(painter: _SvgScene([_Op.circle(60, 60, 46, skin.hair, false, 13), _Op.arc(60, 60, 46, -1.5708, 4.4130, skin.ink, 13, g: [theme.aHi, theme.a], gs: [0.00, 1.00], gv: [0.00, 0.00, 0.00, 1.00]), _Op.text("70%", 60, 58, 26, theme.aHi, 1, fonts.grotesk), _Op.text("Meta", 60, 76, 9, skin.faint, 1, fonts.grotesk)], 120, 120)))))]), child));
+    final Widget body = Container(constraints: const BoxConstraints(minHeight: 170), padding: const EdgeInsets.fromLTRB(16, 16, 16, 13), decoration: BoxDecoration(gradient: LinearGradient(colors: [skin.surface, skin.sunken], begin: Alignment.topCenter, end: Alignment.bottomCenter), border: Border.all(color: skin.hair), borderRadius: BorderRadius.circular(16)), child: _withChild(Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, spacing: 11, children: [_hide(_f(0, "Label"), SizedBox(width: double.infinity, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, spacing: 10, children: [Flexible(child: Text(_f(0, "Label"), style: TextStyle(color: skin.mut, fontFamily: fonts.he, fontSize: 12, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis, softWrap: false))]))), SizedBox(width: double.infinity, child: Center(widthFactor: 1.0, heightFactor: 1.0, child: SizedBox(width: 118, height: 118, child: CustomPaint(painter: _SvgScene([_Op.circle(60, 60, 46, skin.hair, false, 13), _Op.arc(60, 60, 46, -1.5708, 4.4130, skin.ink, 13, g: [theme.aHi, theme.a], gs: [0.00, 1.00], gv: [0.00, 0.00, 0.00, 1.00]), _Op.text(_f(1, "70%"), 60, 58, 26, theme.aHi, 1, fonts.grotesk), _Op.text(_f(2, "Meta"), 60, 76, 9, skin.faint, 1, fonts.grotesk)], 120, 120)))))]), child));
     return body;
   }
 }

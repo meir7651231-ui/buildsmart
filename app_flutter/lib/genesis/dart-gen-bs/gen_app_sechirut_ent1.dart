@@ -12,6 +12,11 @@ import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-maor/month-key.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/temporal/temporal.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutEnt1Screen extends StatefulWidget {
   const GenAppSechirutEnt1Screen({super.key});
@@ -161,12 +166,7 @@ class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return DsScaffold(
-      title: gen_app_sechirut_ent1_c0,
-      subtitle: gen_app_sechirut_ent1_c1,
-      icon: gen_app_sechirut_ent1_c2,
-      bottomBar: DsPrimaryButton(label: _editId == null ? gen_app_sechirut_ent1_c3 : gen_app_sechirut_ent1_c4, onTap: _save),
-      children: [
+    return DsScaffold(title: gen_app_sechirut_ent1_c0, subtitle: gen_app_sechirut_ent1_c1, icon: gen_app_sechirut_ent1_c2, bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_sechirut_ent1_c3 : gen_app_sechirut_ent1_c4]])), header: false, children: [ForgeCenteredPageHeader(fields: ['', gen_app_sechirut_ent1_c0, gen_app_sechirut_ent1_c1]), ...[
         AnimatedBuilder(animation: appStore, builder: (context, _) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [Expanded(child: DsStat(label: gen_app_sechirut_ent1_c0, value: appStore.count('app_sechirut_ent1').toString(), sub: gen_app_sechirut_ent1_c41, glyph: gen_app_sechirut_ent1_c42))]))),
         DsWorkflow(steps: const [gen_app_sechirut_ent1_c25, gen_app_sechirut_ent1_c26, gen_app_sechirut_ent1_c27, gen_app_sechirut_ent1_c28, gen_app_sechirut_ent1_c29, gen_app_sechirut_ent1_c30], current: 0),
         if (_err != null) Container(
@@ -175,21 +175,21 @@ class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
           decoration: BoxDecoration(color: const Color(0x14DC2626), borderRadius: BorderRadius.circular(DsTokens.rSm), border: Border.all(color: const Color(0x40DC2626))),
           child: Row(children: [const Icon(Icons.error_outline, size: 16, color: Color(0xFFDC2626)), const SizedBox(width: 8), Expanded(child: Text(_err!, style: const TextStyle(color: Color(0xFFDC2626), fontSize: 13, fontWeight: FontWeight.w600)))]),
         ),
-        DsSection(title: gen_app_sechirut_ent1_c5, children: [
-          DsField(label: gen_app_sechirut_ent1_c9, hint: '', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v)),
-          DsField(label: gen_app_sechirut_ent1_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v)),
-          DsField(label: gen_app_sechirut_ent1_c11, hint: '', value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v)),
-          DsField(label: gen_app_sechirut_ent1_c12, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v)),
-          DsField(label: gen_app_sechirut_ent1_c13, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v)),
+        ForgeTitledSection(fields: [gen_app_sechirut_ent1_c5, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+          ForgeDsField(state: (_v[0] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent1_c9, ''], control: DsField(label: gen_app_sechirut_ent1_c9, hint: '', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v), bare: true)),
+          ForgeDsField(state: (_v[1] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent1_c10, ''], control: DsField(label: gen_app_sechirut_ent1_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v), bare: true)),
+          ForgeDsField(state: (_v[2] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent1_c11, ''], control: DsField(label: gen_app_sechirut_ent1_c11, hint: '', value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v), bare: true)),
+          ForgeDsField(state: (_v[3] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent1_c12, ''], control: DsField(label: gen_app_sechirut_ent1_c12, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v), bare: true)),
+          ForgeDsField(state: (_v[4] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_sechirut_ent1_c13, ''], control: DsField(label: gen_app_sechirut_ent1_c13, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v), bare: true)),
           if ((_v[4] ?? '').trim().isNotEmpty) _live(gen_app_sechirut_ent1_c14, monthKey((_v[4] ?? ''))),
-          DsDateField(label: gen_app_sechirut_ent1_c15, value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v)),
-          DsEnumField(label: gen_app_sechirut_ent1_c16, options: const [gen_app_sechirut_ent1_c17, gen_app_sechirut_ent1_c18], value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v)),
-          DsEnumField(label: gen_app_sechirut_ent1_c19, options: const [gen_app_sechirut_ent1_c20, gen_app_sechirut_ent1_c21], value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v)),
+          ForgeDsDateFieldInput(fields: [gen_app_sechirut_ent1_c15], control: DsDateField(label: gen_app_sechirut_ent1_c15, value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v), bare: true)),
+          ForgeDsEnumField(fields: [gen_app_sechirut_ent1_c16], control: DsEnumField(label: gen_app_sechirut_ent1_c16, options: const [gen_app_sechirut_ent1_c17, gen_app_sechirut_ent1_c18], value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v), bare: true)),
+          ForgeDsEnumField(fields: [gen_app_sechirut_ent1_c19], control: DsEnumField(label: gen_app_sechirut_ent1_c19, options: const [gen_app_sechirut_ent1_c20, gen_app_sechirut_ent1_c21], value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v), bare: true)),
           _calc(gen_app_sechirut_ent1_c22, (num.tryParse(_v[3] ?? '') ?? 0)  * 12),
           _calc(gen_app_sechirut_ent1_c23, (num.tryParse(_v[3] ?? '') ?? 0)  * 3),
           _calc(gen_app_sechirut_ent1_c24, (num.tryParse(_v[3] ?? '') ?? 0)  *  (num.tryParse(_v[4] ?? '') ?? 0)  / 3),
-        ]),
-        DsSection(title: gen_app_sechirut_ent1_c6, trailing: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)]), children: [
+        ]])),
+        ForgeTitledSection(fields: [gen_app_sechirut_ent1_c6, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)])), ...[
           AnimatedBuilder(
             animation: appStore,
             builder: (context, _) {
@@ -197,19 +197,18 @@ class _GenAppSechirutEnt1ScreenState extends State<GenAppSechirutEnt1Screen> {
               if (all.isEmpty) return const DsEmpty(label: gen_app_sechirut_ent1_c7);
               final q = _q.trim().toLowerCase();
               final rs = q.isEmpty ? all : all.where((r) => r.entries.any((e) => !e.key.startsWith('__') && e.value.toLowerCase().contains(q))).toList();
-              if (_view == 1) return DsBoard(stages: const [gen_app_sechirut_ent1_c25, gen_app_sechirut_ent1_c26, gen_app_sechirut_ent1_c27, gen_app_sechirut_ent1_c28, gen_app_sechirut_ent1_c29, gen_app_sechirut_ent1_c30], records: rs, stageOf: (r) => appStore.stageOf('app_sechirut_ent1', r['__id'] ?? ''), titleOf: (r) => r[gen_app_sechirut_ent1_c9] ?? '', onMove: (id, to) => appStore.setStage('app_sechirut_ent1', id, to));
-              if (_view == 2) return DsCalendar(records: rs, dateOf: (r) => r[gen_app_sechirut_ent1_c15] ?? '', titleOf: (r) => r[gen_app_sechirut_ent1_c9] ?? '');
-              if (_view == 3) return DsTable(labels: const [gen_app_sechirut_ent1_c9, gen_app_sechirut_ent1_c10, gen_app_sechirut_ent1_c11, gen_app_sechirut_ent1_c12, gen_app_sechirut_ent1_c13, gen_app_sechirut_ent1_c15, gen_app_sechirut_ent1_c16, gen_app_sechirut_ent1_c19, gen_app_sechirut_ent1_c22, gen_app_sechirut_ent1_c23, gen_app_sechirut_ent1_c24], rows: rs.map((r) => [r[gen_app_sechirut_ent1_c9] ?? '', r[gen_app_sechirut_ent1_c10] ?? '', r[gen_app_sechirut_ent1_c11] ?? '', r[gen_app_sechirut_ent1_c12] ?? '', r[gen_app_sechirut_ent1_c13] ?? '', r[gen_app_sechirut_ent1_c15] ?? '', r[gen_app_sechirut_ent1_c16] ?? '', r[gen_app_sechirut_ent1_c19] ?? '', r[gen_app_sechirut_ent1_c22] ?? '', r[gen_app_sechirut_ent1_c23] ?? '', r[gen_app_sechirut_ent1_c24] ?? '']).toList());
+              if (_view == 1) return Builder(builder: (_) { final kS = const [gen_app_sechirut_ent1_c25, gen_app_sechirut_ent1_c26, gen_app_sechirut_ent1_c27, gen_app_sechirut_ent1_c28, gen_app_sechirut_ent1_c29, gen_app_sechirut_ent1_c30]; final kR = rs; final kF = (r) => appStore.stageOf('app_sechirut_ent1', r['__id'] ?? ''); final kT = (r) => r[gen_app_sechirut_ent1_c9] ?? ''; final kM = (id, to) => appStore.setStage('app_sechirut_ent1', id, to); final kCols = [for (var c = 0; c < kS.length; c++) [for (final r in kR) if (kF(r).clamp(0, kS.length - 1) == c) r]]; return ForgeKanbanBoard(bare: true, items: [for (var c = 0; c < kS.length; c++) [kS[c], '${kCols[c].length}', for (final r in kCols[c]) kT(r).isEmpty ? (r['__id'] ?? '') : kT(r)]], onCell: (i, j) { if (i < kS.length - 1 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i + 1); }, onCellLong: (i, j) { if (i > 0 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i - 1); }); });
+              if (_view == 2) return DsMonthOffset(builder: (ctx, off, shift) { final g = DsCalendar.grid(rs, (r) => r[gen_app_sechirut_ent1_c15] ?? '', off); return ForgeEventCalendar(fields: [g.title, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], columns: DsCalendar.dows, items: [for (final c in g.cells) [c.$1, c.$3]], variants: [for (final c in g.cells) const <String>['pad', '', 'has', 'today'].indexOf(c.$2).clamp(0, 3)], onAction: (k) => shift(k == 0 ? -1 : 1)); });
+              if (_view == 3) return ForgeDataGrid(bare: true, columns: const [gen_app_sechirut_ent1_c9, gen_app_sechirut_ent1_c10, gen_app_sechirut_ent1_c11, gen_app_sechirut_ent1_c12, gen_app_sechirut_ent1_c13, gen_app_sechirut_ent1_c15, gen_app_sechirut_ent1_c16, gen_app_sechirut_ent1_c19, gen_app_sechirut_ent1_c22, gen_app_sechirut_ent1_c23, gen_app_sechirut_ent1_c24], items: rs.map((r) => [r[gen_app_sechirut_ent1_c9] ?? '', r[gen_app_sechirut_ent1_c10] ?? '', r[gen_app_sechirut_ent1_c11] ?? '', r[gen_app_sechirut_ent1_c12] ?? '', r[gen_app_sechirut_ent1_c13] ?? '', r[gen_app_sechirut_ent1_c15] ?? '', r[gen_app_sechirut_ent1_c16] ?? '', r[gen_app_sechirut_ent1_c19] ?? '', r[gen_app_sechirut_ent1_c22] ?? '', r[gen_app_sechirut_ent1_c23] ?? '', r[gen_app_sechirut_ent1_c24] ?? '']).toList());
               return Column(children: [
-                DsSearch(value: _q, onChanged: (v) => setState(() => _q = v)),
+                ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true)),
                 if (rs.isEmpty) const DsEmpty(label: gen_app_sechirut_ent1_c8),
                 for (var i = 0; i < rs.length; i++)
                   _card(rs[i], _rlsHiddenSet),
               ]);
             },
           ),
-        ]),
-      ],
-    );
+        ]])),
+      ]]);
   }
 }

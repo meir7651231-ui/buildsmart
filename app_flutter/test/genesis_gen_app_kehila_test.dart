@@ -1,11 +1,11 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של KehilaApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_kehila.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_volunteer_from_fee_skeda887.dart' show VolunteerScreen, VolunteerFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_skeda887.dart' show DonationScreen, DonationFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm_skeda887.dart' show RoomScreen, RoomFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_family_from_stu_skeda887.dart' show FamilyScreen, FamilyFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopitem_from_crs_skeda887.dart' show ShopItemScreen, ShopItemFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_skeda887.dart' show MemberScreen, MemberFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_volunteer_from_fee_ske93605.dart' show VolunteerScreen, VolunteerFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_donation_from_fee_ske93605.dart' show DonationScreen, DonationFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_room_from_rm_ske93605.dart' show RoomScreen, RoomFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_family_from_stu_ske93605.dart' show FamilyScreen, FamilyFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopitem_from_crs_ske93605.dart' show ShopItemScreen, ShopItemFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_member_from_stu_ske93605.dart' show MemberScreen, MemberFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/card/card.dart';

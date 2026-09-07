@@ -1251,7 +1251,7 @@ class _RoomScreenState extends State<RoomScreen> {
       // 8 · ניצולת-שבועית-להנהלה (admin): NeonBars על ערכי-אמת (utilPct) — לא bar_chart המזייף
       if (_RoomData.roleName(_role) == 'admin') ...[
         ForgeTitledSection(fields: ['📊 ניצולת-שבועית להנהלה · ממוצע ${_RoomData.utilAvgPct}%', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
-          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final r in _RoomData.utilRanked) _RoomData.utilPct(r).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final r in _RoomData.utilRanked) _RoomData.utilPct(r).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _gap(6),
           Row(children: [
             Expanded(child: ForgeStatPlain(fields: ['הכי-מנוצל', '${_RoomData.utilRanked.isEmpty ? '—' : _RoomData.utilRanked.first['name']}'])),

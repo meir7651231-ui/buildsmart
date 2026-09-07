@@ -21,6 +21,8 @@ import 'gen_app_sechirut_rec4.dart';
 import 'gen_app_sechirut_scr5.dart';
 import 'gen_app_sechirut_settings.dart';
 import 'package:flutter/material.dart';
+import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutHubScreen extends StatefulWidget {
   const GenAppSechirutHubScreen({super.key});
@@ -33,24 +35,24 @@ class _GenAppSechirutHubScreenState extends State<GenAppSechirutHubScreen> {
   static const List<List<int>> _vis = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], [0, 1, 2, 5, 7, 8, 9, 11, 12, 13]];
 
   List<Widget> _tiles(BuildContext context) => [
-        DsNavTile(glyph: gen_app_sechirut_hub_c3, title: gen_app_sechirut_hub_c4, sub: gen_app_sechirut_hub_c5, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt1Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c6, title: gen_app_sechirut_hub_c7, sub: gen_app_sechirut_hub_c8, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt2Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c9, title: gen_app_sechirut_hub_c10, sub: gen_app_sechirut_hub_c11, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt3Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c12, title: gen_app_sechirut_hub_c13, sub: gen_app_sechirut_hub_c14, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt4Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c15, title: gen_app_sechirut_hub_c16, sub: gen_app_sechirut_hub_c17, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutScr5Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c18, title: gen_app_sechirut_hub_c19, sub: gen_app_sechirut_hub_c20, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutOver1Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c21, title: gen_app_sechirut_hub_c22, sub: gen_app_sechirut_hub_c23, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutOver2Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c24, title: gen_app_sechirut_hub_c25, sub: gen_app_sechirut_hub_c26, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec1Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c27, title: gen_app_sechirut_hub_c28, sub: gen_app_sechirut_hub_c29, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec2Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c30, title: gen_app_sechirut_hub_c31, sub: gen_app_sechirut_hub_c32, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec3Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c33, title: gen_app_sechirut_hub_c34, sub: gen_app_sechirut_hub_c35, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec4Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c36, title: gen_app_sechirut_hub_c37, sub: gen_app_sechirut_hub_c38, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind1Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c39, title: gen_app_sechirut_hub_c40, sub: gen_app_sechirut_hub_c41, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind2Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c42, title: gen_app_sechirut_hub_c43, sub: gen_app_sechirut_hub_c44, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind3Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c45, title: gen_app_sechirut_hub_c46, sub: gen_app_sechirut_hub_c47, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind4Screen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c48, title: gen_app_sechirut_hub_c49, sub: gen_app_sechirut_hub_c50, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutAuditScreen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c51, title: gen_app_sechirut_hub_c52, sub: gen_app_sechirut_hub_c53, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutFlagsScreen()))),
-        DsNavTile(glyph: gen_app_sechirut_hub_c54, title: gen_app_sechirut_hub_c55, sub: gen_app_sechirut_hub_c56, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutSettingsScreen()))),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt1Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c4, gen_app_sechirut_hub_c5])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt2Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c7, gen_app_sechirut_hub_c8])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt3Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c10, gen_app_sechirut_hub_c11])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt4Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c13, gen_app_sechirut_hub_c14])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutScr5Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c16, gen_app_sechirut_hub_c17])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutOver1Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c19, gen_app_sechirut_hub_c20])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutOver2Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c22, gen_app_sechirut_hub_c23])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec1Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c25, gen_app_sechirut_hub_c26])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec2Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c28, gen_app_sechirut_hub_c29])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec3Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c31, gen_app_sechirut_hub_c32])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutRec4Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c34, gen_app_sechirut_hub_c35])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind1Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c37, gen_app_sechirut_hub_c38])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind2Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c40, gen_app_sechirut_hub_c41])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind3Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c43, gen_app_sechirut_hub_c44])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBind4Screen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c46, gen_app_sechirut_hub_c47])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutAuditScreen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c49, gen_app_sechirut_hub_c50])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutFlagsScreen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c52, gen_app_sechirut_hub_c53])),
+        GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutSettingsScreen())), child: ForgeGridHubCard(fields: [gen_app_sechirut_hub_c55, gen_app_sechirut_hub_c56])),
   ];
 
   Widget _actorBar(BuildContext context) => AnimatedBuilder(
@@ -100,18 +102,13 @@ class _GenAppSechirutHubScreenState extends State<GenAppSechirutHubScreen> {
   Widget build(BuildContext context) {
     final all = _tiles(context);
     final vis = _vis[appStore.role.clamp(0, _vis.length - 1)];
-    return DsScaffold(
-      title: gen_app_sechirut_hub_c0,
-      subtitle: '${vis.length} מסכים גלויים',
-      icon: gen_app_sechirut_hub_c1,
-      children: [
+    return DsScaffold(title: gen_app_sechirut_hub_c0, subtitle: '${vis.length} מסכים גלויים', icon: gen_app_sechirut_hub_c1, header: false, children: [ForgeCenteredPageHeader(fields: ['', gen_app_sechirut_hub_c0, '${vis.length} מסכים גלויים']), ...[
         _actorBar(context),
         Container(
           margin: const EdgeInsets.only(bottom: 4),
           child: Wrap(children: [_roleChip(0, gen_app_sechirut_hub_c57), _roleChip(1, gen_app_sechirut_hub_c58)]),
         ),
         for (final i in vis) all[i],
-      ],
-    );
+      ]]);
   }
 }

@@ -6584,10 +6584,14 @@
       "seam": "fields",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 2,
+      "fieldSlots": 6,
       "fieldDemo": [
         "Label",
-        "12%"
+        "12%",
+        "86",
+        "01",
+        "04",
+        "07"
       ],
       "sig": {
         "root": {
@@ -6610,9 +6614,29 @@
             "fs": 10.5,
             "fw": 700,
             "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
           }
         ],
-        "numEmph": 0.88
+        "numEmph": 1.33
       },
       "child": true,
       "bare": false,
@@ -6629,10 +6653,18 @@
       "seam": "fields",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 2,
+      "fieldSlots": 10,
       "fieldDemo": [
         "Label",
-        "248"
+        "248",
+        "120",
+        "A",
+        "86",
+        "B",
+        "164",
+        "C",
+        "64",
+        "D"
       ],
       "sig": {
         "root": {
@@ -6655,9 +6687,49 @@
             "fs": 22,
             "fw": 700,
             "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
           }
         ],
-        "numEmph": 1.83
+        "numEmph": 1.38
       },
       "child": true,
       "bare": false,
@@ -6674,10 +6746,13 @@
       "seam": "series",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 2,
+      "fieldSlots": 5,
       "fieldDemo": [
         "Label",
-        "4%"
+        "4%",
+        "Q1",
+        "Q2",
+        "Q3"
       ],
       "sig": {
         "root": {
@@ -6700,9 +6775,24 @@
             "fs": 10.5,
             "fw": 700,
             "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
           }
         ],
-        "numEmph": 0.88
+        "numEmph": 0.66
       },
       "child": true,
       "bare": false,
@@ -7054,9 +7144,11 @@
       "seam": "fields",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 1,
+      "fieldSlots": 3,
       "fieldDemo": [
-        "Label"
+        "Label",
+        "70%",
+        "Meta"
       ],
       "sig": {
         "root": {
@@ -7074,9 +7166,19 @@
             "fs": 12,
             "fw": 600,
             "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
           }
         ],
-        "numEmph": 0
+        "numEmph": 1
       },
       "child": true,
       "bare": false,
@@ -7132,9 +7234,12 @@
       "seam": "fields",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 1,
+      "fieldSlots": 4,
       "fieldDemo": [
-        "Label"
+        "Label",
+        "248",
+        "0",
+        "500"
       ],
       "sig": {
         "root": {
@@ -7152,9 +7257,24 @@
             "fs": 12,
             "fw": 600,
             "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
           }
         ],
-        "numEmph": 0
+        "numEmph": 1.33
       },
       "child": true,
       "bare": false,
@@ -7171,9 +7291,10 @@
       "seam": "series",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 1,
+      "fieldSlots": 2,
       "fieldDemo": [
-        "Label"
+        "Label",
+        "14"
       ],
       "sig": {
         "root": {
@@ -7191,9 +7312,14 @@
             "fs": 12,
             "fw": 600,
             "inBtn": false
+          },
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
           }
         ],
-        "numEmph": 0
+        "numEmph": 1.33
       },
       "child": true,
       "bare": false,
@@ -17921,8 +18047,10 @@
       "seam": "fields",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 0,
-      "fieldDemo": [],
+      "fieldSlots": 1,
+      "fieldDemo": [
+        "12"
+      ],
       "sig": {
         "root": {
           "tag": "div",
@@ -17934,7 +18062,13 @@
         "input": null,
         "series": 0,
         "fills": 0,
-        "slots": [],
+        "slots": [
+          {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          }
+        ],
         "numEmph": 0
       },
       "child": true,
@@ -17952,10 +18086,11 @@
       "seam": "fields",
       "states": false,
       "stateIds": null,
-      "fieldSlots": 4,
+      "fieldSlots": 5,
       "fieldDemo": [
         "DEFAULT",
         "SELECTED",
+        "12",
         "CLUSTER",
         "DISABLED"
       ],
@@ -17982,6 +18117,11 @@
             "inBtn": false
           },
           {
+            "fs": 16,
+            "fw": 400,
+            "inBtn": false
+          },
+          {
             "fs": 8.5,
             "fw": 400,
             "inBtn": false
@@ -17992,7 +18132,7 @@
             "inBtn": false
           }
         ],
-        "numEmph": 0
+        "numEmph": 1.88
       },
       "child": true,
       "bare": true,

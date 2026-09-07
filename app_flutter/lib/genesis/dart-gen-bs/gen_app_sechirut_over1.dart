@@ -6,6 +6,7 @@ import '../dart-ui-bs/premium/lists/expandable_tile.dart';
 import '../dart-ui-bs/auto/bar.dart';
 import '../dart-ui-bs/ds/ds_board.dart';
 import '../dart-data-bs/auto/gen_app_sechirut_over1_content.dart';
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutOver1Screen extends StatelessWidget {
   const GenAppSechirutOver1Screen({super.key});
@@ -34,7 +35,7 @@ class GenAppSechirutOver1Screen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Bar(pct: appStore.count('app_sechirut_ent1') == 0 ? 0 : (appStore.scoped('app_sechirut_ent1', gen_app_sechirut_over1_c0).where((r) => appStore.stageOf('app_sechirut_ent1', r['__id'] ?? '') >= 5).length * 100 ~/ appStore.count('app_sechirut_ent1'))),
           ),
-          Expanded(child: DsBoard(stages: const [gen_app_sechirut_over1_c4, gen_app_sechirut_over1_c5, gen_app_sechirut_over1_c6, gen_app_sechirut_over1_c7, gen_app_sechirut_over1_c8, gen_app_sechirut_over1_c9], records: appStore.scoped('app_sechirut_ent1', gen_app_sechirut_over1_c0), stageOf: (r) => appStore.stageOf('app_sechirut_ent1', r['__id'] ?? ''), titleOf: (r) => r[gen_app_sechirut_over1_c10] ?? '', onMove: (id, to) => appStore.setStage('app_sechirut_ent1', id, to))),
+          Expanded(child: Builder(builder: (_) { final kS = const [gen_app_sechirut_over1_c4, gen_app_sechirut_over1_c5, gen_app_sechirut_over1_c6, gen_app_sechirut_over1_c7, gen_app_sechirut_over1_c8, gen_app_sechirut_over1_c9]; final kR = appStore.scoped('app_sechirut_ent1', gen_app_sechirut_over1_c0); final kF = (r) => appStore.stageOf('app_sechirut_ent1', r['__id'] ?? ''); final kT = (r) => r[gen_app_sechirut_over1_c10] ?? ''; final kM = (id, to) => appStore.setStage('app_sechirut_ent1', id, to); final kCols = [for (var c = 0; c < kS.length; c++) [for (final r in kR) if (kF(r).clamp(0, kS.length - 1) == c) r]]; return ForgeKanbanBoard(bare: true, items: [for (var c = 0; c < kS.length; c++) [kS[c], '${kCols[c].length}', for (final r in kCols[c]) kT(r).isEmpty ? (r['__id'] ?? '') : kT(r)]], onCell: (i, j) { if (i < kS.length - 1 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i + 1); }, onCellLong: (i, j) { if (i > 0 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i - 1); }); })),
           ],
         ),
       );

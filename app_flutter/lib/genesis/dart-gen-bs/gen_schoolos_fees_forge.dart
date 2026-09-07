@@ -1,4 +1,4 @@
-// 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
+// 🎨 schoolos_fees.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeWaveformBars · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×2 · chipRow×1 · chip×3 · statRow×31 · button×25 · statusChip×15 · banner×23 · emptyState×14 · mediaRow×9 · section×9 · segmented×3 · meter×3 · frame×8 · timeline×10 · field×2 · enumField×7 · numberField×2 · dateField×2 · search×1 · pageHeader×1 · table×1 · bars×4 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
 // מטרה: "שכל שקל שמגיע ייגבה בזמן, ששום משפחה לא תיפול בין הכיסאות, ושהמנהל/ת יידע בדיוק
@@ -1147,9 +1147,9 @@ class _FeesScreenState extends State<FeesScreen> {
         Expanded(child: TrendStat(value: _m(thisMonth), delta: (trend['pct'] as num).toDouble(), label: 'נגבה החודש · מגמה מול חצי-שנה')),
       ]),
       _gap(10),
-      if (_amounts) ForgeBarChart(fields: ['חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in byType.values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      if (_amounts) ForgeWaveformBars(fields: ['חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in byType.values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(10),
-      ForgeBarChart(fields: ['משפחות לפי-סטטוס', ''], values: (() { final _vs = [for (final c in counts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      ForgeWaveformBars(fields: ['משפחות לפי-סטטוס', ''], values: (() { final _vs = [for (final c in counts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(10),
       ForgeTitledSection(fields: ['🗓 דוח-גזבר שבועי · מ-${fmtDate(weekAgo)} עד ${fmtDate(_FeesData.today)}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         Row(children: [
@@ -1275,11 +1275,11 @@ class _FeesScreenState extends State<FeesScreen> {
   // סקירה: השוואה (NeonBars) · יחס (StatRow) · פירוק-לפי-סוג (DsBars) · תלמידים · מדדי-דפוס (RFM·מגמה)
   List<Widget> _tabOverview(Map<String, dynamic> f, int charged, int paid, int bal) => [
         if (_amounts) ...[
-          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [charged.toDouble(), paid.toDouble(), bal.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [charged.toDouble(), paid.toDouble(), bal.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _gap(8),
           ForgeLinearProgressStatus(fields: ['שולם מתוך חיובים', '${shekel(paid)} / ${shekel(charged)}'], values: [charged == 0 ? 0 : paid / charged]),
           _gap(8),
-          if (_FeesData.byType(f).isNotEmpty) ForgeBarChart(fields: ['פירוק-חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in _FeesData.byType(f).values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          if (_FeesData.byType(f).isNotEmpty) ForgeWaveformBars(fields: ['פירוק-חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in _FeesData.byType(f).values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
         ],
         _wrap([for (final m in f['members'] as List) ForgeStatusChip(items: [['🎓 ${(m as Map)['first']} · ${m['grade']}']], variants: const <int>[0])]),
         _wrap(_facts(f)),

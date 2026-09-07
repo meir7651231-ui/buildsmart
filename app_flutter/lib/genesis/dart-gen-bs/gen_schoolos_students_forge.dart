@@ -1,4 +1,4 @@
-// 🎨 schoolos_students.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
+// 🎨 schoolos_students.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeWaveformBars · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×1 · chip×3 · statRow×21 · button×34 · statusChip×25 · banner×16 · emptyState×11 · mediaRow×5 · section×2 · segmented×4 · meter×3 · frame×9 · timeline×7 · field×4 · enumField×3 · search×1 · table×1 · bars×3 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 🎓 SchoolOS · מודול-תלמידים — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) מול SPEC-STUDENTS-FULL-2026-09-04.
 // מטרה: "לדעת מי כל תלמיד באמת — לימודית, חברתית, רגשית ומשפחתית — ולראות את מי-שנופל לפני שהוא נופל."
@@ -1118,7 +1118,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
         return [
           _h('פירוק-האותות · תרומה לציון-הסיכון (נק׳)'),
           if (withData.isEmpty) ForgeAnimatedEmpty(fields: ['אין עדיין אותות עם נתון', '']) else
-          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final x in withData) (x['contribution'] as double)]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final x in withData) (x['contribution'] as double)]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           if (noData.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: [for (final x in noData) ForgeStatusChip(items: [['▫ ${x['label']}: אין נתון (מקום-שמור)']], variants: const <int>[0])])),
           _gap(10),
           Row(children: [
@@ -1133,7 +1133,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
             Expanded(child: ForgeStatPlain(fields: ['אחוזון-סיכון בשכבה (גבוה=חמור)', '${_StuData.percentile(s)}'])),
             Expanded(child: ForgeStatPlain(fields: ['ממוצע-סיכון בשכבה', '${(grandTotal(_StuData.cohort(s), (o) => _StuData.risk(o as Map<String, dynamic>)) / (_StuData.cohort(s).isEmpty ? 1 : _StuData.cohort(s).length)).round()}'])),
           ]),
-          if (_StuData.cohort(s).length >= 2) ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final b in _StuData.cohortBins(s)) b.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          if (_StuData.cohort(s).length >= 2) ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final b in _StuData.cohortBins(s)) b.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _gap(10),
           _h('הערות אחרונות · ${ns.length}'),
           if (ns.isEmpty) ForgeAnimatedEmpty(fields: ['אין הערות-מחנך/ת', '']) else for (final n in ns.take(3)) ForgeNotifRow(items: [['📝 ${n['by']}', '${n['date']}'.isEmpty ? 'ללא-תאריך' : _StuData.fmt('${n['date']}')]]),
@@ -1165,7 +1165,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
           ]),
           _gap(10),
           _h('נוכחות חודשית (%)'),
-          if (ms.isEmpty) ForgeAnimatedEmpty(fields: ['אין נתוני-נוכחות עדיין', '']) else ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final m in ms) _StuData.monthRate(s, m) * 100]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          if (ms.isEmpty) ForgeAnimatedEmpty(fields: ['אין נתוני-נוכחות עדיין', '']) else ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final m in ms) _StuData.monthRate(s, m) * 100]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _h('חיסורים · ${abs.length}'),
           if (abs.isEmpty) ForgeAnimatedEmpty(fields: ['אין חיסורים רשומים', '']) else for (final a in abs.take(12)) ForgeNotifRow(items: [[a['noshow'] == true ? '⛔ אי-הופעה' : '🚫 חיסור', _StuData.fmt(a['date'] as String?)]]),
         ];

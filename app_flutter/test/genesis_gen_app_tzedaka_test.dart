@@ -1,12 +1,12 @@
 // מחולל ע"י machtzev/generator/app-from-sentences.mjs — בדיקת-ניווט של TzedakaApp: בית ⇒ כל מודול מרונדר וחוזר, אפס-חריגות
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_tzedaka.dart';
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzbox_from_tch_skeda887.dart' show TzBoxScreen, TzBoxFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzcampaign_from_crs_skeda887.dart' show TzCampaignScreen, TzCampaignFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopproduct_from_rm_skeda887.dart' show ShopProductScreen, ShopProductFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopstore_from_stu_skeda887.dart' show ShopStoreScreen, ShopStoreFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_skeda887.dart' show TeacherScreen, TeacherFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_enrollment_from_fee_skeda887.dart' show EnrollmentScreen, EnrollmentFacts;
-import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_supporter_from_fee_skeda887.dart' show SupporterScreen, SupporterFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzbox_from_tch_ske93605.dart' show TzBoxScreen, TzBoxFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_tzcampaign_from_crs_ske93605.dart' show TzCampaignScreen, TzCampaignFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopproduct_from_rm_ske93605.dart' show ShopProductScreen, ShopProductFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_shopstore_from_stu_ske93605.dart' show ShopStoreScreen, ShopStoreFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_teacher_from_stu_ske93605.dart' show TeacherScreen, TeacherFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_enrollment_from_fee_ske93605.dart' show EnrollmentScreen, EnrollmentFacts;
+import 'package:buildsmart/genesis/dart-gen-bs/gen_retarget_supporter_from_fee_ske93605.dart' show SupporterScreen, SupporterFacts;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/premium/feedback/empty_state.dart';
 import 'package:buildsmart/genesis/dart-forge-bs/card/card.dart';

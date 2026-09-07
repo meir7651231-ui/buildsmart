@@ -1,7 +1,7 @@
 // 🎯 DonationScreen — retarget של schoolos_fees.dart לישות Donation (GENMAX·G5c/G5d · הכרעה-24) · מחולל דטרמיניסטי: retarget.mjs --module schoolos_fees.dart --entity Donation
 //   זרע-ראשי: families (מועמדים: families(36/38) charges(9/10) charges(7/8) charges(7/8) charges(7/8) charges(7/8) charges(7/8) incoming(7/8) charges(6/7) hist(5/5) criteria(3/3) calls(3/3) payments(3/4) payments(3/4) payments(3/4) payments(3/4) calls(3/3) payments(3/4)) · מיפוי שם 5 · ערוץ 0 · טיפוס-יחיד 0 · מקום-שמור 17 · חוזה-מנוע (לא משתנה) 16
 //   date⇒date(name) · amount⇒amount(name) · cur⇒cur(name) · cat⇒cat(name) · rid⇒rid(name) · id⇒∅(engine-contract) · name⇒∅(engine-contract) · phone⇒∅(engine-contract) · email⇒∅(engine-contract) · idNum⇒∅(engine-contract) · hok⇒∅(engine-contract) · day⇒∅(engine-contract) · active⇒∅(engine-contract) · carryBalance⇒∅(engine-contract) · kevaId⇒∅(engine-contract) · hist⇒∅(engine-contract) · d⇒∅(engine-contract) · a⇒∅(engine-contract) · c⇒∅(engine-contract) · clearer⇒∅(engine-contract) · nextDate⇒∅(engine-contract) · payer⇒∅(reserved(2 מועמדים)) · members⇒∅(reserved) · grade⇒∅(reserved(2 מועמדים)) · first⇒∅(reserved(2 מועמדים)) · charges⇒∅(reserved) · method⇒∅(reserved(2 מועמדים)) · memberId⇒∅(reserved(2 מועמדים)) · note⇒∅(reserved(2 מועמדים)) · payments⇒∅(reserved) · startedAt⇒∅(reserved) · criteria⇒∅(reserved) · calls⇒∅(reserved) · at⇒∅(reserved) · outcome⇒∅(reserved(2 מועמדים)) · nextNote⇒∅(reserved(2 מועמדים)) · installmentOf⇒∅(reserved(2 מועמדים)) · cancelledAt⇒∅(reserved)
-//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×21 (ב-Row, Expanded) · פנימיים: button×21 statusChip×15 banner×14 emptyState×9 mediaRow×9 · StatHero⇒ForgeStatPlain ×0 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
+//   עור-forge (G12c/e): BareStat⇒ForgeStatPlain ×0 (ב-Wrap) · ×31 (ב-Row, Expanded) · פנימיים: button×25 statusChip×15 banner×23 emptyState×14 mediaRow×9 · StatHero⇒ForgeStatPlain ×2 · KpiTile⇒— · DsNavTile⇒— — fields לפי תפקידי-חריצים; צבעי-מצב-DS לא מועברים
 //   תפר-עובדות (G9b): DonationFacts · count=families.length (static-const) · מדדים 0 · hero=count · שורות-מדד (G10a) ∅ · תפר-כניסה initialPanelId · תפר-סינון-מדד ∅ · תפר-הזרקה ∅
 //   שדות-Donation בלי מקור (מקום-שמור, יאירו כשיוזרם נתון): designation, purpose · תוויות: מונחי Supporter (תורם/—) ⇒ Donation (תרומה/תרומות) · 0 החלפות · הזרע = זרע-הצבה של המקור, לא ערך-אמת של Donation
 // 💰 SchoolOS · מסך-גבייה ותשלומים (FEES) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד) לפי SPEC-FEES-FULL-2026-09-04.
@@ -12,7 +12,6 @@
 // ⚠️ גבול-כספי חרוט: המסך רושם חיובים/תשלומים ומזכיר — אינו מנפיק קבלות-מס ואינו סולק. קבלה/סליקה/קישור =
 //   שער-חיצוני = מקום-שמור (חוק-7). אין המצאת-מספרי-קבלה. אין Date.now במנוע (today מוזרק).
 // חלקיק-תובנה = כמה אטומים (תצוגה⊕לוגיקה) · עובדה = אטום-יחיד · מזייפים (StatBlock/DataGrid/…) לא נוגעים.
-// G17c · מטרה (צעד 1, אדם): לגבות בזמן בלי לרדוף · פעולות-יסוד (צעד 2, אדם): יתרה · הוראת-קבע · ייצוא ⇒ חלקיקים (המנוע): fee.balance · fee.hok · fee.export
 import 'package:flutter/material.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_search.dart'; // איתור: חיפוש-מבוקר (value+onChanged)
@@ -87,14 +86,15 @@ import '../dart-data-maor/hok-recorded-this-month-sockets.dart' as skHokRec;
 import '../dart-data-maor/hok-method-label-terms.dart' as tdHokMethod;
 import '../dart-data-maor/tier-of-terms.dart' as tdTier;
 import '../dart-data-maor/overdue-contact-task-drafts-sockets.dart' as skOverdue;
+import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/card/card.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/feedback/feedback.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/list/list.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
+import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/dataviz/dataviz.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 const _acc = DsTokens.accent;
@@ -651,6 +651,8 @@ class _DonationData {
       finderMatches({'families': fs, ...ctx}, locks, axisValue).cast<Map<String, dynamic>>();
   static List<String> grades(List<Map<String, dynamic>> fs) =>
       {for (final f in fs) for (final m in f['members'] as List) '${(m as Map)['grade']}'.split('-').first}.toList()..sort();
+  static List<String> courses(List<Map<String, dynamic>> fs) =>
+      {for (final f in fs) for (final c in liveCharges(f)) if (c['cat'] == 'חוג' && c['note'] != null) '${c['note']}'}.toList()..sort();
   static List<String> years(List<Map<String, dynamic>> fs) =>
       donationYears([for (final f in fs) for (final p in paymentsOf(f)) {'date': p['date']}, for (final f in fs) for (final c in liveCharges(f)) {'date': c['date']}]);
 
@@ -684,6 +686,38 @@ class _DonationData {
           [f['name'], studentsN(f), gradesOf(f), charged(f), paid(f), balance(f), agingDays(f), lastPaymentDate(f), lastMethod(f), hokFlag(f) ? (hokActive(f) ? 'פעילה' : 'נכשלה') : '', discountLabel(f), remindersSent(f).length, riskLabel(risk(f)), statusOf(f), f['payer'], f['phone']],
       ];
   static String csvOf(List<Map<String, dynamic>> fs) => toCsv(csvRows(fs), csvEscape) as String;
+  static bool exportOk(int role) => exportAllowed(false) && can(role, 'fees.export');
+
+  // ═══ חוזה-עמודות (חוק-7 · מקום-שמור): 16 עמודות-הליבה + שדות-השער-החיצוני כשקעים ═══
+  //   נגזרת(get)=תמיד · שדה(key)=מוארת רק כשמשפחה נושאת ערך (receiptNo/clearingRef/invoiceNo — יאירו כשהשער יחובר)
+  static final List<Map<String, Object?>> columnDefs = <Map<String, Object?>>[
+    // ═══ חוזה-העמודות של Donation (G5h · חוק-7): 2 שדות-סכמה בלי מקור בזרע — עמודות-מקום-שמור, לא מזויפות ולא מושמטות ═══
+    {'key': 'designation', 'label': 'designation'}, // G5h · מקום-שמור: שדה-Donation מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'key': 'purpose', 'label': 'purpose'}, // G5h · מקום-שמור: שדה-Donation מהסכמה (string) — מאיר כשהנתון מוזרם
+    {'label': 'משפחה', 'get': (Map<String, dynamic> f) => '${f['name']}'},
+    {'label': 'תלמידים', 'get': (Map<String, dynamic> f) => '${studentsN(f)}'},
+    {'label': 'כיתות', 'get': (Map<String, dynamic> f) => gradesOf(f)},
+    {'label': 'סך-חיובים', 'get': (Map<String, dynamic> f) => shekel(charged(f)), 'money': true},
+    {'label': 'שולם', 'get': (Map<String, dynamic> f) => shekel(paid(f)), 'money': true},
+    {'label': 'יתרה', 'get': (Map<String, dynamic> f) => shekel(balance(f)), 'money': true},
+    {'label': 'ותק (ימים)', 'get': (Map<String, dynamic> f) => balance(f) > 0 ? '${agingDays(f)}' : '—'},
+    {'label': 'תשלום-אחרון', 'get': (Map<String, dynamic> f) => fmtDate(lastPaymentDate(f))},
+    {'label': 'אמצעי', 'get': (Map<String, dynamic> f) => lastMethod(f).isEmpty ? '—' : lastMethod(f)},
+    {'label': 'הו״ק', 'get': (Map<String, dynamic> f) => !hasHok(f) ? '—' : hokFlag(f) ? (hokActive(f) ? '✅ פעילה' : '⚠️ נכשלה') : '⏸ מופסקת'},
+    {'label': 'הנחה/מלגה', 'get': (Map<String, dynamic> f) => discountLabel(f).isEmpty ? '—' : discountLabel(f)},
+    {'label': 'תזכורות', 'get': (Map<String, dynamic> f) => '${remindersSent(f).length}'},
+    {'label': 'סיכון', 'get': (Map<String, dynamic> f) => riskLabel(risk(f))},
+    {'label': 'סטטוס', 'get': (Map<String, dynamic> f) => statusOf(f)},
+    {'label': 'הורה-משלם', 'get': (Map<String, dynamic> f) => '${f['payer']} · ${f['phone']}'},
+    {'label': 'הערה', 'get': (Map<String, dynamic> f) => '${f['nextNote'] ?? '—'}'}, // Supporter.nextNote
+    {'key': 'receiptNo', 'label': 'מס׳-קבלה (חיצוני)', 'money': true}, // מקום-שמור · שער-חיצוני
+    {'key': 'clearingRef', 'label': 'אישור-סליקה'}, // מקום-שמור · שער-חיצוני
+    {'key': 'invoiceNo', 'label': 'חשבונית'}, // מקום-שמור · שער-חיצוני
+    {'key': 'payLinkSent', 'label': 'קישור-תשלום נשלח'}, // מקום-שמור · מואר כשהשער מוגדר
+  ];
+  static bool colShown(Map<String, Object?> c, List<Map<String, dynamic>> rows) =>
+      c['get'] != null || rows.any((f) => f[c['key']] != null && '${f[c['key']]}'.trim().isNotEmpty);
+  // שדות-מטא של תשלום (מקום-שמור): מאירים בציר-התשלומים כשהתשלום נושא אותם
   static const paymentMeta = <Map<String, String>>[
     {'key': 'receiptNo', 'prefix': '🧾 קבלה ', 'suffix': ''},
     {'key': 'clearingRef', 'prefix': '🔐 סליקה ', 'suffix': ''},
@@ -736,12 +770,24 @@ class _DonationScreenState extends State<DonationScreen> {
   String _q = '';
   int _chip = 0; // 0=הכל · 1=יתרה>0 · 2=ותק>90 · 3=הו״ק · 4=מלגה · 5=ללא-תזכורת · 6=תזכורת>2 · 7=הסדר · 8=בסיכון
   String _grade = '', _type = '', _course = '', _method = '', _year = '', _status = '';
+  int _mode = 0; // 0=🎯 חייבים · 1=📋 טבלה · 2=💳 הו״ק · 3=🔔 תזכורות · 4=📊 דוחות · 5=🧾 אודיט
+  bool _loading = false;
+  String? _error;
   bool _hokArmed = false; // אישור-דו-שלבי לרישום-הו״ק-מרוכז
+  bool _filtersOpen = false;
+
   String get _roleName => _DonationData.roleName(_role);
   bool get _amounts => _DonationData.amounts(_role);
   String _m(num v) => _amounts ? shekel(v) : '🔒'; // נעילת-הרשאה-כספית: סכום ⇒ מנעול
 
   static const _chipAxis = {1: 'debt', 2: 'old', 3: 'hok', 4: 'scholar', 5: 'noremind', 6: 'remind2', 7: 'arr', 8: 'risk'};
+
+  Widget _fchip(int i, String label) => FilterChipPill(
+        label: label, selected: _chip == i, onTap: () => setState(() => _chip = i),
+        activeFillColor: _acc, surfaceColor: const Color(0xFF14162E),
+        activeTextColor: const Color(0xFF0B0B15), inkColor: _ink,
+        outlineColor: const Color(0xFF2A2D4A), pillRadius: 999,
+      );
 
   Map<dynamic, dynamic> get _locks => {
         if (_chip != 0) _chipAxis[_chip]!: '1',
@@ -752,6 +798,213 @@ class _DonationScreenState extends State<DonationScreen> {
         if (_year.isNotEmpty) 'year': '1',
         if (_status.isNotEmpty) 'status': _status,
       };
+
+  @override
+  Widget build(BuildContext context) {
+    final all = _DonationData.visibleFor(_role);
+    // דירוג: סיכון-יורד ⇒ ותק-יורד ⇒ יתרה-יורדת (המפרט: חוב · ותק-חוב · סיכון)
+    final ranked = [...all]..sort((a, b) {
+        final r = _DonationData.risk(b).compareTo(_DonationData.risk(a));
+        if (r != 0) return r;
+        final ag = _DonationData.agingDays(b).compareTo(_DonationData.agingDays(a));
+        return ag != 0 ? ag : _DonationData.balance(b).compareTo(_DonationData.balance(a));
+      });
+    final visible = _DonationData.filter(_DonationData.search(ranked, _q), _locks,
+        {'grade': _grade, 'type': _type, 'course': _course, 'method': _method, 'year': _year});
+    // KPI-10 על כל-המשפחות-הנראות-לתפקיד (הורה ⇒ משפחתו בלבד)
+    final kCharged = _DonationData.kCharged(all), kPaid = _DonationData.kPaid(all), kOpen = _DonationData.kOpen(all), kPct = _DonationData.kPct(all);
+    final inDebt = _DonationData.kInDebt(all), oldN = all.where(_DonationData.oldDebt).length, kOld = _DonationData.kOld(all);
+    final kExp = _DonationData.kExpected(all), kHok = _DonationData.kHokActive(all), kSch = _DonationData.kScholar(all), kRem = _DonationData.kReminders(all);
+    final failed = all.where(_DonationData.hokFailed).toList();
+    final late = all.where(_DonationData.arrangementLate).toList();
+    final dups = [for (final f in all) if (_DonationData.duplicateCharges(f).isNotEmpty) f];
+    final hokDue = _DonationData.hokDueList(all);
+    final follow = _DonationData.followUps(all);
+    final tripDebt = all.where((f) => _DonationData.balance(f) > 0 && _DonationData.liveCharges(f).any((c) => c['cat'] == 'טיול')).toList();
+    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
+    for (final f in visible) {
+      // דגל-בלבד (מחנך): שני דליים — דגל/תקין; אין דירוג-סיכון גלוי
+      buckets[_DonationData.balance(f) <= 0 ? -1 : _amounts ? _DonationData.risk(f) : 0]!.add(f);
+    }
+    final secTitle = {2: '🔴 סיכון-גבוה / חוב-ותיק', 1: '🟠 בפיגור / בינוני', 0: _amounts ? '🟢 חוב-טרי' : '🚩 דגל-חוב', -1: '✅ ללא-חוב'};
+    const secTone = {2: 2, 1: 3, 0: 0, -1: 1};
+    final trend = _DonationData.collectionTrend(all);
+    final thisMonth = _DonationData.collectedInMonth(all, monthKey(_DonationData.today));
+
+    return DsScaffold(title: 'גבייה ותשלומים', subtitle: '${all.length} משפחות · ${_DonationData.year} · $_roleName', icon: '💰', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'גבייה ותשלומים', '${all.length} משפחות · ${_DonationData.year} · $_roleName']), ...[
+        // בורר-תפקיד (חוק-6 · זהות-מוזרקת) — מדגים גידור-הרשאות (roleOf⊕canGrantedAction)
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final r in _DonationData.roleDefs) r['label'] as String]) [s]], selected: {_role}, onSelect: (i) => setState(() { _role = i; _hokArmed = false; })),
+        ),
+        _gap(10),
+        if (!_amounts) ...[
+          ForgeToneBanner(items: [['נעילת-הרשאה-כספית: תפקיד זה רואה דגל-חוב בלבד — אפס-סכומים, אפס-פרטי-חוב (מגן-כבוד)']], variants: const <int>[2]),
+          _gap(8),
+        ],
+        // פס-עליון: חיפוש (DsSearch) · רענון · חיוב-חדש · רישום-תשלום · ייצוא — מגודרים פר-הרשאה
+        Row(children: [
+          Expanded(child: ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true))),
+          const SizedBox(width: 6),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _refresh, child: ForgeToneButton(items: [['🔄']], variants: const <int>[0]))),
+          if (_DonationData.can(_role, 'fees.charge')) ...[
+            const SizedBox(width: 6),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openChargeForm(null, visible), child: ForgeToneButton(items: [['➕ חיוב']], variants: const <int>[0]))),
+          ],
+          if (_DonationData.can(_role, 'fees.pay')) ...[
+            const SizedBox(width: 6),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openPaymentForm(null, visible), child: ForgeToneButton(items: [['💳 תשלום']], variants: const <int>[1]))),
+          ],
+          if (_DonationData.exportOk(_role)) ...[
+            const SizedBox(width: 6),
+            Padding(padding: const EdgeInsets.only(bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _openExport(visible), child: ForgeToneButton(items: [['⬇ CSV']], variants: const <int>[0]))),
+          ],
+        ]),
+        // צ׳יפי-חריגה (FilterChipPill מבוקר ⊕ finderMatches) — פעולת-יסוד "זיהוי-חריגה"
+        Builder(builder: (_) { final chips = <(String, bool, VoidCallback)>[(('הכל'), _chip == (0), () => setState(() => _chip = (0))), (('🚩 דגל-חוב · $inDebt'), _chip == (1), () => setState(() => _chip = (1))), if (_amounts) ...[(('⏰ ותק>${_DonationData.oldDebtDays} · $oldN'), _chip == (2), () => setState(() => _chip = (2))), (('💳 הו״ק · ${all.where(_DonationData.hokFlag).length}'), _chip == (3), () => setState(() => _chip = (3))), (('🎓 מלגה/הנחה · ${all.where((f) => _DonationData.discountPct(f) > 0).length}'), _chip == (4), () => setState(() => _chip = (4))), (('🔕 ללא-תזכורת · ${all.where((f) => _DonationData.balance(f) > 0 && _DonationData.remindersSent(f).isEmpty).length}'), _chip == (5), () => setState(() => _chip = (5))), (('🔔 תזכורת>2 · ${all.where((f) => _DonationData.remindersSent(f).length > 2).length}'), _chip == (6), () => setState(() => _chip = (6))), (('📆 הסדר · ${all.where(_DonationData.hasArrangement).length}'), _chip == (7), () => setState(() => _chip = (7))), (('⚠️ בסיכון · ${all.where((f) => _DonationData.risk(f) >= 1).length}'), _chip == (8), () => setState(() => _chip = (8))), (_filtersOpen ? '▲ פילטרים' : '▼ פילטרים (כיתה·חוג·סוג·אמצעי·שנה·סטטוס)', _filtersOpen, () => setState(() => _filtersOpen = !_filtersOpen))]]; return ForgeFacetChip(bare: true, items: [for (final ch in chips) [ch.$1]], selected: <int>{for (final (k, ch) in chips.indexed) if (ch.$2) k}, onSelect: (k) => chips[k].$3()); }),
+        if (_filtersOpen) ...[
+          _gap(8),
+          // פילטרי-ערך (DsEnumField מבוקר ⇒ נעילת-ציר ב-finderMatches): כיתה · חוג · סוג-חיוב · אמצעי · שנה · סטטוס
+          Wrap(spacing: 10, runSpacing: 6, children: [
+            _enum('כיתה', ['', ..._DonationData.grades(all)], _grade, (v) => setState(() => _grade = v)),
+            _enum('חוג', ['', ..._DonationData.courses(all)], _course, (v) => setState(() => _course = v)),
+            _enum('סוג-חיוב', ['', ..._DonationData.chargeTypes, _DonationData.arrangementType], _type, (v) => setState(() => _type = v)),
+            _enum('אמצעי', ['', ..._DonationData.payMethodsSchool], _method, (v) => setState(() => _method = v)),
+            _enum('שנה', ['', ..._DonationData.years(all)], _year, (v) => setState(() => _year = v)),
+            _enum('סטטוס', const ['', 'תקין', 'בפיגור', 'הסדר', 'הסדר-בפיגור', 'מלגה-מלאה', 'חוב-אבוד'], _status, (v) => setState(() => _status = v)),
+          ]),
+        ],
+        const SizedBox(height: 12),
+        // KPI-10 (המפרט): hero=יתרה-פתוחה (המטרה: מה חסר) + 10 מדדי-מצב (BareStat, ערכי-אמת) + יחס-גבייה (StatRow)
+        if (!_amounts)
+          ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['משפחות עם דגל-חוב מתוך ${all.length}', '$inDebt'])),
+              const SizedBox(height: 8),
+              const Text('פרטים וסכומים = גזברות בלבד. לתיאום: לפנות לגזבר/ת, לא לתלמיד.', style: TextStyle(color: _muted, fontSize: 12.5)),
+            ]))
+        else
+        ForgeStripPanelFrame(fields: ['', ''], child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            ConstrainedBox(constraints: const BoxConstraints(maxWidth: 420), child: ForgeStatPlain(fields: ['יתרה פתוחה · $inDebt משפחות בחוב', _m(kOpen)])),
+            const SizedBox(height: 12),
+            ForgeLinearProgressStatus(fields: ['אחוז-גבייה (שולם מתוך חיובים)', '$kPct%'], values: [kPct / 100]),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: ForgeStatPlain(fields: ['🧾 סך-חיובים', _m(kCharged)])),
+              Expanded(child: ForgeStatPlain(fields: ['✅ נגבה', _m(kPaid)])),
+              Expanded(child: ForgeStatPlain(fields: ['💸 יתרה-פתוחה', _m(kOpen)])),
+              Expanded(child: ForgeStatPlain(fields: ['📈 אחוז-גבייה', '$kPct%'])),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: ForgeStatPlain(fields: ['👨‍👩‍👧 משפחות-בחוב', '$inDebt'])),
+              Expanded(child: ForgeStatPlain(fields: ['⏰ חוב-ותיק >${_DonationData.oldDebtDays}י׳ · $oldN', _m(kOld)])),
+              Expanded(child: ForgeStatPlain(fields: ['📅 צפוי-החודש', _m(kExp)])),
+            ]),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: ForgeStatPlain(fields: ['💳 הו״ק-פעילות', '$kHok'])),
+              Expanded(child: ForgeStatPlain(fields: ['🎓 מלגות/הנחות', _m(kSch)])),
+              Expanded(child: ForgeStatPlain(fields: ['🔔 תזכורות-החודש', '$kRem'])),
+            ]),
+          ])),
+        const SizedBox(height: 8),
+        // מרכז-אוטומציות (23-ג · פרואקטיבי): הו״ק-נכשלה · הסדר-בפיגור · חיוב-כפול · הו״ק-לרישום · מעקב-שעבר-מועד · חוב-לפני-טיול
+        if (failed.isNotEmpty && _amounts) ...[
+          ForgeToneBanner(items: [['${failed.length} הו״ק נכשלה (הסליקה פסקה >2 חודשים) — התרעה + ניסיון-חוזר: ${failed.map((f) => f['name']).join(' · ')}']], variants: const <int>[3]),
+          _gap(8),
+        ],
+        if (late.isNotEmpty && _amounts) ...[
+          ForgeToneBanner(items: [['${late.length} הסדר-בפיגור: ${late.map((f) => f['name']).join(' · ')}']], variants: const <int>[2]),
+          _gap(8),
+        ],
+        if (dups.isNotEmpty && _amounts) ...[
+          ForgeToneBanner(items: [['חיוב-כפול-חשוד (אותו סוג·סכום·תאריך·תלמיד): ${dups.map((f) => '${f['name']} (${_DonationData.duplicateCharges(f).map((c) => c['cat']).join(',')})').join(' · ')}']], variants: const <int>[2]),
+          _gap(8),
+        ],
+        if (tripDebt.isNotEmpty && _amounts) ...[
+          ForgeToneBanner(items: [['חוב לפני-טיול (התרעה-מוקדמת, לא-מניעה): ${tripDebt.map((f) => f['name']).join(' · ')}']], variants: const <int>[0]),
+          _gap(8),
+        ],
+        if (follow.isNotEmpty && _DonationData.can(_role, 'fees.remind')) ...[
+          ForgeToneBanner(items: [['מעקב שעבר-מועד: ${follow.map((t) => t['title']).join(' · ')}']], variants: const <int>[0]),
+          _gap(8),
+        ],
+        if (hokDue.isNotEmpty && _DonationData.can(_role, 'fees.hok')) ...[
+          ForgeToneBanner(items: [['${hokDue.length} הו״ק לרישום החודש (${_m(_DonationData.hokExpected(all))}) — ראה מבט הו״ק']], variants: const <int>[0]),
+          _gap(8),
+        ],
+        // בורר-מבט (SegmentedSwitch מבוקר)
+        if (_amounts)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ForgeSegPickerSelection(bare: true, items: [for (final s in const ['🎯 חייבים', '📋 טבלה', '💳 הו״ק', '🔔 תזכורות', '📊 דוחות', '🧾 אודיט']) [s]], selected: {_mode}, onSelect: (i) => setState(() => _mode = i)),
+          ),
+        const SizedBox(height: 10),
+        // מצבי-מסך שמורים: טעינה · שגיאה · ריק
+        if (_loading)
+          _loadingView()
+        else if (_error != null)
+          ForgeToneBanner(items: [[_error!]], variants: const <int>[3])
+        else if (_mode == 2 && _amounts)
+          _hokView(all, hokDue)
+        else if (_mode == 3 && _amounts)
+          _remindersView(visible)
+        else if (_mode == 4 && _amounts)
+          _reportsView(all, trend, thisMonth)
+        else if (_mode == 5 && _amounts)
+          _auditView()
+        else if (all.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeAnimatedEmpty(fields: ['אין משפחות/חיובים — התחל בחיוב-שנה', '']))
+        else if (visible.isEmpty)
+          const Padding(padding: EdgeInsets.only(top: 24), child: ForgeAnimatedEmpty(fields: ['אין משפחות תואמות לחיפוש/סינון', '']))
+        else if (_mode == 1 && _amounts)
+          _table(visible)
+        else
+          for (final st in const [2, 1, 0, -1])
+            if (buckets[st]!.isNotEmpty)
+              ForgeTitledSection(fields: ['${secTitle[st]} · ${buckets[st]!.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+                for (final f in buckets[st]!) _row(f),
+              ]])),
+      ]]);
+  }
+
+  Widget _enum(String label, List<String> options, String value, void Function(String) on) => SizedBox(
+        width: 170,
+        child: ForgeDsEnumField(fields: [label], control: DsEnumField(label: label, options: options, value: value, onChanged: on, bare: true)),
+      );
+
+  void _refresh() {
+    setState(() { _loading = true; _error = null; });
+    Future.delayed(const Duration(milliseconds: 700), () { if (mounted) setState(() => _loading = false); });
+  }
+
+  Widget _loadingView() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+          CircularProgressIndicator(color: _acc),
+          const SizedBox(height: 14),
+          const Text('טוען גבייה…', style: TextStyle(color: _muted, fontSize: 14)),
+        ]),
+      );
+
+  // 📋 טבלה מונחית-חוזה (columnDefs · מקום-שמור): עמודות-נגזרות תמיד, שדות-שער-חיצוני מוארים כשיש נתון
+  Widget _table(List<Map<String, dynamic>> rows) {
+    final cols = [for (final c in _DonationData.columnDefs) if (_DonationData.colShown(c, rows)) c];
+    final labels = [for (final c in cols) c['label'] as String];
+    final data = <List<String>>[
+      for (final f in rows)
+        [
+          for (final c in cols)
+            if (c['money'] == true && !_amounts)
+              '🔒'
+            else if (c['get'] != null)
+              (c['get'] as String Function(Map<String, dynamic>))(f)
+            else
+              '${f[c['key']] ?? '—'}',
+        ],
+    ];
+    return ForgeDataGrid(bare: true, columns: labels, items: data);
+  }
 
   // ═══ שורת-משפחה (טריאז'): זהות ⊕ יחס-שולם (StatRow) ⊕ BareStat×3 ⊕ facts ⊕ הפעולה-הנכונה (AlertBanner) ═══
   Widget _row(Map<String, dynamic> f) {
@@ -847,6 +1100,27 @@ class _DonationScreenState extends State<DonationScreen> {
     ]);
   }
 
+  // ═══ 🔔 מבט-תזכורות: תזכורת-מדורגת פר-משפחה (segulaReminders) + נוסח (waPaymentText) — פרטי, לא פומבי ═══
+  Widget _remindersView(List<Map<String, dynamic>> fs) {
+    final due = fs.where((f) => _DonationData.nextReminder(f) != null).toList();
+    final sentAll = [for (final f in fs) for (final c in _DonationData.remindersSent(f)) {'f': f, 'c': c}]..sort((a, b) => '${(b['c'] as Map)['at']}'.compareTo('${(a['c'] as Map)['at']}'));
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      ForgeToneBanner(items: [['מגן-כבוד: תזכורות פרטיות בלבד · אין תזכורת פומבית · אין חסימת-תלמיד · מלגה-מלאה = אפס-תזכורות']], variants: const <int>[1]),
+      _gap(8),
+      ForgeTitledSection(fields: ['🔔 מועד-תזכורת הגיע · ${due.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+        if (due.isEmpty)
+          ForgeAnimatedEmpty(fields: ['אין תזכורות שמועדן הגיע', ''])
+        else
+          for (final f in due) _reminderCard(f),
+      ]])),
+      ForgeTitledSection(fields: ['📜 היסטוריית-תזכורות · ${sentAll.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+        if (sentAll.isEmpty) ForgeAnimatedEmpty(fields: ['טרם נשלחו תזכורות', '']) else
+          for (final x in sentAll)
+            ForgeNotifRow(items: [['${(x['f'] as Map)['name']} · ${(x['c'] as Map)['grade'] ?? 'תזכורת'}', fmtDate((x['c'] as Map)['at'] as String?)]]),
+      ]])),
+    ]);
+  }
+
   Widget _reminderCard(Map<String, dynamic> f) {
     final nr = _DonationData.nextReminder(f)!;
     final grade = nr['grade'] as String;
@@ -887,9 +1161,9 @@ class _DonationScreenState extends State<DonationScreen> {
         Expanded(child: TrendStat(value: _m(thisMonth), delta: (trend['pct'] as num).toDouble(), label: 'נגבה החודש · מגמה מול חצי-שנה')),
       ]),
       _gap(10),
-      if (_amounts) ForgeBarChart(fields: ['חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in byType.values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      if (_amounts) ForgeWaveformBars(fields: ['חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in byType.values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(10),
-      ForgeBarChart(fields: ['משפחות לפי-סטטוס', ''], values: (() { final _vs = [for (final c in counts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      ForgeWaveformBars(fields: ['משפחות לפי-סטטוס', ''], values: (() { final _vs = [for (final c in counts) (c[1] as int).toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(10),
       ForgeTitledSection(fields: ['🗓 דוח-גזבר שבועי · מ-${fmtDate(weekAgo)} עד ${fmtDate(_DonationData.today)}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
         Row(children: [
@@ -917,6 +1191,15 @@ class _DonationScreenState extends State<DonationScreen> {
       ]])),
     ]);
   }
+
+  // ═══ 🧾 אודיט: כל פעולה (מי·מה·מתי) — TimelineItem ═══
+  Widget _auditView() => ForgeTitledSection(fields: ['🧾 יומן-אודיט · ${_DonationData.audit.length}', '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+        if (_DonationData.audit.isEmpty)
+          ForgeAnimatedEmpty(fields: ['אין פעולות עדיין — כל חיוב/תשלום/ביטול/הנחה/תזכורת יירשם כאן', ''])
+        else
+          for (final a in _DonationData.audit)
+            ForgeNotifRow(items: [['${a['role']} · ${a['family'] == '*' ? 'כלל-המערכת' : _DonationData.families.firstWhere((f) => f['id'] == a['family'], orElse: () => const {'name': '?'})['name']}', fmtDate(a['date'] as String?)]]),
+      ]]));
 
   // ═══ פאנל משפחה-נבחרת (GlassCard · bottom-sheet): זהות · יתרה (צבועה-לפי-ותק) · פירוק · טאבים-9 · הפעולה-הנכונה · פעולות ═══
   void _openPanel(Map<String, dynamic> f) {
@@ -1006,11 +1289,11 @@ class _DonationScreenState extends State<DonationScreen> {
   // סקירה: השוואה (NeonBars) · יחס (StatRow) · פירוק-לפי-סוג (DsBars) · תלמידים · מדדי-דפוס (RFM·מגמה)
   List<Widget> _tabOverview(Map<String, dynamic> f, int charged, int paid, int bal) => [
         if (_amounts) ...[
-          ForgeBarChart(fields: ['', ''], values: (() { final _vs = [charged.toDouble(), paid.toDouble(), bal.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [charged.toDouble(), paid.toDouble(), bal.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
           _gap(8),
           ForgeLinearProgressStatus(fields: ['שולם מתוך חיובים', '${shekel(paid)} / ${shekel(charged)}'], values: [charged == 0 ? 0 : paid / charged]),
           _gap(8),
-          if (_DonationData.byType(f).isNotEmpty) ForgeBarChart(fields: ['פירוק-חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in _DonationData.byType(f).values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+          if (_DonationData.byType(f).isNotEmpty) ForgeWaveformBars(fields: ['פירוק-חיובים לפי-סוג', ''], values: (() { final _vs = [for (final v in _DonationData.byType(f).values) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
         ],
         _wrap([for (final m in f['members'] as List) ForgeStatusChip(items: [['🎓 ${(m as Map)['first']} · ${m['grade']}']], variants: const <int>[0])]),
         _wrap(_facts(f)),
@@ -1281,46 +1564,6 @@ class _DonationScreenState extends State<DonationScreen> {
         child: Wrap(spacing: 8, runSpacing: 6, children: kids),
       );
   Widget _gap([double h = 10]) => SizedBox(height: h);
-  @override
-  Widget build(BuildContext context) {
-    final all = _DonationData.visibleFor(_role);
-    // דירוג: סיכון-יורד ⇒ ותק-יורד ⇒ יתרה-יורדת (המפרט: חוב · ותק-חוב · סיכון)
-    final ranked = [...all]..sort((a, b) {
-        final r = _DonationData.risk(b).compareTo(_DonationData.risk(a));
-        if (r != 0) return r;
-        final ag = _DonationData.agingDays(b).compareTo(_DonationData.agingDays(a));
-        return ag != 0 ? ag : _DonationData.balance(b).compareTo(_DonationData.balance(a));
-      });
-    final visible = _DonationData.filter(_DonationData.search(ranked, _q), _locks,
-        {'grade': _grade, 'type': _type, 'course': _course, 'method': _method, 'year': _year});
-    // KPI-10 על כל-המשפחות-הנראות-לתפקיד (הורה ⇒ משפחתו בלבד)
-    final kCharged = _DonationData.kCharged(all), kPaid = _DonationData.kPaid(all), kOpen = _DonationData.kOpen(all), kPct = _DonationData.kPct(all);
-    final inDebt = _DonationData.kInDebt(all), oldN = all.where(_DonationData.oldDebt).length, kOld = _DonationData.kOld(all);
-    final kExp = _DonationData.kExpected(all), kHok = _DonationData.kHokActive(all), kSch = _DonationData.kScholar(all), kRem = _DonationData.kReminders(all);
-    final failed = all.where(_DonationData.hokFailed).toList();
-    final late = all.where(_DonationData.arrangementLate).toList();
-    final dups = [for (final f in all) if (_DonationData.duplicateCharges(f).isNotEmpty) f];
-    final hokDue = _DonationData.hokDueList(all);
-    final follow = _DonationData.followUps(all);
-    final tripDebt = all.where((f) => _DonationData.balance(f) > 0 && _DonationData.liveCharges(f).any((c) => c['cat'] == 'טיול')).toList();
-    final buckets = <int, List<Map<String, dynamic>>>{2: [], 1: [], 0: [], -1: []};
-    for (final f in visible) {
-      // דגל-בלבד (מחנך): שני דליים — דגל/תקין; אין דירוג-סיכון גלוי
-      buckets[_DonationData.balance(f) <= 0 ? -1 : _amounts ? _DonationData.risk(f) : 0]!.add(f);
-    }
-    final secTitle = {2: '🔴 סיכון-גבוה / חוב-ותיק', 1: '🟠 בפיגור / בינוני', 0: _amounts ? '🟢 חוב-טרי' : '🚩 דגל-חוב', -1: '✅ ללא-חוב'};
-    const secTone = {2: 2, 1: 3, 0: 0, -1: 1};
-    final trend = _DonationData.collectionTrend(all);
-    final thisMonth = _DonationData.collectedInMonth(all, monthKey(_DonationData.today));
-
-    return DsScaffold(title: 'DonationScreen', subtitle: 'DonationScreen · מודול-משנה מחולל · 3 בונים מחווטים-לשקעי-הזהב', icon: '🧬', header: false, children: [ForgeCenteredPageHeader(fields: ['', 'DonationScreen', 'DonationScreen · מודול-משנה מחולל · 3 בונים מחווטים-לשקעי-הזהב']), ...[
-      _hokView(all, hokDue),
-      _reportsView(all, trend, thisMonth),
-      _gap(10),
-      // בונים-פנימיים (מורכבים דרך הקורא שלהם, לא ברמת-המסך): _facts, _tabOverview, _tabCharges, _tabPayments, _tabHok, _tabReminders, _tabDiscounts, _tabArrangement, _tabStatement, _tabAudit, _wrap
-      // מקום-שמור (חוק-7): בונים בלי שקע-פתיר במודול-המשנה — _row, _reminderCard
-    ]]);
-  }
 }
 
 // ═══ תפר-עובדות ציבורי (G9b · לרכזת-האפליקציה): DonationFacts — נגזרות-אמת של דאטה-המודול; כל ערך = ביטוי חי על הזרע/המנועים (§20-ג), אפס ליטרל-מומצא. מחולל: retarget.mjs ═══

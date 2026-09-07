@@ -7,7 +7,7 @@
 //   "שיבוצים של השנה" ⇒ Enrollment ⇐ schoolos_fees.dart (strong · שמות 4/26)
 //   "תורמים לפי סכום" ⇒ Supporter ⇐ schoolos_fees.dart (strong · שמות 11/24)
 //   G10b-ב · תפר-הזרקה (db) ⇒ בדיקה שמזריקה שדה-סכמה שמור על רשומת-המסך ורואה את העמודה מאירה: TzBox:∅ · TzCampaign:∅ · ShopProduct:∅ · ShopStore:0 עמודות · Teacher:9 עמודות · Enrollment:∅ · Supporter:∅
-//   G12c · תפקידי-עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
+//   G12c · תפקידי-עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeWaveformBars · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   G12b · עור: forge — אריח-KPI = ForgeStatPlain (card · 2 חריצים · תוכן-העיצוב ["Label","248"] ⇒ ערך בחריץ 1, תווית בחריץ 0, השאר '') — הצבה של הבעלים ב-app-golden, מאומתת מבנית
 //   G10b · עם הקפיצה נשלח גם initialMetric=heroKey ⇒ הטבלה במודול מסוננת לשורות-המדד (באנר + ביטול): TzBox:initialMetric · TzCampaign:initialMetric · ShopProduct:initialMetric · ShopStore:initialMetric · Teacher:initialMetric · Enrollment:∅ · Supporter:∅
 //   G10a · אריח-hero ⇒ טאפ פותח את המודול על הרשומה-הראשונה של המדד (<E>Facts.heroFirstId ⇒ <E>Screen(initialPanelId)) — תפר-כניסה חצוב מצורת initialPanel של זהב-המורים: TzBox:initialPanel · TzCampaign:initialPanelId · ShopProduct:initialPanelId · ShopStore:initialPanelId · Teacher:initialPanelId · Enrollment:initialPanelId · Supporter:initialPanelId
@@ -22,13 +22,13 @@ import '../dart-maor/smart-filter.dart'; // איתור: סינון+מיון-לפ
 import '../dart-maor/smart-score.dart'; // איתור: ניקוד רב-מילתי AND (מדף)
 import '../dart-maor/norm-search.dart'; // איתור: נרמול-חיפוש עברי (מדף)
 import '../dart-data-maor/norm-search-strings.dart'; // NORM_SEARCH_T (אטום-דאטה)
-import 'gen_retarget_tzbox_from_tch_skeda887.dart' show TzBoxScreen, TzBoxFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_tzcampaign_from_crs_skeda887.dart' show TzCampaignScreen, TzCampaignFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopproduct_from_rm_skeda887.dart' show ShopProductScreen, ShopProductFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_shopstore_from_stu_skeda887.dart' show ShopStoreScreen, ShopStoreFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_teacher_from_stu_skeda887.dart' show TeacherScreen, TeacherFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_enrollment_from_fee_skeda887.dart' show EnrollmentScreen, EnrollmentFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
-import 'gen_retarget_supporter_from_fee_skeda887.dart' show SupporterScreen, SupporterFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_tzbox_from_tch_ske93605.dart' show TzBoxScreen, TzBoxFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_tzcampaign_from_crs_ske93605.dart' show TzCampaignScreen, TzCampaignFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopproduct_from_rm_ske93605.dart' show ShopProductScreen, ShopProductFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_shopstore_from_stu_ske93605.dart' show ShopStoreScreen, ShopStoreFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_teacher_from_stu_ske93605.dart' show TeacherScreen, TeacherFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_enrollment_from_fee_ske93605.dart' show EnrollmentScreen, EnrollmentFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
+import 'gen_retarget_supporter_from_fee_ske93605.dart' show SupporterScreen, SupporterFacts; // רק התפר הציבורי (מסך+עובדות) — מחלקות-ציבוריות אחרות של הזהב (DashInput) לא מתנגשות
 
 class TzedakaApp extends StatelessWidget {
   const TzedakaApp({super.key});

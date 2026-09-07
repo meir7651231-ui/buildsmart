@@ -1,4 +1,4 @@
-// 🎨 schoolos_teachers.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeBarChart · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
+// 🎨 schoolos_teachers.dart בעור-forge (GENMAX·G12d) — מחולל דטרמיניסטי: skin-golden.mjs · הזהב לא נגע (טעינה-לצד, חוק-7) · עור: kpi=ForgeStatPlain · hero=ForgeStatPlain · stat=ForgeStatPlain · navTile=ForgeGridHubCard · empty=ForgeAnimatedEmpty · button=ForgeToneButton · statusChip=ForgeStatusChip · banner=ForgeToneBanner · emptyState=ForgeAnimatedEmpty · mediaRow=ForgeContactTile · section=ForgeTitledSection · frame=ForgeStripPanelFrame · segmented=ForgeSegPickerSelection · chip=ForgeFacetChip · meter=ForgeLinearProgressStatus · glass=ForgeStripPanelFrame · timeline=ForgeNotifRow · field=ForgeDsField · enumField=ForgeDsEnumField · numberField=ForgeDsNumberField · dateField=ForgeDsDateFieldInput · search=ForgeDsSearch · pageHeader=ForgeCenteredPageHeader · table=ForgeDataGrid · bars=ForgeWaveformBars · board=ForgeKanbanBoard · calendar=ForgeEventCalendar
 //   החלפות: stat×0 · hero×1 · chipRow×3 · chip×8 · statRow×17 · button×17 · statusChip×12 · banner×12 · emptyState×12 · mediaRow×6 · section×2 · segmented×6 · meter×2 · frame×4 · timeline×4 · search×1 · table×2 · bars×2 · board×1 · BareStat ב-Row נשאר DS (רצועת-4) · צבעי-מצב-DS לא מועברים · חיפוש/טבלאות/פילטרים = DS (אטומי-forge של קלט הם ציור, לא שדה)
 // 👩‍🏫 SchoolOS · מורים וצוות (TEACHERS) — נבנה בדרך (THE-WAY · הכרעה 23-ב/ג/ד). מפרט: knowledge/SPEC-TEACHERS-FULL-2026-09-04.md
 // מטרה: "שכל מורה יהיה במקום הנכון עם עומס נכון — ושהמנהל/ת יראה מי-עמוס-מדי, מי-חסר ומי-צריך-תמיכה לפני שזה פוגע בתלמידים."
@@ -908,7 +908,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
     final base = DateTime.parse('${_TeamData.today}T12:00:00');
     final labels = [for (var i = 3; i >= 0; i--) () { final m = DateTime(base.year, base.month - i); return '${m.month}/${m.year % 100}'; }()];
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      ForgeBarChart(fields: ['', ''], values: (() { final _vs = [for (final v in monthly) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = [for (final v in monthly) v.toDouble()]; final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(6),
       Wrap(spacing: 8, children: [
         ForgeStatusChip(items: [['מגמה: ${trend['dir'] == 'up' ? '↑ עולה' : trend['dir'] == 'down' ? '↓ יורדת' : '→ יציבה'} ${trend['pct']}%']], variants: [const <int>[0, 1, 3, 2][(trend['dir'] == 'up' ? 2 : 1) % 4]]),
@@ -937,7 +937,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
     if (perf == null) return ForgeAnimatedEmpty(fields: ['מקום-שמור: נוכחות/ציוני-כיתותיו יאירו כשיוזרמו ממודולי נוכחות ותלמידים (לא מזייפים)', '']);
     final trend = trendFromScan({'monthly': perf['monthly']});
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      ForgeBarChart(fields: ['', ''], values: (() { final _vs = (perf['values'] as List).map((v) => (v as num).toDouble()).toList(); final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
+      ForgeWaveformBars(fields: ['', ''], values: (() { final _vs = (perf['values'] as List).map((v) => (v as num).toDouble()).toList(); final _m = _vs.fold<double>(0.0, (a, b) => a > b ? a : b); return [for (final v in _vs) _m == 0 ? 0.0 : v / _m]; })()),
       _gap(6),
       ForgeStatusChip(items: [['מגמה ${trend['dir']} ${trend['pct']}%']], variants: [const <int>[0, 1, 3, 2][(trend['dir'] == 'down' ? 2 : 1) % 4]]),
     ]);
