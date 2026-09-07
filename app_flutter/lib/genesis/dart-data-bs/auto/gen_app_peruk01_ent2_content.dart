@@ -1,0 +1,20 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_peruk01_ent2_c0 = 'ממצא';
+const String gen_app_peruk01_ent2_c1 = '5 שדות';
+const String gen_app_peruk01_ent2_c2 = '🗂️';
+const String gen_app_peruk01_ent2_c3 = 'שמירה';
+const String gen_app_peruk01_ent2_c4 = 'עדכון';
+const String gen_app_peruk01_ent2_c5 = 'פרטי הרשומה';
+const String gen_app_peruk01_ent2_c6 = 'רשומות';
+const String gen_app_peruk01_ent2_c7 = 'אין ממצא עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_peruk01_ent2_c8 = 'לא נמצאו רשומות תואמות';
+const String gen_app_peruk01_ent2_c9 = 'תיק';
+const String gen_app_peruk01_ent2_c10 = 'סעיף';
+const String gen_app_peruk01_ent2_c11 = 'מה כתוב';
+const String gen_app_peruk01_ent2_c12 = 'מה לבקש';
+const String gen_app_peruk01_ent2_c13 = 'צבע';
+const String gen_app_peruk01_ent2_c14 = 'אדום';
+const String gen_app_peruk01_ent2_c15 = 'צהוב';
+const String gen_app_peruk01_ent2_c16 = 'ירוק';
+const String gen_app_peruk01_ent2_c17 = 'סה"כ רשומות';
+const String gen_app_peruk01_ent2_c18 = '🗂️';

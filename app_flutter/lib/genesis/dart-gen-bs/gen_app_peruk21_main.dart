@@ -1,0 +1,28 @@
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — שורש-האפליקציה (main + MaterialApp + theme + RTL). אל תערוך ידנית.
+import '../dart-data-bs/auto/gen_app_peruk21_main_content.dart';
+import '../dart-ui-bs/ds/ds.dart';
+import 'gen_app_peruk21_shell.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(const GenAppPeruk21MainScreen());
+
+class GenAppPeruk21MainScreen extends StatelessWidget {
+  const GenAppPeruk21MainScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: gen_app_peruk21_main_c0,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          fontFamily: 'Heebo',
+          scaffoldBackgroundColor: DsTokens.bg,
+          colorScheme: ColorScheme.fromSeed(seedColor: DsTokens.accent),
+        ),
+        builder: (context, child) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: child ?? const SizedBox.shrink(),
+        ),
+        home: const GenAppPeruk21ShellScreen(),
+      );
+}
