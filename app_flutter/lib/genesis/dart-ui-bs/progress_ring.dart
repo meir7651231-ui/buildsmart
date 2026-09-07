@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 
 class ProgressRing extends StatefulWidget {
   const ProgressRing({
-    required this.pct,
     required this.height,
     required this.radius,
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
+    required this.pct,
     super.key,
   });
 

@@ -4,8 +4,8 @@
 // עיצוב — גובה · צבע-מילוי/מסלול/רקע מוזרקים בחיווט.
 import 'package:flutter/material.dart';
 class LinearProgress extends StatefulWidget {
-  const LinearProgress({required this.pct, required this.height, required this.radius,
-    required this.accentColor, required this.baseColor, required this.fillColor, super.key});
+  const LinearProgress({required this.height, required this.radius,
+    required this.accentColor, required this.baseColor, required this.fillColor, required this.pct, super.key});
   /// האחוז האמיתי 0–100 (שקע-דאטה).
   final double pct;
   final double height, radius;

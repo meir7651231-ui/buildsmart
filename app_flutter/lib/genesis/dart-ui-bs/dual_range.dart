@@ -4,8 +4,8 @@
 // עיצוב — גובה · צבע-מילוי/כדור/מסלול מוזרקים.
 import 'package:flutter/material.dart';
 class DualRange extends StatefulWidget {
-  const DualRange({required this.low, required this.high, this.onChanged, required this.height, required this.radius,
-    required this.accentColor, required this.baseColor, required this.fillColor, super.key});
+  const DualRange({required this.height, required this.radius,
+    required this.accentColor, required this.baseColor, required this.fillColor, required this.low, required this.high, this.onChanged, super.key});
   /// הטווח האמיתי 0–100 (שקע-דאטה).
   final double low, high;
   /// דיווח-גרירה (low, high) ב-0–100.

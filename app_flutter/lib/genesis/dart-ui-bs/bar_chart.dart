@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 
 class BarChart extends StatefulWidget {
   const BarChart({
-    required this.values,
     required this.height,
     required this.radius,
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
+    required this.values,
     super.key,
   });
   /// הערכים האמיתיים, עמודה לכל ערך (שקע-דאטה).

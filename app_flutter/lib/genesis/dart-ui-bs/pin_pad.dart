@@ -4,8 +4,8 @@
 // עיצוב — גובה · צבע-מקש/ספרה/רקע מוזרקים; המקש-האחרון הפנימי שלו.
 import 'package:flutter/material.dart';
 class PinPad extends StatefulWidget {
-  const PinPad({required this.onDigit, this.onBackspace, required this.height, required this.radius,
-    required this.accentColor, required this.baseColor, required this.fillColor, super.key});
+  const PinPad({required this.height, required this.radius,
+    required this.accentColor, required this.baseColor, required this.fillColor, required this.onDigit, this.onBackspace, super.key});
   /// ספרה שהוקשה (שקע-קלט).
   final ValueChanged<int> onDigit;
   /// מחיקה (שקע-קלט).

@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 
 class StoryRing extends StatefulWidget {
   const StoryRing({
-    required this.initials,
-    this.seen = false,
     required this.height,
     required this.radius,
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
+    required this.initials,
+    this.seen = false,
     super.key,
   });
   /// ראשי-תיבות (שקע-דאטה).

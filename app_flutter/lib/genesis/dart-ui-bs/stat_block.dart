@@ -4,8 +4,8 @@
 // עיצוב — גובה · צבע-מבטא/טקסט/רקע מוזרקים בחיווט.
 import 'package:flutter/material.dart';
 class StatBlock extends StatelessWidget {
-  const StatBlock({required this.labels, required this.values, required this.height, required this.radius,
-    required this.accentColor, required this.baseColor, required this.fillColor, super.key});
+  const StatBlock({required this.labels, required this.height, required this.radius,
+    required this.accentColor, required this.baseColor, required this.fillColor, required this.values, super.key});
   final List<String> labels;
   /// הערכים האמיתיים, אחד לכל תווית (שקע-דאטה).
   final List<num> values;

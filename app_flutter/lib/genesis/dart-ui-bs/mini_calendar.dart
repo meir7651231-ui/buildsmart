@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 class MiniCalendar extends StatefulWidget {
   const MiniCalendar({
-    required this.today,
-    required this.marked,
     required this.height,
     required this.radius,
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
+    required this.today,
+    required this.marked,
     super.key,
   });
   /// תא-היום ברשת 7×5 (שקע-דאטה).

@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 class FabMenu extends StatefulWidget {
   const FabMenu({
-    required this.labels,
-    required this.onSelect,
     required this.height,
     required this.radius,
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
+    required this.labels,
+    required this.onSelect,
     super.key,
   });
   /// הפעולות (שקע-דאטה).
