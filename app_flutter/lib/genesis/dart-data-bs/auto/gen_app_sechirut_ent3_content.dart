@@ -1,0 +1,23 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_sechirut_ent3_c0 = 'ממצא';
+const String gen_app_sechirut_ent3_c1 = '6 שדות';
+const String gen_app_sechirut_ent3_c2 = '🗂️';
+const String gen_app_sechirut_ent3_c3 = 'שמירה';
+const String gen_app_sechirut_ent3_c4 = 'עדכון';
+const String gen_app_sechirut_ent3_c5 = 'פרטי הרשומה';
+const String gen_app_sechirut_ent3_c6 = 'רשומות';
+const String gen_app_sechirut_ent3_c7 = 'אין ממצא עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_sechirut_ent3_c8 = 'לא נמצאו רשומות תואמות';
+const String gen_app_sechirut_ent3_c9 = 'תיק';
+const String gen_app_sechirut_ent3_c10 = 'סעיף';
+const String gen_app_sechirut_ent3_c11 = 'צבע';
+const String gen_app_sechirut_ent3_c12 = 'אדום';
+const String gen_app_sechirut_ent3_c13 = 'צהוב';
+const String gen_app_sechirut_ent3_c14 = 'ירוק';
+const String gen_app_sechirut_ent3_c15 = 'מה כתוב';
+const String gen_app_sechirut_ent3_c16 = 'מה לבקש';
+const String gen_app_sechirut_ent3_c17 = 'נשלח';
+const String gen_app_sechirut_ent3_c18 = 'כן';
+const String gen_app_sechirut_ent3_c19 = 'לא';
+const String gen_app_sechirut_ent3_c20 = 'סה"כ רשומות';
+const String gen_app_sechirut_ent3_c21 = '🗂️';
