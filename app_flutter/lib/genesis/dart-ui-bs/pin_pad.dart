@@ -1,10 +1,15 @@
 // 🎨 חוט-תצוגה · PinPad — מקלדת-ספרות 3×4 עם הבהוב-הקשה (חוק-1/חוק-5).
-// המנוע: רשת-ספרות; הקשה מדגישה מקש בקפיצה קצרה. אפס-דאטה —
-// גובה · צבע-מקש/ספרה/רקע מוזרקים; המקש-האחרון הפנימי שלו.
+// המנוע: רשת-ספרות; הקשה מדגישה מקש בקפיצה קצרה ומדווחת החוצה.
+// תפר-דאטה (G21 · §20-ג): onDigit(ספרה) · onBackspace — הקלט זורם לבעלים, לא נבלע באטום.
+// עיצוב — גובה · צבע-מקש/ספרה/רקע מוזרקים; המקש-האחרון הפנימי שלו.
 import 'package:flutter/material.dart';
 class PinPad extends StatefulWidget {
-  const PinPad({required this.height, required this.radius,
+  const PinPad({required this.onDigit, this.onBackspace, required this.height, required this.radius,
     required this.accentColor, required this.baseColor, required this.fillColor, super.key});
+  /// ספרה שהוקשה (שקע-קלט).
+  final ValueChanged<int> onDigit;
+  /// מחיקה (שקע-קלט).
+  final VoidCallback? onBackspace;
   final double height, radius;
   final Color accentColor, baseColor, fillColor;
   @override State<PinPad> createState() => _PinPadState();
@@ -17,9 +22,9 @@ class _PinPadState extends State<PinPad> {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 8, crossAxisSpacing: 8, childAspectRatio: 1.6),
       itemCount: keys.length, itemBuilder: (context, i) {
         final k = keys[i];
-        if (k < 0) return k == -2 ? Icon(Icons.backspace_outlined, color: widget.baseColor.withValues(alpha: 0.6)) : const SizedBox();
+        if (k < 0) return k == -2 ? GestureDetector(onTap: widget.onBackspace, child: Icon(Icons.backspace_outlined, color: widget.baseColor.withValues(alpha: 0.6))) : const SizedBox();
         final on = _last == i;
-        return GestureDetector(onTap: () => setState(() => _last = i),
+        return GestureDetector(onTap: () { setState(() => _last = i); widget.onDigit(k); },
           child: AnimatedScale(scale: on ? 0.92 : 1, duration: const Duration(milliseconds: 120),
             child: Container(alignment: Alignment.center,
               decoration: BoxDecoration(color: on ? widget.accentColor : widget.fillColor, borderRadius: BorderRadius.circular(widget.radius)),

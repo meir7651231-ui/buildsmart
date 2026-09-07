@@ -1,10 +1,13 @@
 // 🎨 חוט-תצוגה · FabMenu — כפתור-צף שנפתח לתפריט-מיני (חוק-1/חוק-5).
-// המנוע: הקשה מסובבת + ⇒ × ופורשת 3 כפתורי-מיני כלפי-מעלה (Animated*). אפס-דאטה —
-// גובה · צבע-כפתור/אייקון/מיני מוזרקים בחיווט; מצב-הפתיחה הפנימי שלו.
+// המנוע: הקשה מסובבת + ⇒ × ופורשת כפתור-מיני לכל פעולה כלפי-מעלה (Animated*).
+// תפר-דאטה (G21 · §20-ג): labels = הפעולות האמיתיות (עד 3, ראשי-תיבות על הכפתור) · onSelect(i) — מוזרקים בחיווט.
+// עיצוב — גובה · צבע-כפתור/אייקון/מיני מוזרקים בחיווט; מצב-הפתיחה הפנימי שלו.
 import 'package:flutter/material.dart';
 
 class FabMenu extends StatefulWidget {
   const FabMenu({
+    required this.labels,
+    required this.onSelect,
     required this.height,
     required this.radius,
     required this.accentColor,
@@ -12,6 +15,10 @@ class FabMenu extends StatefulWidget {
     required this.fillColor,
     super.key,
   });
+  /// הפעולות (שקע-דאטה).
+  final List<String> labels;
+  /// בחירת-פעולה לפי אינדקס (שקע-קלט).
+  final ValueChanged<int> onSelect;
   final double height, radius;
   final Color accentColor, baseColor, fillColor;
   @override
@@ -20,7 +27,6 @@ class FabMenu extends StatefulWidget {
 
 class _FabMenuState extends State<FabMenu> {
   bool _open = false;
-  static const _icons = [Icons.edit, Icons.share, Icons.favorite];
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +36,7 @@ class _FabMenuState extends State<FabMenu> {
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          for (var i = 0; i < 3; i++)
+          for (var i = 0; i < widget.labels.length && i < 3; i++)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 260),
               curve: Curves.easeOutBack,
@@ -38,11 +44,15 @@ class _FabMenuState extends State<FabMenu> {
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 220),
                 opacity: _open ? 1 : 0,
-                child: Container(
-                  width: s * 0.72, height: s * 0.72,
-                  decoration: BoxDecoration(color: widget.fillColor, shape: BoxShape.circle,
-                      border: Border.all(color: widget.accentColor.withValues(alpha: 0.5))),
-                  child: Icon(_icons[i], color: widget.accentColor, size: s * 0.34),
+                child: GestureDetector(
+                  onTap: () { setState(() => _open = false); widget.onSelect(i); },
+                  child: Container(
+                    width: s * 0.72, height: s * 0.72, alignment: Alignment.center,
+                    decoration: BoxDecoration(color: widget.fillColor, shape: BoxShape.circle,
+                        border: Border.all(color: widget.accentColor.withValues(alpha: 0.5))),
+                    child: Text(widget.labels[i].trim().isEmpty ? '·' : widget.labels[i].trim().substring(0, 1),
+                        style: TextStyle(color: widget.accentColor, fontWeight: FontWeight.w800, fontSize: s * 0.3)),
+                  ),
                 ),
               ),
             ),

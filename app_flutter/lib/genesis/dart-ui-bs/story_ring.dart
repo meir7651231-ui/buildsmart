@@ -1,11 +1,14 @@
 // 🎨 חוט-תצוגה · StoryRing — אווטאר עם טבעת-סטורי גרדיאנט מסתובבת (חוק-1/חוק-5).
 // המנוע: טבעת-גרדיאנט (SweepGradient) שמסתובבת סביב עיגול-אווטאר (AnimationController).
-// אפס-דאטה — גובה · צבע-טבעת/אווטאר/רקע מוזרקים בחיווט.
+// תפר-דאטה (G21 · §20-ג): initials = ראשי-התיבות של הישות · seen = האם הסטורי נצפה (טבעת דהויה) — מוזרקים בחיווט.
+// עיצוב — גובה · צבע-טבעת/אווטאר/רקע מוזרקים בחיווט.
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class StoryRing extends StatefulWidget {
   const StoryRing({
+    required this.initials,
+    this.seen = false,
     required this.height,
     required this.radius,
     required this.accentColor,
@@ -13,6 +16,10 @@ class StoryRing extends StatefulWidget {
     required this.fillColor,
     super.key,
   });
+  /// ראשי-תיבות (שקע-דאטה).
+  final String initials;
+  /// נצפה ⇒ טבעת דהויה (שקע-דאטה).
+  final bool seen;
   final double height, radius;
   final Color accentColor, baseColor, fillColor;
   @override
@@ -41,7 +48,9 @@ class _StoryRingState extends State<StoryRing> with SingleTickerProviderStateMix
                   shape: BoxShape.circle,
                   gradient: SweepGradient(
                     transform: GradientRotation(_c.value * 2 * math.pi),
-                    colors: [widget.accentColor, widget.baseColor, widget.accentColor],
+                    colors: widget.seen
+                        ? [widget.baseColor.withValues(alpha: 0.35), widget.baseColor.withValues(alpha: 0.2), widget.baseColor.withValues(alpha: 0.35)]
+                        : [widget.accentColor, widget.baseColor, widget.accentColor],
                   ),
                 ),
               ),
@@ -53,7 +62,10 @@ class _StoryRingState extends State<StoryRing> with SingleTickerProviderStateMix
                 width: d - 14, height: d - 14,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(color: widget.accentColor.withValues(alpha: 0.2), shape: BoxShape.circle),
-                child: Icon(Icons.person, color: widget.accentColor, size: d * 0.4),
+                child: widget.initials.trim().isEmpty
+                    ? Icon(Icons.person, color: widget.accentColor, size: d * 0.4)
+                    : Text(widget.initials.trim().length > 2 ? widget.initials.trim().substring(0, 2) : widget.initials.trim(),
+                        style: TextStyle(color: widget.accentColor, fontWeight: FontWeight.w800, fontSize: d * 0.3)),
               ),
             ],
           ),

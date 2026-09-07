@@ -1,24 +1,23 @@
 // 🎨 חוט-תצוגה · BarChart — תרשים-עמודות שצומח בכניסה (חוק-1/חוק-5).
-// המנוע: N עמודות בגבהים דטרמיניסטיים (seed) שצומחות 0→שיא (AnimationController).
-// אפס-דאטה — גובה · מספר-עמודות · צבע-עמודה/מבטא/רקע · seed מוזרקים בחיווט.
-import 'dart:math' as math;
+// המנוע: עמודה לכל ערך, גובה יחסי-למקסימום, צומחות 0→שיא בכניסה (AnimationController).
+// תפר-דאטה (G21 · §20-ג): values = הערכים האמיתיים מוזרקים בחיווט — האטום לא ממציא גבהים (היה seed).
+// עיצוב — גובה · צבע-עמודה/מבטא/רקע מוזרקים בחיווט.
 import 'package:flutter/material.dart';
 
 class BarChart extends StatefulWidget {
   const BarChart({
+    required this.values,
     required this.height,
-    required this.bars,
     required this.radius,
     required this.accentColor,
     required this.baseColor,
     required this.fillColor,
-    this.seed = 0,
     super.key,
   });
+  /// הערכים האמיתיים, עמודה לכל ערך (שקע-דאטה).
+  final List<double> values;
   final double height, radius;
-  final int bars;
   final Color accentColor, baseColor, fillColor;
-  final int seed;
   @override
   State<BarChart> createState() => _BarChartState();
 }
@@ -39,8 +38,7 @@ class _BarChartState extends State<BarChart> with SingleTickerProviderStateMixin
             builder: (context, _) => CustomPaint(
               painter: _BarPainter(
                 t: Curves.easeOutCubic.transform(_c.value),
-                bars: widget.bars < 1 ? 1 : widget.bars,
-                seed: widget.seed,
+                values: widget.values,
                 accent: widget.accentColor,
                 base: widget.baseColor,
               ),
@@ -51,17 +49,18 @@ class _BarChartState extends State<BarChart> with SingleTickerProviderStateMixin
 }
 
 class _BarPainter extends CustomPainter {
-  _BarPainter({required this.t, required this.bars, required this.seed, required this.accent, required this.base});
+  _BarPainter({required this.t, required this.values, required this.accent, required this.base});
   final double t;
-  final int bars;
-  final int seed;
+  final List<double> values;
   final Color accent, base;
   @override
   void paint(Canvas canvas, Size size) {
     final pad = 14.0;
+    final bars = values.isEmpty ? 1 : values.length;
     final w = (size.width - pad * 2) / bars;
-    for (var i = 0; i < bars; i++) {
-      final r = (math.sin(i * 1.7 + seed) * 0.5 + 0.5) * 0.75 + 0.2;
+    final mx = values.fold<double>(0, (m, v) => v > m ? v : m);
+    for (var i = 0; i < values.length; i++) {
+      final r = mx <= 0 ? 0.0 : (values[i] / mx).clamp(0.0, 1.0);
       final h = (size.height - pad * 2) * r * t;
       final x = pad + i * w;
       final col = Color.lerp(base, accent, r) ?? accent;
@@ -76,5 +75,5 @@ class _BarPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BarPainter old) => old.t != t || old.bars != bars;
+  bool shouldRepaint(_BarPainter old) => old.t != t || old.values != values;
 }

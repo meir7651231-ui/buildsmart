@@ -1,11 +1,13 @@
 // 🎨 חוט-תצוגה · ProgressRing — טבעת-התקדמות עם אחוז במרכז (חוק-1/חוק-5).
-// המנוע: קשת שמתמלאת 0→100% במחזור (AnimationController) + טקסט-אחוז. אפס-דאטה —
-// גובה/קוטר · צבע-מילוי/מסלול/טקסט מוזרקים בחיווט.
+// המנוע: קשת שמתמלאת 0→pct בכניסה (AnimationController) + טקסט-אחוז.
+// תפר-דאטה (G21 · §20-ג): pct = האחוז האמיתי (0–100) מוזרק בחיווט — האטום לא ממציא ערך.
+// עיצוב — גובה/קוטר · צבע-מילוי/מסלול/טקסט מוזרקים בחיווט.
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class ProgressRing extends StatefulWidget {
   const ProgressRing({
+    required this.pct,
     required this.height,
     required this.radius,
     required this.accentColor,
@@ -14,6 +16,8 @@ class ProgressRing extends StatefulWidget {
     super.key,
   });
 
+  /// האחוז האמיתי 0–100 (שקע-דאטה).
+  final double pct;
   final double height, radius;
   final Color accentColor, baseColor, fillColor;
 
@@ -25,8 +29,10 @@ class _ProgressRingState extends State<ProgressRing>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2400),
-  )..repeat();
+    duration: const Duration(milliseconds: 900),
+  )..forward();
+  @override
+  void didUpdateWidget(ProgressRing old) { super.didUpdateWidget(old); if (old.pct != widget.pct) _c.forward(from: 0); }
 
   @override
   void dispose() {
@@ -41,19 +47,19 @@ class _ProgressRingState extends State<ProgressRing>
           height: widget.height,
           child: AnimatedBuilder(
             animation: _c,
-            builder: (context, _) => Stack(
+            builder: (context, _) { final v = Curves.easeOut.transform(_c.value) * (widget.pct / 100).clamp(0.0, 1.0); return Stack(
               alignment: Alignment.center,
               children: [
                 CustomPaint(
                   size: Size(widget.height, widget.height),
                   painter: _RingPainter(
-                    value: _c.value,
+                    value: v,
                     accent: widget.accentColor,
                     base: widget.baseColor,
                   ),
                 ),
                 Text(
-                  '${(_c.value * 100).round()}%',
+                  '${(v * 100).round()}%',
                   style: TextStyle(
                     color: widget.baseColor,
                     fontWeight: FontWeight.w800,
@@ -61,7 +67,7 @@ class _ProgressRingState extends State<ProgressRing>
                   ),
                 ),
               ],
-            ),
+            ); },
           ),
         ),
       );

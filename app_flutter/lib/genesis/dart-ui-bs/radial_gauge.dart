@@ -1,11 +1,13 @@
 // 🎨 חוט-תצוגה · RadialGauge — מד חצי-עיגול עם מחוג נע (חוק-1/חוק-5).
-// המנוע: קשת-מד 180° + מחוג שנע 0→ערך ובחזרה (AnimationController) + אחוז במרכז.
-// אפס-דאטה — גובה · צבע-מד/מחוג/רקע מוזרקים בחיווט; הערך מונפש-מחזורי.
+// המנוע: קשת-מד 180° + מחוג שנע 0→pct בכניסה (AnimationController) + אחוז במרכז.
+// תפר-דאטה (G21 · §20-ג): pct = הערך האמיתי (0–100) מוזרק בחיווט — האטום לא ממציא ערך.
+// עיצוב — גובה · צבע-מד/מחוג/רקע מוזרקים בחיווט.
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class RadialGauge extends StatefulWidget {
   const RadialGauge({
+    required this.pct,
     required this.height,
     required this.radius,
     required this.accentColor,
@@ -13,6 +15,8 @@ class RadialGauge extends StatefulWidget {
     required this.fillColor,
     super.key,
   });
+  /// הערך האמיתי 0–100 (שקע-דאטה).
+  final double pct;
   final double height, radius;
   final Color accentColor, baseColor, fillColor;
   @override
@@ -21,7 +25,9 @@ class RadialGauge extends StatefulWidget {
 
 class _RadialGaugeState extends State<RadialGauge> with SingleTickerProviderStateMixin {
   late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 2600))..repeat(reverse: true);
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..forward();
+  @override
+  void didUpdateWidget(RadialGauge old) { super.didUpdateWidget(old); if (old.pct != widget.pct) _c.forward(from: 0); }
   @override
   void dispose() { _c.dispose(); super.dispose(); }
   @override
@@ -32,7 +38,7 @@ class _RadialGaugeState extends State<RadialGauge> with SingleTickerProviderStat
         child: AnimatedBuilder(
           animation: _c,
           builder: (context, _) {
-            final v = Curves.easeInOut.transform(_c.value);
+            final v = Curves.easeOut.transform(_c.value) * (widget.pct / 100).clamp(0.0, 1.0);
             return Stack(
               alignment: Alignment.center,
               children: [
