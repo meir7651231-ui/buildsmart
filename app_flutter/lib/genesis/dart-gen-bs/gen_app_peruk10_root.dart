@@ -7,6 +7,7 @@ import '../dart-ui-bs/auto/kv_line.dart';
 import 'gen_app_peruk10_ent1.dart';
 import 'gen_app_peruk10_rp1.dart';
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 class GenAppPeruk10RootScreen extends StatelessWidget {
@@ -15,12 +16,13 @@ class GenAppPeruk10RootScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) {
     final r0 = appStore.byId('app_peruk10_ent1', id);
-    if (r0 == null) return DsScaffold(title: gen_app_peruk10_root_c50, subtitle: gen_app_peruk10_root_c51, icon: gen_app_peruk10_root_c52, children: const []);
-    return DsScaffold(title: appStore.displayOf('app_peruk10_ent1', id), subtitle: const [gen_app_peruk10_root_c45, gen_app_peruk10_root_c46, gen_app_peruk10_root_c47, gen_app_peruk10_root_c48, gen_app_peruk10_root_c49][appStore.stageOf('app_peruk10_ent1', id).clamp(0, 4)], icon: gen_app_peruk10_root_c53, children: [
+    if (r0 == null) return DsScaffold(title: gen_app_peruk10_root_c53, subtitle: gen_app_peruk10_root_c54, icon: gen_app_peruk10_root_c55, children: const []);
+    return DsScaffold(title: appStore.displayOf('app_peruk10_ent1', id), subtitle: const [gen_app_peruk10_root_c48, gen_app_peruk10_root_c49, gen_app_peruk10_root_c50, gen_app_peruk10_root_c51, gen_app_peruk10_root_c52][appStore.stageOf('app_peruk10_ent1', id).clamp(0, 4)], icon: gen_app_peruk10_root_c56, children: [
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsChipButton(label: gen_app_peruk10_root_c40, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk10Rp1Screen(initialId: id))))),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_peruk10_root_c42, details: [if ((r0[gen_app_peruk10_root_c32] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c0, value: (r0[gen_app_peruk10_root_c1] ?? '')), if ((r0[gen_app_peruk10_root_c33] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c4, value: (r0[gen_app_peruk10_root_c5] ?? '')), if ((r0[gen_app_peruk10_root_c34] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c8, value: (r0[gen_app_peruk10_root_c9] ?? '')), if ((r0[gen_app_peruk10_root_c35] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c12, value: (r0[gen_app_peruk10_root_c13] ?? '')), if ((r0[gen_app_peruk10_root_c36] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c16, value: (r0[gen_app_peruk10_root_c17] ?? '')), if ((r0[gen_app_peruk10_root_c37] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c20, value: (r0[gen_app_peruk10_root_c21] ?? '')), if ((r0[gen_app_peruk10_root_c38] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c24, value: (r0[gen_app_peruk10_root_c25] ?? '')), if ((r0[gen_app_peruk10_root_c39] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk10_root_c28, value: (r0[gen_app_peruk10_root_c29] ?? ''))])),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__note'] ?? '').trim().isNotEmpty ? DsFold(title: gen_app_peruk10_root_c43, details: [Text(r0['__note'] ?? '', style: TextStyle(color: DsLook.of(context).ink, fontSize: 15, height: 1.5))]) : const SizedBox.shrink())),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__doc'] ?? '').startsWith('data:image') ? DsFold(title: gen_app_peruk10_root_c44, details: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(base64Decode((r0['__doc'] ?? '').split(',').last), fit: BoxFit.fitWidth))]) : const SizedBox.shrink())),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: (() { final ph = [(r0[gen_app_peruk10_root_c43] ?? '')].map((x) => x.replaceAll(RegExp(r'[^0-9+]'), '')).firstWhere((x) => x.length >= 9, orElse: () => ''); if (ph.isEmpty) return const SizedBox.shrink(); final intl = ph.startsWith('+') ? ph.substring(1) : (ph.startsWith('0') ? '972' + ph.substring(1) : ph); return Padding(padding: const EdgeInsets.only(bottom: 10), child: Row(children: [DsChipButton(label: gen_app_peruk10_root_c44, onTap: () => launchUrl(Uri.parse('tel:' + ph), mode: LaunchMode.externalApplication)), const SizedBox(width: 8), DsChipButton(label: gen_app_peruk10_root_c45, onTap: () => launchUrl(Uri.parse('https://wa.me/' + intl), mode: LaunchMode.externalApplication))])); })()),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__note'] ?? '').trim().isNotEmpty ? DsFold(title: gen_app_peruk10_root_c46, details: [Text(r0['__note'] ?? '', style: TextStyle(color: DsLook.of(context).ink, fontSize: 15, height: 1.5))]) : const SizedBox.shrink())),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__doc'] ?? '').startsWith('data:image') ? DsFold(title: gen_app_peruk10_root_c47, details: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(base64Decode((r0['__doc'] ?? '').split(',').last), fit: BoxFit.fitWidth))]) : const SizedBox.shrink())),
     ]);
   });
 }
