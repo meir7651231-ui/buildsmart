@@ -522,8 +522,9 @@ class DsChipButton extends StatelessWidget {
 
 // ── G33 · DsTodayItem (one today-row shared by all modules; act = bound closure) ──
 class DsTodayItem {
-  const DsTodayItem({required this.title, required this.sub, required this.due, required this.hard, required this.overdue, required this.module, required this.actions, required this.act, this.rid = '', this.field = ''});
+  const DsTodayItem({required this.title, required this.sub, required this.due, required this.hard, required this.overdue, required this.module, required this.actions, required this.act, this.rid = '', this.field = '', this.time = ''});
   final String title, sub, module, rid, field;
+  final String time;   // 'HH:MM' when the record carries a fixed hour (time field) — the plan pins it
   final DateTime due;
   final bool hard, overdue;
   final List<String> actions;

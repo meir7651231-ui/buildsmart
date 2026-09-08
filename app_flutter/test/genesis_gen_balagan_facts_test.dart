@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final today = DateTime(2026, 9, 8);   // יום שלישי
-  BalaganModule mod(List<String> dates, List<String> nums, [List<String> times = const []]) => BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, dates, nums, 'מה', '', 'x', const <BalaganField>[], 1, const <String>[], timeFields: times);
+  BalaganModule mod(List<String> dates, List<String> nums, {List<String> tm = const [], List<String> ph = const [], List<String> pe = const [], List<String> pc = const []}) => BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, dates, nums, 'מה', '', 'x', const <BalaganField>[], 1, const <String>[], timeFields: tm, phoneFields: ph, personFields: pe, percentFields: pc);
   test('עובדות 1: לשלם ארנונה מחר 350 ש"ח', () {
     final f = balaganFacts('לשלם ארנונה מחר 350 ש"ח', mod(['תאריך תשלום'], ['סכום']), today: today);
     expect(f['תאריך תשלום'], '2026-09-09');
@@ -61,8 +61,9 @@ void main() {
     expect(f['__note'], 'החוזה נגמר 30.11');
   });
   test('עובדות 9: ריבית 3.5% על 2,400', () {
-    final f = balaganFacts('ריבית 3.5% על 2,400', mod(['מועד'], ['סכום']), today: today);
+    final f = balaganFacts('ריבית 3.5% על 2,400', mod(['מועד'], ['סכום', 'ריבית'], pc: ['ריבית']), today: today);
     expect(f['סכום'], '2400');
+    expect(f['ריבית'], '3.5');
     expect(f.containsKey('מועד'), isFalse);
     expect(f['__note'], 'ריבית 3.5% על 2,400');
   });
@@ -73,7 +74,7 @@ void main() {
     expect(f['__note'], 'יום ה׳ אצל הרופא');
   });
   test('עובדות 11: פגישה עם רו"ח מחר ב-16:30', () {
-    final f = balaganFacts('פגישה עם רו"ח מחר ב-16:30', mod(['מועד'], [], ['שעה']), today: today);
+    final f = balaganFacts('פגישה עם רו"ח מחר ב-16:30', mod(['מועד'], [], tm: ['שעה']), today: today);
     expect(f['מועד'], '2026-09-09');
     expect(f['שעה'], '16:30');
     expect(f['מה'], 'פגישה עם רו"ח');
@@ -81,12 +82,27 @@ void main() {
     expect(f['__note'], 'פגישה עם רו"ח מחר ב-16:30');
   });
   test('עובדות 12: בשעה 9 אצל דני בשבוע הבא', () {
-    final f = balaganFacts('בשעה 9 אצל דני בשבוע הבא', mod(['מועד'], [], ['שעה']), today: today);
+    final f = balaganFacts('בשעה 9 אצל דני בשבוע הבא', mod(['מועד'], [], tm: ['שעה'], pe: ['לקוח']), today: today);
     expect(f['מועד'], '2026-09-15');
     expect(f['שעה'], '09:00');
     expect(f['מה'], 'אצל דני');
+    expect(f['לקוח'], 'דני');
 
     expect(f['__note'], 'בשעה 9 אצל דני בשבוע הבא');
+  });
+  test('עובדות 13: רות לוי 052-123-4567 פיקדון 8,000', () {
+    final f = balaganFacts('רות לוי 052-123-4567 פיקדון 8,000', mod([], ['סכום הפיקדון'], ph: ['טלפון']), today: today);
+    expect(f['טלפון'], '0521234567');
+    expect(f['סכום הפיקדון'], '8000');
+    expect(f['מה'], 'רות לוי פיקדון');
+
+    expect(f['__note'], 'רות לוי 052-123-4567 פיקדון 8,000');
+  });
+  test('עובדות 14: לדבר עם המשכיר על התיקון', () {
+    final f = balaganFacts('לדבר עם המשכיר על התיקון', mod([], [], pe: ['לקוח']), today: today);
+    expect(f['לקוח'], 'המשכיר');
+
+    expect(f['__note'], 'לדבר עם המשכיר על התיקון');
   });
   test('זיהוי: רגע כללי ⇒ שכבת-הבסיס ראשונה, המודול-החלש חלופה', () {
     final h = balaganIdentify('לשלם ארנונה מחר 350 ש"ח');

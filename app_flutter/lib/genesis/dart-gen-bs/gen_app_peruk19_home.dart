@@ -20,6 +20,8 @@ class _D { const _D(this.label, this.hard); final String label; final bool hard;
 class GenAppPeruk19HomeScreenToday {
   static const module = gen_app_peruk19_home_c14;
   static const _dates = [_D(gen_app_peruk19_home_c11, false)];
+  static const List<String> _times = [];
+  static String _timeOf(Map<String, String> r) { for (final l in _times) { final v = (r[l] ?? '').trim(); if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(v)) return v.padLeft(5, '0'); } return ''; }
   static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
   static DateTime? _parse(String s) { final t = s.trim(); if (t.isEmpty) return null; try { return _day(DateTime.parse(t.length == 10 ? '${t}T12:00:00' : t)); } catch (_) { return null; } }
   static List<int> _offsets() => appStore.setting('offsets', '3,1,0').split(',').map((x) => int.tryParse(x.trim()) ?? 0).toList();
@@ -35,9 +37,9 @@ class GenAppPeruk19HomeScreenToday {
     await Share.share(text);
   }
 
-  static DsTodayItem _mk(String title, String sub, String rid, String field, DateTime d, bool hard, bool overdue, DateTime today) {
+  static DsTodayItem _mk(String title, String sub, String rid, String field, DateTime d, bool hard, bool overdue, DateTime today, [String time = '']) {
     final acts = overdue ? [gen_app_peruk19_home_c15, gen_app_peruk19_home_c16, gen_app_peruk19_home_c17] : (d == today ? [gen_app_peruk19_home_c18, gen_app_peruk19_home_c19] : [gen_app_peruk19_home_c20, gen_app_peruk19_home_c21, gen_app_peruk19_home_c22]);   // P4 · ביום-ההכרעה אין דחייה · «ליומן» = קישור-יומן, אפס-מפתח
-    return DsTodayItem(title: title, sub: sub, rid: rid, field: field, due: d, hard: hard, overdue: overdue, module: module, actions: acts, act: (i) => _act(rid, field, d, acts, i));
+    return DsTodayItem(title: title, sub: time.isNotEmpty ? time + ' · ' + sub : sub, rid: rid, field: field, due: d, hard: hard, overdue: overdue, module: module, actions: acts, act: (i) => _act(rid, field, d, acts, i), time: time);
   }
   static void _act(String rid, String field, DateTime due, List<String> acts, int i) {
     final a = acts[i.clamp(0, acts.length - 1)];
@@ -51,15 +53,16 @@ class GenAppPeruk19HomeScreenToday {
   static List<DsTodayItem> items(DateTime today, {required int dayDelta}) {
     final out = <DsTodayItem>[];
     for (final r in open()) {
-      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk19_ent1', rid);
+      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk19_ent1', rid); final tm = _timeOf(r);
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null) continue;
         if (appStore.decision('ign:$rid:${f.label}') == 'no') continue;
-        if (dayDelta == 0 && d.isBefore(today)) { out.add(_mk('${f.label} · $who', gen_app_peruk19_home_c27.replaceAll('{date}', _iso(d)), rid, f.label, d, f.hard, true, today)); continue; }
-        if (appStore.decision(_remKey(rid, f.label)) != 'ok') continue;
+        if (dayDelta == 0 && d.isBefore(today)) { out.add(_mk('${f.label} · $who', gen_app_peruk19_home_c27.replaceAll('{date}', _iso(d)), rid, f.label, d, f.hard, true, today, tm)); continue; }
+        final okRem = appStore.decision(_remKey(rid, f.label)) == 'ok';   // תזכורת-מוקדמת (−3/−1) = הצעה שדורשת אישור; יום-ההכרעה עצמו = עובדה — מוצג בלי אישור
         for (final off in _offsets()) {
+          if (off > 0 && !okRem) continue;
           final fire = _shift(d.subtract(Duration(days: off)), f.hard);
-          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk('${f.label} · $who', off == 0 ? gen_app_peruk19_home_c28 : gen_app_peruk19_home_c29.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today)); break; }
+          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk('${f.label} · $who', off == 0 ? gen_app_peruk19_home_c28 : gen_app_peruk19_home_c29.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '')); break; }
         }
       }
     }
@@ -74,7 +77,7 @@ class GenAppPeruk19HomeScreenToday {
     for (final r in open()) {
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk19_ent1', rid);
       for (final f in _dates) {
-        final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
+        final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         out.add(DsApproveCard(question: gen_app_peruk19_home_c30.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_peruk19_home_c31, noLabel: gen_app_peruk19_home_c32, alwaysLabel: gen_app_peruk19_home_c33,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),

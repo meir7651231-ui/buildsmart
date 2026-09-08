@@ -94,7 +94,7 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   void _skip() { setState(() { _hits = _hits.length > 1 ? _hits.sublist(1) : const []; if (_hits.isEmpty) _note = gen_balagan_ask_c1; }); }
   void _open(BuildContext context, BalaganHit h, [List<BalaganModule> alts = const []]) {
     final parts = balaganSplit(_c.text); final first = parts.first;
-    final facts = {...balaganFacts(first, h.module), ..._extra}..removeWhere((key, v) => v.trim().isEmpty || !(h.module.dateFields.contains(key) || h.module.numFields.contains(key) || h.module.timeFields.contains(key) || key == h.module.descField || key == h.module.longField));
+    final facts = {...balaganFacts(first, h.module), ..._extra}..removeWhere((key, v) => v.trim().isEmpty || !(h.module.dateFields.contains(key) || h.module.numFields.contains(key) || h.module.timeFields.contains(key) || h.module.phoneFields.contains(key) || h.module.personFields.contains(key) || h.module.percentFields.contains(key) || key == h.module.descField || key == h.module.longField));
     Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: h.module, facts: facts, doc: _doc, alternatives: alts, text: first, queue: parts.sublist(1)))).then((saved) { if (saved == true && mounted) setState(() { _c.clear(); _hits = const []; _extra = const {}; _doc = ''; _asked = false; _note = gen_balagan_ask_c2; }); });
   }
   Future<void> _photo() async {
