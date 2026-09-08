@@ -95,6 +95,8 @@ List<_DateAt> balaganDates(String text, DateTime today) {
   put(RegExp(r'(\d{4})-(\d{2})-(\d{2})'), (x) => DateTime(int.parse(x.group(1)!), int.parse(x.group(2)!), int.parse(x.group(3)!)));
   put(RegExp(r'(?<![\d.])(\d{1,2})[./](\d{1,2})[./](\d{2,4})(?![\d.])'), (x) { var y = int.parse(x.group(3)!); if (y < 100) y += 2000; final mo = int.parse(x.group(2)!), d = int.parse(x.group(1)!); return (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) ? DateTime(y, mo, d) : null; });
   put(RegExp(r'(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d.%]|\s*(?:אלף|%|₪))'), (x) { final mo = int.parse(x.group(2)!), d = int.parse(x.group(1)!); if (!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31)) return null; var c = DateTime(t0.year, mo, d); if (c.isBefore(t0)) c = DateTime(t0.year + 1, mo, d); return c; });   // dd.mm בלי שנה: הקרוב-הבא
+  const months = {'ינואר': 1, 'פברואר': 2, 'מרץ': 3, 'מרס': 3, 'אפריל': 4, 'מאי': 5, 'יוני': 6, 'יולי': 7, 'אוגוסט': 8, 'ספטמבר': 9, 'אוקטובר': 10, 'נובמבר': 11, 'דצמבר': 12};
+  put(RegExp(r'(?<![\d.])(\d{1,2})\s*ב?(ינואר|פברואר|מרץ|מרס|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר)(?:\s+(\d{4}))?(?![\u0590-\u05FF])'), (x) { final d = int.parse(x.group(1)!); final mo = months[x.group(2)!]!; if (d < 1 || d > 31) return null; if (x.group(3) != null) return DateTime(int.parse(x.group(3)!), mo, d); var c = DateTime(t0.year, mo, d); if (c.isBefore(t0)) c = DateTime(t0.year + 1, mo, d); return c; });   // «15 בספטמבר» · «3 באוקטובר 2027»: שמות-חודשים = לוח, לא דומיין
   put(RegExp(r'(?<![\u0590-\u05FF])מחרתיים'), (_) => add(2));
   put(RegExp(r'(?<![\u0590-\u05FF])מחר(?![\u0590-\u05FF])'), (_) => add(1));
   put(RegExp(r'(?<![\u0590-\u05FF])היום(?![\u0590-\u05FF])'), (_) => add(0));
@@ -163,6 +165,31 @@ List<String> balaganSplit(String text) {
   final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => p.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList();
   return parts.length >= 2 ? parts : [text.trim()];
 }
+/// סכום במילים: «מאתיים» · «שלוש מאות» · «אלף וחמש מאות» · «שלושת אלפים ומאתיים» · «עשרת אלפים» ⇒ מספר (דקדוק-מספרים, לא מילון-דומייני)
+List<_NumAt> balaganNumberWords(String text) {
+  const hundreds = {'מאה': 100, 'מאתיים': 200};
+  const hMul = {'שלוש': 3, 'ארבע': 4, 'חמש': 5, 'שש': 6, 'שבע': 7, 'שמונה': 8, 'תשע': 9};
+  const thousands = {'אלף': 1000, 'אלפיים': 2000};
+  const tMul = {'שלושת': 3, 'ארבעת': 4, 'חמשת': 5, 'ששת': 6, 'שבעת': 7, 'שמונת': 8, 'תשעת': 9, 'עשרת': 10};
+  final re = RegExp(r'(?<![\u0590-\u05FF])((?:(?:\d+\s+אלף|(?:שלושת|ארבעת|חמשת|ששת|שבעת|שמונת|תשעת|עשרת)\s+אלפים|אלפיים|אלף)(?:\s+ו?)?)?(?:(?:שלוש|ארבע|חמש|שש|שבע|שמונה|תשע)\s+מאות|מאתיים|מאה)?)(?![\u0590-\u05FF])');
+  final out = <_NumAt>[];
+  for (final x in re.allMatches(text)) {
+    final g = x.group(1)!.trim(); if (g.isEmpty) continue;
+    var v = 0; final parts = g.split(RegExp(r'\s+ו?\s*|\s+'));
+    for (var i = 0; i < parts.length; i++) {
+      final w = parts[i].replaceFirst(RegExp(r'^ו'), '');
+      if (thousands.containsKey(w)) { v += thousands[w]!; continue; }
+      if (hundreds.containsKey(w)) { v += hundreds[w]!; continue; }
+      if (int.tryParse(w) != null && i + 1 < parts.length && parts[i + 1] == 'אלף') { v += int.parse(w) * 1000; i++; continue; }
+      if (tMul.containsKey(w) && i + 1 < parts.length && parts[i + 1] == 'אלפים') { v += tMul[w]! * 1000; i++; continue; }
+      if (hMul.containsKey(w) && i + 1 < parts.length && parts[i + 1] == 'מאות') { v += hMul[w]! * 100; i++; continue; }
+      if (w == 'אלף' || w == 'אלפים' || w == 'מאות') continue;
+    }
+    var end = x.end; final tail = RegExp(r'^\s*(?:₪|ש"ח|ש״ח|שקל|שקלים|שח(?![\u0590-\u05FF])|דולר|יורו|€)').firstMatch(text.substring(x.end)); if (tail != null) end += tail.end;   // המטבע נצרך עם המילים («אלף וחמש מאות שקל») — המתאר נשאר נקי
+    if (v > 0) out.add(_NumAt(x.start + (x.group(0)!.length - x.group(0)!.trimLeft().length), end, v.toString()));
+  }
+  return out;
+}
 /// סכומים: 8,000 · 8000 · 8 אלף · 8.5 אלף · 8k · אלפיים · 350 ש"ח / ₪350 (מספר קטן רק עם מטבע). לא חלק מתאריך/טלפון.
 List<_NumAt> balaganNums(String text, List<_DateAt> dates) {
   final out = <_NumAt>[];
@@ -170,7 +197,7 @@ List<_NumAt> balaganNums(String text, List<_DateAt> dates) {
   String fmt(double v) => v == v.roundToDouble() ? v.round().toString() : v.toString();
   void put(RegExp re, String? Function(RegExpMatch) f) { for (final x in re.allMatches(text)) { if (inDate(x.start, x.end)) continue; final v = f(x); if (v != null) out.add(_NumAt(x.start, x.end, v)); } }
   put(RegExp(r'(?<![\d.,-])(\d+(?:[.,]\d{1,2})?)\s*(?:אלף|א׳|[kK])(?![\u0590-\u05FFa-zA-Z])'), (x) { final v = double.tryParse(x.group(1)!.replaceAll(',', '.')); return v == null ? null : fmt(v * 1000); });
-  put(RegExp(r'(?<![\u0590-\u05FF])אלפיים(?![\u0590-\u05FF])'), (_) => '2000');
+  for (final w in balaganNumberWords(text)) { if (!inDate(w.start, w.end) && !out.any((o) => w.start < o.end && w.end > o.start)) out.add(w); }   // מילים לפני ספרות: «אלף וחמש מאות» טווח אחד
   put(RegExp(r'(?<![\d.,-])(\d{1,3}(?:,\d{3})+|\d+(?:[.,]\d{1,2})?)\s*(?:₪|ש"ח|ש״ח|שח(?![\u0590-\u05FF])|שקל|שקלים|דולר|\$|יורו|€)'), (x) { final g = x.group(1)!; return RegExp(r'^\d{1,3}(,\d{3})+$').hasMatch(g) ? g.replaceAll(',', '') : g.replaceAll(',', '.'); });   // עם מטבע: הטווח כולל את המטבע (המתאר נשאר נקי)
   put(RegExp(r'(?:₪|\$|€)\s*(\d{1,3}(?:,\d{3})+|\d+(?:[.,]\d{1,2})?)(?![\d,])'), (x) { final g = x.group(1)!; return RegExp(r'^\d{1,3}(,\d{3})+$').hasMatch(g) ? g.replaceAll(',', '') : g.replaceAll(',', '.'); });
   put(RegExp(r'(?<![\d-])(\d{1,3}(?:,\d{3})+|\d{3,7})(?![\d-])'), (x) => x.group(1)!.replaceAll(',', ''));

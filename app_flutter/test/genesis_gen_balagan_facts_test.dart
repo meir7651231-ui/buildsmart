@@ -143,6 +143,38 @@ void main() {
 
     expect(f['__note'], 'ריבית 3.5% מול הבנק');
   });
+  test('עובדות 20: ההמחאה ב-15 בספטמבר', () {
+    final f = balaganFacts('ההמחאה ב-15 בספטמבר', mod(['מועד'], []), today: today);
+    expect(f['מועד'], '2026-09-15');
+    expect(f['מה'], 'ההמחאה');
+
+    expect(f['__note'], 'ההמחאה ב-15 בספטמבר');
+  });
+  test('עובדות 21: החוזה נגמר 3 באוקטובר 2027', () {
+    final f = balaganFacts('החוזה נגמר 3 באוקטובר 2027', mod(['מועד'], []), today: today);
+    expect(f['מועד'], '2027-10-03');
+
+    expect(f['__note'], 'החוזה נגמר 3 באוקטובר 2027');
+  });
+  test('עובדות 22: שילמתי אלף וחמש מאות שקל לגנן', () {
+    final f = balaganFacts('שילמתי אלף וחמש מאות שקל לגנן', mod([], ['סכום']), today: today);
+    expect(f['סכום'], '1500');
+    expect(f['מה'], 'שילמתי לגנן');
+
+    expect(f['__note'], 'שילמתי אלף וחמש מאות שקל לגנן');
+  });
+  test('עובדות 23: הפיקדון שלושת אלפים ומאתיים', () {
+    final f = balaganFacts('הפיקדון שלושת אלפים ומאתיים', mod([], ['סכום']), today: today);
+    expect(f['סכום'], '3200');
+
+    expect(f['__note'], 'הפיקדון שלושת אלפים ומאתיים');
+  });
+  test('עובדות 24: קנס של מאתיים', () {
+    final f = balaganFacts('קנס של מאתיים', mod([], ['סכום']), today: today);
+    expect(f['סכום'], '200');
+
+    expect(f['__note'], 'קנס של מאתיים');
+  });
   test('זיהוי: רגע כללי ⇒ שכבת-הבסיס ראשונה, המודול-החלש חלופה', () {
     final h = balaganIdentify('לשלם ארנונה מחר 350 ש"ח');
     expect(h.first.module.layer, 'base');
@@ -182,6 +214,15 @@ void main() {
     expect(st.search('052').first[1], id);
     expect(st.search('ארנונה').length, 1);
     expect(st.search('x'), isEmpty);
+  });
+  test('«סיים» עם החזר: השורה מוסתרת והשלב מתקדם; החזר מחזיר את שניהם', () {
+    final st = AppStore();
+    final id = st.add('e_ent', {'מה': 'x', 'מועד': '2026-09-08', '__stage': '0'});
+    st.advance('e_ent', id, 3); st.decide('ign:$id:מועד', 'no');
+    final lid = st.logAction('done', 'סיים', entity: 'e_ent', rid: id, field: 'מועד', prev: '0');
+    expect(st.stageOf('e_ent', id), 1); expect(st.decision('ign:$id:מועד'), 'no');
+    expect(st.undo(lid), isTrue);
+    expect(st.stageOf('e_ent', id), 0); expect(st.decision('ign:$id:מועד'), '');
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
