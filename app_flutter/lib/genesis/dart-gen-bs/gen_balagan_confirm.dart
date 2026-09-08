@@ -7,6 +7,36 @@ import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_number_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import 'gen_balagan_moments.dart';
+import 'gen_app_calendar_root.dart';
+import 'gen_app_tasks_root.dart';
+import 'gen_app_peruk01_root.dart';
+import 'gen_app_peruk02_root.dart';
+import 'gen_app_peruk03_root.dart';
+import 'gen_app_peruk04_root.dart';
+import 'gen_app_peruk05_root.dart';
+import 'gen_app_peruk06_root.dart';
+import 'gen_app_peruk07_root.dart';
+import 'gen_app_peruk08_root.dart';
+import 'gen_app_peruk09_root.dart';
+import 'gen_app_peruk10_root.dart';
+import 'gen_app_peruk11_root.dart';
+import 'gen_app_peruk12_root.dart';
+import 'gen_app_peruk13_root.dart';
+import 'gen_app_peruk14_root.dart';
+import 'gen_app_peruk15_root.dart';
+import 'gen_app_peruk16_root.dart';
+import 'gen_app_peruk17_root.dart';
+import 'gen_app_peruk18_root.dart';
+import 'gen_app_peruk19_root.dart';
+import 'gen_app_peruk20_root.dart';
+import 'gen_app_peruk21_root.dart';
+import 'gen_app_peruk22_root.dart';
+import 'gen_app_peruk23_root.dart';
+import 'gen_app_peruk24_root.dart';
+import 'gen_app_peruk25_root.dart';
+import 'gen_app_peruk26_root.dart';
+import 'gen_app_peruk27_root.dart';
+import 'gen_app_peruk28_root.dart';
 import 'package:flutter/material.dart';
 
 /// זיכרון-חיים: שדה-טקסט קצר (≤30) נזכר לפי התווית שלו ומוצע בכל מודול עם אותה תווית. מקומי-למכשיר (AppStore.settings).
@@ -26,6 +56,42 @@ class GenBalaganConfirmScreen extends StatefulWidget {
 }
 
 class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
+  bool _forceNew = false;
+  Widget _openRoot(String entity, String id) {
+    switch (entity) {
+      case 'app_calendar_ent1': return GenAppCalendarRootScreen(id: id);
+      case 'app_tasks_ent1': return GenAppTasksRootScreen(id: id);
+      case 'app_peruk01_ent1': return GenAppPeruk01RootScreen(id: id);
+      case 'app_peruk02_ent1': return GenAppPeruk02RootScreen(id: id);
+      case 'app_peruk03_ent1': return GenAppPeruk03RootScreen(id: id);
+      case 'app_peruk04_ent1': return GenAppPeruk04RootScreen(id: id);
+      case 'app_peruk05_ent1': return GenAppPeruk05RootScreen(id: id);
+      case 'app_peruk06_ent1': return GenAppPeruk06RootScreen(id: id);
+      case 'app_peruk07_ent1': return GenAppPeruk07RootScreen(id: id);
+      case 'app_peruk08_ent1': return GenAppPeruk08RootScreen(id: id);
+      case 'app_peruk09_ent1': return GenAppPeruk09RootScreen(id: id);
+      case 'app_peruk10_ent1': return GenAppPeruk10RootScreen(id: id);
+      case 'app_peruk11_ent1': return GenAppPeruk11RootScreen(id: id);
+      case 'app_peruk12_ent1': return GenAppPeruk12RootScreen(id: id);
+      case 'app_peruk13_ent1': return GenAppPeruk13RootScreen(id: id);
+      case 'app_peruk14_ent1': return GenAppPeruk14RootScreen(id: id);
+      case 'app_peruk15_ent1': return GenAppPeruk15RootScreen(id: id);
+      case 'app_peruk16_ent1': return GenAppPeruk16RootScreen(id: id);
+      case 'app_peruk17_ent1': return GenAppPeruk17RootScreen(id: id);
+      case 'app_peruk18_ent1': return GenAppPeruk18RootScreen(id: id);
+      case 'app_peruk19_ent1': return GenAppPeruk19RootScreen(id: id);
+      case 'app_peruk20_ent1': return GenAppPeruk20RootScreen(id: id);
+      case 'app_peruk21_ent1': return GenAppPeruk21RootScreen(id: id);
+      case 'app_peruk22_ent1': return GenAppPeruk22RootScreen(id: id);
+      case 'app_peruk23_ent1': return GenAppPeruk23RootScreen(id: id);
+      case 'app_peruk24_ent1': return GenAppPeruk24RootScreen(id: id);
+      case 'app_peruk25_ent1': return GenAppPeruk25RootScreen(id: id);
+      case 'app_peruk26_ent1': return GenAppPeruk26RootScreen(id: id);
+      case 'app_peruk27_ent1': return GenAppPeruk27RootScreen(id: id);
+      case 'app_peruk28_ent1': return GenAppPeruk28RootScreen(id: id);
+      default: return const SizedBox.shrink();
+    }
+  }
   late final Map<String, String> _v = {for (final f in widget.module.fields) if (balaganRemember(f.label).isNotEmpty) f.label: balaganRemember(f.label), ...widget.facts};
   Widget _field(BalaganField f) {
     final v = _v[f.label] ?? '';
@@ -60,9 +126,10 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
       if (widget.alternatives.isNotEmpty) DsFold(title: gen_balagan_confirm_c4.replaceAll('{n}', widget.alternatives.length.toString()), details: [for (final a in widget.alternatives) DsNavTile(glyph: '', title: a.title, sub: a.moment, onTap: () => Navigator.of(context).pushReplacement<bool, bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: a, facts: balaganFacts(widget.text, a), doc: widget.doc, alternatives: [for (final x in [widget.module, ...widget.alternatives]) if (x.index != a.index) x], text: widget.text, queue: widget.queue))))]),
       if ((widget.facts['__repeat'] ?? '').isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 8), child: DsNote(message: gen_balagan_confirm_c5.replaceAll('{every}', balaganRepeatLabel(widget.facts['__repeat']!)), label: '', tone: 0)),
       if (widget.queue.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 8), child: DsNote(message: gen_balagan_confirm_c6.replaceAll('{n}', widget.queue.length.toString()), label: '', tone: 0)),
+      if (!_forceNew) for (final d in balaganDuplicates(m, _v).take(1)) DsApproveCard(question: gen_balagan_confirm_c7.replaceAll('{who}', appStore.displayOf(m.rootSlug, d['__id'] ?? '')), source: m.title, okLabel: gen_balagan_confirm_c8, noLabel: gen_balagan_confirm_c9, onOk: () => Navigator.of(context).pushReplacement<bool, bool>(MaterialPageRoute<bool>(builder: (_) => _openRoot(m.rootSlug, d['__id'] ?? ''))), onNo: () => setState(() => _forceNew = true)),   // תיק כפול: «זה אותו עניין?» לפני שנפתח תיק שני
       for (final f in shown) _field(f),
-      if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c7.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
-      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c8, onTap: _save)),
+      if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c10.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
+      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c11, onTap: _save)),
     ]);
   }
 }

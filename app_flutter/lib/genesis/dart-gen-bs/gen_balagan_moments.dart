@@ -1,4 +1,5 @@
 // 🧭 חולל ע"י balagan (G33 · הכרעה-29) — מזהה-הרגע: TF-IDF דטרמיניסטי מ-30 מסמכי-פירוק (כותרת+«הרגע» ×3). אפס-בינה, אפס-מילון. אל תערוך ידנית.
+import '../dart-ui-bs/ds/ds_store.dart';
 class BalaganField { const BalaganField(this.label, this.type, this.required, this.options); final String label, type; final bool required; final List<String> options; }
 class BalaganModule {
   const BalaganModule(this.index, this.ns, this.title, this.moment, this.topic, this.weights, this.dateFields, this.numFields, this.descField, this.longField, this.rootSlug, this.fields, this.stages, this.chain, {this.selfScore = 1, this.layer = '', this.required = 0, this.timeFields = const [], this.phoneFields = const [], this.personFields = const [], this.percentFields = const []});
@@ -160,6 +161,13 @@ String balaganRepeatLabel(String code) {
   if (n == 2) return u == 'd' ? 'כל יומיים' : u == 'w' ? 'כל שבועיים' : u == 'm' ? 'כל חודשיים' : 'כל שנתיים';
   return 'כל $n ' + (u == 'd' ? 'ימים' : u == 'w' ? 'שבועות' : u == 'm' ? 'חודשים' : 'שנים');
 }
+/// תיק כפול: רשומה פתוחה באותו מודול עם אותו מתאר/אדם (השוואה מנורמלת) — לפני «שמור» שואלים «זה אותו עניין?» במקום לפתוח תיק שני.
+List<Map<String, String>> balaganDuplicates(BalaganModule m, Map<String, String> v) {
+  String norm(String x) => x.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+  final keys = [m.descField, ...m.personFields].where((f) => f.isNotEmpty && norm(v[f] ?? '').length >= 3).toList();
+  if (keys.isEmpty) return const [];
+  return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; return keys.any((f) => norm(r[f] ?? '') == norm(v[f]!)); }).toList();
+}
 /// שורה עם כמה רגעים («שילמתי ארנונה. מחר תור לרופא») ⇒ חלקים לפי שורה/נקודה-ורווח/נקודה-פסיק — כל חלק רגע משלו (טופס-אישור אחר טופס-אישור). חלק = ≥2 מילים.
 List<String> balaganSplit(String text) {
   final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => p.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList();
@@ -251,7 +259,7 @@ Map<String, String> balaganFacts(String text, BalaganModule m, {DateTime? today}
   cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').replaceAll(RegExp(r'[\s,\-–—:]+$'), '').replaceAll(RegExp(r'\s[בלמוה]-?$'), '').replaceAll(RegExp(r'^[\s,\-–—:]+'), '').trim();
   final rawLine = text.trim().split(RegExp(r'[\n.]')).first.trim();
   final line = (cleaned.length >= 2 ? cleaned.split(RegExp(r'[\n]')).first.trim() : rawLine);
-  if (m.descField.isNotEmpty && line.isNotEmpty && line.length <= 40 && !m.dateFields.contains(m.descField) && !m.numFields.contains(m.descField)) { out[m.descField] = line; }   // שורה קצרה = שם/מתאר; משפט ארוך אינו שם
+  if (m.descField.isNotEmpty && !out.containsKey(m.descField) && line.isNotEmpty && line.length <= 40 && !m.dateFields.contains(m.descField) && !m.numFields.contains(m.descField)) { out[m.descField] = line; }   // מתאר שהוא גם שדה-אדם («לקוח») ושכבר קיבל שם — לא נדרס בשורה   // שורה קצרה = שם/מתאר; משפט ארוך אינו שם
   if (m.longField.isNotEmpty && text.trim().length > 40) { out[m.longField] = text.trim(); }
   // עובדה מטופסת בלי שדה-יעד (אחוז · טלפון · שעה) לא אובדת: נכנסת ל«הערה» (שדה-הטקסט-הארוך), אם הוא פנוי
   final left = <String>[for (var i = 0; i < pctMs.length; i++) if (!usedPc.contains(i)) pctMs[i].iso + '%', for (var i = 0; i < phoneMs.length; i++) if (!usedP.contains(i)) phoneMs[i].iso, for (var i = 0; i < timeMs.length; i++) if (!usedT.contains(i)) timeMs[i].iso];

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final today = DateTime(2026, 9, 8);   // יום שלישי
-  BalaganModule mod(List<String> dates, List<String> nums, {List<String> tm = const [], List<String> ph = const [], List<String> pe = const [], List<String> pc = const [], String lf = ''}) => BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, dates, nums, 'מה', lf, 'x', const <BalaganField>[], 1, const <String>[], timeFields: tm, phoneFields: ph, personFields: pe, percentFields: pc);
+  BalaganModule mod(List<String> dates, List<String> nums, {List<String> tm = const [], List<String> ph = const [], List<String> pe = const [], List<String> pc = const [], String lf = '', String desc = 'מה'}) => BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, dates, nums, desc, lf, 'x', const <BalaganField>[], 1, const <String>[], timeFields: tm, phoneFields: ph, personFields: pe, percentFields: pc);
   test('עובדות 1: לשלם ארנונה מחר 350 ש"ח', () {
     final f = balaganFacts('לשלם ארנונה מחר 350 ש"ח', mod(['תאריך תשלום'], ['סכום']), today: today);
     expect(f['תאריך תשלום'], '2026-09-09');
@@ -175,6 +175,13 @@ void main() {
 
     expect(f['__note'], 'קנס של מאתיים');
   });
+  test('עובדות 25: רות לוי 052-123-4567 המשכיר עדיין לא החזיר', () {
+    final f = balaganFacts('רות לוי 052-123-4567 המשכיר עדיין לא החזיר', mod([], [], ph: ['טלפון'], pe: ['לקוח'], desc: 'לקוח'), today: today);
+    expect(f['לקוח'], 'רות לוי');
+    expect(f['טלפון'], '0521234567');
+
+    expect(f['__note'], 'רות לוי 052-123-4567 המשכיר עדיין לא החזיר');
+  });
   test('זיהוי: רגע כללי ⇒ שכבת-הבסיס ראשונה, המודול-החלש חלופה', () {
     final h = balaganIdentify('לשלם ארנונה מחר 350 ש"ח');
     expect(h.first.module.layer, 'base');
@@ -223,6 +230,14 @@ void main() {
     expect(st.stageOf('e_ent', id), 1); expect(st.decision('ign:$id:מועד'), 'no');
     expect(st.undo(lid), isTrue);
     expect(st.stageOf('e_ent', id), 0); expect(st.decision('ign:$id:מועד'), '');
+  });
+  test('תיק כפול: אותו אדם/מתאר במודול פתוח ⇒ נמצא; סגור ⇒ לא', () {
+    final m = BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, const [], const [], 'מה', '', 'dup_ent', const <BalaganField>[], 3, const <String>[], personFields: const ['לקוח']);
+    final a = appStore.add('dup_ent', {'מה': 'פיקדון', 'לקוח': 'רות לוי', '__stage': '0'});
+    appStore.add('dup_ent', {'מה': 'אחר', 'לקוח': 'דן כהן', '__stage': '2'});
+    expect(balaganDuplicates(m, {'לקוח': ' רות  לוי '}).map((r) => r['__id']), [a]);
+    expect(balaganDuplicates(m, {'לקוח': 'דן כהן'}), isEmpty);
+    expect(balaganDuplicates(m, {'מה': 'פי'}), isEmpty);
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
