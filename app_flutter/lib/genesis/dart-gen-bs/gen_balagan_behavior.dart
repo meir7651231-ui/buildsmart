@@ -15,7 +15,10 @@ class GenBalaganBehaviorScreen extends StatelessWidget {
     DsField(label: gen_balagan_behavior_c4, hint: '3,1,0', value: appStore.setting('offsets', '3,1,0'), onChanged: (v) => appStore.setSetting('offsets', v)),
     DsField(label: gen_balagan_behavior_c5, hint: '9', value: appStore.setting('dayStart', '9'), onChanged: (v) => appStore.setSetting('dayStart', v)),
     DsField(label: gen_balagan_behavior_c6, hint: '30', value: appStore.setting('blockMin', '30'), onChanged: (v) => appStore.setSetting('blockMin', v)),
-    DsToggleTile(label: gen_balagan_behavior_c7, value: appStore.setting('always:rem') == '1' ? 'true' : 'false', onChanged: (v) => appStore.setSetting('always:rem', v == 'true' ? '1' : '')),
-    DsSection(title: gen_balagan_behavior_c8, children: [for (final e in appStore.log) DsLogRow(text: e['what'] ?? '', sub: _short(e['at'] ?? ''), undoLabel: e['undone'] == '1' ? '' : gen_balagan_behavior_c9, onUndo: e['undone'] == '1' ? null : () => appStore.undo(e['id'] ?? ''))]),
+    DsField(label: gen_balagan_behavior_c7, hint: '4', value: appStore.setting('minAdd', '4'), onChanged: (v) => appStore.setSetting('minAdd', v)),
+    DsField(label: gen_balagan_behavior_c8, hint: '12', value: appStore.setting('minSend', '12'), onChanged: (v) => appStore.setSetting('minSend', v)),
+    DsField(label: gen_balagan_behavior_c9, hint: '3', value: appStore.setting('minAuto', '3'), onChanged: (v) => appStore.setSetting('minAuto', v)),
+    DsToggleTile(label: gen_balagan_behavior_c10, value: appStore.setting('always:rem') == '1' ? 'true' : 'false', onChanged: (v) => appStore.setSetting('always:rem', v == 'true' ? '1' : '')),
+    DsSection(title: gen_balagan_behavior_c11, children: [for (final e in appStore.log) DsLogRow(text: e['what'] ?? '', sub: _short(e['at'] ?? ''), undoLabel: e['undone'] == '1' ? '' : gen_balagan_behavior_c12, onUndo: e['undone'] == '1' ? null : () => appStore.undo(e['id'] ?? ''))]),
   ]));
 }
