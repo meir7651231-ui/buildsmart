@@ -338,6 +338,95 @@ class DsDiffRow extends StatelessWidget {
   }
 }
 
+// ── G30 · הוספה-מהירה (quick-add): one text box, Enter creates (Todoist rule; ≤3 keys) ──
+class DsQuickAdd extends StatefulWidget {
+  const DsQuickAdd({required this.hint, required this.onSubmit, super.key});
+  final String hint;
+  final ValueChanged<String> onSubmit;
+  @override
+  State<DsQuickAdd> createState() => _DsQuickAddState();
+}
+
+class _DsQuickAddState extends State<DsQuickAdd> {
+  final _c = TextEditingController();
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: lk.line))),
+      child: Row(children: [
+        Icon(Icons.add, size: 20, color: lk.muted),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            controller: _c,
+            style: TextStyle(color: lk.ink, fontSize: 16),
+            decoration: InputDecoration(hintText: widget.hint, hintStyle: TextStyle(color: lk.faint, fontSize: 15), border: InputBorder.none, isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 12)),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (v) { final s = v.trim(); if (s.isEmpty) return; widget.onSubmit(s); _c.clear(); },
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+// ── G30 · פלטת-פקודות (Ctrl/Cmd+K): text search over records + actions; pick = one tap ──
+class DsPaletteItem {
+  const DsPaletteItem({required this.label, required this.sub, required this.onTap});
+  final String label, sub;
+  final VoidCallback onTap;
+}
+
+class DsPalette extends StatefulWidget {
+  const DsPalette({required this.hint, required this.items, super.key});
+  final String hint;
+  final List<DsPaletteItem> items;
+  static Future<void> show(BuildContext context, {required String hint, required List<DsPaletteItem> items}) =>
+      showDialog<void>(context: context, builder: (_) => Dialog(insetPadding: const EdgeInsets.fromLTRB(16, 60, 16, 16), child: DsPalette(hint: hint, items: items)));
+  @override
+  State<DsPalette> createState() => _DsPaletteState();
+}
+
+class _DsPaletteState extends State<DsPalette> {
+  String _q = '';
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final q = _q.trim().toLowerCase();
+    final shown = widget.items.where((i) => q.isEmpty || i.label.toLowerCase().contains(q) || i.sub.toLowerCase().contains(q)).take(12).toList();
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 520),
+        decoration: BoxDecoration(color: lk.bg, borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              autofocus: true,
+              style: TextStyle(color: lk.ink, fontSize: 16),
+              decoration: InputDecoration(hintText: widget.hint, hintStyle: TextStyle(color: lk.faint), border: InputBorder.none, prefixIcon: Icon(Icons.search, color: lk.muted)),
+              onChanged: (v) => setState(() => _q = v),
+              onSubmitted: (_) { if (shown.isNotEmpty) { Navigator.of(context).pop(); shown.first.onTap(); } },
+            ),
+            Divider(height: 1, color: lk.line),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [for (final i in shown) DsNavTile(glyph: '', title: i.label, sub: i.sub, onTap: () { Navigator.of(context).pop(); i.onTap(); })],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // (שדות-הקלט DsField · DsNumberField · DsDateField · DsToggleTile חיים בקבצים
 //  נפרדים תחת ds/ — כל אחד עם תיאור-עצמי (he) של סוג-הנתון שהוא מחזיק, כדי שהמנוע
 //  יאחזר אותם לפי-משמעות. הידע חי על האטום, לא במנוע — טהור, עובר מבחן-קונכייה.)
