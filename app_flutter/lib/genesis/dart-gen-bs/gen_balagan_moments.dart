@@ -65,7 +65,7 @@ String balaganStripGrammar(String text) {
   return out;
 }
 List<BalaganHit> balaganIdentify(String text, {int k = 3}) {
-  final toks = balaganTokens(balaganStripGrammar(text));
+  final toks = balaganTokens(balaganStripGrammar(balaganWaStrip(text)));
   final hits = <BalaganHit>[];
   for (final m in kBalaganModules) { var s = 0.0; for (final t in toks) { s += m.weights[t] ?? 0; } if (s > 0) hits.add(BalaganHit(m, s)); }
   hits.sort((a, b) { final c = b.score.compareTo(a.score); return c != 0 ? c : a.module.index.compareTo(b.module.index); });
@@ -185,9 +185,13 @@ int balaganMerge(BalaganModule m, String id, Map<String, String> v, String logTe
   appStore.logAction('merge', logText.replaceAll('{n}', next.length.toString()), entity: m.rootSlug, rid: id, prev: jsonEncode(prev));
   return next.length;
 }
+/// שורת-ייצוא-וואטסאפ: «[8.9.2026, 16:30] דני: …» / «8.9.26, 16:30 - דני: …» ⇒ הטקסט בלי הכותרת + השולח (מבנה, לא מילון). חותמת-ההודעה אינה מועד.
+final RegExp _waHead = RegExp(r'^\s*\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4}),?\s+(\d{1,2}:\d{2})(?::\d{2})?\]?\s*-?\s*([^:\n]{2,30}):\s+');
+String balaganWaStrip(String text) { final m = _waHead.firstMatch(text); return m == null ? text : text.substring(m.end); }
+String balaganWaSender(String text) { final m = _waHead.firstMatch(text); return m == null ? '' : m.group(3)!.trim(); }
 /// שורה עם כמה רגעים («שילמתי ארנונה. מחר תור לרופא») ⇒ חלקים לפי שורה/נקודה-ורווח/נקודה-פסיק — כל חלק רגע משלו (טופס-אישור אחר טופס-אישור). חלק = ≥2 מילים.
 List<String> balaganSplit(String text) {
-  final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => p.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList();
+  final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => balaganWaStrip(p).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList();   // חלק = ≥2 מילים אחרי הסרת כותרת-וואטסאפ
   return parts.length >= 2 ? parts : [text.trim()];
 }
 /// סכום במילים: «מאתיים» · «שלוש מאות» · «אלף וחמש מאות» · «שלושת אלפים ומאתיים» · «עשרת אלפים» ⇒ מספר (דקדוק-מספרים, לא מילון-דומייני)
@@ -231,9 +235,10 @@ List<_NumAt> balaganNums(String text, List<_DateAt> dates) {
   return res;
 }
 /// עובדות מהטקסט (תאריכים — גם יחסיים · סכומים · שורה-ראשונה) ⇒ שדות-השורש לפי טיפוס + קרבה למילות-תווית-השדה. `today` מוזרק (דטרמיניסטי; ברירת-מחדל עכשיו).
-Map<String, String> balaganFacts(String text, BalaganModule m, {DateTime? today}) {
+Map<String, String> balaganFacts(String text0, BalaganModule m, {DateTime? today}) {
   final out = <String, String>{};
   final t0 = today ?? DateTime.now();
+  final sender = balaganWaSender(text0); final text = balaganWaStrip(text0);   // כותרת-וואטסאפ: לא תאריך, לא שעה — השולח = אדם (רק כשלא נמצא אחר)
   final dateMs = balaganDates(text, t0);
   final phoneMs = balaganPhones(text);
   final pctMs = balaganPercents(text);
@@ -269,7 +274,8 @@ Map<String, String> balaganFacts(String text, BalaganModule m, {DateTime? today}
   final usedD = <int>{};
   for (final f in m.dateFields) { final i = nearest(dStarts, f); if (i >= 0 && !usedD.contains(i)) { out[f] = dateMs[i].iso; usedD.add(i); } }
   var di = 0; for (final f in m.dateFields) { if (out.containsKey(f)) continue; while (di < dateMs.length && usedD.contains(di)) { di++; } if (di < dateMs.length) { out[f] = dateMs[di].iso; usedD.add(di); } }
-  if (text.trim().isNotEmpty) out['__note'] = text.trim();   // הטקסט המקורי לעולם לא אובד (מוצג בתיק: «מה כתבת»)
+  if (text0.trim().isNotEmpty) out['__note'] = text0.trim();   // הטקסט המקורי לעולם לא אובד (מוצג בתיק: «מה כתבת»)
+  if (sender.isNotEmpty && m.personFields.isNotEmpty && !m.personFields.any((f) => out.containsKey(f))) out[m.personFields.first] = sender;
   // המתאר = השורה בלי העובדות שכבר נקלטו לשדות («לשלם ארנונה מחר 350 ש"ח» ⇒ «לשלם ארנונה»): הסרת-הטווחים שנצרכו + ניקוי מילת-יחס תלויה. אינו מילון — טווחי-ההתאמה עצמם.
   final spans = <List<int>>[for (final i in usedD) [dateMs[i].start, dateMs[i].end], for (final i in usedN) [numMs[i].start, numMs[i].end], for (final i in usedT) [timeMs[i].start, timeMs[i].end], for (final i in usedP) [phoneMs[i].start, phoneMs[i].end], for (final i in usedPc) [pctMs[i].start, pctMs[i].end], for (final x in repMs) [x.start, x.end]]..sort((a, b) => a[0].compareTo(b[0]));
   var cleaned = ''; var pos = 0; for (final sp in spans) { if (sp[0] > pos) cleaned += text.substring(pos, sp[0]); pos = sp[1] > pos ? sp[1] : pos; } cleaned += text.substring(pos);
