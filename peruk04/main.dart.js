@@ -8056,7 +8056,7 @@ if(a3>0&&c)continue
 a4=b.n8(0-864e8*a3)
 a5=a7.n8(q)
 if(a4.a===a5.a&&a4.b===a5.b&&a4.c===a5.c){c=a3===0
-if(c)a="\u05d4\u05d9\u05d5\u05dd"
+if(c)a=""
 else{a=B.f.k(a3)
 a=A.da("\u05d1\u05e2\u05d5\u05d3 {n} \u05d9\u05de\u05d9\u05dd","{n}",a)}c=c?i:""
 a6.push(A.aAl(d+" \xb7 "+j,a,k,d,b,!0,!1,a7,c,g))

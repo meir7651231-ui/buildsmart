@@ -8277,7 +8277,7 @@ a3=c.lu(0-864e8*a2)
 if(A.LQ(a3)===6)a3=a3.lu(a5)
 a4=a8.lu(q)
 if(a3.a===a4.a&&a3.b===a4.b&&a3.c===a4.c){d=a2===0
-if(d)b="\u05d4\u05d9\u05d5\u05dd"
+if(d)b=""
 else{b=B.e.k(a2)
 b=A.cC("\u05d1\u05e2\u05d5\u05d3 {n} \u05d9\u05de\u05d9\u05dd","{n}",b)}a7.push(A.aDE(j,b,k,a6,c,!1,!1,a8,d?i:"",g))
 break}}}}B.b.fn(a7,new A.a3U())
