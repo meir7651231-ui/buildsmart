@@ -55,7 +55,7 @@ class GenAppPeruk05HomeScreenToday {
 
   static DsTodayItem _mk(String title, String sub, String rid, String field, DateTime d, bool hard, bool overdue, DateTime today, [String time = '', bool rep = false]) {
     final acts = overdue ? [gen_app_peruk05_home_c42, gen_app_peruk05_home_c43, gen_app_peruk05_home_c44] : (d == today ? [gen_app_peruk05_home_c45, gen_app_peruk05_home_c46] : [gen_app_peruk05_home_c47, gen_app_peruk05_home_c48, gen_app_peruk05_home_c49]);   // P4 · ביום-ההכרעה אין דחייה · «ליומן» = קישור-יומן, אפס-מפתח
-    return DsTodayItem(title: (rep ? '↻ ' : '') + title, sub: time.isNotEmpty ? time + ' · ' + sub : sub, rid: rid, field: field, due: d, hard: hard, overdue: overdue, module: module, actions: acts, act: (i) => _act(rid, field, d, acts, i), time: time);
+    return DsTodayItem(title: (rep ? '↻ ' : '') + title, sub: [time, sub].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: field, due: d, hard: hard, overdue: overdue, module: module, actions: acts, act: (i) => _act(rid, field, d, acts, i), time: time);
   }
   static void _act(String rid, String field, DateTime due, List<String> acts, int i) {
     final a = acts[i.clamp(0, acts.length - 1)];
