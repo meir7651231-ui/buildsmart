@@ -47,7 +47,7 @@ const RESOURCES = {"firebase-messaging-sw.js": "2a2983a6c96c2735ec25d203145bf534
 "assets/assets/fonts/JetBrainsMono-ExtraBold.ttf": "8d83c4826bd219efd19fe257fe0165ec",
 "assets/FontManifest.json": "3dbcc247e1e2204d5dff91b7463707ce",
 "assets/AssetManifest.json": "d32f5760673d6b4e3b15a1c5e4756a2d",
-"assets/fonts/MaterialIcons-Regular.otf": "3104788330bc241456a66d550abdfd2c",
+"assets/fonts/MaterialIcons-Regular.otf": "a4d5a94e80a0ec80fec21f3bd7580575",
 "assets/AssetManifest.bin.json": "89de901e1031b8043e3ead2e2aec0ec2",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
 "index.html": "3b8b66535bf2999695b9fbf13a199584",
