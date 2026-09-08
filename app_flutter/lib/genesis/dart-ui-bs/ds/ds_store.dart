@@ -85,6 +85,31 @@ class AppStore extends ChangeNotifier {
     } catch (_) {}
   }
 
+  /// Backup as text (same JSON as persistence). Restore replaces everything; the previous state is kept once for undo.
+  String exportJson() => jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'settings': _settings});
+  int importJson(String raw) {
+    Map<String, dynamic> data;
+    try { data = jsonDecode(raw) as Map<String, dynamic>; } catch (_) { return -1; }
+    if (data['rec'] is! Map) return -1;
+    try { persistSave('\$_pkey.prev', exportJson()); } catch (_) {}
+    _rec.clear(); _log.clear(); _decided.clear(); _settings.clear();
+    _seq = (data['seq'] as num?)?.toInt() ?? 0; _role = (data['role'] as num?)?.toInt() ?? 0; _actor = (data['actor'] as String?) ?? '';
+    for (final e in (data['log'] as List? ?? const [])) _log.add((e as Map).map((k, v) => MapEntry(k.toString(), v.toString())));
+    ((data['decided'] as Map?) ?? const {}).forEach((k, v) => _decided[k.toString()] = v.toString());
+    ((data['settings'] as Map?) ?? const {}).forEach((k, v) => _settings[k.toString()] = v.toString());
+    (data['rec'] as Map<String, dynamic>).forEach((k, v) { _rec[k] = (v as List).map((e) => (e as Map).map((kk, vv) => MapEntry(kk.toString(), vv.toString()))).toList(); });
+    notifyListeners();
+    return _rec.values.fold<int>(0, (a, b) => a + b.length);
+  }
+  bool undoImport() { final prev = persistLoad('\$_pkey.prev'); if (prev == null || prev.isEmpty) return false; final n = importJson(prev); return n >= 0; }
+  /// Text search across every entity: any value containing q (case-insensitive). Returns (entity, id, matching value).
+  List<List<String>> search(String q) {
+    final needle = q.trim().toLowerCase(); if (needle.length < 2) return const [];
+    final out = <List<String>>[];
+    _rec.forEach((entity, rows) { for (final r in rows) { for (final e in r.entries) { if (e.key == AppStore.idKey || e.key == '__doc' || e.key == '__at' || e.key == '__stage') continue; if (e.value.toLowerCase().contains(needle)) { out.add([entity, r[AppStore.idKey] ?? '', e.value]); break; } } } });
+    return out;
+  }
+
   @override
   void notifyListeners() {
     try {

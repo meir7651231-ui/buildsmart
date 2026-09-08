@@ -1,6 +1,7 @@
 // 🧭 חולל ע"י balagan (G33 ב׳-ה · הכרעה-29) — הוכחת-עובדות: תאריכים-יחסיים בעברית · צורות-סכום · קרבה-למילת-השדה. היום מוזרק ⇒ דטרמיניסטי. אל תערוך ידנית.
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_moments.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_calendar_home.dart' show GenAppCalendarHomeScreenToday;
+import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -168,6 +169,19 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2026, 9, 8), 'd3'), DateTime(2026, 9, 11));
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2028, 2, 29), 'y1'), DateTime(2029, 2, 28));
     expect(balaganRepeatLabel('m2'), 'כל חודשיים');
+  });
+  test('גיבוי: ייצוא ⇒ שחזור מחזיר את התיקים · טקסט זר נדחה · חיפוש מוצא בכל שדה', () {
+    final st = AppStore();
+    final id = st.add('x_ent', {'מה': 'לשלם ארנונה', 'טלפון': '0521234567'});
+    final dump = st.exportJson();
+    expect(st.importJson('לא גיבוי'), -1);
+    expect(st.records('x_ent').length, 1);
+    st.add('x_ent', {'מה': 'עוד אחד'});
+    expect(st.importJson(dump), 1);
+    expect(st.records('x_ent').first['מה'], 'לשלם ארנונה');
+    expect(st.search('052').first[1], id);
+    expect(st.search('ארנונה').length, 1);
+    expect(st.search('x'), isEmpty);
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
