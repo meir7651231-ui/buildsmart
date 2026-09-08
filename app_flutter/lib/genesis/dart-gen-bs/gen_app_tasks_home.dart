@@ -56,7 +56,7 @@ class GenAppTasksHomeScreenToday {
         appStore.logAction('add', gen_app_tasks_home_c17.replaceAll('{title}', appStore.displayOf('app_tasks_ent1', nid) + ' · ' + next[field]!), entity: 'app_tasks_ent1', rid: nid);
       }
     }
-    else if (a == gen_app_tasks_home_c18) { final r = appStore.byId('app_tasks_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_tasks_ent1', rid, {field: _iso(due.add(const Duration(days: 1)))}); appStore.logAction('auto', gen_app_tasks_home_c19 + ' · ' + field, entity: 'app_tasks_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
+    else if (a == gen_app_tasks_home_c18) { final r = appStore.byId('app_tasks_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_tasks_ent1', rid, {field: _iso(_shift(due.add(const Duration(days: 1)), false))}); /* «דחה למחר» לא נוחת בשבת (אותו _shift של תזכורת-רכה) */ appStore.logAction('auto', gen_app_tasks_home_c19 + ' · ' + field, entity: 'app_tasks_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
     else if (a == gen_app_tasks_home_c20) {   // «ליומן»: עם שעה ⇒ אירוע בשעתו (אורך = בלוק-ההגדרה); בלי ⇒ יום-שלם
       final r = appStore.byId('app_tasks_ent1', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due).replaceAll('-', '');
       String z(DateTime x) => x.toIso8601String().substring(0, 16).replaceAll(RegExp(r'[-:]'), '') + '00';
