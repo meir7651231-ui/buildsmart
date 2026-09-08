@@ -38,6 +38,7 @@ import 'gen_app_peruk28_ent1.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 Widget balaganOpen(int index, Map<String, String> initial) {
@@ -77,39 +78,43 @@ Widget balaganOpen(int index, Map<String, String> initial) {
 }
 
 class GenBalaganAskScreen extends StatefulWidget {
-  const GenBalaganAskScreen({super.key});
+  const GenBalaganAskScreen({this.initialText = '', super.key});
+  final String initialText;   // שיתוף (share_target ?text=) / הדבקה ⇒ נכנס לשדה ומזוהה מיד
   @override
   State<GenBalaganAskScreen> createState() => _GenBalaganAskScreenState();
 }
 
 class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   final _c = TextEditingController();
+  @override
+  void initState() { super.initState(); if (widget.initialText.trim().isNotEmpty) { _c.text = widget.initialText.trim(); _note = gen_balagan_ask_c0; WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _go(); }); } }   // הגיע משיתוף ⇒ אפס-הקשות עד טופס-האישור
+  Future<void> _paste() async { final d = await Clipboard.getData('text/plain'); final t = (d?.text ?? '').trim(); if (t.isEmpty) { setState(() => _note = gen_balagan_ask_c1); return; } _c.text = t; _go(); }   // «הדבק» = הקשה אחת מהודעה שהועתקה
   List<BalaganHit> _hits = const [];
   Map<String, String> _extra = const {};
   String _doc = '';   // data:URI של הצילום (מוקטן) — נשמר עם הרשומה (מחסנית-מסמכים)
   bool _asked = false, _busy = false;
   String _note = '';
 
-  void _go() { final hits = balaganIdentify(balaganSplit(_c.text).first); setState(() { _asked = true; _hits = hits; _note = hits.isEmpty ? gen_balagan_ask_c0 : ''; }); if (hits.isNotEmpty) _open(context, hits.first, hits.skip(1).map((h) => h.module).toList()); }   // הקשה אחת: זיהוי ⇒ ישר לטופס-האישור (החלופות בתוכו)
-  void _skip() { setState(() { _hits = _hits.length > 1 ? _hits.sublist(1) : const []; if (_hits.isEmpty) _note = gen_balagan_ask_c1; }); }
+  void _go() { final hits = balaganIdentify(balaganSplit(_c.text).first); setState(() { _asked = true; _hits = hits; _note = hits.isEmpty ? gen_balagan_ask_c2 : ''; }); if (hits.isNotEmpty) _open(context, hits.first, hits.skip(1).map((h) => h.module).toList()); }   // הקשה אחת: זיהוי ⇒ ישר לטופס-האישור (החלופות בתוכו)
+  void _skip() { setState(() { _hits = _hits.length > 1 ? _hits.sublist(1) : const []; if (_hits.isEmpty) _note = gen_balagan_ask_c3; }); }
   void _open(BuildContext context, BalaganHit h, [List<BalaganModule> alts = const []]) {
     final parts = balaganSplit(_c.text); final first = parts.first;
     final facts = {...balaganFacts(first, h.module), ..._extra}..removeWhere((key, v) => v.trim().isEmpty || !(h.module.dateFields.contains(key) || h.module.numFields.contains(key) || h.module.timeFields.contains(key) || h.module.phoneFields.contains(key) || h.module.personFields.contains(key) || h.module.percentFields.contains(key) || key == h.module.descField || key == h.module.longField || key.startsWith('__')));
-    Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: h.module, facts: facts, doc: _doc, alternatives: alts, text: first, queue: parts.sublist(1)))).then((saved) { if (saved == true && mounted) setState(() { _c.clear(); _hits = const []; _extra = const {}; _doc = ''; _asked = false; _note = gen_balagan_ask_c2; }); });
+    Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: h.module, facts: facts, doc: _doc, alternatives: alts, text: first, queue: parts.sublist(1)))).then((saved) { if (saved == true && mounted) setState(() { _c.clear(); _hits = const []; _extra = const {}; _doc = ''; _asked = false; _note = gen_balagan_ask_c4; }); });
   }
   Future<void> _photo() async {
     final key = appStore.setting('ai.key');
-    if (key.isEmpty) { setState(() => _note = gen_balagan_ask_c3); return; }
+    if (key.isEmpty) { setState(() => _note = gen_balagan_ask_c5); return; }
     final x = await ImagePicker().pickImage(source: kIsWeb ? ImageSource.gallery : ImageSource.camera, imageQuality: 60, maxWidth: 900);
     if (x == null) return;
-    setState(() { _busy = true; _note = gen_balagan_ask_c4; });
+    setState(() { _busy = true; _note = gen_balagan_ask_c6; });
     final bytes = await x.readAsBytes();
     _doc = bytes.length <= 160000 ? 'data:' + (x.mimeType ?? 'image/jpeg') + ';base64,' + base64Encode(bytes) : '';   // ≤160KB במכשיר; גדול ⇒ רק התמלול (כנות במסך)
     final r = await dsAiExtract(apiKey: key, image: bytes, imageMime: x.mimeType ?? 'image/jpeg', fields: const ['תאריך', 'סכום', 'שם'], model: appStore.setting('ai.model', 'claude-sonnet-5'));
     if (!mounted) return;
-    if (r == null) { setState(() { _busy = false; _note = gen_balagan_ask_c5; }); return; }
+    if (r == null) { setState(() { _busy = false; _note = gen_balagan_ask_c7; }); return; }
     final text = (r['_text'] ?? '').trim();
-    setState(() { _busy = false; _note = _doc.isEmpty ? gen_balagan_ask_c6 : gen_balagan_ask_c7; if (text.isNotEmpty) _c.text = text; _extra = {for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value}; });
+    setState(() { _busy = false; _note = _doc.isEmpty ? gen_balagan_ask_c8 : gen_balagan_ask_c9; if (text.isNotEmpty) _c.text = text; _extra = {for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value}; });
     _go();
   }
 
@@ -117,23 +122,25 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   Widget build(BuildContext context) {
     final lk = DsLook.of(context);
     final top = _hits.isNotEmpty ? _hits.first : null;
-    return DsScaffold(title: gen_balagan_ask_c8, subtitle: gen_balagan_ask_c9, icon: gen_balagan_ask_c10, children: [
+    return DsScaffold(title: gen_balagan_ask_c10, subtitle: gen_balagan_ask_c11, icon: gen_balagan_ask_c12, children: [
       Container(
         decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(lk.r)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: TextField(controller: _c, minLines: 3, maxLines: 8, autofocus: true, textInputAction: TextInputAction.done, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5), decoration: InputDecoration(border: InputBorder.none, hintText: gen_balagan_ask_c11, hintStyle: TextStyle(color: lk.faint)), onSubmitted: (_) => _go()),
+        child: TextField(controller: _c, minLines: 3, maxLines: 8, autofocus: true, textInputAction: TextInputAction.done, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5), decoration: InputDecoration(border: InputBorder.none, hintText: gen_balagan_ask_c13, hintStyle: TextStyle(color: lk.faint)), onSubmitted: (_) => _go()),
       ),
       Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-        Expanded(child: DsPrimaryButton(label: gen_balagan_ask_c12, onTap: _busy ? null : _go)),
+        Expanded(child: DsPrimaryButton(label: gen_balagan_ask_c14, onTap: _busy ? null : _go)),
         const SizedBox(width: 8),
-        GestureDetector(onTap: _busy ? null : _photo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(gen_balagan_ask_c13, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
+        DsChipButton(label: gen_balagan_ask_c15, onTap: _busy ? null : _paste),
+        const SizedBox(width: 8),
+        GestureDetector(onTap: _busy ? null : _photo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(gen_balagan_ask_c16, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
       ])),
-      if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 14), child: Text(gen_balagan_ask_c14, style: TextStyle(color: lk.muted, fontSize: 13))),
-      if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final ex in gen_balagan_ask_c15.split('|')) DsChipButton(label: ex, onTap: () { _c.text = ex; _go(); })])),   // אפס-הקלדה: דוגמה = הקשה אחת ⇒ טופס-האישור
+      if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 14), child: Text(gen_balagan_ask_c17, style: TextStyle(color: lk.muted, fontSize: 13))),
+      if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final ex in gen_balagan_ask_c18.split('|')) DsChipButton(label: ex, onTap: () { _c.text = ex; _go(); })])),   // אפס-הקלדה: דוגמה = הקשה אחת ⇒ טופס-האישור
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: DsNote(message: _note, label: '', tone: 0)),
-      if (_asked && top != null) DsSection(title: gen_balagan_ask_c16, children: [   // חזר בלי לשמור ⇒ הזיהוי נשאר על המסך (הקשה אחת חוזרת)
-        DsApproveCard(question: gen_balagan_ask_c17.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c18, noLabel: gen_balagan_ask_c19, onOk: () => _open(context, top, _hits.skip(1).map((h) => h.module).toList()), onNo: _skip),
-        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c20 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
+      if (_asked && top != null) DsSection(title: gen_balagan_ask_c19, children: [   // חזר בלי לשמור ⇒ הזיהוי נשאר על המסך (הקשה אחת חוזרת)
+        DsApproveCard(question: gen_balagan_ask_c20.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c21, noLabel: gen_balagan_ask_c22, onOk: () => _open(context, top, _hits.skip(1).map((h) => h.module).toList()), onNo: _skip),
+        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c23 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
       ]),
     ]);
   }

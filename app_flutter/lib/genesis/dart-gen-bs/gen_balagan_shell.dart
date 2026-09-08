@@ -46,7 +46,9 @@ class GenBalaganShellScreen extends StatefulWidget {
 }
 
 class _GenBalaganShellScreenState extends State<GenBalaganShellScreen> {
-  int _t = 0;
+  // שיתוף-מהמכשיר (share_target במניפסט ⇒ ?text=/?title=/?url=): נפתחים ישר ב«מה קרה?» עם הטקסט
+  static String _sharedText() { try { final q = Uri.base.queryParameters; return [q['text'] ?? '', q['title'] ?? '', q['url'] ?? ''].where((x) => x.trim().isNotEmpty).join(' '); } catch (_) { return ''; } }
+  late int _t = _sharedText().isEmpty ? 0 : 1;
   @override
   Widget build(BuildContext context) => CallbackShortcuts(
     bindings: <ShortcutActivator, VoidCallback>{
@@ -58,7 +60,7 @@ class _GenBalaganShellScreenState extends State<GenBalaganShellScreen> {
     },
     child: Focus(autofocus: true, child: Scaffold(
       backgroundColor: DsLook.of(context).bg,
-      body: IndexedStack(index: _t.clamp(0, 2), children: const [GenBalaganHomeScreen(), GenBalaganAskScreen(), GenBalaganTopicsScreen()]),
+      body: IndexedStack(index: _t.clamp(0, 2), children: [const GenBalaganHomeScreen(), GenBalaganAskScreen(initialText: _sharedText()), const GenBalaganTopicsScreen()]),
       bottomNavigationBar: SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(12, 6, 12, 10), child: Center(heightFactor: 1.0, child: ForgeMustChip(bare: true, items: [for (final s in [gen_balagan_shell_c0, gen_balagan_shell_c1, gen_balagan_shell_c2]) [s]], selected: {_t}, onSelect: (i) => setState(() => _t = i))))),
     )));
 }
