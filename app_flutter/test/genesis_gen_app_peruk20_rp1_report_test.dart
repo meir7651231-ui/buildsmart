@@ -14,6 +14,7 @@ void main() {
   expect(t, contains('*נוסח פנייה ללשכה פנייה*'));
   expect(t, contains('*האם בכלל שייך דחוף*'));
   expect(t, contains('*מה לא*'));
+  expect(t, contains('*לוח*'));
   expect(t, contains('*הסתייגות*'));
 
   });

@@ -14,6 +14,7 @@ void main() {
   expect(t, contains('*טיוטת תשובה קצרה למחנכת*'));
   expect(t, contains('*שאלות לפגישה*'));
   expect(t, contains('*מה לא לכתוב בקבוצת*'));
+  expect(t, contains('*לוח*'));
   expect(t, contains('*הסתייגות*'));
 
   });

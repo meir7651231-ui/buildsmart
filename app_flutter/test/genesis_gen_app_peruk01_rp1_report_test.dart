@@ -15,6 +15,7 @@ void main() {
   expect(t, contains('*בקשות לשינוי*'));
   expect(t, contains('*החלטה*'));
   expect(t, contains('*מה לא בדקנו*'));
+  expect(t, contains('*לוח*'));
   expect(t, contains('*הסתייגות*'));
   expect(t, contains('מתווך: '));
   expect(t, contains('החלטה: '));

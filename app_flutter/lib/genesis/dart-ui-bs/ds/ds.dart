@@ -300,6 +300,44 @@ class DsNote extends StatelessWidget {
   }
 }
 
+// ── G29 · שורת-דיף: מה-השתנה בלבד — תווית · ישן→חדש (value) · Δ (delta) · משמעות-כסף (sub). Notion-שטוח, קו-תחתון, בלי כרטיס ──
+class DsDiffRow extends StatelessWidget {
+  const DsDiffRow({required this.label, required this.value, required this.delta, this.sub = '', this.tone = 0, super.key});
+  final String label, value, delta, sub;
+  final int tone; // 0 ניטרלי · 1 ok · 2 danger · 3 warn — צבע-ה-Δ
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final dC = tone == 1 ? lk.success : tone == 2 ? lk.danger : tone == 3 ? const Color(0xFFC98A00) : lk.ink;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 44),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: lk.line))),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 84, child: Text(label, style: TextStyle(color: lk.muted, fontSize: 14))),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(value, style: TextStyle(color: lk.ink, fontSize: 15, fontFeatures: const [FontFeature.tabularFigures()])),
+                if (sub.isNotEmpty) Text(sub, style: TextStyle(color: lk.muted, fontSize: 12.5)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+            decoration: BoxDecoration(color: dC.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(999)),
+            child: Text(delta, style: TextStyle(color: dC, fontSize: 12, fontWeight: FontWeight.w600, fontFeatures: const [FontFeature.tabularFigures()])),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // (שדות-הקלט DsField · DsNumberField · DsDateField · DsToggleTile חיים בקבצים
 //  נפרדים תחת ds/ — כל אחד עם תיאור-עצמי (he) של סוג-הנתון שהוא מחזיק, כדי שהמנוע
 //  יאחזר אותם לפי-משמעות. הידע חי על האטום, לא במנוע — טהור, עובר מבחן-קונכייה.)

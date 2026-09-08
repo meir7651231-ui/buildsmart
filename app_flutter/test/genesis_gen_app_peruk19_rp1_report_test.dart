@@ -14,6 +14,7 @@ void main() {
   expect(t, contains('*טיוטת פנייה קצרה*'));
   expect(t, contains('*מה לשלם בינתיים שלא*'));
   expect(t, contains('*מתי אין מה לערער*'));
+  expect(t, contains('*לוח*'));
   expect(t, contains('*הסתייגות*'));
 
   });

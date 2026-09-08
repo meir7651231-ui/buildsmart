@@ -4,6 +4,7 @@ import '../dart-data-bs/auto/gen_app_peruk19_shell_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-forge-bs/selection/must_chip.dart';
+import '../dart-ui-bs/auto/empty_state.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import 'gen_app_peruk19_ent1.dart';
 import 'gen_app_peruk19_hub.dart';
@@ -32,9 +33,10 @@ class _RootTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) {
     final rs = appStore.records('app_peruk19_ent1');
-    return DsScaffold(title: gen_app_peruk19_shell_c8, subtitle: rs.length.toString() + ' ' + gen_app_peruk19_shell_c9, icon: gen_app_peruk19_shell_c10, children: [
+    return DsScaffold(title: gen_app_peruk19_shell_c11, subtitle: rs.length.toString() + ' ' + gen_app_peruk19_shell_c12, icon: gen_app_peruk19_shell_c13, children: [
       Padding(padding: const EdgeInsets.only(bottom: 10), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19Ent1Screen())), child: ForgeToneButton(items: [[gen_app_peruk19_shell_c4]]))),
-      for (final r in rs) DsNavTile(glyph: gen_app_peruk19_shell_c11, title: (r[gen_app_peruk19_shell_c6] ?? ''), sub: (r[gen_app_peruk19_shell_c7] ?? ''), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk19RootScreen(id: r[AppStore.idKey] ?? '')))),
+      if (rs.isEmpty) EmptyState(label: gen_app_peruk19_shell_c7),
+      for (final r in rs) DsNavTile(glyph: gen_app_peruk19_shell_c14, title: (r[gen_app_peruk19_shell_c9] ?? ''), sub: (r[gen_app_peruk19_shell_c10] ?? ''), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk19RootScreen(id: r[AppStore.idKey] ?? '')))),
     ]);
   });
 }
