@@ -1,6 +1,6 @@
 // ✨ מאגר-העיצוב · שפת-Pure (Layer B · הטמעה) — **מחולל ע"י machtzev/ds-pure.mjs מ-new/atoms/pure-look.mjs.**
 // אל תערוך ידנית: שנה את הזרע (pure-look) והרץ את המנוע. נייטרל+סמנטי זורמים כ-DsPureSkin **הפיך**
-// (ברירת-מחדל=טוקני-Pure); אקצנט **מורף** פר-ערכה (t-indigo / t-teal / t-amber). הזהות מוזרקת בחיווט (חוק-6). material בלבד.
+// (ברירת-מחדל=טוקני-Pure); אקצנט **מורף** פר-ערכה (t-indigo / t-teal / t-amber / t-balagan). הזהות מוזרקת בחיווט (חוק-6). material בלבד.
 import 'package:flutter/material.dart';
 
 /// ערכת-אקצנט אחת — מורפת יחד בהחלפת-ערכה (חוק-5: האטום לא יודע איזו ערכה).
@@ -53,6 +53,9 @@ class DsPureSkin {
   final Color faint;
   final Color hair;
   final Color hair2;
+  final Color onA;
+  final Color hi;
+  final Color shade;
   final Color ok;
   final Color warn;
   final Color err;
@@ -68,6 +71,9 @@ class DsPureSkin {
     required this.faint,
     required this.hair,
     required this.hair2,
+    required this.onA,
+    required this.hi,
+    required this.shade,
     required this.ok,
     required this.warn,
     required this.err,
@@ -75,7 +81,7 @@ class DsPureSkin {
   });
 }
 
-/// שפת-Pure כטוקני-Dart. נייטרל+סמנטי קבועים; 3 ערכות-אקצנט; themeOf() = resolver.
+/// שפת-Pure כטוקני-Dart. נייטרל+סמנטי קבועים; 4 ערכות-אקצנט; themeOf() = resolver.
 class DsPure {
   // ── נייטרל · סולם-רקע/דיו/קו — לא מורף בהחלפת-ערכה ──
   static const canvas = Color(0xFF0C0C0E);
@@ -88,6 +94,9 @@ class DsPure {
   static const faint = Color(0xFF6E6A62);
   static const hair = Color(0x17ECE9E2);
   static const hair2 = Color(0x0DECE9E2);
+  static const onA = Color(0xFF0B0B0D);
+  static const hi = Color(0xFFFFFFFF);
+  static const shade = Color(0xFF000000);
 
   // ── סמנטי · ok/warn/err/gold — קבוע (error נשאר אדום, gold נשאר זהב) ──
   static const ok = Color(0xFF43D08C);
@@ -99,6 +108,7 @@ class DsPure {
   static const indigo = DsPureTheme(aHi: Color(0xFFB0A4FF), a: Color(0xFF7A6BF0), a800: Color(0xFF4B3ECB), gl: Color(0x6B7A6BF0), c2: Color(0xFF4CC6E6), c3: Color(0xFFB57BE6));
   static const teal = DsPureTheme(aHi: Color(0xFF6FE6D5), a: Color(0xFF1FB8A6), a800: Color(0xFF0C7E72), gl: Color(0x6B1FB8A6), c2: Color(0xFF4FB6E6), c3: Color(0xFF43D08C));
   static const amber = DsPureTheme(aHi: Color(0xFFF2C87E), a: Color(0xFFD99A3C), a800: Color(0xFF9E6B1E), gl: Color(0x6BD99A3C), c2: Color(0xFFE8863C), c3: Color(0xFFE67BA6));
+  static const balagan = DsPureTheme(aHi: Color(0xFF2F6FED), a: Color(0xFF2F6FED), a800: Color(0xFF1E4FB8), gl: Color(0x002F6FED), c2: Color(0xFF2F6FED), c3: Color(0xFF2F6FED));
 
   // ── קיצורי-אקצנט לברירת-המחדל (Color ישיר — לטוקנים דורמנטיים כמו BsPure) ──
   static const accentHi = Color(0xFFB0A4FF);
@@ -109,10 +119,14 @@ class DsPure {
   static const DsPureFonts fonts = DsPureFonts(serif: "Fraunces", serifHe: "Frank Ruhl Libre", grotesk: "Space Grotesk", he: "Heebo");
 
   // ── עור-העיצוב · ברירת-מחדל (פרמטר הפיך — נייטרל+סמנטי כחבילה שזורמת דרך PureScope) ──
-  static const DsPureSkin skin = DsPureSkin(canvas: canvas, sunken: sunken, surface: surface, raised: raised, raised2: raised2, ink: ink, mut: mut, faint: faint, hair: hair, hair2: hair2, ok: ok, warn: warn, err: err, gold: gold);
+  static const DsPureSkin skin = DsPureSkin(canvas: canvas, sunken: sunken, surface: surface, raised: raised, raised2: raised2, ink: ink, mut: mut, faint: faint, hair: hair, hair2: hair2, onA: onA, hi: hi, shade: shade, ok: ok, warn: warn, err: err, gold: gold);
 
   static const String defaultTheme = 't-indigo';
-  static const Map<String, DsPureTheme> themes = {'t-indigo': indigo, 't-teal': teal, 't-amber': amber};
+  static const Map<String, DsPureTheme> themes = {'t-indigo': indigo, 't-teal': teal, 't-amber': amber, 't-balagan': balagan};
+
+  // ── G28 · עורות נוספים (skins) וחבילות-פונט (fontSets) — הפיכים: מוזרקים ב-PureScope פר-אפליקציה (חוק-6/7); בלי הזרקה ⇒ skin/fonts ⇒ ביט-זהה ──
+  static const Map<String, DsPureSkin> skins = {'paper': DsPureSkin(canvas: Color(0xFFFFFFFF), sunken: Color(0xFFF7F6F3), surface: Color(0xFFFFFFFF), raised: Color(0xFFF7F6F3), raised2: Color(0xFFEFEDE8), ink: Color(0xFF37352F), mut: Color(0x9937352F), faint: Color(0x6637352F), hair: Color(0x14000000), hair2: Color(0x0D000000), onA: Color(0xFFFFFFFF), hi: Color(0xFFFFFFFF), shade: Color(0x00000000), ok: Color(0xFF1B8A4C), warn: Color(0xFFC98A00), err: Color(0xFFC8321E), gold: Color(0xFFC98A00))};
+  static const Map<String, DsPureFonts> fontSets = {'heebo': DsPureFonts(serif: "Heebo", serifHe: "Heebo", grotesk: "Heebo", he: "Heebo")};
 
   /// resolver-הערכה (מקביל ל-pure-resolve בצד-ה-JS): id→ערכה, נפילה לברירת-המחדל.
   static DsPureTheme themeOf(String id) => themes[id] ?? themes[defaultTheme]!;

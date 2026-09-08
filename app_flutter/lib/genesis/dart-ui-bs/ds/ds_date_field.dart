@@ -26,36 +26,38 @@ class DsDateField extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Padding(
         padding: bare ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (!bare) Padding(
               padding: const EdgeInsets.only(right: 2, bottom: 6),
-              child: Text(label, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
+              child: Text(label, style: TextStyle(color: lk.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
             ),
             Material(
-              color: DsTokens.cardAlt,
-              borderRadius: BorderRadius.circular(DsTokens.rSm),
+              color: lk.cardAlt,
+              borderRadius: BorderRadius.circular(lk.rSm),
               child: InkWell(
-                borderRadius: BorderRadius.circular(DsTokens.rSm),
+                borderRadius: BorderRadius.circular(lk.rSm),
                 onTap: () => _pick(context),
                 child: Container(
                   height: 46,
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(DsTokens.rSm),
-                    border: Border.all(color: DsTokens.line),
+                    borderRadius: BorderRadius.circular(lk.rSm),
+                    border: Border.all(color: lk.line),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today_outlined, size: 17, color: DsTokens.faint),
+                      Icon(Icons.calendar_today_outlined, size: 17, color: lk.faint),
                       const SizedBox(width: 10),
                       Text(
                         value.isEmpty ? 'בחר תאריך' : value,
                         style: TextStyle(
-                          color: value.isEmpty ? DsTokens.faint : DsTokens.ink,
+                          color: value.isEmpty ? lk.faint : lk.ink,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -68,4 +70,5 @@ class DsDateField extends StatelessWidget {
           ],
         ),
       );
+  }
 }

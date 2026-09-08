@@ -11,16 +11,17 @@ class DsToggleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     final on = value == 'true' || value == '1' || value == 'כן';
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(color: DsTokens.ink, fontSize: 14.5, fontWeight: FontWeight.w600))),
+          Expanded(child: Text(label, style: TextStyle(color: lk.ink, fontSize: 14.5, fontWeight: FontWeight.w600))),
           Switch(
             value: on,
             onChanged: onChanged == null ? null : (v) => onChanged!(v ? 'true' : 'false'),
-            activeTrackColor: DsTokens.accent,
+            activeTrackColor: lk.accent,
             thumbColor: WidgetStateProperty.all(Colors.white),
           ),
         ],

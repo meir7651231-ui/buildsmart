@@ -13,29 +13,30 @@ class DsEnumField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     final cur = options.contains(value) ? value : null;
     return Padding(
       padding: bare ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 7),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!bare) Text(label, style: const TextStyle(color: DsTokens.ink, fontSize: 13.5, fontWeight: FontWeight.w700)),
+          if (!bare) Text(label, style: TextStyle(color: lk.ink, fontSize: 13.5, fontWeight: FontWeight.w700)),
           if (!bare) const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: DsTokens.cardAlt,
-              borderRadius: BorderRadius.circular(DsTokens.rSm),
-              border: Border.all(color: DsTokens.line),
+              color: lk.cardAlt,
+              borderRadius: BorderRadius.circular(lk.rSm),
+              border: Border.all(color: lk.line),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: cur,
-                hint: const Text('בחר', style: TextStyle(color: DsTokens.faint, fontSize: 14)),
-                icon: const Icon(Icons.expand_more, color: DsTokens.faint),
+                hint: Text('בחר', style: TextStyle(color: lk.faint, fontSize: 14)),
+                icon: Icon(Icons.expand_more, color: lk.faint),
                 items: options
-                    .map((o) => DropdownMenuItem<String>(value: o, child: Text(o, style: const TextStyle(color: DsTokens.ink, fontSize: 14, fontWeight: FontWeight.w600))))
+                    .map((o) => DropdownMenuItem<String>(value: o, child: Text(o, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600))))
                     .toList(),
                 onChanged: (v) => onChanged(v ?? ''),
               ),

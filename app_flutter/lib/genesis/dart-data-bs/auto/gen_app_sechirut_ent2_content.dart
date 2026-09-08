@@ -1,7 +1,7 @@
 // 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
 const String gen_app_sechirut_ent2_c0 = 'בטוחה';
 const String gen_app_sechirut_ent2_c1 = '10 שדות';
-const String gen_app_sechirut_ent2_c2 = '🗂️';
+const String gen_app_sechirut_ent2_c2 = '';
 const String gen_app_sechirut_ent2_c3 = 'שמירה';
 const String gen_app_sechirut_ent2_c4 = 'עדכון';
 const String gen_app_sechirut_ent2_c5 = 'פרטי הרשומה';
@@ -31,4 +31,4 @@ const String gen_app_sechirut_ent2_c28 = 'תקין';
 const String gen_app_sechirut_ent2_c29 = 'טווח פיקדון (0–1000000)';
 const String gen_app_sechirut_ent2_c30 = 'טווח ערבות בנקאית (0–1000000)';
 const String gen_app_sechirut_ent2_c31 = 'סה"כ רשומות';
-const String gen_app_sechirut_ent2_c32 = '🗂️';
+const String gen_app_sechirut_ent2_c32 = '';

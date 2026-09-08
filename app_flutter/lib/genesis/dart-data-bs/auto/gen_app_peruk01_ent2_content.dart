@@ -1,7 +1,7 @@
 // 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
 const String gen_app_peruk01_ent2_c0 = 'ממצא';
 const String gen_app_peruk01_ent2_c1 = '5 שדות';
-const String gen_app_peruk01_ent2_c2 = '🗂️';
+const String gen_app_peruk01_ent2_c2 = '';
 const String gen_app_peruk01_ent2_c3 = 'שמירה';
 const String gen_app_peruk01_ent2_c4 = 'עדכון';
 const String gen_app_peruk01_ent2_c5 = 'פרטי הרשומה';
@@ -17,4 +17,4 @@ const String gen_app_peruk01_ent2_c14 = 'אדום';
 const String gen_app_peruk01_ent2_c15 = 'צהוב';
 const String gen_app_peruk01_ent2_c16 = 'ירוק';
 const String gen_app_peruk01_ent2_c17 = 'סה"כ רשומות';
-const String gen_app_peruk01_ent2_c18 = '🗂️';
+const String gen_app_peruk01_ent2_c18 = '';

@@ -12,7 +12,6 @@ import '../dart-ui-bs/ds/ds_store.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
@@ -69,20 +68,21 @@ class _GenAppPeruk04Ent1ScreenState extends State<GenAppPeruk04Ent1Screen> {
   }
 
   Widget _viewBar(BuildContext context) {
+    final lk = DsLook.of(context);
     const labels = ['☰ רשימה', '📋 לוח', '📅 לוח-שנה', '▦ טבלה'];
     return Row(mainAxisSize: MainAxisSize.min, children: [
       for (var i = 0; i < labels.length; i++)
         Padding(
           padding: const EdgeInsets.only(left: 6),
           child: Material(
-            color: _view == i ? DsTokens.accentSoft : const Color(0xFFF1F5F9),
+            color: _view == i ? lk.accentSoft : (lk.chipBg),
             borderRadius: BorderRadius.circular(20),
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: () => setState(() => _view = i),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                child: Text(labels[i], style: TextStyle(color: _view == i ? DsTokens.accentDark : DsTokens.muted, fontSize: 12, fontWeight: FontWeight.w700)),
+                child: Text(labels[i], style: TextStyle(color: _view == i ? lk.accentDark : lk.muted, fontSize: 12, fontWeight: FontWeight.w700)),
               ),
             ),
           ),
@@ -95,11 +95,11 @@ class _GenAppPeruk04Ent1ScreenState extends State<GenAppPeruk04Ent1Screen> {
     return DsRecordCard(labels: const [gen_app_peruk04_ent1_c9, gen_app_peruk04_ent1_c10, gen_app_peruk04_ent1_c11, gen_app_peruk04_ent1_c12, gen_app_peruk04_ent1_c13, gen_app_peruk04_ent1_c14, gen_app_peruk04_ent1_c15, gen_app_peruk04_ent1_c16, gen_app_peruk04_ent1_c17, gen_app_peruk04_ent1_c18, gen_app_peruk04_ent1_c19], values: [r[gen_app_peruk04_ent1_c9] ?? '', r[gen_app_peruk04_ent1_c10] ?? '', r[gen_app_peruk04_ent1_c11] ?? '', r[gen_app_peruk04_ent1_c12] ?? '', r[gen_app_peruk04_ent1_c13] ?? '', r[gen_app_peruk04_ent1_c14] ?? '', r[gen_app_peruk04_ent1_c15] ?? '', r[gen_app_peruk04_ent1_c16] ?? '', r[gen_app_peruk04_ent1_c17] ?? '', r[gen_app_peruk04_ent1_c18] ?? '', r[gen_app_peruk04_ent1_c19] ?? ''], stage: (const [gen_app_peruk04_ent1_c23, gen_app_peruk04_ent1_c24, gen_app_peruk04_ent1_c25, gen_app_peruk04_ent1_c26, gen_app_peruk04_ent1_c27])[appStore.stageOf('app_peruk04_ent1', rid)], stageDone: appStore.stageOf('app_peruk04_ent1', rid) >= 4, stages: const [gen_app_peruk04_ent1_c23, gen_app_peruk04_ent1_c24, gen_app_peruk04_ent1_c25, gen_app_peruk04_ent1_c26, gen_app_peruk04_ent1_c27], stageIndex: appStore.stageOf('app_peruk04_ent1', rid), onStage: (i) => appStore.setStage('app_peruk04_ent1', rid, i), onAdvance: () => appStore.advance('app_peruk04_ent1', rid, 5), onEdit: () => _edit(r), onDelete: () => appStore.removeById('app_peruk04_ent1', rid), footer: Wrap(spacing: 6, runSpacing: 6, children: [_backChip(gen_app_peruk04_ent1_c28, appStore.referencing('app_peruk04_ent2', gen_app_peruk04_ent1_c29, rid).length)]), confirmMessage: appStore.inboundRefs('app_peruk04_ent1', rid) > 0 ? (gen_app_peruk04_ent1_c30 + appStore.inboundRefs('app_peruk04_ent1', rid).toString() + gen_app_peruk04_ent1_c31) : null);
   }
 
-  Widget _backChip(String label, int n) => Container(
+  Widget _backChip(String label, int n) => Builder(builder: (context) { final lk = DsLook.of(context); return Container(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(20)),
-        child: Text('$label · $n', style: const TextStyle(color: DsTokens.muted, fontSize: 11.5, fontWeight: FontWeight.w700)),
-      );
+        decoration: BoxDecoration(color: lk.chipBg, borderRadius: BorderRadius.circular(20)),
+        child: Text('$label · $n', style: TextStyle(color: lk.muted, fontSize: 11.5, fontWeight: FontWeight.w700)),
+      ); });
 
 
   String _csv() {
@@ -111,8 +111,8 @@ class _GenAppPeruk04Ent1ScreenState extends State<GenAppPeruk04Ent1Screen> {
     return b.toString();
   }
 
-  Widget _csvBtn(BuildContext context) => Material(
-        color: const Color(0xFFF1F5F9),
+  Widget _csvBtn(BuildContext context) { final lk = DsLook.of(context); return Material(
+        color: lk.chipBg,
         borderRadius: BorderRadius.circular(9),
         child: InkWell(
           borderRadius: BorderRadius.circular(9),
@@ -120,29 +120,35 @@ class _GenAppPeruk04Ent1ScreenState extends State<GenAppPeruk04Ent1Screen> {
             Clipboard.setData(ClipboardData(text: _csv()));
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('הועתק כ-CSV'), duration: Duration(seconds: 2)));
           },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.copy_all_outlined, size: 15, color: DsTokens.muted),
-              SizedBox(width: 5),
-              Text('CSV', style: TextStyle(color: DsTokens.muted, fontSize: 12, fontWeight: FontWeight.w700)),
+              Icon(Icons.copy_all_outlined, size: 15, color: lk.muted),
+              const SizedBox(width: 5),
+              Text('CSV', style: TextStyle(color: lk.muted, fontSize: 12, fontWeight: FontWeight.w700)),
             ]),
           ),
         ),
-      );
+      ); }
 
   @override
   Widget build(BuildContext context) {
-    return DsScaffold(title: gen_app_peruk04_ent1_c0, subtitle: gen_app_peruk04_ent1_c1, icon: gen_app_peruk04_ent1_c2, bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_peruk04_ent1_c3 : gen_app_peruk04_ent1_c4]])), header: false, children: [ForgeCenteredPageHeader(fields: ['', gen_app_peruk04_ent1_c0, gen_app_peruk04_ent1_c1]), ...[
+    final lk = DsLook.of(context);
+    return DsScaffold(
+      title: gen_app_peruk04_ent1_c0,
+      subtitle: gen_app_peruk04_ent1_c1,
+      icon: gen_app_peruk04_ent1_c2,
+      bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_peruk04_ent1_c3 : gen_app_peruk04_ent1_c4]])),
+      children: [
         AnimatedBuilder(animation: appStore, builder: (context, _) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [Expanded(child: DsStat(label: gen_app_peruk04_ent1_c0, value: appStore.count('app_peruk04_ent1').toString(), sub: gen_app_peruk04_ent1_c32, glyph: gen_app_peruk04_ent1_c33))]))),
         DsWorkflow(steps: const [gen_app_peruk04_ent1_c23, gen_app_peruk04_ent1_c24, gen_app_peruk04_ent1_c25, gen_app_peruk04_ent1_c26, gen_app_peruk04_ent1_c27], current: 0),
         if (_err != null) Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: const Color(0x14DC2626), borderRadius: BorderRadius.circular(DsTokens.rSm), border: Border.all(color: const Color(0x40DC2626))),
-          child: Row(children: [const Icon(Icons.error_outline, size: 16, color: Color(0xFFDC2626)), const SizedBox(width: 8), Expanded(child: Text(_err!, style: const TextStyle(color: Color(0xFFDC2626), fontSize: 13, fontWeight: FontWeight.w600)))]),
+          decoration: BoxDecoration(color: lk.dangerSoft, borderRadius: BorderRadius.circular(lk.rSm), border: Border.all(color: lk.dangerLine)),
+          child: Row(children: [Icon(Icons.error_outline, size: 16, color: lk.danger), const SizedBox(width: 8), Expanded(child: Text(_err!, style: TextStyle(color: lk.danger, fontSize: 13, fontWeight: FontWeight.w600)))]),
         ),
-        ForgeTitledSection(fields: [gen_app_peruk04_ent1_c5, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[
+        DsSection(title: gen_app_peruk04_ent1_c5, children: [
           ForgeDsField(state: (_v[0] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk04_ent1_c9, ''], control: DsField(label: gen_app_peruk04_ent1_c9, hint: '', value: _v[0] ?? '', onChanged: (v) => setState(() => _v[0] = v), bare: true)),
           ForgeDsField(state: (_v[1] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk04_ent1_c10, ''], control: DsField(label: gen_app_peruk04_ent1_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v), bare: true)),
           ForgeDsField(state: (_v[2] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk04_ent1_c11, ''], control: DsField(label: gen_app_peruk04_ent1_c11, hint: '', value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v), bare: true)),
@@ -154,8 +160,8 @@ class _GenAppPeruk04Ent1ScreenState extends State<GenAppPeruk04Ent1Screen> {
           ForgeDsField(state: (_v[8] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk04_ent1_c17, ''], control: DsField(label: gen_app_peruk04_ent1_c17, hint: '', value: _v[8] ?? '', onChanged: (v) => setState(() => _v[8] = v), bare: true)),
           ForgeDsField(state: (_v[9] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk04_ent1_c18, ''], control: DsField(label: gen_app_peruk04_ent1_c18, hint: '', value: _v[9] ?? '', onChanged: (v) => setState(() => _v[9] = v), bare: true)),
           ForgeDsEnumField(fields: [gen_app_peruk04_ent1_c19], control: DsEnumField(label: gen_app_peruk04_ent1_c19, options: const [gen_app_peruk04_ent1_c20, gen_app_peruk04_ent1_c21, gen_app_peruk04_ent1_c22], value: _v[10] ?? '', onChanged: (v) => setState(() => _v[10] = v), bare: true)),
-        ]])),
-        ForgeTitledSection(fields: [gen_app_peruk04_ent1_c6, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [Align(alignment: Alignment.centerLeft, child: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)])), ...[
+        ]),
+        DsSection(title: gen_app_peruk04_ent1_c6, trailing: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)]), children: [
           AnimatedBuilder(
             animation: appStore,
             builder: (context, _) {
@@ -174,7 +180,8 @@ class _GenAppPeruk04Ent1ScreenState extends State<GenAppPeruk04Ent1Screen> {
               ]);
             },
           ),
-        ]])),
-      ]]);
+        ]),
+      ],
+    );
   }
 }

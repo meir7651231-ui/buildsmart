@@ -38,7 +38,10 @@ class DsMonthOffset extends StatefulWidget {
 class _DsMonthOffsetState extends State<DsMonthOffset> {
   int _off = 0;
   @override
-  Widget build(BuildContext context) => widget.builder(context, _off, (d) => setState(() => _off += d));
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return widget.builder(context, _off, (d) => setState(() => _off += d));
+  }
 }
 
 class _DsCalendarState extends State<DsCalendar> {
@@ -49,6 +52,7 @@ class _DsCalendarState extends State<DsCalendar> {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     final now = DateTime.now();
     final anchor = DateTime(now.year, now.month + _off);
     final first = DateTime(anchor.year, anchor.month, 1);
@@ -73,15 +77,15 @@ class _DsCalendarState extends State<DsCalendar> {
       final isToday = _off == 0 && day == now.day;
       cells.add(Container(
         decoration: BoxDecoration(
-          color: n > 0 ? DsTokens.accentSoft : Colors.transparent,
+          color: n > 0 ? lk.accentSoft : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: isToday ? Border.all(color: DsTokens.accent, width: 1.5) : null,
+          border: isToday ? Border.all(color: lk.accent, width: 1.5) : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('$day', style: TextStyle(color: n > 0 ? DsTokens.accentDark : DsTokens.muted, fontSize: 12.5, fontWeight: n > 0 ? FontWeight.w800 : FontWeight.w500)),
-            if (n > 0) Text('$n', style: const TextStyle(color: DsTokens.accentDark, fontSize: 10, fontWeight: FontWeight.w600)),
+            Text('$day', style: TextStyle(color: n > 0 ? lk.accentDark : lk.muted, fontSize: 12.5, fontWeight: n > 0 ? FontWeight.w800 : FontWeight.w500)),
+            if (n > 0) Text('$n', style: TextStyle(color: lk.accentDark, fontSize: 10, fontWeight: FontWeight.w600)),
           ],
         ),
       ));
@@ -94,12 +98,12 @@ class _DsCalendarState extends State<DsCalendar> {
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(children: [
             _NavBtn(icon: Icons.chevron_right, onTap: () => setState(() => _off--)),
-            Expanded(child: Center(child: Text('${_months[anchor.month - 1]} ${anchor.year}', style: const TextStyle(color: DsTokens.ink, fontSize: 14, fontWeight: FontWeight.w800)))),
+            Expanded(child: Center(child: Text('${_months[anchor.month - 1]} ${anchor.year}', style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w800)))),
             _NavBtn(icon: Icons.chevron_left, onTap: () => setState(() => _off++)),
           ]),
         ),
         Row(children: [
-          for (final d in _dows) Expanded(child: Center(child: Text(d, style: const TextStyle(color: DsTokens.faint, fontSize: 11.5, fontWeight: FontWeight.w700)))),
+          for (final d in _dows) Expanded(child: Center(child: Text(d, style: TextStyle(color: lk.faint, fontSize: 11.5, fontWeight: FontWeight.w700)))),
         ]),
         const SizedBox(height: 4),
         GridView.count(
@@ -122,13 +126,16 @@ class _NavBtn extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: DsTokens.track,
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Material(
+        color: lk.track,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
-          child: Padding(padding: const EdgeInsets.all(5), child: Icon(icon, size: 18, color: DsTokens.muted)),
+          child: Padding(padding: const EdgeInsets.all(5), child: Icon(icon, size: 18, color: lk.muted)),
         ),
       );
+  }
 }

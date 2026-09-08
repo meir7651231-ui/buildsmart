@@ -12,6 +12,7 @@ class DsSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     return AnimatedBuilder(
       animation: appStore,
       builder: (context, _) {
@@ -23,28 +24,28 @@ class DsSelect extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: DsTokens.ink, fontSize: 13.5, fontWeight: FontWeight.w700)),
+              Text(label, style: TextStyle(color: lk.ink, fontSize: 13.5, fontWeight: FontWeight.w700)),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: DsTokens.cardAlt,
-                  borderRadius: BorderRadius.circular(DsTokens.rSm),
-                  border: Border.all(color: DsTokens.line),
+                  color: lk.cardAlt,
+                  borderRadius: BorderRadius.circular(lk.rSm),
+                  border: Border.all(color: lk.line),
                 ),
                 child: opts.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: Text('אין $entity עדיין — הוסף כדי לקשר', style: const TextStyle(color: DsTokens.faint, fontSize: 13)),
+                        child: Text('אין $entity עדיין — הוסף כדי לקשר', style: TextStyle(color: lk.faint, fontSize: 13)),
                       )
                     : DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           isExpanded: true,
                           value: cur,
-                          hint: Text('בחר $entity', style: const TextStyle(color: DsTokens.faint, fontSize: 14)),
-                          icon: const Icon(Icons.expand_more, color: DsTokens.faint),
+                          hint: Text('בחר $entity', style: TextStyle(color: lk.faint, fontSize: 14)),
+                          icon: Icon(Icons.expand_more, color: lk.faint),
                           items: opts
-                              .map((e) => DropdownMenuItem<String>(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 14, fontWeight: FontWeight.w600))))
+                              .map((e) => DropdownMenuItem<String>(value: e.key, child: Text(e.value, overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600))))
                               .toList(),
                           onChanged: (v) => onChanged(v ?? ''),
                         ),

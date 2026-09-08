@@ -5,29 +5,30 @@
 //   הודעת תשובה אחת = הודעת תשובה אחת, [תוכן הודעת תשובה אחת]
 //   לוח = [תוכן לוח]
 //   הסתייגות = [תוכן הסתייגות]
-//   [תוכן כרטיס]⇒ToastCard
-//   [תוכן דיף סעיפים]⇒ToastCard
-//   [תוכן מספר מיקוח אחד]⇒ToastCard
+//   [תוכן כרטיס]⇒DsNote
+//   [תוכן דיף סעיפים]⇒DsNote
+//   [תוכן מספר מיקוח אחד]⇒DsNote
 //   הודעת תשובה אחת⇒DsChip
-//   [תוכן הודעת תשובה אחת]⇒ToastCard
-//   [תוכן לוח]⇒ToastCard
-//   [תוכן הסתייגות]⇒ToastCard
+//   [תוכן הודעת תשובה אחת]⇒DsNote
+//   [תוכן לוח]⇒DsNote
+//   [תוכן הסתייגות]⇒DsNote
 //   שליחה בוואטסאפ⇒DsPrimaryButton+waLink
 
 import '../dart-data-bs/auto/gen_app_peruk04_rp1_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart-forge-bs/selection/must_chip.dart';
+import '../dart-forge-bs/selection/seg_picker_selection.dart';
+import '../dart-forge-bs/selection/segmented_pill_toggle_selection.dart';
+import '../dart-forge-bs/selection/star_rating.dart';
+import '../dart-forge-bs/selection/unit_segment_toggle_selection.dart';
 import '../dart-maor/wa-digits.dart';
 import '../dart-maor/wa-link.dart';
 import '../dart-ui-bs/auto/empty_state.dart';
 import '../dart-ui-bs/ds/ds.dart';
-import '../dart-ui-bs/premium/actions/segmented_switch.dart';
-import '../dart-ui-bs/premium/feedback/toast_card.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
-import '../dart-forge-bs/header/header.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/selection/selection.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
@@ -69,20 +70,18 @@ class _GenAppPeruk04Rp1ScreenState extends State<GenAppPeruk04Rp1Screen> {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, __) {
     final rs = appStore.records('app_peruk04_ent1');
-    if (rs.isEmpty) return DsScaffold(title: gen_app_peruk04_rp1_c94, subtitle: gen_app_peruk04_rp1_c95, icon: gen_app_peruk04_rp1_c96, header: false, children: [ForgeCenteredPageHeader(fields: ['', gen_app_peruk04_rp1_c94, gen_app_peruk04_rp1_c95]), ...[EmptyState(label: gen_app_peruk04_rp1_c3)]]);
+    if (rs.isEmpty) return DsScaffold(title: gen_app_peruk04_rp1_c94, subtitle: gen_app_peruk04_rp1_c95, icon: gen_app_peruk04_rp1_c97, children: [EmptyState(label: gen_app_peruk04_rp1_c3)]);
     final i0 = _sel ?? (widget.initialId != null ? rs.indexWhere((r) => r[AppStore.idKey] == widget.initialId) : 0);
     final i = (i0 < 0 ? 0 : i0).clamp(0, rs.length - 1);
     final r0 = rs[i];
     final id0 = r0[AppStore.idKey] ?? '';
-    return DsScaffold(title: gen_app_peruk04_rp1_c94, subtitle: gen_app_peruk04_rp1_c95, icon: gen_app_peruk04_rp1_c97, header: false, children: [ForgeCenteredPageHeader(fields: ['', gen_app_peruk04_rp1_c94, gen_app_peruk04_rp1_c95]), ...[
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeSegPickerSelection(bare: true, items: [for (final s in [for (final o in appStore.options('app_peruk04_ent1')) o.value]) [s]], selected: {i}, onSelect: (v) => setState(() => _sel = v))),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeTitledSection(fields: [gen_app_peruk04_rp1_c15, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ToastCard(message: gen_app_peruk04_rp1_c7, tone: 0), ToastCard(message: gen_app_peruk04_rp1_c10, tone: 0)])]]))),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeTitledSection(fields: [gen_app_peruk04_rp1_c31, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ToastCard(message: gen_app_peruk04_rp1_c20, tone: 0), ToastCard(message: gen_app_peruk04_rp1_c23, tone: 0), ToastCard(message: gen_app_peruk04_rp1_c26, tone: 0)])]]))),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeTitledSection(fields: [gen_app_peruk04_rp1_c47, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ToastCard(message: gen_app_peruk04_rp1_c36, tone: 0), ToastCard(message: gen_app_peruk04_rp1_c39, tone: 0), ToastCard(message: gen_app_peruk04_rp1_c42, tone: 0)])]]))),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeTitledSection(fields: [gen_app_peruk04_rp1_c68, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[AnimatedBuilder(animation: appStore, builder: (context, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final r in [r0].where((r) => (r[gen_app_peruk04_rp1_c57] ?? '').toString().trim().isNotEmpty)) Padding(padding: const EdgeInsets.only(bottom: 8), child: ForgeStatusChip(items: [[gen_app_peruk04_rp1_c52 + ': ' + (r[gen_app_peruk04_rp1_c53] ?? '')]], variants: const <int>[0]))])), Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ToastCard(message: gen_app_peruk04_rp1_c63, tone: 0)])]]))),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeTitledSection(fields: [gen_app_peruk04_rp1_c78, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ToastCard(message: gen_app_peruk04_rp1_c73, tone: 0)])]]))),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeTitledSection(fields: [gen_app_peruk04_rp1_c88, '', '', ''], child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [...[Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [ToastCard(message: gen_app_peruk04_rp1_c83, tone: 0)])]]))),
+    return DsScaffold(title: gen_app_peruk04_rp1_c94, subtitle: gen_app_peruk04_rp1_c95, icon: gen_app_peruk04_rp1_c98, children: [
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ForgeMustChip(bare: true, items: [for (final s in [for (final o in appStore.options('app_peruk04_ent1')) o.value]) [s]], selected: {i}, onSelect: (v) => setState(() => _sel = v))),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk04_rp1_c15, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk04_rp1_c7, label: gen_app_peruk04_rp1_c8, tone: 0), DsNote(message: gen_app_peruk04_rp1_c10, label: gen_app_peruk04_rp1_c11, tone: 0)])], tone: 0)),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk04_rp1_c31, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk04_rp1_c20, label: gen_app_peruk04_rp1_c21, tone: 0), DsNote(message: gen_app_peruk04_rp1_c23, label: gen_app_peruk04_rp1_c24, tone: 0), DsNote(message: gen_app_peruk04_rp1_c26, label: gen_app_peruk04_rp1_c27, tone: 0)])], tone: 0)),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk04_rp1_c47, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk04_rp1_c36, label: gen_app_peruk04_rp1_c37, tone: 0), DsNote(message: gen_app_peruk04_rp1_c39, label: gen_app_peruk04_rp1_c40, tone: 0), DsNote(message: gen_app_peruk04_rp1_c42, label: gen_app_peruk04_rp1_c43, tone: 0)])], tone: 0)),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_peruk04_rp1_c96, details: [Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk04_rp1_c68, children: [AnimatedBuilder(animation: appStore, builder: (context, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final r in [r0].where((r) => (r[gen_app_peruk04_rp1_c57] ?? '').toString().trim().isNotEmpty)) Padding(padding: const EdgeInsets.only(bottom: 8), child: ForgeStatusChip(items: [[gen_app_peruk04_rp1_c52 + ': ' + (r[gen_app_peruk04_rp1_c53] ?? '')]], variants: const <int>[0]))])), Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk04_rp1_c63, label: gen_app_peruk04_rp1_c64, tone: 0)])], tone: 0)), Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk04_rp1_c78, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk04_rp1_c73, label: gen_app_peruk04_rp1_c74, tone: 0)])], tone: 0)), Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk04_rp1_c88, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk04_rp1_c83, label: gen_app_peruk04_rp1_c84, tone: 0)])], tone: 0))])),
       Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _send(context, r0, id0), child: ForgeToneButton(items: [[gen_app_peruk04_rp1_c91]]))),
-    ]]);
+    ]);
   });
 }

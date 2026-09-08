@@ -4,6 +4,7 @@
 // ⚠️ חתימות-הבנאי קפואות (תפר atom-census) — כאן משתנה רק המראה (build/צבעים/צללים).
 import 'package:flutter/material.dart';
 import 'ds_pure.dart'; // 🎨 עיצוב-Pure (הכרעת-בעלים 1.9) — הפלטה מופנית ל-DsPure. הפיך: שחזור-קובץ ⇒ הישן.
+import 'ds_seam.dart'; // G28 · חריץ-העור: DsLook.of(context) — כרום-ה-DS לובש את העור המוזרק (paper) או נשאר ביט-זהה (כהה)
 
 class DsTokens {
   // ── זהות · בהירות-הערכה (טוקן=דאטה · המנוע קורא-עיוור, לא מכריע) ──
@@ -67,7 +68,26 @@ class DsTokens {
   ];
 }
 
-// ── שלד-מסך: רקע כהה + כותרת-זכוכית + גוף גלילה מרווח ──
+// ── G28 (הכרעה-28) · מראה-נפתר לכרום-ה-DS ──
+// בלי PureScope, או עור-כהה ⇒ DsLook.dark = ערכי-DsTokens (ביט-זהה — חוק-7). עור-בהיר (skins.paper) ⇒ paper:
+// לבן · דיו #37352F · קו 8% · אקצנט-יחיד · בלי גרדיאנט/זוהר/צל · שורה-לא-כרטיס · בלי אריח-אמוג׳י. הכרום קורא DsLook.of(context)
+// בדיוק כמו שאטום-forge קורא DsSeam.skinOf — הזהות בחיווט (חוק-6), לא בקוד.
+class DsLook {
+  const DsLook({required this.paper, required this.bg, required this.card, required this.cardAlt, required this.ink, required this.muted, required this.faint, required this.line, required this.track, required this.accent, required this.accentDark, required this.accentSoft, required this.success, required this.successSoft, required this.danger, required this.dangerSoft, required this.dangerLine, required this.chipBg, required this.r, required this.rSm, required this.fontHead});
+  final bool paper;
+  final Color bg, card, cardAlt, ink, muted, faint, line, track, accent, accentDark, accentSoft, success, successSoft, danger, dangerSoft, dangerLine, chipBg;
+  final double r, rSm;
+  final String fontHead;
+  static const DsLook dark = DsLook(paper: false, bg: DsTokens.bg, card: DsTokens.card, cardAlt: DsTokens.cardAlt, ink: DsTokens.ink, muted: DsTokens.muted, faint: DsTokens.faint, line: DsTokens.line, track: DsTokens.track, accent: DsTokens.accent, accentDark: DsTokens.accentDark, accentSoft: DsTokens.accentSoft, success: DsTokens.success, successSoft: DsTokens.successSoft, danger: Color(0xFFDC2626), dangerSoft: Color(0x14DC2626), dangerLine: Color(0x40DC2626), chipBg: Color(0xFFF1F5F9), r: DsTokens.r, rSm: DsTokens.rSm, fontHead: DsTokens.fontHead);
+  static DsLook of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<PureScope>();
+    if (scope == null || scope.skin.canvas.computeLuminance() < 0.5) return dark;
+    final s = scope.skin, th = scope.theme;
+    return DsLook(paper: true, bg: s.canvas, card: s.surface, cardAlt: s.raised, ink: s.ink, muted: s.mut, faint: s.faint, line: s.hair, track: s.raised2, accent: th.a, accentDark: th.a800, accentSoft: th.a.withValues(alpha: 0.10), success: s.ok, successSoft: s.ok.withValues(alpha: 0.12), danger: s.err, dangerSoft: s.err.withValues(alpha: 0.08), dangerLine: s.err.withValues(alpha: 0.25), chipBg: s.raised2, r: 12, rSm: 10, fontHead: scope.fonts.he);
+  }
+}
+
+// ── שלד-מסך: רקע כהה + כותרת-זכוכית + גוף גלילה מרווח (paper: לבן · כותרת 22/600 · קו · בלי אריח) ──
 class DsScaffold extends StatelessWidget {
   const DsScaffold({required this.title, required this.subtitle, required this.icon, required this.children, this.bottomBar, this.header = true, super.key});
   final String title, subtitle, icon;
@@ -79,82 +99,86 @@ class DsScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final canPop = Navigator.of(context).canPop();
+    final lk = DsLook.of(context);
+    final paper = lk.paper;
+    final column = Column(
+      children: [
+        if (!header && canPop) Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.of(context).maybePop(), icon: Icon(Icons.arrow_forward, color: lk.muted, size: 22))),
+        if (header) Container(
+          padding: paper ? const EdgeInsets.fromLTRB(16, 10, 16, 10) : const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          decoration: BoxDecoration(
+            color: lk.card,
+            border: Border(bottom: BorderSide(color: lk.line)),
+            boxShadow: paper ? null : DsTokens.shadowSm,
+          ),
+          child: Row(
+            children: [
+              if (!paper) Container(
+                width: 42, height: 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(12), boxShadow: DsTokens.glow),
+                child: Text(icon, style: const TextStyle(fontSize: 22)),
+              ),
+              if (!paper) const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: paper
+                        ? TextStyle(color: lk.ink, fontSize: 22, fontWeight: FontWeight.w600, height: 1.3, fontFamily: lk.fontHead)
+                        : const TextStyle(color: DsTokens.ink, fontSize: 19, fontWeight: FontWeight.w800, height: 1.1, letterSpacing: -0.3, fontFamily: DsTokens.fontHead)),
+                    if (subtitle.isNotEmpty) Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.muted, fontSize: paper ? 13 : 12.5, fontWeight: FontWeight.w500)),
+                    ),
+                  ],
+                ),
+              ),
+              if (canPop)
+                IconButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  icon: Icon(Icons.arrow_forward, color: lk.muted, size: 22),
+                ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: paper
+              ? Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 720), child: ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 28), children: children)))
+              : ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 28), children: children),
+        ),
+        if (bottomBar != null)
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            decoration: BoxDecoration(
+              color: lk.card,
+              border: Border(top: BorderSide(color: lk.line)),
+            ),
+            child: SafeArea(top: false, child: bottomBar!),
+          ),
+      ],
+    );
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: DsTokens.bg,
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(-0.7, -1.1), radius: 1.5,
-              colors: [Color(0x267C3AED), Color(0x0007070D)],
-            ),
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                if (!header && canPop) Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.of(context).maybePop(), icon: const Icon(Icons.arrow_forward, color: DsTokens.muted, size: 22))),
-                if (header) Container(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                  decoration: const BoxDecoration(
-                    color: DsTokens.card,
-                    border: Border(bottom: BorderSide(color: DsTokens.line)),
-                    boxShadow: DsTokens.shadowSm,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42, height: 42,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(gradient: DsTokens.accentGrad, borderRadius: BorderRadius.circular(12), boxShadow: DsTokens.glow),
-                        child: Text(icon, style: const TextStyle(fontSize: 22)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 19, fontWeight: FontWeight.w800, height: 1.1, letterSpacing: -0.3, fontFamily: DsTokens.fontHead)),
-                            if (subtitle.isNotEmpty) Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w500)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (canPop)
-                        IconButton(
-                          onPressed: () => Navigator.of(context).maybePop(),
-                          icon: const Icon(Icons.arrow_forward, color: DsTokens.muted, size: 22),
-                        ),
-                    ],
+        backgroundColor: lk.bg,
+        body: paper
+            ? SafeArea(child: column)
+            : DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(-0.7, -1.1), radius: 1.5,
+                    colors: [Color(0x267C3AED), Color(0x0007070D)],
                   ),
                 ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-                    children: children,
-                  ),
-                ),
-                if (bottomBar != null)
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    decoration: const BoxDecoration(
-                      color: DsTokens.card,
-                      border: Border(top: BorderSide(color: DsTokens.line)),
-                    ),
-                    child: SafeArea(top: false, child: bottomBar!),
-                  ),
-              ],
-            ),
-          ),
-        ),
+                child: SafeArea(child: column),
+              ),
       ),
     );
   }
 }
 
-// ── כרטיס-סקשן: כותרת + ילדים במרווח אחיד (זכוכית-כהה) ──
+// ── כרטיס-סקשן: כותרת + ילדים במרווח אחיד (זכוכית-כהה · paper: כותרת-חלק 15/700 שטוחה, בלי כרטיס) ──
 class DsSection extends StatelessWidget {
   const DsSection({required this.title, required this.children, this.trailing, this.tone = 0, super.key});
   final String title;
@@ -164,7 +188,28 @@ class DsSection extends StatelessWidget {
   static const List<Color> _toneC = [Color(0xFF7C3AED), Color(0xFF34D399), Color(0xFFF43F5E), Color(0xFFF59E0B)];
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    if (lk.paper) {
+      final toneC = tone == 0 ? lk.ink : tone == 1 ? lk.success : tone == 2 ? lk.danger : const Color(0xFFC98A00);
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(children: [
+                Expanded(child: Text(title, style: TextStyle(color: toneC, fontSize: 15, fontWeight: FontWeight.w700, fontFamily: lk.fontHead))),
+                if (trailing != null) trailing!,
+              ]),
+            ),
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children),
+          ],
+        ),
+      );
+    }
+    return Container(
         margin: const EdgeInsets.only(bottom: DsTokens.gap),
         decoration: BoxDecoration(
           gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF141534), Color(0xFF101127)]),
@@ -193,6 +238,66 @@ class DsSection extends StatelessWidget {
           ],
         ),
       );
+  }
+}
+
+// ── G28 · חלק-מקופל: כותרת «▸ פרטים (n)» + ילדים, סגור כברירת-מחדל (3-למעלה, השאר מתחת — PLAN §3.2) ──
+// סוקטים: title · details (List<Widget>) — נאסף לקטלוג ע"י המפקד כ-op expand. paper ובכהה כאחד (אין מצב-קודם ⇒ אין ביט-זהה לשבור).
+class DsFold extends StatefulWidget {
+  const DsFold({required this.title, required this.details, this.open = false, super.key});
+  final String title;
+  final List<Widget> details;
+  final bool open;
+  @override
+  State<DsFold> createState() => _DsFoldState();
+}
+
+class _DsFoldState extends State<DsFold> {
+  bool? _open;
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final open = _open ?? widget.open;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: () => setState(() => _open = !open),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(children: [
+              Icon(open ? Icons.expand_more : Icons.chevron_left, size: 18, color: lk.muted),
+              const SizedBox(width: 4),
+              Expanded(child: Text(widget.title, style: TextStyle(color: lk.muted, fontSize: 14, fontWeight: FontWeight.w600))),
+            ]),
+          ),
+        ),
+        if (open) Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: widget.details),
+      ],
+    );
+  }
+}
+
+// ── G28 · פסקת-תוכן: כותרת-חלק + טקסט (אטום-תוכן «תוכן X: …» של הפירוק) — סוקטים: message · label. Notion-שטוח: 16/1.5, בלי כרטיס ──
+class DsNote extends StatelessWidget {
+  const DsNote({required this.message, this.label = '', this.tone = 0, super.key});
+  final String message, label;
+  final int tone; // 0 רגיל · 1 ok · 2 danger · 3 warn — צבע-הכותרת בלבד
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final toneC = tone == 1 ? lk.success : tone == 2 ? lk.danger : tone == 3 ? const Color(0xFFC98A00) : lk.ink;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (label.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 2), child: Text(label, style: TextStyle(color: toneC, fontSize: 15, fontWeight: FontWeight.w700, fontFamily: lk.fontHead))),
+          Text(message, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5)),
+        ],
+      ),
+    );
+  }
 }
 
 // (שדות-הקלט DsField · DsNumberField · DsDateField · DsToggleTile חיים בקבצים
@@ -206,11 +311,13 @@ class DsWorkflow extends StatelessWidget {
   final int current;
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final paper = lk.paper;
     final items = <Widget>[];
     for (var i = 0; i < steps.length; i++) {
       final done = i <= current;
       if (i > 0) {
-        items.add(Expanded(child: Container(height: 2, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(gradient: i <= current ? DsTokens.accentGrad : null, color: i <= current ? null : DsTokens.line))));
+        items.add(Expanded(child: Container(height: 2, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(gradient: paper ? null : (i <= current ? DsTokens.accentGrad : null), color: paper ? (i <= current ? lk.accent : lk.line) : (i <= current ? null : DsTokens.line)))));
       }
       items.add(Column(
         mainAxisSize: MainAxisSize.min,
@@ -219,18 +326,18 @@ class DsWorkflow extends StatelessWidget {
             width: 30, height: 30,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              gradient: done ? DsTokens.accentGrad : null,
-              color: done ? null : DsTokens.card,
+              gradient: paper ? null : (done ? DsTokens.accentGrad : null),
+              color: paper ? (done ? lk.accent : lk.card) : (done ? null : DsTokens.card),
               shape: BoxShape.circle,
-              border: Border.all(color: done ? Colors.transparent : DsTokens.line, width: 2),
-              boxShadow: i == current ? DsTokens.glow : null,
+              border: Border.all(color: done ? Colors.transparent : lk.line, width: 2),
+              boxShadow: paper ? null : (i == current ? DsTokens.glow : null),
             ),
-            child: Text('${i + 1}', style: TextStyle(color: done ? Colors.white : DsTokens.faint, fontSize: 13, fontWeight: FontWeight.w800)),
+            child: Text('${i + 1}', style: TextStyle(color: done ? Colors.white : lk.faint, fontSize: 13, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(height: 6),
           SizedBox(
             width: 54,
-            child: Text(steps[i], textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: i == current ? DsTokens.ink : DsTokens.faint, fontSize: 10.5, fontWeight: i == current ? FontWeight.w700 : FontWeight.w500)),
+            child: Text(steps[i], textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: i == current ? lk.ink : lk.faint, fontSize: 10.5, fontWeight: i == current ? FontWeight.w700 : FontWeight.w500)),
           ),
         ],
       ));
@@ -238,41 +345,48 @@ class DsWorkflow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: DsTokens.gap),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      decoration: BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), border: Border.all(color: DsTokens.line), boxShadow: DsTokens.shadow),
+      decoration: paper
+          ? BoxDecoration(border: Border(bottom: BorderSide(color: lk.line)))
+          : BoxDecoration(color: DsTokens.card, borderRadius: BorderRadius.circular(DsTokens.r), border: Border.all(color: DsTokens.line), boxShadow: DsTokens.shadow),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: items),
     );
   }
 }
 
-// ── כפתור-ראשי (gradient-ניאון + זוהר) ──
+// ── כפתור-ראשי (gradient-ניאון + זוהר · paper: אקצנט-מלא שטוח, רדיוס 12) ──
 class DsPrimaryButton extends StatelessWidget {
   const DsPrimaryButton({required this.label, this.onTap, super.key});
   final String label;
   final VoidCallback? onTap;
   @override
-  Widget build(BuildContext context) => DecoratedBox(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final paper = lk.paper;
+    return DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(13),
-          gradient: DsTokens.accentGrad,
-          boxShadow: DsTokens.glow,
+          borderRadius: BorderRadius.circular(paper ? 12 : 13),
+          gradient: paper ? null : DsTokens.accentGrad,
+          color: paper ? lk.accent : null,
+          boxShadow: paper ? null : DsTokens.glow,
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(13),
+            borderRadius: BorderRadius.circular(paper ? 12 : 13),
             onTap: onTap ?? () {},
             child: Container(
               height: 50,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
+              decoration: paper ? null : BoxDecoration(
                 borderRadius: BorderRadius.circular(13),
                 border: Border.all(color: const Color(0x24FFFFFF)),
               ),
-              child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 15.5, fontWeight: FontWeight.w800, letterSpacing: 0.2)),
+              child: Text(label, style: TextStyle(color: Colors.white, fontSize: paper ? 16 : 15.5, fontWeight: paper ? FontWeight.w600 : FontWeight.w800, letterSpacing: paper ? 0 : 0.2)),
             ),
           ),
         ),
       );
+  }
 }
 
 // ── שבב-סטטוס ──
@@ -282,9 +396,10 @@ class DsChip extends StatelessWidget {
   final int tone; // 0 accent · 1 success · 2 muted
   @override
   Widget build(BuildContext context) {
-    final bg = tone == 1 ? DsTokens.successSoft : tone == 2 ? DsTokens.track : DsTokens.accentSoft;
-    final fg = tone == 1 ? DsTokens.success : tone == 2 ? DsTokens.muted : DsTokens.accentDark;
-    final bd = tone == 1 ? const Color(0x3334D399) : tone == 2 ? DsTokens.line : const Color(0x407C3AED);
+    final lk = DsLook.of(context);
+    final bg = tone == 1 ? lk.successSoft : tone == 2 ? lk.track : lk.accentSoft;
+    final fg = tone == 1 ? lk.success : tone == 2 ? lk.muted : lk.accentDark;
+    final bd = lk.paper ? Colors.transparent : (tone == 1 ? const Color(0x3334D399) : tone == 2 ? DsTokens.line : const Color(0x407C3AED));
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20), border: Border.all(color: bd)),
@@ -293,63 +408,100 @@ class DsChip extends StatelessWidget {
   }
 }
 
-// ── אריח-KPI (דשבורד) — ערך בגרדיאנט-טקסט ──
+// ── אריח-KPI (דשבורד) — ערך בגרדיאנט-טקסט (paper: מספר-גדול על לבן, קו) ──
 class DsStat extends StatelessWidget {
   const DsStat({required this.label, required this.value, required this.sub, required this.glyph, this.onTap, super.key});
   final String label, value, sub, glyph;
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final paper = lk.paper;
     final card = Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF16173A), Color(0xFF101127)]),
-          borderRadius: BorderRadius.circular(DsTokens.r),
-          border: Border.all(color: DsTokens.line),
-          boxShadow: DsTokens.shadow,
-        ),
+        decoration: paper
+            ? BoxDecoration(color: lk.card, borderRadius: BorderRadius.circular(lk.r), border: Border.all(color: lk.line))
+            : BoxDecoration(
+                gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF16173A), Color(0xFF101127)]),
+                borderRadius: BorderRadius.circular(DsTokens.r),
+                border: Border.all(color: DsTokens.line),
+                boxShadow: DsTokens.shadow,
+              ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
+                if (!paper) Container(
                   width: 34, height: 34,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(9), border: Border.all(color: const Color(0x337C3AED))),
                   child: Text(glyph, style: const TextStyle(fontSize: 17)),
                 ),
                 const Spacer(),
-                ShaderMask(
-                  shaderCallback: (r) => DsTokens.inkGrad.createShader(r),
-                  child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w800, letterSpacing: -0.6, fontFamily: DsTokens.fontHead)),
-                ),
+                if (paper)
+                  Text(value, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.5, fontFamily: lk.fontHead, fontFeatures: const [FontFeature.tabularFigures()]))
+                else
+                  ShaderMask(
+                    shaderCallback: (r) => DsTokens.inkGrad.createShader(r),
+                    child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w800, letterSpacing: -0.6, fontFamily: DsTokens.fontHead)),
+                  ),
               ],
             ),
             const SizedBox(height: 10),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 14, fontWeight: FontWeight.w700)),
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: paper ? FontWeight.w600 : FontWeight.w700)),
             const SizedBox(height: 2),
-            Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.muted, fontSize: 11.5, fontWeight: FontWeight.w500)),
+            Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.muted, fontSize: paper ? 13 : 11.5, fontWeight: FontWeight.w500)),
           ],
         ),
       );
     if (onTap == null) return card;
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(DsTokens.r),
-      child: InkWell(borderRadius: BorderRadius.circular(DsTokens.r), onTap: onTap, child: card),
+      borderRadius: BorderRadius.circular(lk.r),
+      child: InkWell(borderRadius: BorderRadius.circular(lk.r), onTap: onTap, child: card),
     );
   }
 }
 
-// ── שורת-ניווט (לוח) ──
+// ── שורת-ניווט (לוח) — paper: שורה 52px, כותרת+מטא, קו-מפריד, בלי כרטיס ובלי אריח-אמוג׳י ──
 class DsNavTile extends StatelessWidget {
   const DsNavTile({required this.glyph, required this.title, required this.sub, required this.onTap, super.key});
   final String glyph, title, sub;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    if (lk.paper) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 52),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: lk.line))),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.ink, fontSize: 16, fontWeight: FontWeight.w400, height: 1.5)),
+                      if (sub.isNotEmpty) Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.muted, fontSize: 13, fontWeight: FontWeight.w400)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_left, color: lk.muted, size: 20),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Material(
           color: Colors.transparent,
@@ -386,6 +538,7 @@ class DsNavTile extends StatelessWidget {
           ),
         ),
       );
+  }
 }
 
 // ── כרטיס-רשומה: תווית:ערך לכל שדה + שבב-שלב חי + קידום + עריכה (הקשה) + מחיקה ──
@@ -404,6 +557,7 @@ class DsRecordCard extends StatelessWidget {
   final VoidCallback? onAdvance, onEdit, onDelete;
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     final rows = <Widget>[];
     for (var i = 0; i < labels.length && i < values.length; i++) {
       if (hidden.contains(i)) continue;   // RLS · עמודה מוסתרת לתפקיד
@@ -413,9 +567,9 @@ class DsRecordCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 110, child: Text(labels[i], style: const TextStyle(color: DsTokens.faint, fontSize: 12.5, fontWeight: FontWeight.w600))),
+            SizedBox(width: 110, child: Text(labels[i], style: TextStyle(color: lk.faint, fontSize: 12.5, fontWeight: FontWeight.w600))),
             const SizedBox(width: 8),
-            Expanded(child: Text(values[i], style: const TextStyle(color: DsTokens.ink, fontSize: 13.5, fontWeight: FontWeight.w600))),
+            Expanded(child: Text(values[i], style: TextStyle(color: lk.ink, fontSize: 13.5, fontWeight: FontWeight.w600))),
           ],
         ),
       ));
@@ -438,7 +592,7 @@ class DsRecordCard extends StatelessWidget {
                       PopupMenuItem<int>(
                         value: i,
                         child: Row(children: [
-                          Icon(i == stageIndex ? Icons.radio_button_checked : Icons.radio_button_off, size: 16, color: i == stageIndex ? DsTokens.accent : DsTokens.faint),
+                          Icon(i == stageIndex ? Icons.radio_button_checked : Icons.radio_button_off, size: 16, color: i == stageIndex ? lk.accent : lk.faint),
                           const SizedBox(width: 8),
                           Text(stages[i], style: const TextStyle(fontSize: 13.5)),
                         ]),
@@ -447,23 +601,23 @@ class DsRecordCard extends StatelessWidget {
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     DsChip(label: stage, tone: stageDone ? 1 : 0),
                     const SizedBox(width: 2),
-                    const Icon(Icons.expand_more, size: 15, color: DsTokens.faint),
+                    Icon(Icons.expand_more, size: 15, color: lk.faint),
                   ]),
                 ),
               const Spacer(),
               if (stage.isNotEmpty && !stageDone && onAdvance != null)
                 Material(
-                  color: DsTokens.accentSoft,
+                  color: lk.accentSoft,
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
                     onTap: onAdvance,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Text('קדם שלב', style: TextStyle(color: DsTokens.accentDark, fontSize: 12, fontWeight: FontWeight.w700)),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_back, size: 14, color: DsTokens.accentDark),
+                        Text('קדם שלב', style: TextStyle(color: lk.accentDark, fontSize: 12, fontWeight: FontWeight.w700)),
+                        const SizedBox(width: 4),
+                        Icon(Icons.arrow_back, size: 14, color: lk.accentDark),
                       ]),
                     ),
                   ),
@@ -492,23 +646,23 @@ class DsRecordCard extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                    icon: Icon(Icons.delete_outline, size: 18, color: blockedReason != null ? DsTokens.faint : DsTokens.muted),
+                    icon: Icon(Icons.delete_outline, size: 18, color: blockedReason != null ? lk.faint : lk.muted),
                     tooltip: blockedReason != null ? 'מחיקה חסומה' : 'מחק',
                   ),
                 ),
             ],
           ),
         ),
-        ...rows.isEmpty ? [const Text('—', style: TextStyle(color: DsTokens.faint))] : rows,
+        ...rows.isEmpty ? [Text('—', style: TextStyle(color: lk.faint))] : rows,
         if (footer != null) Padding(padding: const EdgeInsets.only(top: 10), child: footer),
       ],
     );
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: DsTokens.cardAlt,
-        borderRadius: BorderRadius.circular(DsTokens.rSm),
-        border: Border.all(color: DsTokens.line),
+        color: lk.cardAlt,
+        borderRadius: BorderRadius.circular(lk.rSm),
+        border: Border.all(color: lk.line),
       ),
       clipBehavior: Clip.antiAlias,
       child: onEdit == null
@@ -523,19 +677,22 @@ class DsEmpty extends StatelessWidget {
   const DsEmpty({required this.label, super.key});
   final String label;
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Padding(
         padding: const EdgeInsets.symmetric(vertical: 22),
         child: Column(
           children: [
             Container(
               width: 46, height: 46,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: DsTokens.track, borderRadius: BorderRadius.circular(13), border: Border.all(color: DsTokens.line)),
-              child: const Icon(Icons.inbox_outlined, color: DsTokens.faint, size: 24),
+              decoration: BoxDecoration(color: lk.track, borderRadius: BorderRadius.circular(13), border: Border.all(color: lk.line)),
+              child: Icon(Icons.inbox_outlined, color: lk.faint, size: 24),
             ),
             const SizedBox(height: 10),
-            Text(label, style: const TextStyle(color: DsTokens.muted, fontSize: 13, fontWeight: FontWeight.w500)),
+            Text(label, style: TextStyle(color: lk.muted, fontSize: 13, fontWeight: FontWeight.w500)),
           ],
         ),
       );
+  }
 }

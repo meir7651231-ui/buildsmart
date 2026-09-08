@@ -1,6 +1,7 @@
-// ✨ חולל ע"י מנוע-הרינדור (render-ds) — שורש-האפליקציה (main + MaterialApp + theme + RTL). אל תערוך ידנית.
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — שורש-האפליקציה (main + MaterialApp + theme + RTL + PureScope · עור-נייר (G28)). אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_app_peruk04_main_content.dart';
-import '../dart-ui-bs/ds/ds.dart';
+import '../dart-ui-bs/ds/ds_pure.dart';
+import '../dart-ui-bs/ds/ds_seam.dart';
 import 'gen_app_peruk04_relations.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import 'gen_app_peruk04_shell.dart';
@@ -17,13 +18,16 @@ class GenAppPeruk04MainScreen extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
+          brightness: Brightness.light,
           fontFamily: 'Heebo',
-          scaffoldBackgroundColor: DsTokens.bg,
-          colorScheme: ColorScheme.fromSeed(seedColor: DsTokens.accent),
+          scaffoldBackgroundColor: DsPure.skins['paper']!.canvas,
+          colorScheme: ColorScheme.fromSeed(seedColor: DsPure.themes['t-balagan']!.a, brightness: Brightness.light),
         ),
-        builder: (context, child) => Directionality(
-          textDirection: TextDirection.rtl,
-          child: child ?? const SizedBox.shrink(),
+        builder: (context, child) => PureScope(
+          theme: DsPure.themes['t-balagan']!,
+          skin: DsPure.skins['paper']!,
+          fonts: DsPure.fontSets['heebo']!,
+          child: Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox.shrink()),
         ),
         home: const GenAppPeruk04ShellScreen(),
       );

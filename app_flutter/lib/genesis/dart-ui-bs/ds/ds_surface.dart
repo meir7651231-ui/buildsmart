@@ -11,15 +11,18 @@ class DsCardElevated extends StatelessWidget {
   const DsCardElevated({required this.child, super.key});
   final Widget child;
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
         padding: const EdgeInsets.all(DsSpace.lg),
         decoration: BoxDecoration(
-          color: DsTokens.card,
+          color: lk.card,
           borderRadius: BorderRadius.circular(DsRadii.lg),
           boxShadow: DsElev.e2,
         ),
         child: child,
       );
+  }
 }
 
 // ── כרטיס-מתאר — קו-גבול עדין, בלי-צל, שטוח ──
@@ -27,15 +30,18 @@ class DsCardOutlined extends StatelessWidget {
   const DsCardOutlined({required this.child, super.key});
   final Widget child;
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
         padding: const EdgeInsets.all(DsSpace.lg),
         decoration: BoxDecoration(
-          color: DsTokens.card,
+          color: lk.card,
           borderRadius: BorderRadius.circular(DsRadii.lg),
-          border: Border.all(color: DsTokens.line),
+          border: Border.all(color: lk.line),
         ),
         child: child,
       );
+  }
 }
 
 // ── כרטיס-זכוכית — שקיפות+טשטוש-רקע, מסגרת-אור (glassmorphism) ──
@@ -43,7 +49,9 @@ class DsCardGlass extends StatelessWidget {
   const DsCardGlass({required this.child, super.key});
   final Widget child;
   @override
-  Widget build(BuildContext context) => ClipRRect(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return ClipRRect(
         borderRadius: BorderRadius.circular(DsRadii.lg),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
@@ -58,6 +66,7 @@ class DsCardGlass extends StatelessWidget {
           ),
         ),
       );
+  }
 }
 
 // ── כרטיס-גרדיאנט — רקע גרדיאנט-מבטא, טקסט-בהיר ──
@@ -65,7 +74,9 @@ class DsCardGradient extends StatelessWidget {
   const DsCardGradient({required this.child, super.key});
   final Widget child;
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
         padding: const EdgeInsets.all(DsSpace.lg),
         decoration: BoxDecoration(
           gradient: DsGradient.accent,
@@ -74,4 +85,5 @@ class DsCardGradient extends StatelessWidget {
         ),
         child: DefaultTextStyle.merge(style: const TextStyle(color: Colors.white), child: child),
       );
+  }
 }

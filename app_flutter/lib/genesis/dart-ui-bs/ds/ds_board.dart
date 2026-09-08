@@ -22,6 +22,7 @@ class DsBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     return SizedBox(
       height: 340,
       child: ListView.separated(
@@ -34,9 +35,9 @@ class DsBoard extends StatelessWidget {
           return Container(
             width: 210,
             decoration: BoxDecoration(
-              color: DsTokens.cardAlt,
-              borderRadius: BorderRadius.circular(DsTokens.rSm),
-              border: Border.all(color: DsTokens.line),
+              color: lk.cardAlt,
+              borderRadius: BorderRadius.circular(lk.rSm),
+              border: Border.all(color: lk.line),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,18 +45,18 @@ class DsBoard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
                   child: Row(children: [
-                    Expanded(child: Text(stages[col], overflow: TextOverflow.ellipsis, style: const TextStyle(color: DsTokens.ink, fontSize: 13.5, fontWeight: FontWeight.w800))),
+                    Expanded(child: Text(stages[col], overflow: TextOverflow.ellipsis, style: TextStyle(color: lk.ink, fontSize: 13.5, fontWeight: FontWeight.w800))),
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
-                      decoration: BoxDecoration(color: DsTokens.accentSoft, borderRadius: BorderRadius.circular(10)),
-                      child: Text('${inCol.length}', style: const TextStyle(color: DsTokens.accentDark, fontSize: 11.5, fontWeight: FontWeight.w800)),
+                      decoration: BoxDecoration(color: lk.accentSoft, borderRadius: BorderRadius.circular(10)),
+                      child: Text('${inCol.length}', style: TextStyle(color: lk.accentDark, fontSize: 11.5, fontWeight: FontWeight.w800)),
                     ),
                   ]),
                 ),
                 Expanded(
                   child: inCol.isEmpty
-                      ? const Center(child: Text('—', style: TextStyle(color: DsTokens.faint)))
+                      ? Center(child: Text('—', style: TextStyle(color: lk.faint)))
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                           itemCount: inCol.length,
@@ -66,14 +67,14 @@ class DsBoard extends StatelessWidget {
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: DsTokens.cardAlt,
-                                borderRadius: BorderRadius.circular(DsTokens.rSm),
-                                border: Border.all(color: DsTokens.line),
+                                color: lk.cardAlt,
+                                borderRadius: BorderRadius.circular(lk.rSm),
+                                border: Border.all(color: lk.line),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(titleOf(r).isEmpty ? id : titleOf(r), style: const TextStyle(color: DsTokens.ink, fontSize: 13, fontWeight: FontWeight.w700)),
+                                  Text(titleOf(r).isEmpty ? id : titleOf(r), style: TextStyle(color: lk.ink, fontSize: 13, fontWeight: FontWeight.w700)),
                                   const SizedBox(height: 8),
                                   Row(children: [
                                     if (col > 0)
@@ -105,15 +106,16 @@ class _MoveBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     return Material(
-      color: accent ? DsTokens.accentSoft : DsTokens.track,
+      color: accent ? lk.accentSoft : lk.track,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(4),
-          child: Icon(icon, size: 17, color: accent ? DsTokens.accentDark : DsTokens.muted),
+          child: Icon(icon, size: 17, color: accent ? lk.accentDark : lk.muted),
         ),
       ),
     );

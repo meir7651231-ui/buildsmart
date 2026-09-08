@@ -41,6 +41,7 @@ class _DsTableState extends State<DsTable> {
 
   @override
   Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
     final rows = _sorted;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -49,8 +50,8 @@ class _DsTableState extends State<DsTable> {
         headingRowHeight: 40,
         dataRowMinHeight: 38,
         dataRowMaxHeight: 46,
-        headingTextStyle: const TextStyle(color: DsTokens.ink, fontSize: 12.5, fontWeight: FontWeight.w800),
-        dataTextStyle: const TextStyle(color: DsTokens.ink, fontSize: 12.5, fontWeight: FontWeight.w500),
+        headingTextStyle: TextStyle(color: lk.ink, fontSize: 12.5, fontWeight: FontWeight.w800),
+        dataTextStyle: TextStyle(color: lk.ink, fontSize: 12.5, fontWeight: FontWeight.w500),
         columns: [
           for (var i = 0; i < widget.labels.length; i++)
             DataColumn(
@@ -58,7 +59,7 @@ class _DsTableState extends State<DsTable> {
                 onTap: () => _tap(i),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Flexible(child: Text(widget.labels[i], overflow: TextOverflow.ellipsis)),
-                  if (_sort == i) Icon(_asc ? Icons.arrow_drop_up : Icons.arrow_drop_down, size: 18, color: DsTokens.accent),
+                  if (_sort == i) Icon(_asc ? Icons.arrow_drop_up : Icons.arrow_drop_down, size: 18, color: lk.accent),
                 ]),
               ),
             ),

@@ -24,32 +24,35 @@ class _DsFieldState extends State<DsField> {
   @override
   void dispose() { _c.dispose(); super.dispose(); }
   @override
-  Widget build(BuildContext context) => Padding(
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Padding(
         padding: widget.bare ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (!widget.bare) Padding(
               padding: const EdgeInsets.only(right: 2, bottom: 6),
-              child: Text(widget.label, style: const TextStyle(color: DsTokens.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
+              child: Text(widget.label, style: TextStyle(color: lk.muted, fontSize: 12.5, fontWeight: FontWeight.w600)),
             ),
             TextField(
               controller: _c,
               onChanged: widget.onChanged,
-              style: const TextStyle(color: DsTokens.ink, fontSize: 15, fontWeight: FontWeight.w500),
-              cursorColor: DsTokens.accent,
+              style: TextStyle(color: lk.ink, fontSize: 15, fontWeight: FontWeight.w500),
+              cursorColor: lk.accent,
               decoration: InputDecoration(
                 isDense: true,
                 hintText: widget.hint,
-                hintStyle: const TextStyle(color: DsTokens.faint, fontSize: 14),
+                hintStyle: TextStyle(color: lk.faint, fontSize: 14),
                 filled: true,
-                fillColor: DsTokens.cardAlt,
+                fillColor: lk.cardAlt,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(DsTokens.rSm), borderSide: const BorderSide(color: DsTokens.line)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(DsTokens.rSm), borderSide: const BorderSide(color: DsTokens.accent, width: 1.6)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(lk.rSm), borderSide: BorderSide(color: lk.line)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(lk.rSm), borderSide: BorderSide(color: lk.accent, width: 1.6)),
               ),
             ),
           ],
         ),
       );
+  }
 }
