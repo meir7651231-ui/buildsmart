@@ -78,7 +78,7 @@ class GenAppTasksHomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_tasks_ent1').where((r) => appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '') >= 1 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: (((r[gen_app_tasks_home_c0] ?? '')).trim().isEmpty ? gen_app_tasks_home_c26 : (r[gen_app_tasks_home_c0] ?? '')) + ' · ' + const [gen_app_tasks_home_c3, gen_app_tasks_home_c4][appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_tasks_home_c0] ?? '')).trim().isEmpty ? gen_app_tasks_home_c26 : (r[gen_app_tasks_home_c0] ?? '')), trailing: Text(const [gen_app_tasks_home_c3, gen_app_tasks_home_c4][appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         
         Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_app_tasks_home_c27, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppTasksRootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);

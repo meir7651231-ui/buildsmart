@@ -93,7 +93,7 @@ class GenAppPeruk22HomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_peruk22_ent1').where((r) => appStore.stageOf('app_peruk22_ent1', r[AppStore.idKey] ?? '') >= 4 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: (((r[gen_app_peruk22_home_c0] ?? '')).trim().isEmpty ? gen_app_peruk22_home_c40 : (r[gen_app_peruk22_home_c0] ?? '')) + ' · ' + const [gen_app_peruk22_home_c6, gen_app_peruk22_home_c7, gen_app_peruk22_home_c8, gen_app_peruk22_home_c9, gen_app_peruk22_home_c10][appStore.stageOf('app_peruk22_ent1', r[AppStore.idKey] ?? '').clamp(0, 4)], children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_peruk22_home_c0] ?? '')).trim().isEmpty ? gen_app_peruk22_home_c40 : (r[gen_app_peruk22_home_c0] ?? '')), trailing: Text(const [gen_app_peruk22_home_c6, gen_app_peruk22_home_c7, gen_app_peruk22_home_c8, gen_app_peruk22_home_c9, gen_app_peruk22_home_c10][appStore.stageOf('app_peruk22_ent1', r[AppStore.idKey] ?? '').clamp(0, 4)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         
         Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_peruk22_home_c41, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_peruk22_home_c42, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk22RootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);

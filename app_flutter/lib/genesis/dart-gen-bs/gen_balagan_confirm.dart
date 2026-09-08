@@ -37,7 +37,8 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
     final map = <String, String>{for (final e in _v.entries) if (e.value.trim().isNotEmpty) e.key: e.value.trim()};
     if (map.isEmpty) return;
     for (final f in widget.module.fields) { if (map.containsKey(f.label)) balaganLearn(f, map[f.label]!); }
-    appStore.add(widget.module.rootSlug, {...map, if (widget.module.stages > 0) '__stage': '0', if (widget.doc.isNotEmpty) '__doc': widget.doc});
+    final id = appStore.add(widget.module.rootSlug, {...map, if (widget.module.stages > 0) '__stage': '0', if (widget.doc.isNotEmpty) '__doc': widget.doc});
+    appStore.logAction('add', gen_balagan_confirm_c0.replaceAll('{title}', widget.module.title + ' · ' + appStore.displayOf(widget.module.rootSlug, id)), entity: widget.module.rootSlug, rid: id);   // «עשיתי» + החזר (מחיקה)
     Navigator.of(context).pop(true);
   }
   @override
@@ -47,12 +48,12 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
     final shown = <BalaganField>[]; for (final f in m.fields) { if (widget.facts.containsKey(f.label)) shown.add(f); } for (final f in m.fields) { if (shown.length >= 6) break; if (f.required && !shown.contains(f)) shown.add(f); }
     shown.sort((a, b) => m.fields.indexOf(a).compareTo(m.fields.indexOf(b)));
     final rest = m.fields.where((f) => !shown.contains(f)).toList();
-    return DsScaffold(title: m.title, subtitle: gen_balagan_confirm_c0, icon: gen_balagan_confirm_c1, children: [
-      if (m.moment.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: DsNote(message: gen_balagan_confirm_c2.replaceAll('{title}', m.title).replaceAll('{moment}', m.moment), label: '', tone: 0)),
-      if (widget.alternatives.isNotEmpty) DsFold(title: gen_balagan_confirm_c3.replaceAll('{n}', widget.alternatives.length.toString()), details: [for (final a in widget.alternatives) DsNavTile(glyph: '', title: a.title, sub: a.moment, onTap: () => Navigator.of(context).pushReplacement<bool, bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: a, facts: balaganFacts(widget.text, a), doc: widget.doc, alternatives: [for (final x in [widget.module, ...widget.alternatives]) if (x.index != a.index) x], text: widget.text))))]),
+    return DsScaffold(title: m.title, subtitle: gen_balagan_confirm_c1, icon: gen_balagan_confirm_c2, children: [
+      if (m.moment.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: DsNote(message: gen_balagan_confirm_c3.replaceAll('{title}', m.title).replaceAll('{moment}', m.moment), label: '', tone: 0)),
+      if (widget.alternatives.isNotEmpty) DsFold(title: gen_balagan_confirm_c4.replaceAll('{n}', widget.alternatives.length.toString()), details: [for (final a in widget.alternatives) DsNavTile(glyph: '', title: a.title, sub: a.moment, onTap: () => Navigator.of(context).pushReplacement<bool, bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: a, facts: balaganFacts(widget.text, a), doc: widget.doc, alternatives: [for (final x in [widget.module, ...widget.alternatives]) if (x.index != a.index) x], text: widget.text))))]),
       for (final f in shown) _field(f),
-      if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c4.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
-      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c5, onTap: _save)),
+      if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c5.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
+      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c6, onTap: _save)),
     ]);
   }
 }

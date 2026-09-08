@@ -14,10 +14,11 @@ class GenAppTasksRootScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) {
     final r0 = appStore.byId('app_tasks_ent1', id);
-    if (r0 == null) return DsScaffold(title: gen_app_tasks_root_c19, subtitle: gen_app_tasks_root_c20, icon: gen_app_tasks_root_c21, children: const []);
-    return DsScaffold(title: appStore.displayOf('app_tasks_ent1', id), subtitle: const [gen_app_tasks_root_c17, gen_app_tasks_root_c18][appStore.stageOf('app_tasks_ent1', id).clamp(0, 1)], icon: gen_app_tasks_root_c22, children: [
+    if (r0 == null) return DsScaffold(title: gen_app_tasks_root_c20, subtitle: gen_app_tasks_root_c21, icon: gen_app_tasks_root_c22, children: const []);
+    return DsScaffold(title: appStore.displayOf('app_tasks_ent1', id), subtitle: const [gen_app_tasks_root_c18, gen_app_tasks_root_c19][appStore.stageOf('app_tasks_ent1', id).clamp(0, 1)], icon: gen_app_tasks_root_c23, children: [
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_tasks_root_c15, details: [if ((r0[gen_app_tasks_root_c12] ?? '').trim().isNotEmpty) KvLine(label: gen_app_tasks_root_c0, value: (r0[gen_app_tasks_root_c1] ?? '')), if ((r0[gen_app_tasks_root_c13] ?? '').trim().isNotEmpty) KvLine(label: gen_app_tasks_root_c4, value: (r0[gen_app_tasks_root_c5] ?? '')), if ((r0[gen_app_tasks_root_c14] ?? '').trim().isNotEmpty) KvLine(label: gen_app_tasks_root_c8, value: (r0[gen_app_tasks_root_c9] ?? ''))])),
-      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__doc'] ?? '').startsWith('data:image') ? DsFold(title: gen_app_tasks_root_c16, details: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(base64Decode((r0['__doc'] ?? '').split(',').last), fit: BoxFit.fitWidth))]) : const SizedBox.shrink())),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__note'] ?? '').trim().isNotEmpty ? DsFold(title: gen_app_tasks_root_c16, details: [Text(r0['__note'] ?? '', style: TextStyle(color: DsLook.of(context).ink, fontSize: 15, height: 1.5))]) : const SizedBox.shrink())),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__doc'] ?? '').startsWith('data:image') ? DsFold(title: gen_app_tasks_root_c17, details: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(base64Decode((r0['__doc'] ?? '').split(',').last), fit: BoxFit.fitWidth))]) : const SizedBox.shrink())),
     ]);
   });
 }

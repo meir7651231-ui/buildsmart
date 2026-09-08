@@ -57,6 +57,7 @@ class AppStore extends ChangeNotifier {
     if (i < 0 || _log[i]['undone'] == '1') return false;
     final e = _log[i];
     if ((e['kind'] ?? '') == 'decide') { _decided.remove(e['field']); }
+    else if ((e['kind'] ?? '') == 'add') { removeById(e['entity'] ?? '', e['rid'] ?? ''); }   // החזר של שמירה = מחיקת הרשומה
     else if ((e['entity'] ?? '').isNotEmpty && (e['field'] ?? '').isNotEmpty) { final r = byId(e['entity']!, e['rid'] ?? ''); if (r != null) r[e['field']!] = e['prev'] ?? ''; }
     e['undone'] = '1'; notifyListeners(); return true;
   }
@@ -105,7 +106,7 @@ class AppStore extends ChangeNotifier {
   // "שם" רשומה = הערך-הראשון-הלא-ריק שאינו מטא (לתצוגת מפתח-זר ולבורר-קשר).
   String _display(Map<String, String> r) {
     for (final e in r.entries) {
-      if (e.key == idKey || e.key == stageKey) continue;
+      if (e.key == idKey || e.key == stageKey || e.key.startsWith('__')) continue;   // מטא (__at · __doc · __note) אינו שם-תצוגה
       if (e.value.trim().isNotEmpty) return e.value.trim();
     }
     return r[idKey] ?? '';
@@ -184,7 +185,7 @@ class AppStore extends ChangeNotifier {
 
   String add(String entity, Map<String, String> record) {
     final id = 'r${++_seq}';
-    final rec = <String, String>{idKey: id, ...record};
+    final rec = <String, String>{idKey: id, '__at': DateTime.now().toIso8601String().substring(0, 10), ...record};   // G33 · חותמת-יצירה (תיק שעומד בלי תנועה)
     (_rec[entity] ??= <Map<String, String>>[]).add(rec);
     notifyListeners();
     return id;

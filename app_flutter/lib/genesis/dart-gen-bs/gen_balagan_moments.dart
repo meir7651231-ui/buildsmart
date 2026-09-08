@@ -5,6 +5,7 @@ class BalaganModule {
   final int index; final String ns, title, moment, topic, rootSlug; final Map<String, double> weights; final List<String> dateFields, numFields; final String descField, longField; final List<BalaganField> fields; final int stages; final List<String> chain;
 }
 class BalaganHit { const BalaganHit(this.module, this.score); final BalaganModule module; final double score; }
+class _At { const _At(this.start); final int start; }
 
 const List<BalaganModule> kBalaganModules = [
   BalaganModule(0, 'calendar', 'יומן', '', 'עוד', {'יומנ': 16.72, 'פגישה': 2.05, 'שעה': 2.05, 'הערה': 2.05, 'ערה': 2.05, 'קומ': 1.82, 'ועד': 1.13, 'מועד': 1.04, 'מקומ': 1.04}, ['מועד'], [], 'מה', 'הערה', 'app_calendar_ent1', [BalaganField('מה', 'text', true, []), BalaganField('מועד', 'date', true, []), BalaganField('שעה', 'text', false, []), BalaganField('מקום', 'text', false, []), BalaganField('הערה', 'multiline', false, [])], 2, []),
@@ -64,8 +65,22 @@ Map<String, String> balaganFacts(String text, BalaganModule m) {
   for (final d in RegExp(r'(\d{1,2})[./](\d{1,2})[./](\d{2,4})').allMatches(text)) { var y = d.group(3)!; if (y.length == 2) y = '20$y'; dates.add('$y-${d.group(2)!.padLeft(2, '0')}-${d.group(1)!.padLeft(2, '0')}'); }
   final nums = <String>[];
   for (final n in RegExp(r'(?<![\d-])(\d{1,3}(?:,\d{3})+|\d{3,7})(?![\d-])').allMatches(text)) { final v = n.group(1)!.replaceAll(',', ''); if (!dates.any((d) => d.contains(v))) nums.add(v); }
-  for (var i = 0; i < m.dateFields.length && i < dates.length; i++) { out[m.dateFields[i]] = dates[i]; }
-  for (var i = 0; i < m.numFields.length && i < nums.length; i++) { out[m.numFields[i]] = nums[i]; }
+  // קרבה למילות-השדה (מבני: המילים של תווית-השדה עצמה, לא מילון): «מהפיקדון של 8,000» ⇒ פיקדון ⇐ 8000. אין קרבה ⇒ לפי סדר.
+  int nearest(List<RegExpMatch> ms, String label) {
+    final ws = <String>{}; for (final x in RegExp(r'[\u0590-\u05FF]{3,}').allMatches(label)) { final w = x.group(0)!; ws.add(w); if (w.length >= 4 && 'והבלמשכ'.contains(w[0])) ws.add(w.substring(1)); }
+    var best = -1; var bestD = 1 << 30;
+    for (var i = 0; i < ms.length; i++) { final a = ms[i].start; for (final w in ws) { var from = 0; while (true) { final at = text.indexOf(w, from); if (at < 0) break; from = at + 1; final wm = _At(at); var d = (wm.start - a).abs(); if (a < wm.start) d += 20; if (at > 0 && text[at - 1] == 'מ') d += 10; if (d < bestD && d <= 60) { bestD = d; best = i; } } } }
+    return best;
+  }
+  final numMs = RegExp(r'(?<![\d-])(\d{1,3}(?:,\d{3})+|\d{3,7})(?![\d-])').allMatches(text).where((n) => !dates.any((d) => d.contains(n.group(1)!.replaceAll(',', '')))).toList();
+  final usedN = <int>{};
+  for (final f in m.numFields) { final i = nearest(numMs, f); if (i >= 0 && !usedN.contains(i)) { out[f] = numMs[i].group(1)!.replaceAll(',', ''); usedN.add(i); } }
+  var ni = 0; for (final f in m.numFields) { if (out.containsKey(f)) continue; while (ni < numMs.length && usedN.contains(ni)) { ni++; } if (ni < numMs.length) { out[f] = numMs[ni].group(1)!.replaceAll(',', ''); usedN.add(ni); } }
+  final dateMs = [...RegExp(r'(\d{4})-(\d{2})-(\d{2})').allMatches(text), ...RegExp(r'(\d{1,2})[./](\d{1,2})[./](\d{2,4})').allMatches(text)];
+  final usedD = <int>{};
+  for (final f in m.dateFields) { final i = nearest(dateMs, f); if (i >= 0 && !usedD.contains(i) && i < dates.length) { out[f] = dates[i]; usedD.add(i); } }
+  var di = 0; for (final f in m.dateFields) { if (out.containsKey(f)) continue; while (di < dates.length && usedD.contains(di)) { di++; } if (di < dates.length) { out[f] = dates[di]; usedD.add(di); } }
+  if (text.trim().isNotEmpty) out['__note'] = text.trim();   // הטקסט המקורי לעולם לא אובד (מוצג בתיק: «מה כתבת»)
   final line = text.trim().split(RegExp(r'[\n.]')).first.trim();
   if (m.descField.isNotEmpty && line.isNotEmpty && line.length <= 40 && !m.dateFields.contains(m.descField) && !m.numFields.contains(m.descField)) { out[m.descField] = line; }   // שורה קצרה = שם/מתאר; משפט ארוך אינו שם
   if (m.longField.isNotEmpty && text.trim().length > 40) { out[m.longField] = text.trim(); }   // הטקסט המלא ⇒ שדה-הטקסט-הארוך הראשון (multiline), אם יש
