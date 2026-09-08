@@ -86,12 +86,12 @@ class GenAppPeruk26HomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null) continue;
         if (appStore.decision('ign:$rid:${f.label}') == 'no') continue;
-        if (dayDelta == 0 && d.isBefore(today)) { final ago = today.difference(d).inDays; out.add(_mk('${f.label} · $who', gen_app_peruk26_home_c27.replaceAll('{date}', _iso(d)) + ' · ' + (ago == 1 ? gen_app_peruk26_home_c28 : gen_app_peruk26_home_c29.replaceAll('{n}', ago.toString())), rid, f.label, d, f.hard, true, today, tm, rep)); continue; }
+        if (dayDelta == 0 && d.isBefore(today)) { final ago = today.difference(d).inDays; out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', gen_app_peruk26_home_c27.replaceAll('{date}', _iso(d)) + ' · ' + (ago == 1 ? gen_app_peruk26_home_c28 : gen_app_peruk26_home_c29.replaceAll('{n}', ago.toString())), rid, f.label, d, f.hard, true, today, tm, rep)); continue; }
         final okRem = appStore.decision(_remKey(rid, f.label)) == 'ok';   // תזכורת-מוקדמת (−3/−1) = הצעה שדורשת אישור; יום-ההכרעה עצמו = עובדה — מוצג בלי אישור
         for (final off in _offsets()) {
           if (off > 0 && !okRem) continue;
           final fire = _shift(d.subtract(Duration(days: off)), f.hard);
-          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk('${f.label} · $who', off == 0 ? gen_app_peruk26_home_c30 : gen_app_peruk26_home_c31.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep)); break; }
+          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? gen_app_peruk26_home_c30 : gen_app_peruk26_home_c31.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep)); break; }
         }
       }
     }
