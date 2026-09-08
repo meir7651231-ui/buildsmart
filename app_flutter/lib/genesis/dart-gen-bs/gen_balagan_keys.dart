@@ -12,6 +12,8 @@ class GenBalaganKeysScreen extends StatelessWidget {
     DsField(label: gen_balagan_keys_c3, hint: gen_balagan_keys_c4, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
     DsField(label: gen_balagan_keys_c5, hint: gen_balagan_keys_c6, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
     Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c7, label: '', tone: 0)),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c8, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c8, hint: gen_balagan_keys_c9, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c10, label: '', tone: 0)),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c11, label: '', tone: 0)),
   ]));
 }
