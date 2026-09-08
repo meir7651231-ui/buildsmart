@@ -70,7 +70,9 @@ List<BalaganHit> balaganIdentify(String text, {int k = 3}) {
   for (final m in kBalaganModules) { var s = 0.0; for (final t in toks) { s += m.weights[t] ?? 0; } if (s > 0) hits.add(BalaganHit(m, s)); }
   hits.sort((a, b) { final c = b.score.compareTo(a.score); return c != 0 ? c : a.module.index.compareTo(b.module.index); });
   // רגע כללי (אין מודול שמזהה אותו בביטחון) ⇒ שכבת-הבסיס ראשונה: הבסיס עם הציון-הגבוה, ואם אין — הכללי-ביותר (הכי-פחות שדות-חובה: משימה לפני פגישה). המודולים החלשים נשארים כחלופות («לא זה? אולי»).
-  final weak = hits.isEmpty || hits.first.score / hits.first.module.selfScore < kBalaganWeak;
+  // רגע עם תאריך שהמודול-שנבחר אינו יכול להחזיק (אין לו שדה-תאריך) — «מחר בבוקר תור לרופא» ⇒ יומן, לא «תור שבוטל»; המודול נשאר חלופה
+  final hasDate = balaganDates(balaganWaStrip(text), DateTime.now()).isNotEmpty;
+  final weak = hits.isEmpty || hits.first.score / hits.first.module.selfScore < kBalaganWeak || (hasDate && hits.first.module.dateFields.isEmpty);
   if (weak) {
     final base = kBalaganModules.where((m) => m.layer == 'base').toList();
     if (base.isNotEmpty) {
@@ -123,6 +125,9 @@ List<_DateAt> balaganDates(String text, DateTime today) {
 List<_DateAt> balaganTimes(String text) {
   final out = <_DateAt>[];
   for (final x in RegExp(r'(?:ב-?)?(?<![\d:])(\d{1,2}):(\d{2})(?![\d:])').allMatches(text)) { final h = int.parse(x.group(1)!), mi = int.parse(x.group(2)!); if (h > 23 || mi > 59) continue; out.add(_DateAt(x.start, x.end, '${h.toString().padLeft(2, '0')}:${mi.toString().padLeft(2, '0')}')); }
+  // חלקי-יום (שפה, לא דומיין): בבוקר 09:00 · בצהריים 13:00 · אחה"צ 16:00 · בערב 19:00 · בלילה 21:00 — רק כשאין שעה מפורשת באותו טווח
+  const dayParts = {'בבוקר': '09:00', 'בצהריים': '13:00', 'אחה"צ': '16:00', 'אחר הצהריים': '16:00', 'אחרי הצהריים': '16:00', 'בערב': '19:00', 'בלילה': '21:00'};
+  for (final x in RegExp(r'(?<![\u0590-\u05FF])(בבוקר|בצהריים|אחה"צ|אחר הצהריים|אחרי הצהריים|בערב|בלילה)(?![\u0590-\u05FF])').allMatches(text)) { if (out.any((o) => x.start < o.end && x.end > o.start)) continue; out.add(_DateAt(x.start, x.end, dayParts[x.group(1)!]!)); }
   for (final x in RegExp(r'בשעה\s+(\d{1,2})(?![\d:])').allMatches(text)) { final h = int.parse(x.group(1)!); if (h > 23) continue; if (out.any((o) => x.start < o.end && x.end > o.start)) continue; out.add(_DateAt(x.start, x.end, '${h.toString().padLeft(2, '0')}:00')); }
   out.sort((a, b) => a.start.compareTo(b.start));
   return out;

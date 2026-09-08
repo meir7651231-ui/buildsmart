@@ -202,7 +202,22 @@ void main() {
 
     expect(f['__note'], '[8.9.2026, 16:30] דני: מחר ב-9:00 פגישה');
   });
-  test('עובדות 28: 8.9.26, 16:30 - רות לוי: מסרתי מפתח ב-1.8.2026', () {
+  test('עובדות 28: מחר בבוקר תור לרופא', () {
+    final f = balaganFacts('מחר בבוקר תור לרופא', mod(['מועד'], [], tm: ['שעה']), today: today);
+    expect(f['מועד'], '2026-09-09');
+    expect(f['שעה'], '09:00');
+    expect(f['מה'], 'תור לרופא');
+
+    expect(f['__note'], 'מחר בבוקר תור לרופא');
+  });
+  test('עובדות 29: בערב פגישה עם דני', () {
+    final f = balaganFacts('בערב פגישה עם דני', mod(['מועד'], [], tm: ['שעה']), today: today);
+    expect(f['שעה'], '19:00');
+    expect(f['מה'], 'פגישה עם דני');
+    expect(f.containsKey('מועד'), isFalse);
+    expect(f['__note'], 'בערב פגישה עם דני');
+  });
+  test('עובדות 30: 8.9.26, 16:30 - רות לוי: מסרתי מפתח ב-1.8.2026', () {
     final f = balaganFacts('8.9.26, 16:30 - רות לוי: מסרתי מפתח ב-1.8.2026', mod(['תאריך מסירת מפתח'], [], pe: ['לקוח']), today: today);
     expect(f['תאריך מסירת מפתח'], '2026-08-01');
     expect(f['לקוח'], 'רות לוי');
@@ -223,6 +238,10 @@ void main() {
     final h = balaganIdentify('המשכיר מקזז 6,200 מהפיקדון של 8,000, מסרתי מפתח');
     expect(h.first.module.layer, isNot('base'));
     expect(h.first.score / h.first.module.selfScore >= kBalaganWeak, isTrue);
+  });
+  test('תאריך שהמודול לא יכול להחזיק ⇒ הבסיס; בלי תאריך המודול נשאר', () {
+    final a = balaganIdentify('מחר בבוקר תור לרופא'); expect(a.first.module.layer, 'base'); expect(a.first.module.timeFields, isNotEmpty); expect(a.any((h) => h.module.layer != 'base'), isTrue);
+    final b = balaganIdentify('תור לרופא'); expect(b.first.module.layer, isNot('base'));
   });
   test('שעה + רגע כללי ⇒ הבסיס עם שדה-שעה (פגישה), לא משימה', () {
     final h = balaganIdentify('מחר ב-9:00 עם דני');
