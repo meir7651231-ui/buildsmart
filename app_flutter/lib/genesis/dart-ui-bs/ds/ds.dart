@@ -506,6 +506,16 @@ class DsApproveCard extends StatelessWidget {
   }
 }
 
+// ── G33 · DsTodayItem (one today-row shared by all modules; act = bound closure) ──
+class DsTodayItem {
+  const DsTodayItem({required this.title, required this.sub, required this.due, required this.hard, required this.overdue, required this.module, required this.actions, required this.act, this.rid = '', this.field = ''});
+  final String title, sub, module, rid, field;
+  final DateTime due;
+  final bool hard, overdue;
+  final List<String> actions;
+  final void Function(int i) act;
+}
+
 // ── G32 · DsLogRow (log row + undo) ──
 class DsLogRow extends StatelessWidget {
   const DsLogRow({required this.text, this.sub = '', this.undoLabel = '', this.onUndo, super.key});

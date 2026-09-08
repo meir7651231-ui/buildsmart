@@ -1,0 +1,22 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_balagan_home_c0 = 'תקציר הבוקר';
+const String gen_balagan_home_c1 = 'היום';
+const String gen_balagan_home_c2 = 'אין כלום להיום. תנוח.';
+const String gen_balagan_home_c3 = 'דבר אחד ממך היום.';
+const String gen_balagan_home_c4 = '{n} דברים ממך היום.';
+const String gen_balagan_home_c5 = 'היום';
+const String gen_balagan_home_c6 = 'צלם, הדבק או כתוב שורה — אני אזהה.';
+const String gen_balagan_home_c7 = '';
+const String gen_balagan_home_c8 = '{n} דברים';
+const String gen_balagan_home_c9 = 'רגוע';
+const String gen_balagan_home_c10 = 'עמוס';
+const String gen_balagan_home_c11 = 'יותר מדי';
+const String gen_balagan_home_c12 = 'באיחור';
+const String gen_balagan_home_c13 = 'היום';
+const String gen_balagan_home_c14 = 'עוד ({n})';
+const String gen_balagan_home_c15 = 'ממתין לאישורך';
+const String gen_balagan_home_c16 = 'עשיתי לבד';
+const String gen_balagan_home_c17 = 'החזר';
+const String gen_balagan_home_c18 = 'מחר';
+const String gen_balagan_home_c19 = 'הכל מסודר. תנוח.';
+const String gen_balagan_home_c20 = 'קרה משהו? לחץ «מה קרה?» למטה — צלם או כתוב שורה, ואני אסדר.';

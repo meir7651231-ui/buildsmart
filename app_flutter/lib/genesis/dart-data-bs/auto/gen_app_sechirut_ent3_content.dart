@@ -19,5 +19,3 @@ const String gen_app_sechirut_ent3_c16 = 'מה לבקש';
 const String gen_app_sechirut_ent3_c17 = 'נשלח';
 const String gen_app_sechirut_ent3_c18 = 'כן';
 const String gen_app_sechirut_ent3_c19 = 'לא';
-const String gen_app_sechirut_ent3_c20 = 'סה"כ רשומות';
-const String gen_app_sechirut_ent3_c21 = '';

@@ -28,5 +28,3 @@ const String gen_app_peruk10_ent1_c25 = 'נמסר';
 const String gen_app_peruk10_ent1_c26 = 'סגור';
 const String gen_app_peruk10_ent1_c27 = 'סכום';
 const String gen_app_peruk10_ent1_c28 = '';
-const String gen_app_peruk10_ent1_c29 = 'סה"כ רשומות';
-const String gen_app_peruk10_ent1_c30 = '';

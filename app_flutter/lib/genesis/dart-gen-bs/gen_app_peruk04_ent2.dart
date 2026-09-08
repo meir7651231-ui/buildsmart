@@ -15,8 +15,9 @@ import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במוד
 import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppPeruk04Ent2Screen extends StatefulWidget {
-  const GenAppPeruk04Ent2Screen({this.scopeField, this.scopeId, super.key});
+  const GenAppPeruk04Ent2Screen({this.scopeField, this.scopeId, this.initial, super.key});
 
+  final Map<String, String>? initial;   // G33 · מילוי-מראש מ«מה קרה?» (הכרעה-29): שדה ⇒ ערך, פעם אחת
   final String? scopeField;   // G26 · היקף-הורה (ניווט-מקשרים): שדה-הקשר + מזהה ⇒ הרשימה מסוננת לרשומת-ההורה והטופס ממולא-מראש
   final String? scopeId;
 
@@ -28,7 +29,8 @@ class _GenAppPeruk04Ent2ScreenState extends State<GenAppPeruk04Ent2Screen> {
   static const List<String> _labelsAll = [gen_app_peruk04_ent2_c9, gen_app_peruk04_ent2_c10, gen_app_peruk04_ent2_c11, gen_app_peruk04_ent2_c12, gen_app_peruk04_ent2_c13];
   Map<int, String> _v = {};
   String? _editId;   // ריק = הוספה · מזהה = עריכת-רשומה קיימת
-  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } }
+  bool _initialUsed = false;
+  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } if (widget.initial != null && !_initialUsed) { _initialUsed = true; widget.initial!.forEach((f, v) { final i = _labelsAll.indexOf(f); if (i >= 0 && v.trim().isNotEmpty) _v[i] = v; }); } }
   @override
   void initState() { super.initState(); _prefill(); }
   String _q = '';    // מחרוזת-חיפוש (סינון-רשומות חי)
@@ -126,7 +128,7 @@ class _GenAppPeruk04Ent2ScreenState extends State<GenAppPeruk04Ent2Screen> {
       icon: gen_app_peruk04_ent2_c2,
       bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_peruk04_ent2_c3 : gen_app_peruk04_ent2_c4]])),
       children: [
-        AnimatedBuilder(animation: appStore, builder: (context, _) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [Expanded(child: DsStat(label: gen_app_peruk04_ent2_c0, value: appStore.count('app_peruk04_ent2').toString(), sub: gen_app_peruk04_ent2_c17, glyph: gen_app_peruk04_ent2_c18))]))),
+        
         if (_err != null) Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),

@@ -18,8 +18,9 @@ import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודו
 import '../dart-forge-bs/temporal/temporal.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppPeruk19Ent1Screen extends StatefulWidget {
-  const GenAppPeruk19Ent1Screen({this.scopeField, this.scopeId, super.key});
+  const GenAppPeruk19Ent1Screen({this.scopeField, this.scopeId, this.initial, super.key});
 
+  final Map<String, String>? initial;   // G33 · מילוי-מראש מ«מה קרה?» (הכרעה-29): שדה ⇒ ערך, פעם אחת
   final String? scopeField;   // G26 · היקף-הורה (ניווט-מקשרים): שדה-הקשר + מזהה ⇒ הרשימה מסוננת לרשומת-ההורה והטופס ממולא-מראש
   final String? scopeId;
 
@@ -31,7 +32,8 @@ class _GenAppPeruk19Ent1ScreenState extends State<GenAppPeruk19Ent1Screen> {
   static const List<String> _labelsAll = [gen_app_peruk19_ent1_c9, gen_app_peruk19_ent1_c10, gen_app_peruk19_ent1_c11, gen_app_peruk19_ent1_c12, gen_app_peruk19_ent1_c13, gen_app_peruk19_ent1_c16, gen_app_peruk19_ent1_c17];
   Map<int, String> _v = {};
   String? _editId;   // ריק = הוספה · מזהה = עריכת-רשומה קיימת
-  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } }
+  bool _initialUsed = false;
+  void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } if (widget.initial != null && !_initialUsed) { _initialUsed = true; widget.initial!.forEach((f, v) { final i = _labelsAll.indexOf(f); if (i >= 0 && v.trim().isNotEmpty) _v[i] = v; }); } }
   @override
   void initState() { super.initState(); _prefill(); }
   String _q = '';    // מחרוזת-חיפוש (סינון-רשומות חי)
@@ -129,7 +131,7 @@ class _GenAppPeruk19Ent1ScreenState extends State<GenAppPeruk19Ent1Screen> {
       icon: gen_app_peruk19_ent1_c2,
       bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_peruk19_ent1_c3 : gen_app_peruk19_ent1_c4]])),
       children: [
-        AnimatedBuilder(animation: appStore, builder: (context, _) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Row(children: [Expanded(child: DsStat(label: gen_app_peruk19_ent1_c0, value: appStore.count('app_peruk19_ent1').toString(), sub: gen_app_peruk19_ent1_c28, glyph: gen_app_peruk19_ent1_c29))]))),
+        
         DsWorkflow(steps: const [gen_app_peruk19_ent1_c23, gen_app_peruk19_ent1_c24, gen_app_peruk19_ent1_c25, gen_app_peruk19_ent1_c26, gen_app_peruk19_ent1_c27], current: 0),
         if (_err != null) Container(
           margin: const EdgeInsets.only(bottom: 12),

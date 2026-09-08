@@ -22,5 +22,3 @@ const String gen_app_peruk27_ent1_c19 = 'שולם';
 const String gen_app_peruk27_ent1_c20 = 'בבדיקה';
 const String gen_app_peruk27_ent1_c21 = 'נמסר';
 const String gen_app_peruk27_ent1_c22 = 'סגור';
-const String gen_app_peruk27_ent1_c23 = 'סה"כ רשומות';
-const String gen_app_peruk27_ent1_c24 = '';

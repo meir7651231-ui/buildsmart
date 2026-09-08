@@ -20,5 +20,3 @@ const String gen_app_peruk12_ent1_c17 = 'שולם';
 const String gen_app_peruk12_ent1_c18 = 'בבדיקה';
 const String gen_app_peruk12_ent1_c19 = 'נמסר';
 const String gen_app_peruk12_ent1_c20 = 'סגור';
-const String gen_app_peruk12_ent1_c21 = 'סה"כ רשומות';
-const String gen_app_peruk12_ent1_c22 = '';

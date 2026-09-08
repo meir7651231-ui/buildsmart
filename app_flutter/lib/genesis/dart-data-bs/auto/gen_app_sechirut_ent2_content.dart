@@ -30,5 +30,3 @@ const String gen_app_sechirut_ent2_c27 = 'חורג';
 const String gen_app_sechirut_ent2_c28 = 'תקין';
 const String gen_app_sechirut_ent2_c29 = 'טווח פיקדון (0–1000000)';
 const String gen_app_sechirut_ent2_c30 = 'טווח ערבות בנקאית (0–1000000)';
-const String gen_app_sechirut_ent2_c31 = 'סה"כ רשומות';
-const String gen_app_sechirut_ent2_c32 = '';

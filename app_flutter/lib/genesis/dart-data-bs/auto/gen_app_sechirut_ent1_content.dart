@@ -44,5 +44,3 @@ const String gen_app_sechirut_ent1_c41 = 'מחיקה תמחק גם ';
 const String gen_app_sechirut_ent1_c42 = ' רשומות מקושרות. להמשיך?';
 const String gen_app_sechirut_ent1_c43 = 'בבדיקה · שכירות > 0';
 const String gen_app_sechirut_ent1_c44 = 'לקוח';
-const String gen_app_sechirut_ent1_c45 = 'סה"כ רשומות';
-const String gen_app_sechirut_ent1_c46 = '';

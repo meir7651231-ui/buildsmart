@@ -24,5 +24,3 @@ const String gen_app_peruk09_ent1_c21 = 'ממצא';
 const String gen_app_peruk09_ent1_c22 = 'תיק';
 const String gen_app_peruk09_ent1_c23 = 'מחיקה תמחק גם ';
 const String gen_app_peruk09_ent1_c24 = ' רשומות מקושרות. להמשיך?';
-const String gen_app_peruk09_ent1_c25 = 'סה"כ רשומות';
-const String gen_app_peruk09_ent1_c26 = '';

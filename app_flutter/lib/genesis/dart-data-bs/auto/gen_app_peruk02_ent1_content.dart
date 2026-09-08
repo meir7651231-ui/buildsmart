@@ -34,5 +34,3 @@ const String gen_app_peruk02_ent1_c31 = 'סכום';
 const String gen_app_peruk02_ent1_c32 = '';
 const String gen_app_peruk02_ent1_c33 = 'סכום';
 const String gen_app_peruk02_ent1_c34 = '';
-const String gen_app_peruk02_ent1_c35 = 'סה"כ רשומות';
-const String gen_app_peruk02_ent1_c36 = '';

@@ -39,5 +39,3 @@ const String gen_app_peruk04_ent1_c36 = 'ממצא';
 const String gen_app_peruk04_ent1_c37 = 'תיק';
 const String gen_app_peruk04_ent1_c38 = 'מחיקה תמחק גם ';
 const String gen_app_peruk04_ent1_c39 = ' רשומות מקושרות. להמשיך?';
-const String gen_app_peruk04_ent1_c40 = 'סה"כ רשומות';
-const String gen_app_peruk04_ent1_c41 = '';

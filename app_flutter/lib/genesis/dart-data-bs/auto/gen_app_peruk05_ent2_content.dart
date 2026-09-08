@@ -16,5 +16,3 @@ const String gen_app_peruk05_ent2_c13 = 'צבע';
 const String gen_app_peruk05_ent2_c14 = 'אדום';
 const String gen_app_peruk05_ent2_c15 = 'צהוב';
 const String gen_app_peruk05_ent2_c16 = 'ירוק';
-const String gen_app_peruk05_ent2_c17 = 'סה"כ רשומות';
-const String gen_app_peruk05_ent2_c18 = '';

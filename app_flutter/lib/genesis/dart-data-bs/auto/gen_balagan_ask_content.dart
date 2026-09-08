@@ -1,0 +1,17 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_balagan_ask_c0 = 'לא זיהיתי. תוסיף עוד מילה אחת.';
+const String gen_balagan_ask_c1 = 'לא זיהיתי. תוסיף עוד מילה אחת.';
+const String gen_balagan_ask_c2 = 'כדי שאקרא צילום לבד צריך מפתח-בינה שלך (נושאים ← חיבורים). בינתיים — שורה אחת.';
+const String gen_balagan_ask_c3 = 'קורא…';
+const String gen_balagan_ask_c4 = 'לא הצלחתי לקרוא. תכתוב שורה.';
+const String gen_balagan_ask_c5 = 'מה קרה?';
+const String gen_balagan_ask_c6 = 'צלם, הדבק או כתוב שורה — אני אזהה.';
+const String gen_balagan_ask_c7 = '';
+const String gen_balagan_ask_c8 = 'למשל: המשכיר מקזז 6,200 מהפיקדון';
+const String gen_balagan_ask_c9 = 'הבנתי';
+const String gen_balagan_ask_c10 = 'צלם מסמך';
+const String gen_balagan_ask_c11 = 'הבנתי כך?';
+const String gen_balagan_ask_c12 = 'זה «{title}» — {moment}';
+const String gen_balagan_ask_c13 = 'כן, פתח';
+const String gen_balagan_ask_c14 = 'לא זה';
+const String gen_balagan_ask_c15 = 'אולי גם';
