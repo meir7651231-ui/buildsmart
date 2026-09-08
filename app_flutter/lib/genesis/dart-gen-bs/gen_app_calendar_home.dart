@@ -57,7 +57,13 @@ class GenAppCalendarHomeScreenToday {
       }
     }
     else if (a == gen_app_calendar_home_c19) { final r = appStore.byId('app_calendar_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_calendar_ent1', rid, {field: _iso(due.add(const Duration(days: 1)))}); appStore.logAction('auto', gen_app_calendar_home_c20 + ' · ' + field, entity: 'app_calendar_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
-    else if (a == gen_app_calendar_home_c21) { final d = _iso(due).replaceAll('-', ''); launchUrl(Uri.parse('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + Uri.encodeComponent(field + ' · ' + appStore.displayOf('app_calendar_ent1', rid)) + '&dates=' + d + '/' + d), mode: LaunchMode.externalApplication); }
+    else if (a == gen_app_calendar_home_c21) {   // «ליומן»: עם שעה ⇒ אירוע בשעתו (אורך = בלוק-ההגדרה); בלי ⇒ יום-שלם
+      final r = appStore.byId('app_calendar_ent1', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due).replaceAll('-', '');
+      String z(DateTime x) => x.toIso8601String().substring(0, 16).replaceAll(RegExp(r'[-:]'), '') + '00';
+      final block = (int.tryParse(appStore.setting('blockMin', '30')) ?? 30).clamp(5, 240);
+      final dates = tm.isEmpty ? d + '/' + d : () { final a0 = DateTime(due.year, due.month, due.day, int.parse(tm.substring(0, 2)), int.parse(tm.substring(3, 5))); return z(a0) + '/' + z(a0.add(Duration(minutes: block))); }();
+      launchUrl(Uri.parse('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + Uri.encodeComponent(field + ' · ' + appStore.displayOf('app_calendar_ent1', rid)) + '&dates=' + dates), mode: LaunchMode.externalApplication);
+    }
     else { appStore.decide('ign:$rid:$field', 'no'); }
   }
 
@@ -69,12 +75,12 @@ class GenAppCalendarHomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null) continue;
         if (appStore.decision('ign:$rid:${f.label}') == 'no') continue;
-        if (dayDelta == 0 && d.isBefore(today)) { out.add(_mk('${f.label} · $who', gen_app_calendar_home_c22.replaceAll('{date}', _iso(d)), rid, f.label, d, f.hard, true, today, tm, rep)); continue; }
+        if (dayDelta == 0 && d.isBefore(today)) { final ago = today.difference(d).inDays; out.add(_mk('${f.label} · $who', gen_app_calendar_home_c22.replaceAll('{date}', _iso(d)) + ' · ' + (ago == 1 ? gen_app_calendar_home_c23 : gen_app_calendar_home_c24.replaceAll('{n}', ago.toString())), rid, f.label, d, f.hard, true, today, tm, rep)); continue; }
         final okRem = appStore.decision(_remKey(rid, f.label)) == 'ok';   // תזכורת-מוקדמת (−3/−1) = הצעה שדורשת אישור; יום-ההכרעה עצמו = עובדה — מוצג בלי אישור
         for (final off in _offsets()) {
           if (off > 0 && !okRem) continue;
           final fire = _shift(d.subtract(Duration(days: off)), f.hard);
-          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk('${f.label} · $who', off == 0 ? gen_app_calendar_home_c23 : gen_app_calendar_home_c24.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep)); break; }
+          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk('${f.label} · $who', off == 0 ? gen_app_calendar_home_c25 : gen_app_calendar_home_c26.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep)); break; }
         }
       }
     }
@@ -91,7 +97,7 @@ class GenAppCalendarHomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        out.add(DsApproveCard(question: gen_app_calendar_home_c25.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_calendar_home_c26, noLabel: gen_app_calendar_home_c27, alwaysLabel: gen_app_calendar_home_c28,
+        out.add(DsApproveCard(question: gen_app_calendar_home_c27.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_calendar_home_c28, noLabel: gen_app_calendar_home_c29, alwaysLabel: gen_app_calendar_home_c30,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }
@@ -104,9 +110,9 @@ class GenAppCalendarHomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_calendar_ent1').where((r) => appStore.stageOf('app_calendar_ent1', r[AppStore.idKey] ?? '') >= 1 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_calendar_home_c0] ?? '')).trim().isEmpty ? gen_app_calendar_home_c29 : (r[gen_app_calendar_home_c0] ?? '')), trailing: Text(const [gen_app_calendar_home_c3, gen_app_calendar_home_c4][appStore.stageOf('app_calendar_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_calendar_home_c0] ?? '')).trim().isEmpty ? gen_app_calendar_home_c31 : (r[gen_app_calendar_home_c0] ?? '')), trailing: Text(const [gen_app_calendar_home_c3, gen_app_calendar_home_c4][appStore.stageOf('app_calendar_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         
-        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_app_calendar_home_c30, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppCalendarRootScreen(id: r[AppStore.idKey] ?? ''))))])),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_app_calendar_home_c32, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppCalendarRootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
 
   // «תמיד אשר» ⇒ לבד: הכרעות-תזכורת פתוחות נסגרות ונרשמות ביומן עם החזר (T2). אחרי הפריים, לא בתוך build. לעולם לא שולח (T5). P5: לא נוגע בתאריכים.
@@ -119,7 +125,7 @@ class GenAppCalendarHomeScreenToday {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_calendar_home_c31.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_calendar_ent1', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_calendar_home_c33.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_calendar_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
@@ -143,8 +149,8 @@ class _GenAppCalendarHomeScreenState extends State<GenAppCalendarHomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_app_calendar_home_c32, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_app_calendar_home_c33, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_app_calendar_home_c34, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_app_calendar_home_c35, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -166,20 +172,20 @@ class _GenAppCalendarHomeScreenState extends State<GenAppCalendarHomeScreen> {
     final pending = GenAppCalendarHomeScreenToday.proposals(context, today);
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next') && e['undone'] != '1').take(5).toList();
     final n = overdue.length + todayItems.length + pending.length;   // הדברים שדורשים אותו היום (הכרעה-29: לא סופרים רשומות פתוחות פעמיים)
-    final lead = n == 0 && open.isEmpty ? gen_app_calendar_home_c34 : n <= 1 ? gen_app_calendar_home_c35 : gen_app_calendar_home_c36.replaceAll('{n}', n.toString());
+    final lead = n == 0 && open.isEmpty ? gen_app_calendar_home_c36 : n <= 1 ? gen_app_calendar_home_c37 : gen_app_calendar_home_c38.replaceAll('{n}', n.toString());
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
-    return DsScaffold(title: gen_app_calendar_home_c37, subtitle: lead, icon: gen_app_calendar_home_c38, children: [
-      DsLoadMeter(count: n, label: gen_app_calendar_home_c39.replaceAll('{n}', n.toString()), stateLabels: [gen_app_calendar_home_c40, gen_app_calendar_home_c41, gen_app_calendar_home_c42]),
+    return DsScaffold(title: gen_app_calendar_home_c39, subtitle: lead, icon: gen_app_calendar_home_c40, children: [
+      DsLoadMeter(count: n, label: gen_app_calendar_home_c41.replaceAll('{n}', n.toString()), stateLabels: [gen_app_calendar_home_c42, gen_app_calendar_home_c43, gen_app_calendar_home_c44]),
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 12), child: Text(lead, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (overdue.isNotEmpty) DsSection(title: gen_app_calendar_home_c43, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_app_calendar_home_c44, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
+      if (overdue.isNotEmpty) DsSection(title: gen_app_calendar_home_c45, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_app_calendar_home_c46, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
       for (final r in open) GenAppCalendarHomeScreenToday.card(context, r),
-      if (pending.isNotEmpty) DsSection(title: gen_app_calendar_home_c45 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
-      if (did.isNotEmpty) DsSection(title: gen_app_calendar_home_c46 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_calendar_home_c47, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (tomorrow.isNotEmpty) DsFold(title: gen_app_calendar_home_c48 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
-      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_calendar_home_c49 + ' ' + gen_app_calendar_home_c50, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (pending.isNotEmpty) DsSection(title: gen_app_calendar_home_c47 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
+      if (did.isNotEmpty) DsSection(title: gen_app_calendar_home_c48 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_calendar_home_c49, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (tomorrow.isNotEmpty) DsFold(title: gen_app_calendar_home_c50 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
+      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_calendar_home_c51 + ' ' + gen_app_calendar_home_c52, style: TextStyle(color: lk.muted, fontSize: 14))),
     ]);
   });
 }
