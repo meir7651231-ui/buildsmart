@@ -80,7 +80,7 @@ class GenAppTasksHomeScreenToday {
         for (final off in _offsets()) {
           if (off > 0 && !okRem) continue;
           final fire = _shift(d.subtract(Duration(days: off)), f.hard);
-          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? gen_app_tasks_home_c24 : gen_app_tasks_home_c25.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep)); break; }
+          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? '' : gen_app_tasks_home_c24.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep)); break; }
         }
       }
     }
@@ -97,7 +97,7 @@ class GenAppTasksHomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        out.add(DsApproveCard(question: gen_app_tasks_home_c26.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_tasks_home_c27, noLabel: gen_app_tasks_home_c28, alwaysLabel: gen_app_tasks_home_c29,
+        out.add(DsApproveCard(question: gen_app_tasks_home_c25.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_tasks_home_c26, noLabel: gen_app_tasks_home_c27, alwaysLabel: gen_app_tasks_home_c28,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }
@@ -110,9 +110,9 @@ class GenAppTasksHomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_tasks_ent1').where((r) => appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '') >= 1 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_tasks_home_c0] ?? '')).trim().isEmpty ? gen_app_tasks_home_c30 : (r[gen_app_tasks_home_c0] ?? '')), trailing: Text(const [gen_app_tasks_home_c3, gen_app_tasks_home_c4][appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_tasks_home_c0] ?? '')).trim().isEmpty ? gen_app_tasks_home_c29 : (r[gen_app_tasks_home_c0] ?? '')), trailing: Text(const [gen_app_tasks_home_c3, gen_app_tasks_home_c4][appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         
-        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_app_tasks_home_c31, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppTasksRootScreen(id: r[AppStore.idKey] ?? ''))))])),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_app_tasks_home_c30, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppTasksRootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
 
   // «תמיד אשר» ⇒ לבד: הכרעות-תזכורת פתוחות נסגרות ונרשמות ביומן עם החזר (T2). אחרי הפריים, לא בתוך build. לעולם לא שולח (T5). P5: לא נוגע בתאריכים.
@@ -125,7 +125,7 @@ class GenAppTasksHomeScreenToday {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_tasks_home_c32.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_tasks_ent1', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_tasks_home_c31.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_tasks_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
@@ -149,8 +149,8 @@ class _GenAppTasksHomeScreenState extends State<GenAppTasksHomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_app_tasks_home_c33, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_app_tasks_home_c34, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_app_tasks_home_c32, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_app_tasks_home_c33, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -172,20 +172,20 @@ class _GenAppTasksHomeScreenState extends State<GenAppTasksHomeScreen> {
     final pending = GenAppTasksHomeScreenToday.proposals(context, today);
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next') && e['undone'] != '1').take(5).toList();
     final n = overdue.length + todayItems.length + pending.length;   // הדברים שדורשים אותו היום (הכרעה-29: לא סופרים רשומות פתוחות פעמיים)
-    final lead = n == 0 && open.isEmpty ? gen_app_tasks_home_c35 : n <= 1 ? gen_app_tasks_home_c36 : gen_app_tasks_home_c37.replaceAll('{n}', n.toString());
+    final lead = n == 0 && open.isEmpty ? gen_app_tasks_home_c34 : n <= 1 ? gen_app_tasks_home_c35 : gen_app_tasks_home_c36.replaceAll('{n}', n.toString());
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
-    return DsScaffold(title: gen_app_tasks_home_c38, subtitle: lead, icon: gen_app_tasks_home_c39, children: [
-      DsLoadMeter(count: n, label: gen_app_tasks_home_c40.replaceAll('{n}', n.toString()), stateLabels: [gen_app_tasks_home_c41, gen_app_tasks_home_c42, gen_app_tasks_home_c43]),
+    return DsScaffold(title: gen_app_tasks_home_c37, subtitle: lead, icon: gen_app_tasks_home_c38, children: [
+      DsLoadMeter(count: n, label: gen_app_tasks_home_c39.replaceAll('{n}', n.toString()), stateLabels: [gen_app_tasks_home_c40, gen_app_tasks_home_c41, gen_app_tasks_home_c42]),
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 12), child: Text(lead, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (overdue.isNotEmpty) DsSection(title: gen_app_tasks_home_c44, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_app_tasks_home_c45, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
+      if (overdue.isNotEmpty) DsSection(title: gen_app_tasks_home_c43, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_app_tasks_home_c44, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
       for (final r in open) GenAppTasksHomeScreenToday.card(context, r),
-      if (pending.isNotEmpty) DsSection(title: gen_app_tasks_home_c46 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
-      if (did.isNotEmpty) DsSection(title: gen_app_tasks_home_c47 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_tasks_home_c48, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (tomorrow.isNotEmpty) DsFold(title: gen_app_tasks_home_c49 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
-      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_tasks_home_c50 + ' ' + gen_app_tasks_home_c51, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (pending.isNotEmpty) DsSection(title: gen_app_tasks_home_c45 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
+      if (did.isNotEmpty) DsSection(title: gen_app_tasks_home_c46 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_tasks_home_c47, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (tomorrow.isNotEmpty) DsFold(title: gen_app_tasks_home_c48 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
+      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_tasks_home_c49 + ' ' + gen_app_tasks_home_c50, style: TextStyle(color: lk.muted, fontSize: 14))),
     ]);
   });
 }

@@ -118,58 +118,59 @@ class _GenBalaganTopicsScreenState extends State<GenBalaganTopicsScreen> {
     return DsScaffold(title: gen_balagan_topics_c0, subtitle: gen_balagan_topics_c1, icon: gen_balagan_topics_c2, children: [
     DsField(label: gen_balagan_topics_c3, hint: gen_balagan_topics_c4, value: _q, onChanged: (v) => setState(() => _q = v)),
     if (_q.trim().length >= 2 && hits.isEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_topics_c5, label: '', tone: 0)),
-    if (hits.isNotEmpty) DsSection(title: gen_balagan_topics_c6.replaceAll('{n}', hits.length.toString()), children: [for (final h in hits.take(30)) DsNavTile(glyph: '', title: (_titleOf[h[0]] ?? h[0]) + ' · ' + appStore.displayOf(h[0], h[1]), sub: h[2].length > 60 ? h[2].substring(0, 60) + '…' : h[2], onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _open(h[0], h[1]))))]),
-    DsSection(title: gen_balagan_topics_c7, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c8, sub: gen_balagan_topics_c9, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarEnt1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c10, sub: gen_balagan_topics_c11, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppTasksEnt1Screen()))),
+    if (_q.trim().isEmpty) ...(() { final seen = <String>{}; final rows = <Widget>[]; for (final e in appStore.log) { if (rows.length >= 5) break; final ent = e['entity'] ?? '', rid = e['rid'] ?? ''; if (ent.isEmpty || rid.isEmpty || e['undone'] == '1' || !_titleOf.containsKey(ent) || !seen.add(ent + '|' + rid) || appStore.byId(ent, rid) == null) continue; rows.add(DsNavTile(glyph: '', title: (_titleOf[ent] ?? ent) + ' · ' + appStore.displayOf(ent, rid), sub: e['what'] ?? '', onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _open(ent, rid))))); } return rows.isEmpty ? <Widget>[] : [DsSection(title: gen_balagan_topics_c6, children: rows)]; })(),   // «איפה הייתי»: התיקים שנגעת בהם לאחרונה, מהיומן
+    if (hits.isNotEmpty) DsSection(title: gen_balagan_topics_c7.replaceAll('{n}', hits.length.toString()), children: [for (final h in hits.take(30)) DsNavTile(glyph: '', title: (_titleOf[h[0]] ?? h[0]) + ' · ' + appStore.displayOf(h[0], h[1]), sub: h[2].length > 60 ? h[2].substring(0, 60) + '…' : h[2], onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => _open(h[0], h[1]))))]),
+    DsSection(title: gen_balagan_topics_c8, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c9, sub: gen_balagan_topics_c10, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarEnt1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c11, sub: gen_balagan_topics_c12, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppTasksEnt1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c12, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c13, sub: gen_balagan_topics_c14, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk01Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c15, sub: gen_balagan_topics_c16, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk02Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c17, sub: gen_balagan_topics_c18, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk03Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c19, sub: gen_balagan_topics_c20, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk04Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c21, sub: gen_balagan_topics_c22, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk05Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c13, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c14, sub: gen_balagan_topics_c15, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk01Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c16, sub: gen_balagan_topics_c17, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk02Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c18, sub: gen_balagan_topics_c19, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk03Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c20, sub: gen_balagan_topics_c21, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk04Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c22, sub: gen_balagan_topics_c23, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk05Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c23, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c24, sub: gen_balagan_topics_c25, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk21Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c26, sub: gen_balagan_topics_c27, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk22Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c28, sub: gen_balagan_topics_c29, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk23Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c24, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c25, sub: gen_balagan_topics_c26, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk21Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c27, sub: gen_balagan_topics_c28, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk22Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c29, sub: gen_balagan_topics_c30, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk23Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c30, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c31, sub: gen_balagan_topics_c32, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk11Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c33, sub: gen_balagan_topics_c34, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk12Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c31, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c32, sub: gen_balagan_topics_c33, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk11Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c34, sub: gen_balagan_topics_c35, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk12Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c35, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c36, sub: gen_balagan_topics_c37, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk13Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c38, sub: gen_balagan_topics_c39, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk14Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c40, sub: gen_balagan_topics_c41, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk15Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c42, sub: gen_balagan_topics_c43, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk16Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c36, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c37, sub: gen_balagan_topics_c38, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk13Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c39, sub: gen_balagan_topics_c40, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk14Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c41, sub: gen_balagan_topics_c42, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk15Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c43, sub: gen_balagan_topics_c44, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk16Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c44, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c45, sub: gen_balagan_topics_c46, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk06Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c47, sub: gen_balagan_topics_c48, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk07Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c49, sub: gen_balagan_topics_c50, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk08Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c51, sub: gen_balagan_topics_c52, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk10Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c53, sub: gen_balagan_topics_c54, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk17Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c55, sub: gen_balagan_topics_c56, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk18Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c57, sub: gen_balagan_topics_c58, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c59, sub: gen_balagan_topics_c60, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk20Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c61, sub: gen_balagan_topics_c62, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk26Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c45, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c46, sub: gen_balagan_topics_c47, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk06Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c48, sub: gen_balagan_topics_c49, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk07Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c50, sub: gen_balagan_topics_c51, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk08Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c52, sub: gen_balagan_topics_c53, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk10Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c54, sub: gen_balagan_topics_c55, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk17Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c56, sub: gen_balagan_topics_c57, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk18Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c58, sub: gen_balagan_topics_c59, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c60, sub: gen_balagan_topics_c61, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk20Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c62, sub: gen_balagan_topics_c63, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk26Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c63, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c64, sub: gen_balagan_topics_c65, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk24Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c64, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c65, sub: gen_balagan_topics_c66, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk24Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c66, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c67, sub: gen_balagan_topics_c68, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk09Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c69, sub: gen_balagan_topics_c70, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk25Ent1Screen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c71, sub: gen_balagan_topics_c72, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk28Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c67, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c68, sub: gen_balagan_topics_c69, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk09Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c70, sub: gen_balagan_topics_c71, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk25Ent1Screen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c72, sub: gen_balagan_topics_c73, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk28Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c73, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c74, sub: gen_balagan_topics_c75, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk27Ent1Screen()))),
+    DsSection(title: gen_balagan_topics_c74, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c75, sub: gen_balagan_topics_c76, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk27Ent1Screen()))),
     ]),
-    DsSection(title: gen_balagan_topics_c76, children: [
-      DsNavTile(glyph: '', title: gen_balagan_topics_c77, sub: gen_balagan_topics_c78, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenBalaganKeysScreen()))),
-      DsNavTile(glyph: '', title: gen_balagan_topics_c79, sub: gen_balagan_topics_c80, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenBalaganBehaviorScreen()))),
+    DsSection(title: gen_balagan_topics_c77, children: [
+      DsNavTile(glyph: '', title: gen_balagan_topics_c78, sub: gen_balagan_topics_c79, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenBalaganKeysScreen()))),
+      DsNavTile(glyph: '', title: gen_balagan_topics_c80, sub: gen_balagan_topics_c81, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenBalaganBehaviorScreen()))),
     ]),
   ]);
   }
