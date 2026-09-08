@@ -58,6 +58,7 @@ class AppStore extends ChangeNotifier {
     final e = _log[i];
     if ((e['kind'] ?? '') == 'decide') { _decided.remove(e['field']); }
     else if ((e['kind'] ?? '') == 'add') { removeById(e['entity'] ?? '', e['rid'] ?? ''); }   // החזר של שמירה = מחיקת הרשומה
+    else if ((e['kind'] ?? '') == 'merge') { final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null) { try { ((jsonDecode(e['prev'] ?? '{}') as Map)).forEach((k, v) { r[k.toString()] = v.toString(); }); } catch (_) {} } }   // undo of a merge: every touched field goes back (prev = JSON map)
     else if ((e['kind'] ?? '') == 'done') { _decided.remove('ign:${e['rid']}:${e['field']}'); final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null && (e['prev'] ?? '').isNotEmpty) r[stageKey] = e['prev']!; }   // undo of «done»: the date row returns and the stage goes back
     else if ((e['entity'] ?? '').isNotEmpty && (e['field'] ?? '').isNotEmpty) { final r = byId(e['entity']!, e['rid'] ?? ''); if (r != null) r[e['field']!] = e['prev'] ?? ''; }
     e['undone'] = '1'; notifyListeners(); return true;

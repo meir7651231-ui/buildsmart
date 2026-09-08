@@ -1,4 +1,5 @@
 // 🧭 חולל ע"י balagan (G33 · הכרעה-29) — מזהה-הרגע: TF-IDF דטרמיניסטי מ-30 מסמכי-פירוק (כותרת+«הרגע» ×3). אפס-בינה, אפס-מילון. אל תערוך ידנית.
+import 'dart:convert';
 import '../dart-ui-bs/ds/ds_store.dart';
 class BalaganField { const BalaganField(this.label, this.type, this.required, this.options); final String label, type; final bool required; final List<String> options; }
 class BalaganModule {
@@ -167,6 +168,22 @@ List<Map<String, String>> balaganDuplicates(BalaganModule m, Map<String, String>
   final keys = [m.descField, ...m.personFields].where((f) => f.isNotEmpty && norm(v[f] ?? '').length >= 3).toList();
   if (keys.isEmpty) return const [];
   return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; return keys.any((f) => norm(r[f] ?? '') == norm(v[f]!)); }).toList();
+}
+/// מיזוג לתיק קיים: שדה ריק בקיים מקבל את הערך החדש · «מה כתבת» נצבר (שורה חדשה) · שדה מלא לא נדרס. פעולה אחת עם החזר (prev = JSON של מה שנגע).
+int balaganMerge(BalaganModule m, String id, Map<String, String> v, String logText) {
+  final r = appStore.byId(m.rootSlug, id); if (r == null) return 0;
+  final prev = <String, String>{}; final next = <String, String>{};
+  for (final e in v.entries) {
+    final val = e.value.trim(); if (val.isEmpty || e.key == '__id' || e.key == '__at' || e.key == '__stage') continue;
+    final cur = (r[e.key] ?? '').trim();
+    if (e.key == '__note') { if (cur.contains(val)) continue; prev[e.key] = r[e.key] ?? ''; next[e.key] = cur.isEmpty ? val : cur + '\n' + val; continue; }
+    if (cur.isNotEmpty) continue;
+    prev[e.key] = r[e.key] ?? ''; next[e.key] = val;
+  }
+  if (next.isEmpty) return 0;
+  appStore.update(m.rootSlug, id, next);
+  appStore.logAction('merge', logText.replaceAll('{n}', next.length.toString()), entity: m.rootSlug, rid: id, prev: jsonEncode(prev));
+  return next.length;
 }
 /// שורה עם כמה רגעים («שילמתי ארנונה. מחר תור לרופא») ⇒ חלקים לפי שורה/נקודה-ורווח/נקודה-פסיק — כל חלק רגע משלו (טופס-אישור אחר טופס-אישור). חלק = ≥2 מילים.
 List<String> balaganSplit(String text) {
