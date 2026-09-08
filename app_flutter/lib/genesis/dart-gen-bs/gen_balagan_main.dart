@@ -1,4 +1,4 @@
-// 🧭 חולל ע"י balagan (G33 · הכרעה-29) — שורש בלגן: אפליקציה אחת, 28 מודולים, חנות אחת. אל תערוך ידנית.
+// 🧭 חולל ע"י balagan (G33 · הכרעה-29) — שורש בלגן: אפליקציה אחת, 30 מודולים, חנות אחת. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_balagan_main_content.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';

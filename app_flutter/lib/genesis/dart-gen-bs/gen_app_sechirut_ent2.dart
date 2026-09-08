@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppSechirutEnt2Screen extends StatefulWidget {
   const GenAppSechirutEnt2Screen({this.scopeField, this.scopeId, this.initial, super.key});
@@ -156,7 +155,7 @@ class _GenAppSechirutEnt2ScreenState extends State<GenAppSechirutEnt2Screen> {
       title: gen_app_sechirut_ent2_c0,
       subtitle: gen_app_sechirut_ent2_c1,
       icon: gen_app_sechirut_ent2_c2,
-      bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_sechirut_ent2_c3 : gen_app_sechirut_ent2_c4]])),
+      bottomBar: DsPrimaryButton(label: _editId == null ? gen_app_sechirut_ent2_c3 : gen_app_sechirut_ent2_c4, onTap: _save),
       children: [
         
         if (_err != null) Container(

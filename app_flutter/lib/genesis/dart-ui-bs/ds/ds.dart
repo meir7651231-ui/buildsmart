@@ -506,6 +506,18 @@ class DsApproveCard extends StatelessWidget {
   }
 }
 
+// ── G33 · DsChipButton (flat outline action) ──
+class DsChipButton extends StatelessWidget {
+  const DsChipButton({required this.label, this.onTap, super.key});
+  final String label;
+  final VoidCallback? onTap;
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return GestureDetector(onTap: onTap, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(label, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600))));
+  }
+}
+
 // ── G33 · DsTodayItem (one today-row shared by all modules; act = bound closure) ──
 class DsTodayItem {
   const DsTodayItem({required this.title, required this.sub, required this.due, required this.hard, required this.overdue, required this.module, required this.actions, required this.act, this.rid = '', this.field = ''});

@@ -1,0 +1,23 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_tasks_root_c0 = 'מה';
+const String gen_app_tasks_root_c1 = 'מה';
+const String gen_app_tasks_root_c2 = 'מה';
+const String gen_app_tasks_root_c3 = '';
+const String gen_app_tasks_root_c4 = 'מועד';
+const String gen_app_tasks_root_c5 = 'מועד';
+const String gen_app_tasks_root_c6 = 'מועד';
+const String gen_app_tasks_root_c7 = '';
+const String gen_app_tasks_root_c8 = 'הערה';
+const String gen_app_tasks_root_c9 = 'הערה';
+const String gen_app_tasks_root_c10 = 'הערה';
+const String gen_app_tasks_root_c11 = '';
+const String gen_app_tasks_root_c12 = 'מה';
+const String gen_app_tasks_root_c13 = 'מועד';
+const String gen_app_tasks_root_c14 = 'הערה';
+const String gen_app_tasks_root_c15 = 'פרטים (3)';
+const String gen_app_tasks_root_c16 = 'פתוח';
+const String gen_app_tasks_root_c17 = 'נעשה';
+const String gen_app_tasks_root_c18 = 'משימה';
+const String gen_app_tasks_root_c19 = 'הרשומה לא נמצאה';
+const String gen_app_tasks_root_c20 = '';
+const String gen_app_tasks_root_c21 = '';

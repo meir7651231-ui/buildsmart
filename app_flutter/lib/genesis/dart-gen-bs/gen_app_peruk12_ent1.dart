@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppPeruk12Ent1Screen extends StatefulWidget {
   const GenAppPeruk12Ent1Screen({this.scopeField, this.scopeId, this.initial, super.key});
@@ -140,7 +139,7 @@ class _GenAppPeruk12Ent1ScreenState extends State<GenAppPeruk12Ent1Screen> {
       title: gen_app_peruk12_ent1_c0,
       subtitle: gen_app_peruk12_ent1_c1,
       icon: gen_app_peruk12_ent1_c2,
-      bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_peruk12_ent1_c3 : gen_app_peruk12_ent1_c4]])),
+      bottomBar: DsPrimaryButton(label: _editId == null ? gen_app_peruk12_ent1_c3 : gen_app_peruk12_ent1_c4, onTap: _save),
       children: [
         
         DsWorkflow(steps: const [gen_app_peruk12_ent1_c16, gen_app_peruk12_ent1_c17, gen_app_peruk12_ent1_c18, gen_app_peruk12_ent1_c19, gen_app_peruk12_ent1_c20], current: 0),

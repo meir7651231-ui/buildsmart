@@ -12,7 +12,7 @@
 //   [תוכן נוסח]⇒DsNote
 //   [תוכן מתי כן לקחת הצעה]⇒DsNote
 //   [תוכן הסתייגות]⇒DsNote
-//   שליחה בוואטסאפ⇒DsPrimaryButton+waLink
+//   שליחה בוואטסאפ⇒DsChipButton+waLink
 
 import '../dart-data-bs/auto/gen_app_peruk11_rp1_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
@@ -29,7 +29,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import '../dart-forge-bs/status/status.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 /// 📤 סריאליזציית-הדוח לטקסט (G25): *חלק* · שורות; נבדקת ב-test/genesis_gen_app_<ns>_report_test.dart
 String reportTextGenAppPeruk11Rp1Screen(Map<String, String> r0, String id0) {
@@ -80,7 +79,7 @@ class _GenAppPeruk11Rp1ScreenState extends State<GenAppPeruk11Rp1Screen> {
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk11_rp1_c25, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk11_rp1_c20, label: gen_app_peruk11_rp1_c21, tone: 0)])], tone: 0)),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk11_rp1_c35, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk11_rp1_c30, label: gen_app_peruk11_rp1_c31, tone: 0)])], tone: 0)),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_peruk11_rp1_c84, details: [Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk11_rp1_c56, children: [AnimatedBuilder(animation: appStore, builder: (context, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final r in [r0].where((r) => (r[gen_app_peruk11_rp1_c45] ?? '').toString().trim().isNotEmpty)) Padding(padding: const EdgeInsets.only(bottom: 8), child: ForgeStatusChip(items: [[gen_app_peruk11_rp1_c40 + ': ' + (r[gen_app_peruk11_rp1_c41] ?? '')]], variants: const <int>[0]))])), Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk11_rp1_c51, label: gen_app_peruk11_rp1_c52, tone: 0)])], tone: 0)), Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk11_rp1_c66, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk11_rp1_c61, label: gen_app_peruk11_rp1_c62, tone: 0)])], tone: 0)), Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk11_rp1_c76, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk11_rp1_c71, label: gen_app_peruk11_rp1_c72, tone: 0)])], tone: 0))])),
-      Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _send(context, r0, id0), child: ForgeToneButton(items: [[gen_app_peruk11_rp1_c79]]))),
+      Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: DsChipButton(label: gen_app_peruk11_rp1_c79, onTap: () => _send(context, r0, id0))),
     ]);
   });
 }

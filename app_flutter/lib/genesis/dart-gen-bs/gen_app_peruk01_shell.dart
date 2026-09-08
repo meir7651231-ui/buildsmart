@@ -12,7 +12,6 @@ import 'gen_app_peruk01_root.dart';
 import 'gen_app_peruk01_scr3.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppPeruk01ShellScreen extends StatefulWidget {
   const GenAppPeruk01ShellScreen({super.key});
@@ -43,7 +42,7 @@ class _RootTab extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) {
     final rs = appStore.records('app_peruk01_ent1');
     return DsScaffold(title: gen_app_peruk01_shell_c17, subtitle: rs.length.toString() + ' ' + gen_app_peruk01_shell_c18, icon: gen_app_peruk01_shell_c19, children: [
-      Padding(padding: const EdgeInsets.only(bottom: 10), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk01Ent1Screen())), child: ForgeToneButton(items: [[gen_app_peruk01_shell_c4]]))),
+      Padding(padding: const EdgeInsets.only(bottom: 10), child: DsChipButton(label: gen_app_peruk01_shell_c4, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk01Ent1Screen())))),
       Padding(padding: const EdgeInsets.only(bottom: 6), child: DsQuickAdd(hint: gen_app_peruk01_shell_c11, onSubmit: (s) => appStore.add('app_peruk01_ent1', {gen_app_peruk01_shell_c12: s}))),
       if (rs.isEmpty) EmptyState(label: gen_app_peruk01_shell_c7),
       for (final r in rs) DsNavTile(glyph: gen_app_peruk01_shell_c20, title: (r[gen_app_peruk01_shell_c9] ?? ''), sub: (r[gen_app_peruk01_shell_c10] ?? ''), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk01RootScreen(id: r[AppStore.idKey] ?? '')))),

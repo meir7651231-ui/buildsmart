@@ -1,7 +1,9 @@
-// 🧭 חולל ע"י balagan (G33 · הכרעה-29) — «היום» של בלגן: מיזוג ספקי-ה-Today של 28 מודולים — באיחור ראשון · היום · הרשומות הפתוחות (3 למעלה, השאר מקופל) · ממתין-לאישורך · עשיתי-לבד · מחר. אל תערוך ידנית.
+// 🧭 חולל ע"י balagan (G33 · הכרעה-29) — «היום» של בלגן: מיזוג ספקי-ה-Today של 30 מודולים — באיחור ראשון · היום · הרשומות הפתוחות (3 למעלה, השאר מקופל) · ממתין-לאישורך · עשיתי-לבד · מחר. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_balagan_home_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import 'gen_app_calendar_home.dart';
+import 'gen_app_tasks_home.dart';
 import 'gen_app_peruk01_home.dart';
 import 'gen_app_peruk02_home.dart';
 import 'gen_app_peruk03_home.dart';
@@ -47,6 +49,8 @@ class GenBalaganHomeScreen extends StatefulWidget {
 
 class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
   static const _mods = <_Mod>[
+    _Mod(GenAppCalendarHomeScreenToday.module, GenAppCalendarHomeScreenToday.open, GenAppCalendarHomeScreenToday.items, GenAppCalendarHomeScreenToday.proposals, GenAppCalendarHomeScreenToday.card, GenAppCalendarHomeScreenToday.autopilot),
+    _Mod(GenAppTasksHomeScreenToday.module, GenAppTasksHomeScreenToday.open, GenAppTasksHomeScreenToday.items, GenAppTasksHomeScreenToday.proposals, GenAppTasksHomeScreenToday.card, GenAppTasksHomeScreenToday.autopilot),
     _Mod(GenAppPeruk01HomeScreenToday.module, GenAppPeruk01HomeScreenToday.open, GenAppPeruk01HomeScreenToday.items, GenAppPeruk01HomeScreenToday.proposals, GenAppPeruk01HomeScreenToday.card, GenAppPeruk01HomeScreenToday.autopilot),
     _Mod(GenAppPeruk02HomeScreenToday.module, GenAppPeruk02HomeScreenToday.open, GenAppPeruk02HomeScreenToday.items, GenAppPeruk02HomeScreenToday.proposals, GenAppPeruk02HomeScreenToday.card, GenAppPeruk02HomeScreenToday.autopilot),
     _Mod(GenAppPeruk03HomeScreenToday.module, GenAppPeruk03HomeScreenToday.open, GenAppPeruk03HomeScreenToday.items, GenAppPeruk03HomeScreenToday.proposals, GenAppPeruk03HomeScreenToday.card, GenAppPeruk03HomeScreenToday.autopilot),

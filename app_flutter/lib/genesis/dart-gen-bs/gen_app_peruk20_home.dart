@@ -13,7 +13,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class _D { const _D(this.label, this.hard); final String label; final bool hard; }
 
@@ -88,9 +87,9 @@ class GenAppPeruk20HomeScreenToday {
   }
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: (r[gen_app_peruk20_home_c0] ?? '') + ' · ' + const [gen_app_peruk20_home_c6, gen_app_peruk20_home_c7, gen_app_peruk20_home_c8, gen_app_peruk20_home_c9, gen_app_peruk20_home_c10][appStore.stageOf('app_peruk20_ent1', r[AppStore.idKey] ?? '').clamp(0, 4)], children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: (((r[gen_app_peruk20_home_c0] ?? '')).trim().isEmpty ? gen_app_peruk20_home_c38 : (r[gen_app_peruk20_home_c0] ?? '')) + ' · ' + const [gen_app_peruk20_home_c6, gen_app_peruk20_home_c7, gen_app_peruk20_home_c8, gen_app_peruk20_home_c9, gen_app_peruk20_home_c10][appStore.stageOf('app_peruk20_ent1', r[AppStore.idKey] ?? '').clamp(0, 4)], children: [
         
-        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => send(context, r, r[AppStore.idKey] ?? ''), child: ForgeToneButton(items: [[gen_app_peruk20_home_c2]]))), const SizedBox(width: 8), Flexible(child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk20RootScreen(id: r[AppStore.idKey] ?? ''))), child: ForgeToneButton(items: [[gen_app_peruk20_home_c4]])))])),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_peruk20_home_c39, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_peruk20_home_c40, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk20RootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
 
   // «תמיד אשר» ⇒ לבד: הכרעות-תזכורת פתוחות נסגרות ונרשמות ביומן עם החזר (T2). אחרי הפריים, לא בתוך build. לעולם לא שולח (T5). P5: לא נוגע בתאריכים.
@@ -103,7 +102,7 @@ class GenAppPeruk20HomeScreenToday {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_peruk20_home_c38.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_peruk20_ent1', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_peruk20_home_c41.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_peruk20_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
@@ -127,8 +126,8 @@ class _GenAppPeruk20HomeScreenState extends State<GenAppPeruk20HomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_app_peruk20_home_c39, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_app_peruk20_home_c40, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_app_peruk20_home_c42, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_app_peruk20_home_c43, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -150,20 +149,20 @@ class _GenAppPeruk20HomeScreenState extends State<GenAppPeruk20HomeScreen> {
     final pending = GenAppPeruk20HomeScreenToday.proposals(context, today);
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next') && e['undone'] != '1').take(5).toList();
     final n = overdue.length + todayItems.length + pending.length;   // הדברים שדורשים אותו היום (הכרעה-29: לא סופרים רשומות פתוחות פעמיים)
-    final lead = n == 0 && open.isEmpty ? gen_app_peruk20_home_c41 : n <= 1 ? gen_app_peruk20_home_c42 : gen_app_peruk20_home_c43.replaceAll('{n}', n.toString());
+    final lead = n == 0 && open.isEmpty ? gen_app_peruk20_home_c44 : n <= 1 ? gen_app_peruk20_home_c45 : gen_app_peruk20_home_c46.replaceAll('{n}', n.toString());
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
-    return DsScaffold(title: gen_app_peruk20_home_c44, subtitle: lead, icon: gen_app_peruk20_home_c45, children: [
-      DsLoadMeter(count: n, label: gen_app_peruk20_home_c46.replaceAll('{n}', n.toString()), stateLabels: [gen_app_peruk20_home_c47, gen_app_peruk20_home_c48, gen_app_peruk20_home_c49]),
+    return DsScaffold(title: gen_app_peruk20_home_c47, subtitle: lead, icon: gen_app_peruk20_home_c48, children: [
+      DsLoadMeter(count: n, label: gen_app_peruk20_home_c49.replaceAll('{n}', n.toString()), stateLabels: [gen_app_peruk20_home_c50, gen_app_peruk20_home_c51, gen_app_peruk20_home_c52]),
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 12), child: Text(lead, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (overdue.isNotEmpty) DsSection(title: gen_app_peruk20_home_c50, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_app_peruk20_home_c51, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
+      if (overdue.isNotEmpty) DsSection(title: gen_app_peruk20_home_c53, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_app_peruk20_home_c54, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
       for (final r in open) GenAppPeruk20HomeScreenToday.card(context, r),
-      if (pending.isNotEmpty) DsSection(title: gen_app_peruk20_home_c52 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
-      if (did.isNotEmpty) DsSection(title: gen_app_peruk20_home_c53 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_peruk20_home_c54, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (tomorrow.isNotEmpty) DsFold(title: gen_app_peruk20_home_c55 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
-      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_peruk20_home_c56 + ' ' + gen_app_peruk20_home_c57, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (pending.isNotEmpty) DsSection(title: gen_app_peruk20_home_c55 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
+      if (did.isNotEmpty) DsSection(title: gen_app_peruk20_home_c56 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_peruk20_home_c57, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (tomorrow.isNotEmpty) DsFold(title: gen_app_peruk20_home_c58 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
+      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_peruk20_home_c59 + ' ' + gen_app_peruk20_home_c60, style: TextStyle(color: lk.muted, fontSize: 14))),
     ]);
   });
 }

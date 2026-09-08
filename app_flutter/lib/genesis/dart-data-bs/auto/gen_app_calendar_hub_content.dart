@@ -1,0 +1,19 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_calendar_hub_c0 = 'יומן';
+const String gen_app_calendar_hub_c1 = '';
+const String gen_app_calendar_hub_c2 = '';
+const String gen_app_calendar_hub_c3 = 'פגישה';
+const String gen_app_calendar_hub_c4 = '5 שדות · 2 שלבים';
+const String gen_app_calendar_hub_c5 = '';
+const String gen_app_calendar_hub_c6 = 'יומן פעולות';
+const String gen_app_calendar_hub_c7 = 'audit · תיעוד מלא';
+const String gen_app_calendar_hub_c8 = '';
+const String gen_app_calendar_hub_c9 = 'דגלי-יכולת';
+const String gen_app_calendar_hub_c10 = 'הפעלה/כיבוי מודולים';
+const String gen_app_calendar_hub_c11 = '';
+const String gen_app_calendar_hub_c12 = 'הגדרות';
+const String gen_app_calendar_hub_c13 = 'סנכרון · הרשאות';
+const String gen_app_calendar_hub_c14 = '';
+const String gen_app_calendar_hub_c15 = 'התנהגות';
+const String gen_app_calendar_hub_c16 = 'תזכורות · תקציר · לפעול לבד · יומן';
+const String gen_app_calendar_hub_c17 = 'הכל';

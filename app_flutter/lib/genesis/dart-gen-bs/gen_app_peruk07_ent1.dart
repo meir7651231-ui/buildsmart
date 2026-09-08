@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppPeruk07Ent1Screen extends StatefulWidget {
   const GenAppPeruk07Ent1Screen({this.scopeField, this.scopeId, this.initial, super.key});
@@ -26,7 +25,7 @@ class GenAppPeruk07Ent1Screen extends StatefulWidget {
 }
 
 class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
-  static const List<String> _labelsAll = [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c14, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c18, gen_app_peruk07_ent1_c20];
+  static const List<String> _labelsAll = [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c16, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c19];
   Map<int, String> _v = {};
   String? _editId;   // ריק = הוספה · מזהה = עריכת-רשומה קיימת
   bool _initialUsed = false;
@@ -44,14 +43,10 @@ class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
       if ((_v[0] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c9);
       if ((_v[2] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c11);
       if ((_v[3] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c12);
-      if ((_v[4] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c13);
-      if ((_v[5] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c14);
-      if ((_v[6] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c17);
-      if ((_v[7] ?? '').trim().isEmpty) miss.add('חסר ' + gen_app_peruk07_ent1_c18);
       
       
     if (miss.isNotEmpty) { setState(() => _err = miss.join(' · ')); return; }
-    final map = <String, String>{gen_app_peruk07_ent1_c9: _v[0] ?? '', gen_app_peruk07_ent1_c10: _v[1] ?? '', gen_app_peruk07_ent1_c11: _v[2] ?? '', gen_app_peruk07_ent1_c12: _v[3] ?? '', gen_app_peruk07_ent1_c13: _v[4] ?? '', gen_app_peruk07_ent1_c14: _v[5] ?? '', gen_app_peruk07_ent1_c17: _v[6] ?? '', gen_app_peruk07_ent1_c18: _v[7] ?? '', gen_app_peruk07_ent1_c20: _v[8] ?? ''};
+    final map = <String, String>{gen_app_peruk07_ent1_c9: _v[0] ?? '', gen_app_peruk07_ent1_c10: _v[1] ?? '', gen_app_peruk07_ent1_c11: _v[2] ?? '', gen_app_peruk07_ent1_c12: _v[3] ?? '', gen_app_peruk07_ent1_c13: _v[4] ?? '', gen_app_peruk07_ent1_c16: _v[5] ?? '', gen_app_peruk07_ent1_c17: _v[6] ?? '', gen_app_peruk07_ent1_c19: _v[7] ?? ''};
     if (_editId != null) {
       appStore.update('app_peruk07_ent1', _editId!, map);
     } else {
@@ -63,7 +58,7 @@ class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
   void _edit(Map<String, String> r) {
     setState(() {
       _editId = r['__id'];
-      _v = {0: r[gen_app_peruk07_ent1_c9] ?? '', 1: r[gen_app_peruk07_ent1_c10] ?? '', 2: r[gen_app_peruk07_ent1_c11] ?? '', 3: r[gen_app_peruk07_ent1_c12] ?? '', 4: r[gen_app_peruk07_ent1_c13] ?? '', 5: r[gen_app_peruk07_ent1_c14] ?? '', 6: r[gen_app_peruk07_ent1_c17] ?? '', 7: r[gen_app_peruk07_ent1_c18] ?? '', 8: r[gen_app_peruk07_ent1_c20] ?? ''};
+      _v = {0: r[gen_app_peruk07_ent1_c9] ?? '', 1: r[gen_app_peruk07_ent1_c10] ?? '', 2: r[gen_app_peruk07_ent1_c11] ?? '', 3: r[gen_app_peruk07_ent1_c12] ?? '', 4: r[gen_app_peruk07_ent1_c13] ?? '', 5: r[gen_app_peruk07_ent1_c16] ?? '', 6: r[gen_app_peruk07_ent1_c17] ?? '', 7: r[gen_app_peruk07_ent1_c19] ?? ''};
     });
   }
 
@@ -92,15 +87,15 @@ class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
 
   Widget _card(Map<String, String> r) {
     final rid = r['__id'] ?? '';
-    return DsRecordCard(labels: const [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c14, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c18, gen_app_peruk07_ent1_c20], values: [r[gen_app_peruk07_ent1_c9] ?? '', r[gen_app_peruk07_ent1_c10] ?? '', r[gen_app_peruk07_ent1_c11] ?? '', r[gen_app_peruk07_ent1_c12] ?? '', r[gen_app_peruk07_ent1_c13] ?? '', r[gen_app_peruk07_ent1_c14] ?? '', r[gen_app_peruk07_ent1_c17] ?? '', r[gen_app_peruk07_ent1_c18] ?? '', r[gen_app_peruk07_ent1_c20] ?? ''], stage: (const [gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29, gen_app_peruk07_ent1_c30])[appStore.stageOf('app_peruk07_ent1', rid)], stageDone: appStore.stageOf('app_peruk07_ent1', rid) >= 4, stages: const [gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29, gen_app_peruk07_ent1_c30], stageIndex: appStore.stageOf('app_peruk07_ent1', rid), onStage: (i) => appStore.setStage('app_peruk07_ent1', rid, i), onAdvance: () => appStore.advance('app_peruk07_ent1', rid, 5), onEdit: () => _edit(r), onDelete: () => appStore.removeById('app_peruk07_ent1', rid));
+    return DsRecordCard(labels: const [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c16, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c19], values: [r[gen_app_peruk07_ent1_c9] ?? '', r[gen_app_peruk07_ent1_c10] ?? '', r[gen_app_peruk07_ent1_c11] ?? '', r[gen_app_peruk07_ent1_c12] ?? '', r[gen_app_peruk07_ent1_c13] ?? '', r[gen_app_peruk07_ent1_c16] ?? '', r[gen_app_peruk07_ent1_c17] ?? '', r[gen_app_peruk07_ent1_c19] ?? ''], stage: (const [gen_app_peruk07_ent1_c25, gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29])[appStore.stageOf('app_peruk07_ent1', rid)], stageDone: appStore.stageOf('app_peruk07_ent1', rid) >= 4, stages: const [gen_app_peruk07_ent1_c25, gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29], stageIndex: appStore.stageOf('app_peruk07_ent1', rid), onStage: (i) => appStore.setStage('app_peruk07_ent1', rid, i), onAdvance: () => appStore.advance('app_peruk07_ent1', rid, 5), onEdit: () => _edit(r), onDelete: () => appStore.removeById('app_peruk07_ent1', rid));
   }
 
 
   String _csv() {
     final b = StringBuffer();
-    b.writeln(const [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c14, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c18, gen_app_peruk07_ent1_c20].map((h) => '"' + h.replaceAll('"', '""') + '"').join(','));
+    b.writeln(const [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c16, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c19].map((h) => '"' + h.replaceAll('"', '""') + '"').join(','));
     for (final r in appStore.records('app_peruk07_ent1')) {
-      b.writeln([r[gen_app_peruk07_ent1_c9] ?? '', r[gen_app_peruk07_ent1_c10] ?? '', r[gen_app_peruk07_ent1_c11] ?? '', r[gen_app_peruk07_ent1_c12] ?? '', r[gen_app_peruk07_ent1_c13] ?? '', r[gen_app_peruk07_ent1_c14] ?? '', r[gen_app_peruk07_ent1_c17] ?? '', r[gen_app_peruk07_ent1_c18] ?? '', r[gen_app_peruk07_ent1_c20] ?? ''].map((v) => '"' + v.replaceAll('"', '""') + '"').join(','));
+      b.writeln([r[gen_app_peruk07_ent1_c9] ?? '', r[gen_app_peruk07_ent1_c10] ?? '', r[gen_app_peruk07_ent1_c11] ?? '', r[gen_app_peruk07_ent1_c12] ?? '', r[gen_app_peruk07_ent1_c13] ?? '', r[gen_app_peruk07_ent1_c16] ?? '', r[gen_app_peruk07_ent1_c17] ?? '', r[gen_app_peruk07_ent1_c19] ?? ''].map((v) => '"' + v.replaceAll('"', '""') + '"').join(','));
     }
     return b.toString();
   }
@@ -146,10 +141,10 @@ class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
       title: gen_app_peruk07_ent1_c0,
       subtitle: gen_app_peruk07_ent1_c1,
       icon: gen_app_peruk07_ent1_c2,
-      bottomBar: GestureDetector(behavior: HitTestBehavior.opaque, onTap: _save, child: ForgeToneButton(items: [[_editId == null ? gen_app_peruk07_ent1_c3 : gen_app_peruk07_ent1_c4]])),
+      bottomBar: DsPrimaryButton(label: _editId == null ? gen_app_peruk07_ent1_c3 : gen_app_peruk07_ent1_c4, onTap: _save),
       children: [
         
-        DsWorkflow(steps: const [gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29, gen_app_peruk07_ent1_c30], current: 0),
+        DsWorkflow(steps: const [gen_app_peruk07_ent1_c25, gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29], current: 0),
         if (_err != null) Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
@@ -161,12 +156,11 @@ class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
           ForgeDsField(state: (_v[1] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c10, ''], control: DsField(label: gen_app_peruk07_ent1_c10, hint: '', value: _v[1] ?? '', onChanged: (v) => setState(() => _v[1] = v), bare: true)),
           ForgeDsField(state: (_v[2] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c11, ''], control: DsField(label: gen_app_peruk07_ent1_c11, hint: '', value: _v[2] ?? '', onChanged: (v) => setState(() => _v[2] = v), bare: true)),
           ForgeDsField(state: (_v[3] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c12, ''], control: DsField(label: gen_app_peruk07_ent1_c12, hint: '', value: _v[3] ?? '', onChanged: (v) => setState(() => _v[3] = v), bare: true)),
-          ForgeDsField(state: (_v[4] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c13, ''], control: DsField(label: gen_app_peruk07_ent1_c13, hint: '', value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v), bare: true)),
-          ForgeDsEnumField(fields: [gen_app_peruk07_ent1_c14], control: DsEnumField(label: gen_app_peruk07_ent1_c14, options: const [gen_app_peruk07_ent1_c15, gen_app_peruk07_ent1_c16], value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v), bare: true)),
+          ForgeDsEnumField(fields: [gen_app_peruk07_ent1_c13], control: DsEnumField(label: gen_app_peruk07_ent1_c13, options: const [gen_app_peruk07_ent1_c14, gen_app_peruk07_ent1_c15], value: _v[4] ?? '', onChanged: (v) => setState(() => _v[4] = v), bare: true)),
+          ForgeDsField(state: (_v[5] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c16, ''], control: DsField(label: gen_app_peruk07_ent1_c16, hint: '', value: _v[5] ?? '', onChanged: (v) => setState(() => _v[5] = v), bare: true)),
           ForgeDsField(state: (_v[6] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c17, ''], control: DsField(label: gen_app_peruk07_ent1_c17, hint: '', value: _v[6] ?? '', onChanged: (v) => setState(() => _v[6] = v), bare: true)),
-          ForgeDsField(state: (_v[7] ?? '').toString().trim().isEmpty ? ForgeDsFieldState.empty : ForgeDsFieldState.filled, fields: [gen_app_peruk07_ent1_c18, ''], control: DsField(label: gen_app_peruk07_ent1_c18, hint: '', value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v), bare: true)),
-          if ((_v[7] ?? '').trim().isNotEmpty) _live(gen_app_peruk07_ent1_c19, esc((_v[7] ?? ''))),
-          ForgeDsEnumField(fields: [gen_app_peruk07_ent1_c20], control: DsEnumField(label: gen_app_peruk07_ent1_c20, options: const [gen_app_peruk07_ent1_c21, gen_app_peruk07_ent1_c22, gen_app_peruk07_ent1_c23, gen_app_peruk07_ent1_c24, gen_app_peruk07_ent1_c25], value: _v[8] ?? '', onChanged: (v) => setState(() => _v[8] = v), bare: true)),
+          if ((_v[6] ?? '').trim().isNotEmpty) _live(gen_app_peruk07_ent1_c18, esc((_v[6] ?? ''))),
+          ForgeDsEnumField(fields: [gen_app_peruk07_ent1_c19], control: DsEnumField(label: gen_app_peruk07_ent1_c19, options: const [gen_app_peruk07_ent1_c20, gen_app_peruk07_ent1_c21, gen_app_peruk07_ent1_c22, gen_app_peruk07_ent1_c23, gen_app_peruk07_ent1_c24], value: _v[7] ?? '', onChanged: (v) => setState(() => _v[7] = v), bare: true)),
         ]),
         DsSection(title: gen_app_peruk07_ent1_c6, trailing: Row(mainAxisSize: MainAxisSize.min, children: [_viewBar(context), const SizedBox(width: 8), _csvBtn(context)]), children: [
           AnimatedBuilder(
@@ -176,8 +170,8 @@ class _GenAppPeruk07Ent1ScreenState extends State<GenAppPeruk07Ent1Screen> {
               if (all.isEmpty) return const DsEmpty(label: gen_app_peruk07_ent1_c7);
               final q = _q.trim().toLowerCase();
               final rs = q.isEmpty ? all : all.where((r) => r.entries.any((e) => !e.key.startsWith('__') && e.value.toLowerCase().contains(q))).toList();
-              if (_view == 1) return Builder(builder: (_) { final kS = const [gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29, gen_app_peruk07_ent1_c30]; final kR = rs; final kF = (r) => appStore.stageOf('app_peruk07_ent1', r['__id'] ?? ''); final kT = (r) => r[gen_app_peruk07_ent1_c9] ?? ''; final kM = (id, to) => appStore.setStage('app_peruk07_ent1', id, to); final kCols = [for (var c = 0; c < kS.length; c++) [for (final r in kR) if (kF(r).clamp(0, kS.length - 1) == c) r]]; return ForgeKanbanBoard(bare: true, items: [for (var c = 0; c < kS.length; c++) [kS[c], '${kCols[c].length}', for (final r in kCols[c]) kT(r).isEmpty ? (r['__id'] ?? '') : kT(r)]], onCell: (i, j) { if (i < kS.length - 1 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i + 1); }, onCellLong: (i, j) { if (i > 0 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i - 1); }); });
-              if (_view == 2) return ForgeDataGrid(bare: true, columns: const [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c14, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c18, gen_app_peruk07_ent1_c20], items: rs.map((r) => [r[gen_app_peruk07_ent1_c9] ?? '', r[gen_app_peruk07_ent1_c10] ?? '', r[gen_app_peruk07_ent1_c11] ?? '', r[gen_app_peruk07_ent1_c12] ?? '', r[gen_app_peruk07_ent1_c13] ?? '', r[gen_app_peruk07_ent1_c14] ?? '', r[gen_app_peruk07_ent1_c17] ?? '', r[gen_app_peruk07_ent1_c18] ?? '', r[gen_app_peruk07_ent1_c20] ?? '']).toList());
+              if (_view == 1) return Builder(builder: (_) { final kS = const [gen_app_peruk07_ent1_c25, gen_app_peruk07_ent1_c26, gen_app_peruk07_ent1_c27, gen_app_peruk07_ent1_c28, gen_app_peruk07_ent1_c29]; final kR = rs; final kF = (r) => appStore.stageOf('app_peruk07_ent1', r['__id'] ?? ''); final kT = (r) => r[gen_app_peruk07_ent1_c9] ?? ''; final kM = (id, to) => appStore.setStage('app_peruk07_ent1', id, to); final kCols = [for (var c = 0; c < kS.length; c++) [for (final r in kR) if (kF(r).clamp(0, kS.length - 1) == c) r]]; return ForgeKanbanBoard(bare: true, items: [for (var c = 0; c < kS.length; c++) [kS[c], '${kCols[c].length}', for (final r in kCols[c]) kT(r).isEmpty ? (r['__id'] ?? '') : kT(r)]], onCell: (i, j) { if (i < kS.length - 1 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i + 1); }, onCellLong: (i, j) { if (i > 0 && j < kCols[i].length) kM(kCols[i][j]['__id'] ?? '', i - 1); }); });
+              if (_view == 2) return ForgeDataGrid(bare: true, columns: const [gen_app_peruk07_ent1_c9, gen_app_peruk07_ent1_c10, gen_app_peruk07_ent1_c11, gen_app_peruk07_ent1_c12, gen_app_peruk07_ent1_c13, gen_app_peruk07_ent1_c16, gen_app_peruk07_ent1_c17, gen_app_peruk07_ent1_c19], items: rs.map((r) => [r[gen_app_peruk07_ent1_c9] ?? '', r[gen_app_peruk07_ent1_c10] ?? '', r[gen_app_peruk07_ent1_c11] ?? '', r[gen_app_peruk07_ent1_c12] ?? '', r[gen_app_peruk07_ent1_c13] ?? '', r[gen_app_peruk07_ent1_c16] ?? '', r[gen_app_peruk07_ent1_c17] ?? '', r[gen_app_peruk07_ent1_c19] ?? '']).toList());
               return Column(children: [
                 ForgeDsSearch(control: DsSearch(value: _q, onChanged: (v) => setState(() => _q = v), bare: true)),
                 if (rs.isEmpty) const DsEmpty(label: gen_app_peruk07_ent1_c8),

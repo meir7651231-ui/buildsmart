@@ -11,7 +11,7 @@
 //   [תוכן טיוטה קצרה רק אם]⇒DsNote
 //   [תוכן מה לא לשלם עיוור]⇒DsNote
 //   [תוכן הסתייגות]⇒DsNote
-//   שליחה בוואטסאפ⇒DsPrimaryButton+waLink
+//   שליחה בוואטסאפ⇒DsChipButton+waLink
 
 import '../dart-data-bs/auto/gen_app_peruk18_rp1_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
@@ -27,7 +27,6 @@ import '../dart-ui-bs/auto/empty_state.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
-import '../dart-forge-bs/action/action.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 /// 📤 סריאליזציית-הדוח לטקסט (G25): *חלק* · שורות; נבדקת ב-test/genesis_gen_app_<ns>_report_test.dart
 String reportTextGenAppPeruk18Rp1Screen(Map<String, String> r0, String id0) {
@@ -77,7 +76,7 @@ class _GenAppPeruk18Rp1ScreenState extends State<GenAppPeruk18Rp1Screen> {
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk18_rp1_c22, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk18_rp1_c17, label: gen_app_peruk18_rp1_c18, tone: 0)])], tone: 0)),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk18_rp1_c32, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk18_rp1_c27, label: gen_app_peruk18_rp1_c28, tone: 0)])], tone: 0)),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_peruk18_rp1_c70, details: [Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk18_rp1_c42, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk18_rp1_c37, label: gen_app_peruk18_rp1_c38, tone: 0)])], tone: 0)), Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk18_rp1_c52, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk18_rp1_c47, label: gen_app_peruk18_rp1_c48, tone: 0)])], tone: 0)), Padding(padding: const EdgeInsets.only(bottom: 12), child: DsSection(title: gen_app_peruk18_rp1_c62, children: [Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [DsNote(message: gen_app_peruk18_rp1_c57, label: gen_app_peruk18_rp1_c58, tone: 0)])], tone: 0))])),
-      Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => _send(context, r0, id0), child: ForgeToneButton(items: [[gen_app_peruk18_rp1_c65]]))),
+      Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: DsChipButton(label: gen_app_peruk18_rp1_c65, onTap: () => _send(context, r0, id0))),
     ]);
   });
 }

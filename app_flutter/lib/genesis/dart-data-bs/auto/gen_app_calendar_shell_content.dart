@@ -1,0 +1,21 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_calendar_shell_c0 = 'פגישה';
+const String gen_app_calendar_shell_c1 = 'עוד';
+const String gen_app_calendar_shell_c2 = 'יומן';
+const String gen_app_calendar_shell_c3 = 'הוספת פגישה';
+const String gen_app_calendar_shell_c4 = '';
+const String gen_app_calendar_shell_c5 = 'אין כלום כאן עדיין. הוספת פגישה — וזהו.';
+const String gen_app_calendar_shell_c6 = 'פגישה';
+const String gen_app_calendar_shell_c7 = '';
+const String gen_app_calendar_shell_c8 = 'מה';
+const String gen_app_calendar_shell_c9 = 'מועד';
+const String gen_app_calendar_shell_c10 = 'הוספת פגישה — כתוב ומקש Enter';
+const String gen_app_calendar_shell_c11 = 'מה';
+const String gen_app_calendar_shell_c12 = 'הוספת פגישה';
+const String gen_app_calendar_shell_c13 = 'A הוספה · T היום · I רשימה · Ctrl+K פקודה';
+const String gen_app_calendar_shell_c14 = 'חיפוש או פעולה…';
+const String gen_app_calendar_shell_c15 = 'חיפוש או פעולה…';
+const String gen_app_calendar_shell_c16 = 'מה קבוע?';
+const String gen_app_calendar_shell_c17 = 'פגישה';
+const String gen_app_calendar_shell_c18 = '';
+const String gen_app_calendar_shell_c19 = '';

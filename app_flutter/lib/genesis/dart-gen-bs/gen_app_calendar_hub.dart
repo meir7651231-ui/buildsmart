@@ -1,0 +1,43 @@
+// ✨ חולל ע"י מנוע-הרינדור (render-ds) — לוח-ניווט + שער-הרשאות (בורר-תפקיד חי · נשמר). אל תערוך ידנית.
+import '../dart-data-bs/auto/gen_app_calendar_hub_content.dart';
+import '../dart-ui-bs/ds/ds.dart';
+import '../dart-ui-bs/ds/ds_store.dart';
+import 'gen_app_calendar_audit.dart';
+import 'gen_app_calendar_behavior.dart';
+import 'gen_app_calendar_ent1.dart';
+import 'gen_app_calendar_flags.dart';
+import 'gen_app_calendar_settings.dart';
+import 'package:flutter/material.dart';
+
+class GenAppCalendarHubScreen extends StatefulWidget {
+  const GenAppCalendarHubScreen({super.key});
+
+  @override
+  State<GenAppCalendarHubScreen> createState() => _GenAppCalendarHubScreenState();
+}
+
+class _GenAppCalendarHubScreenState extends State<GenAppCalendarHubScreen> {
+  static const List<List<int>> _vis = [[0, 1, 2, 3, 4]];
+
+  List<Widget> _tiles(BuildContext context) => [
+        DsNavTile(glyph: gen_app_calendar_hub_c2, title: gen_app_calendar_hub_c3, sub: gen_app_calendar_hub_c4, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarEnt1Screen()))),
+        DsNavTile(glyph: gen_app_calendar_hub_c5, title: gen_app_calendar_hub_c6, sub: gen_app_calendar_hub_c7, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarAuditScreen()))),
+        DsNavTile(glyph: gen_app_calendar_hub_c8, title: gen_app_calendar_hub_c9, sub: gen_app_calendar_hub_c10, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarFlagsScreen()))),
+        DsNavTile(glyph: gen_app_calendar_hub_c11, title: gen_app_calendar_hub_c12, sub: gen_app_calendar_hub_c13, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarSettingsScreen()))),
+        DsNavTile(glyph: gen_app_calendar_hub_c14, title: gen_app_calendar_hub_c15, sub: gen_app_calendar_hub_c16, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppCalendarBehaviorScreen()))),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final all = _tiles(context);
+    final vis = _vis[appStore.role.clamp(0, _vis.length - 1)];
+    return DsScaffold(
+      title: gen_app_calendar_hub_c0,
+      subtitle: '${vis.length} מסכים גלויים',
+      icon: gen_app_calendar_hub_c1,
+      children: [
+        for (final i in vis) all[i],
+      ],
+    );
+  }
+}

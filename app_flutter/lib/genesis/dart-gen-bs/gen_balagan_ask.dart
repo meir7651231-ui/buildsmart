@@ -3,7 +3,10 @@ import '../dart-data-bs/auto/gen_balagan_ask_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_ai.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import 'gen_balagan_confirm.dart';
 import 'gen_balagan_moments.dart';
+import 'gen_app_calendar_ent1.dart';
+import 'gen_app_tasks_ent1.dart';
 import 'gen_app_peruk01_ent1.dart';
 import 'gen_app_peruk02_ent1.dart';
 import 'gen_app_peruk03_ent1.dart';
@@ -38,34 +41,36 @@ import 'package:image_picker/image_picker.dart';
 
 Widget balaganOpen(int index, Map<String, String> initial) {
   switch (index) {
-    case 0: return GenAppPeruk01Ent1Screen(initial: initial);
-    case 1: return GenAppPeruk02Ent1Screen(initial: initial);
-    case 2: return GenAppPeruk03Ent1Screen(initial: initial);
-    case 3: return GenAppPeruk04Ent1Screen(initial: initial);
-    case 4: return GenAppPeruk05Ent1Screen(initial: initial);
-    case 5: return GenAppPeruk06Ent1Screen(initial: initial);
-    case 6: return GenAppPeruk07Ent1Screen(initial: initial);
-    case 7: return GenAppPeruk08Ent1Screen(initial: initial);
-    case 8: return GenAppPeruk09Ent1Screen(initial: initial);
-    case 9: return GenAppPeruk10Ent1Screen(initial: initial);
-    case 10: return GenAppPeruk11Ent1Screen(initial: initial);
-    case 11: return GenAppPeruk12Ent1Screen(initial: initial);
-    case 12: return GenAppPeruk13Ent1Screen(initial: initial);
-    case 13: return GenAppPeruk14Ent1Screen(initial: initial);
-    case 14: return GenAppPeruk15Ent1Screen(initial: initial);
-    case 15: return GenAppPeruk16Ent1Screen(initial: initial);
-    case 16: return GenAppPeruk17Ent1Screen(initial: initial);
-    case 17: return GenAppPeruk18Ent1Screen(initial: initial);
-    case 18: return GenAppPeruk19Ent1Screen(initial: initial);
-    case 19: return GenAppPeruk20Ent1Screen(initial: initial);
-    case 20: return GenAppPeruk21Ent1Screen(initial: initial);
-    case 21: return GenAppPeruk22Ent1Screen(initial: initial);
-    case 22: return GenAppPeruk23Ent1Screen(initial: initial);
-    case 23: return GenAppPeruk24Ent1Screen(initial: initial);
-    case 24: return GenAppPeruk25Ent1Screen(initial: initial);
-    case 25: return GenAppPeruk26Ent1Screen(initial: initial);
-    case 26: return GenAppPeruk27Ent1Screen(initial: initial);
-    case 27: return GenAppPeruk28Ent1Screen(initial: initial);
+    case 0: return GenAppCalendarEnt1Screen(initial: initial);
+    case 1: return GenAppTasksEnt1Screen(initial: initial);
+    case 2: return GenAppPeruk01Ent1Screen(initial: initial);
+    case 3: return GenAppPeruk02Ent1Screen(initial: initial);
+    case 4: return GenAppPeruk03Ent1Screen(initial: initial);
+    case 5: return GenAppPeruk04Ent1Screen(initial: initial);
+    case 6: return GenAppPeruk05Ent1Screen(initial: initial);
+    case 7: return GenAppPeruk06Ent1Screen(initial: initial);
+    case 8: return GenAppPeruk07Ent1Screen(initial: initial);
+    case 9: return GenAppPeruk08Ent1Screen(initial: initial);
+    case 10: return GenAppPeruk09Ent1Screen(initial: initial);
+    case 11: return GenAppPeruk10Ent1Screen(initial: initial);
+    case 12: return GenAppPeruk11Ent1Screen(initial: initial);
+    case 13: return GenAppPeruk12Ent1Screen(initial: initial);
+    case 14: return GenAppPeruk13Ent1Screen(initial: initial);
+    case 15: return GenAppPeruk14Ent1Screen(initial: initial);
+    case 16: return GenAppPeruk15Ent1Screen(initial: initial);
+    case 17: return GenAppPeruk16Ent1Screen(initial: initial);
+    case 18: return GenAppPeruk17Ent1Screen(initial: initial);
+    case 19: return GenAppPeruk18Ent1Screen(initial: initial);
+    case 20: return GenAppPeruk19Ent1Screen(initial: initial);
+    case 21: return GenAppPeruk20Ent1Screen(initial: initial);
+    case 22: return GenAppPeruk21Ent1Screen(initial: initial);
+    case 23: return GenAppPeruk22Ent1Screen(initial: initial);
+    case 24: return GenAppPeruk23Ent1Screen(initial: initial);
+    case 25: return GenAppPeruk24Ent1Screen(initial: initial);
+    case 26: return GenAppPeruk25Ent1Screen(initial: initial);
+    case 27: return GenAppPeruk26Ent1Screen(initial: initial);
+    case 28: return GenAppPeruk27Ent1Screen(initial: initial);
+    case 29: return GenAppPeruk28Ent1Screen(initial: initial);
     default: return const SizedBox.shrink();
   }
 }
@@ -87,18 +92,18 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   void _skip() { setState(() { _hits = _hits.length > 1 ? _hits.sublist(1) : const []; if (_hits.isEmpty) _note = gen_balagan_ask_c1; }); }
   void _open(BuildContext context, BalaganHit h) {
     final facts = {...balaganFacts(_c.text, h.module), ..._extra}..removeWhere((key, v) => v.trim().isEmpty || !(h.module.dateFields.contains(key) || h.module.numFields.contains(key) || key == h.module.descField || key == h.module.longField));
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => balaganOpen(h.module.index, facts)));
+    Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: h.module, facts: facts))).then((saved) { if (saved == true && mounted) setState(() { _c.clear(); _hits = const []; _extra = const {}; _asked = false; _note = gen_balagan_ask_c2; }); });
   }
   Future<void> _photo() async {
     final key = appStore.setting('ai.key');
-    if (key.isEmpty) { setState(() => _note = gen_balagan_ask_c2); return; }
+    if (key.isEmpty) { setState(() => _note = gen_balagan_ask_c3); return; }
     final x = await ImagePicker().pickImage(source: kIsWeb ? ImageSource.gallery : ImageSource.camera, imageQuality: 85);
     if (x == null) return;
-    setState(() { _busy = true; _note = gen_balagan_ask_c3; });
+    setState(() { _busy = true; _note = gen_balagan_ask_c4; });
     final bytes = await x.readAsBytes();
     final r = await dsAiExtract(apiKey: key, image: bytes, imageMime: x.mimeType ?? 'image/jpeg', fields: const ['תאריך', 'סכום', 'שם'], model: appStore.setting('ai.model', 'claude-sonnet-5'));
     if (!mounted) return;
-    if (r == null) { setState(() { _busy = false; _note = gen_balagan_ask_c4; }); return; }
+    if (r == null) { setState(() { _busy = false; _note = gen_balagan_ask_c5; }); return; }
     final text = (r['_text'] ?? '').trim();
     setState(() { _busy = false; _note = ''; if (text.isNotEmpty) _c.text = text; _extra = {for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value}; });
     _go();
@@ -108,21 +113,21 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   Widget build(BuildContext context) {
     final lk = DsLook.of(context);
     final top = _hits.isNotEmpty ? _hits.first : null;
-    return DsScaffold(title: gen_balagan_ask_c5, subtitle: gen_balagan_ask_c6, icon: gen_balagan_ask_c7, children: [
+    return DsScaffold(title: gen_balagan_ask_c6, subtitle: gen_balagan_ask_c7, icon: gen_balagan_ask_c8, children: [
       Container(
         decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(lk.r)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: TextField(controller: _c, minLines: 3, maxLines: 8, autofocus: true, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5), decoration: InputDecoration(border: InputBorder.none, hintText: gen_balagan_ask_c8, hintStyle: TextStyle(color: lk.faint)), onSubmitted: (_) => _go()),
+        child: TextField(controller: _c, minLines: 3, maxLines: 8, autofocus: true, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5), decoration: InputDecoration(border: InputBorder.none, hintText: gen_balagan_ask_c9, hintStyle: TextStyle(color: lk.faint)), onSubmitted: (_) => _go()),
       ),
       Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-        Expanded(child: DsPrimaryButton(label: gen_balagan_ask_c9, onTap: _busy ? null : _go)),
+        Expanded(child: DsPrimaryButton(label: gen_balagan_ask_c10, onTap: _busy ? null : _go)),
         const SizedBox(width: 8),
-        GestureDetector(onTap: _busy ? null : _photo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(gen_balagan_ask_c10, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
+        GestureDetector(onTap: _busy ? null : _photo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(gen_balagan_ask_c11, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
       ])),
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: DsNote(message: _note, label: '', tone: 0)),
-      if (_asked && top != null) DsSection(title: gen_balagan_ask_c11, children: [
-        DsApproveCard(question: gen_balagan_ask_c12.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c13, noLabel: gen_balagan_ask_c14, onOk: () => _open(context, top), onNo: _skip),
-        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c15 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
+      if (_asked && top != null) DsSection(title: gen_balagan_ask_c12, children: [
+        DsApproveCard(question: gen_balagan_ask_c13.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c14, noLabel: gen_balagan_ask_c15, onOk: () => _open(context, top), onNo: _skip),
+        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c16 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
       ]),
     ]);
   }
