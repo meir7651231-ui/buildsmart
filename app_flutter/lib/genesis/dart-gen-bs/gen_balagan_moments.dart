@@ -122,9 +122,16 @@ List<_DateAt> balaganDates(String text, DateTime today) {
   return res;
 }
 /// שעה-ביום: 16:30 · ב-16:30 · בשעה 16 (⇒ 16:00). הטווח כולל את מילת-היחס (המתאר נשאר נקי).
-List<_DateAt> balaganTimes(String text) {
+List<_DateAt> balaganTimes(String text, {DateTime? now}) {
   final out = <_DateAt>[];
   for (final x in RegExp(r'(?:ב-?)?(?<![\d:])(\d{1,2}):(\d{2})(?![\d:])').allMatches(text)) { final h = int.parse(x.group(1)!), mi = int.parse(x.group(2)!); if (h > 23 || mi > 59) continue; out.add(_DateAt(x.start, x.end, '${h.toString().padLeft(2, '0')}:${mi.toString().padLeft(2, '0')}')); }
+  // יחסי-לעכשיו: «בעוד שעה» · «בעוד שעתיים» · «בעוד חצי שעה» · «בעוד 20 דקות» ⇒ שעה (עכשיו מוזרק)
+  final nowT = now ?? DateTime.now();
+  for (final x in RegExp(r'בעוד\s+(שעה|שעתיים|חצי\s+שעה|רבע\s+שעה|(\d{1,3})\s+דקות|(\d{1,2})\s+שעות)(?![\u0590-\u05FF])').allMatches(text)) {
+    if (out.any((o) => x.start < o.end && x.end > o.start)) continue;
+    final g = x.group(1)!; var mins = 60; if (g == 'שעתיים') mins = 120; else if (g.startsWith('חצי')) mins = 30; else if (g.startsWith('רבע')) mins = 15; else if (x.group(2) != null) mins = int.parse(x.group(2)!); else if (x.group(3) != null) mins = int.parse(x.group(3)!) * 60;
+    final t = nowT.add(Duration(minutes: mins)); out.add(_DateAt(x.start, x.end, '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}'));
+  }
   // חלקי-יום (שפה, לא דומיין): בבוקר 09:00 · בצהריים 13:00 · אחה"צ 16:00 · בערב 19:00 · בלילה 21:00 — רק כשאין שעה מפורשת באותו טווח
   const dayParts = {'בבוקר': '09:00', 'בצהריים': '13:00', 'אחה"צ': '16:00', 'אחר הצהריים': '16:00', 'אחרי הצהריים': '16:00', 'בערב': '19:00', 'בלילה': '21:00'};
   for (final x in RegExp(r'(?<![\u0590-\u05FF])(בבוקר|בצהריים|אחה"צ|אחר הצהריים|אחרי הצהריים|בערב|בלילה)(?![\u0590-\u05FF])').allMatches(text)) { if (out.any((o) => x.start < o.end && x.end > o.start)) continue; out.add(_DateAt(x.start, x.end, dayParts[x.group(1)!]!)); }
@@ -260,7 +267,7 @@ Map<String, String> balaganFacts(String text0, BalaganModule m, {DateTime? today
   final numOnly = m.numFields.where((f) => !m.percentFields.contains(f)).toList();   // שדה-אחוז מקבל אחוז, לא סכום
   for (final f in numOnly) { final i = nearest(nStarts, f); if (i >= 0 && !usedN.contains(i)) { out[f] = numMs[i].value; usedN.add(i); } }
   var ni = 0; for (final f in numOnly) { if (out.containsKey(f)) continue; while (ni < numMs.length && usedN.contains(ni)) { ni++; } if (ni < numMs.length) { out[f] = numMs[ni].value; usedN.add(ni); } }
-  final timeMs = balaganTimes(text);
+  final timeMs = balaganTimes(text, now: today == null ? null : DateTime(today.year, today.month, today.day, 10, 0));   // בבדיקה: «עכשיו» = 10:00 של היום-המוזרק
   final personMs = balaganPersons(text, [...dateMs, ...timeMs, ...phoneMs], phoneMs);
   final repMs = balaganRepeat(text); if (repMs.isNotEmpty) out['__repeat'] = repMs.first.iso;   // ↻ נשמר ברשומה; «סיים» יוצר את הבא
   void assign(List<String> fields, List<_DateAt> ms, Set<int> used) {

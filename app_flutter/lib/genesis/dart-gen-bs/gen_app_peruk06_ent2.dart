@@ -14,7 +14,8 @@ import '../dart-forge-bs/input/input.dart'; // G12c · עור-forge במודול
 import '../dart-forge-bs/spatial/spatial.dart'; // G12c · עור-forge במודול (skin.stat/hero) — אטומי-DS הוחלפו באטומי-forge עם fields; צבעי-מצב של ה-DS (סכנה/תקין) לא מועברים (האטום לובש את החריץ)
 
 class GenAppPeruk06Ent2Screen extends StatefulWidget {
-  const GenAppPeruk06Ent2Screen({this.scopeField, this.scopeId, this.initial, super.key});
+  const GenAppPeruk06Ent2Screen({this.scopeField, this.scopeId, this.initial, this.editId, super.key});
+  final String? editId;   // פתיחה ישר בעריכת-רשומה קיימת (מעמוד-התיק «ערוך»)
 
   final Map<String, String>? initial;   // G33 · מילוי-מראש מ«מה קרה?» (הכרעה-29): שדה ⇒ ערך, פעם אחת
   final String? scopeField;   // G26 · היקף-הורה (ניווט-מקשרים): שדה-הקשר + מזהה ⇒ הרשימה מסוננת לרשומת-ההורה והטופס ממולא-מראש
@@ -31,7 +32,7 @@ class _GenAppPeruk06Ent2ScreenState extends State<GenAppPeruk06Ent2Screen> {
   bool _initialUsed = false;
   void _prefill() { if (widget.scopeId != null) { final i = _labelsAll.indexOf(widget.scopeField ?? ''); if (i >= 0) _v[i] = widget.scopeId!; } if (widget.initial != null && !_initialUsed) { _initialUsed = true; widget.initial!.forEach((f, v) { final i = _labelsAll.indexOf(f); if (i >= 0 && v.trim().isNotEmpty) _v[i] = v; }); } }
   @override
-  void initState() { super.initState(); _prefill(); }
+  void initState() { super.initState(); _prefill(); if (widget.editId != null) { final r = appStore.byId('app_peruk06_ent2', widget.editId!); if (r != null) WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _edit(r); }); } }
   String _q = '';    // מחרוזת-חיפוש (סינון-רשומות חי)
   int _view = 0;   // 0=רשימה · לוח · לוח-שנה · טבלה
   String? _err;      // שגיאת-ולידציה (שדות-חובה חסרים)
