@@ -73,17 +73,17 @@ class DsTokens {
 // לבן · דיו #37352F · קו 8% · אקצנט-יחיד · בלי גרדיאנט/זוהר/צל · שורה-לא-כרטיס · בלי אריח-אמוג׳י. הכרום קורא DsLook.of(context)
 // בדיוק כמו שאטום-forge קורא DsSeam.skinOf — הזהות בחיווט (חוק-6), לא בקוד.
 class DsLook {
-  const DsLook({required this.paper, required this.bg, required this.card, required this.cardAlt, required this.ink, required this.muted, required this.faint, required this.line, required this.track, required this.accent, required this.accentDark, required this.accentSoft, required this.success, required this.successSoft, required this.danger, required this.dangerSoft, required this.dangerLine, required this.chipBg, required this.r, required this.rSm, required this.fontHead});
+  const DsLook({required this.paper, required this.bg, required this.card, required this.cardAlt, required this.ink, required this.muted, required this.faint, required this.line, required this.track, required this.accent, required this.accentDark, required this.accentSoft, required this.success, required this.successSoft, required this.warn, required this.danger, required this.dangerSoft, required this.dangerLine, required this.chipBg, required this.r, required this.rSm, required this.fontHead});
   final bool paper;
-  final Color bg, card, cardAlt, ink, muted, faint, line, track, accent, accentDark, accentSoft, success, successSoft, danger, dangerSoft, dangerLine, chipBg;
+  final Color bg, card, cardAlt, ink, muted, faint, line, track, accent, accentDark, accentSoft, success, successSoft, warn, danger, dangerSoft, dangerLine, chipBg;
   final double r, rSm;
   final String fontHead;
-  static const DsLook dark = DsLook(paper: false, bg: DsTokens.bg, card: DsTokens.card, cardAlt: DsTokens.cardAlt, ink: DsTokens.ink, muted: DsTokens.muted, faint: DsTokens.faint, line: DsTokens.line, track: DsTokens.track, accent: DsTokens.accent, accentDark: DsTokens.accentDark, accentSoft: DsTokens.accentSoft, success: DsTokens.success, successSoft: DsTokens.successSoft, danger: Color(0xFFDC2626), dangerSoft: Color(0x14DC2626), dangerLine: Color(0x40DC2626), chipBg: Color(0xFFF1F5F9), r: DsTokens.r, rSm: DsTokens.rSm, fontHead: DsTokens.fontHead);
+  static const DsLook dark = DsLook(paper: false, bg: DsTokens.bg, card: DsTokens.card, cardAlt: DsTokens.cardAlt, ink: DsTokens.ink, muted: DsTokens.muted, faint: DsTokens.faint, line: DsTokens.line, track: DsTokens.track, accent: DsTokens.accent, accentDark: DsTokens.accentDark, accentSoft: DsTokens.accentSoft, success: DsTokens.success, successSoft: DsTokens.successSoft, warn: Color(0xFFF59E0B), danger: Color(0xFFDC2626), dangerSoft: Color(0x14DC2626), dangerLine: Color(0x40DC2626), chipBg: Color(0xFFF1F5F9), r: DsTokens.r, rSm: DsTokens.rSm, fontHead: DsTokens.fontHead);
   static DsLook of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<PureScope>();
     if (scope == null || scope.skin.canvas.computeLuminance() < 0.5) return dark;
     final s = scope.skin, th = scope.theme;
-    return DsLook(paper: true, bg: s.canvas, card: s.surface, cardAlt: s.raised, ink: s.ink, muted: s.mut, faint: s.faint, line: s.hair, track: s.raised2, accent: th.a, accentDark: th.a800, accentSoft: th.a.withValues(alpha: 0.10), success: s.ok, successSoft: s.ok.withValues(alpha: 0.12), danger: s.err, dangerSoft: s.err.withValues(alpha: 0.08), dangerLine: s.err.withValues(alpha: 0.25), chipBg: s.raised2, r: 12, rSm: 10, fontHead: scope.fonts.he);
+    return DsLook(paper: true, bg: s.canvas, card: s.surface, cardAlt: s.raised, ink: s.ink, muted: s.mut, faint: s.faint, line: s.hair, track: s.raised2, accent: th.a, accentDark: th.a800, accentSoft: th.a.withValues(alpha: 0.10), success: s.ok, successSoft: s.ok.withValues(alpha: 0.12), warn: s.warn, danger: s.err, dangerSoft: s.err.withValues(alpha: 0.08), dangerLine: s.err.withValues(alpha: 0.25), chipBg: s.raised2, r: 12, rSm: 10, fontHead: scope.fonts.he);
   }
 }
 
@@ -423,6 +423,110 @@ class _DsPaletteState extends State<DsPalette> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── G32 · DsLoadMeter (load meter: 5 bars, 3 states) ──
+class DsLoadMeter extends StatelessWidget {
+  const DsLoadMeter({required this.count, required this.label, required this.stateLabels, this.threshold = 5, super.key});
+  final int count, threshold;
+  final String label;
+  final List<String> stateLabels; // 3 states
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    final state = count <= (threshold * 0.6).floor() ? 0 : count <= threshold ? 1 : 2;
+    final c = state == 0 ? lk.success : state == 1 ? lk.warn : lk.danger;
+    final on = threshold == 0 ? 0 : ((count / threshold) * 5).clamp(0, 5).round();
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: lk.line))),
+      child: Row(children: [
+        Row(mainAxisSize: MainAxisSize.min, children: [for (var i = 0; i < 5; i++) Container(width: 12, height: 18, margin: const EdgeInsets.only(left: 3), decoration: BoxDecoration(color: i < on ? c : lk.line, borderRadius: BorderRadius.circular(2)))]),
+        const SizedBox(width: 10),
+        Expanded(child: Text(label, style: TextStyle(color: lk.ink, fontSize: 15))),
+        Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(999)), child: Text(stateLabels[state.clamp(0, stateLabels.length - 1)], style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600))),
+      ]),
+    );
+  }
+}
+
+// ── G32 · DsActionRow (row + up to 5 one-tap actions) ──
+class DsActionRow extends StatelessWidget {
+  const DsActionRow({required this.title, this.sub = '', this.actions = const [], this.onAct, this.tone = 0, super.key});
+  final String title, sub;
+  final List<String> actions;
+  final ValueChanged<int>? onAct;
+  final int tone; // 0 normal · 2 overdue
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
+      constraints: const BoxConstraints(minHeight: 52),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: lk.line))),
+      child: Row(children: [
+        Container(width: 18, height: 18, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: tone == 2 ? lk.danger : lk.muted, width: 1.5))),
+        const SizedBox(width: 12),
+        Expanded(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.4)),
+          if (sub.isNotEmpty) Text(sub, style: TextStyle(color: tone == 2 ? lk.danger : lk.muted, fontSize: 13)),
+        ])),
+        for (var i = 0; i < actions.length && i < 5; i++) GestureDetector(onTap: onAct == null ? null : () => onAct!(i), child: Padding(padding: const EdgeInsets.only(right: 6), child: DsChip(label: actions[i], tone: i == 0 ? 0 : 2))),
+      ]),
+    );
+  }
+}
+
+// ── G32 · DsApproveCard (ask before acting: ok / no / always + source) ──
+class DsApproveCard extends StatelessWidget {
+  const DsApproveCard({required this.question, this.source = '', required this.okLabel, required this.noLabel, this.alwaysLabel = '', required this.onOk, required this.onNo, this.onAlways, super.key});
+  final String question, source, okLabel, noLabel, alwaysLabel;
+  final VoidCallback onOk, onNo;
+  final VoidCallback? onAlways;
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: lk.cardAlt, borderRadius: BorderRadius.circular(12)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+        Text(question, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.4)),
+        if (source.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 2), child: Text(source, style: TextStyle(color: lk.muted, fontSize: 13))),
+        Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
+          GestureDetector(onTap: onOk, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7), decoration: BoxDecoration(color: lk.accent, borderRadius: BorderRadius.circular(9)), child: Text(okLabel, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)))),
+          const SizedBox(width: 8),
+          GestureDetector(onTap: onNo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(noLabel, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
+          if (onAlways != null && alwaysLabel.isNotEmpty) ...[const SizedBox(width: 8), GestureDetector(onTap: onAlways, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(alwaysLabel, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600))))],
+        ])),
+      ]),
+    );
+  }
+}
+
+// ── G32 · DsLogRow (log row + undo) ──
+class DsLogRow extends StatelessWidget {
+  const DsLogRow({required this.text, this.sub = '', this.undoLabel = '', this.onUndo, super.key});
+  final String text, sub, undoLabel;
+  final VoidCallback? onUndo;
+  @override
+  Widget build(BuildContext context) {
+    final lk = DsLook.of(context);
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: lk.line))),
+      child: Row(children: [
+        Container(width: 18, height: 18, alignment: Alignment.center, decoration: BoxDecoration(shape: BoxShape.circle, color: lk.success.withValues(alpha: 0.12)), child: Icon(Icons.check, size: 12, color: lk.success)),
+        const SizedBox(width: 12),
+        Expanded(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(text, style: TextStyle(color: lk.ink, fontSize: 15, height: 1.4)),
+          if (sub.isNotEmpty) Text(sub, style: TextStyle(color: lk.muted, fontSize: 13)),
+        ])),
+        if (onUndo != null && undoLabel.isNotEmpty) GestureDetector(onTap: onUndo, child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: Text(undoLabel, style: TextStyle(color: lk.muted, fontSize: 13)))),
+      ]),
     );
   }
 }

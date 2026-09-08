@@ -3,6 +3,7 @@ import '../dart-data-bs/auto/gen_app_peruk19_hub_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import 'gen_app_peruk19_audit.dart';
+import 'gen_app_peruk19_behavior.dart';
 import 'gen_app_peruk19_ent1.dart';
 import 'gen_app_peruk19_flags.dart';
 import 'gen_app_peruk19_px1.dart';
@@ -19,7 +20,7 @@ class GenAppPeruk19HubScreen extends StatefulWidget {
 }
 
 class _GenAppPeruk19HubScreenState extends State<GenAppPeruk19HubScreen> {
-  static const List<List<int>> _vis = [[0, 1, 2, 3, 4, 5, 6]];
+  static const List<List<int>> _vis = [[0, 1, 2, 3, 4, 5, 6, 7]];
 
   List<Widget> _tiles(BuildContext context) => [
         DsNavTile(glyph: gen_app_peruk19_hub_c2, title: gen_app_peruk19_hub_c3, sub: gen_app_peruk19_hub_c4, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19Ent1Screen()))),
@@ -29,6 +30,7 @@ class _GenAppPeruk19HubScreenState extends State<GenAppPeruk19HubScreen> {
         DsNavTile(glyph: gen_app_peruk19_hub_c14, title: gen_app_peruk19_hub_c15, sub: gen_app_peruk19_hub_c16, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19AuditScreen()))),
         DsNavTile(glyph: gen_app_peruk19_hub_c17, title: gen_app_peruk19_hub_c18, sub: gen_app_peruk19_hub_c19, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19FlagsScreen()))),
         DsNavTile(glyph: gen_app_peruk19_hub_c20, title: gen_app_peruk19_hub_c21, sub: gen_app_peruk19_hub_c22, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19SettingsScreen()))),
+        DsNavTile(glyph: gen_app_peruk19_hub_c23, title: gen_app_peruk19_hub_c24, sub: gen_app_peruk19_hub_c25, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppPeruk19BehaviorScreen()))),
   ];
 
   @override

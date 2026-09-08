@@ -1,0 +1,27 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_peruk17_ent1_c0 = 'תיק';
+const String gen_app_peruk17_ent1_c1 = '6 שדות · 5 שלבים';
+const String gen_app_peruk17_ent1_c2 = '';
+const String gen_app_peruk17_ent1_c3 = 'שמירה';
+const String gen_app_peruk17_ent1_c4 = 'עדכון';
+const String gen_app_peruk17_ent1_c5 = 'פרטי הרשומה';
+const String gen_app_peruk17_ent1_c6 = 'רשומות';
+const String gen_app_peruk17_ent1_c7 = 'אין תיק עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_peruk17_ent1_c8 = 'לא נמצאו רשומות תואמות';
+const String gen_app_peruk17_ent1_c9 = 'לקוח';
+const String gen_app_peruk17_ent1_c10 = 'טלפון';
+const String gen_app_peruk17_ent1_c11 = 'המכתב המלא';
+const String gen_app_peruk17_ent1_c12 = 'איזו בקשה';
+const String gen_app_peruk17_ent1_c13 = 'מה כבר הוגש';
+const String gen_app_peruk17_ent1_c14 = 'סיווג';
+const String gen_app_peruk17_ent1_c15 = 'השלמת מסמכים';
+const String gen_app_peruk17_ent1_c16 = 'דחייה לגופה';
+const String gen_app_peruk17_ent1_c17 = 'זימון ועדה';
+const String gen_app_peruk17_ent1_c18 = 'נגמר השעון';
+const String gen_app_peruk17_ent1_c19 = 'התקבל';
+const String gen_app_peruk17_ent1_c20 = 'שולם';
+const String gen_app_peruk17_ent1_c21 = 'בבדיקה';
+const String gen_app_peruk17_ent1_c22 = 'נמסר';
+const String gen_app_peruk17_ent1_c23 = 'סגור';
+const String gen_app_peruk17_ent1_c24 = 'סה"כ רשומות';
+const String gen_app_peruk17_ent1_c25 = '';

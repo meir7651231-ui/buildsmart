@@ -3,6 +3,7 @@ import '../dart-data-bs/auto/gen_app_sechirut_hub_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import 'gen_app_sechirut_audit.dart';
+import 'gen_app_sechirut_behavior.dart';
 import 'gen_app_sechirut_ent1.dart';
 import 'gen_app_sechirut_ent2.dart';
 import 'gen_app_sechirut_ent3.dart';
@@ -25,7 +26,7 @@ class GenAppSechirutHubScreen extends StatefulWidget {
 }
 
 class _GenAppSechirutHubScreenState extends State<GenAppSechirutHubScreen> {
-  static const List<List<int>> _vis = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [0, 1, 2, 5, 6, 7, 8]];
+  static const List<List<int>> _vis = [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], [0, 1, 2, 5, 6, 7, 8]];
 
   List<Widget> _tiles(BuildContext context) => [
         DsNavTile(glyph: gen_app_sechirut_hub_c3, title: gen_app_sechirut_hub_c4, sub: gen_app_sechirut_hub_c5, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutEnt1Screen()))),
@@ -41,6 +42,7 @@ class _GenAppSechirutHubScreenState extends State<GenAppSechirutHubScreen> {
         DsNavTile(glyph: gen_app_sechirut_hub_c33, title: gen_app_sechirut_hub_c34, sub: gen_app_sechirut_hub_c35, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutAuditScreen()))),
         DsNavTile(glyph: gen_app_sechirut_hub_c36, title: gen_app_sechirut_hub_c37, sub: gen_app_sechirut_hub_c38, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutFlagsScreen()))),
         DsNavTile(glyph: gen_app_sechirut_hub_c39, title: gen_app_sechirut_hub_c40, sub: gen_app_sechirut_hub_c41, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutSettingsScreen()))),
+        DsNavTile(glyph: gen_app_sechirut_hub_c42, title: gen_app_sechirut_hub_c43, sub: gen_app_sechirut_hub_c44, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const GenAppSechirutBehaviorScreen()))),
   ];
 
   Widget _actorBar(BuildContext context) => AnimatedBuilder(
@@ -100,7 +102,7 @@ class _GenAppSechirutHubScreenState extends State<GenAppSechirutHubScreen> {
         _actorBar(context),
         Container(
           margin: const EdgeInsets.only(bottom: 4),
-          child: Wrap(children: [_roleChip(context, 0, gen_app_sechirut_hub_c42), _roleChip(context, 1, gen_app_sechirut_hub_c43)]),
+          child: Wrap(children: [_roleChip(context, 0, gen_app_sechirut_hub_c45), _roleChip(context, 1, gen_app_sechirut_hub_c46)]),
         ),
         for (final i in vis) all[i],
       ],

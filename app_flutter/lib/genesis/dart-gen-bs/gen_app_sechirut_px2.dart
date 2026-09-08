@@ -8,7 +8,6 @@ import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-forge-bs/input/glow_slider.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
-import '../dart-ui-bs/ds/ds.dart';
 import 'package:flutter/material.dart';
 
 class GenAppSechirutPx2Screen extends StatelessWidget {

@@ -40,7 +40,6 @@ import '../dart-maor/wa-digits.dart';
 import '../dart-maor/wa-link.dart';
 import '../dart-ui-bs/auto/empty_state.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
-import '../dart-ui-bs/ds/ds.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';

@@ -1,0 +1,24 @@
+// 📦 תוכן-DS (render-ds) — verbatim מהבקשה. אל תערוך ידנית.
+const String gen_app_peruk12_ent1_c0 = 'תיק';
+const String gen_app_peruk12_ent1_c1 = '6 שדות · 5 שלבים';
+const String gen_app_peruk12_ent1_c2 = '';
+const String gen_app_peruk12_ent1_c3 = 'שמירה';
+const String gen_app_peruk12_ent1_c4 = 'עדכון';
+const String gen_app_peruk12_ent1_c5 = 'פרטי הרשומה';
+const String gen_app_peruk12_ent1_c6 = 'רשומות';
+const String gen_app_peruk12_ent1_c7 = 'אין תיק עדיין — הרשומה הראשונה תופיע כאן';
+const String gen_app_peruk12_ent1_c8 = 'לא נמצאו רשומות תואמות';
+const String gen_app_peruk12_ent1_c9 = 'לקוח';
+const String gen_app_peruk12_ent1_c10 = 'טלפון';
+const String gen_app_peruk12_ent1_c11 = 'קישור מודעה';
+const String gen_app_peruk12_ent1_c12 = 'קישור חיפוש';
+const String gen_app_peruk12_ent1_c13 = 'מחיר';
+const String gen_app_peruk12_ent1_c14 = 'מה המוכר אמר';
+const String gen_app_peruk12_ent1_c15 = 'האם נסעת';
+const String gen_app_peruk12_ent1_c16 = 'התקבל';
+const String gen_app_peruk12_ent1_c17 = 'שולם';
+const String gen_app_peruk12_ent1_c18 = 'בבדיקה';
+const String gen_app_peruk12_ent1_c19 = 'נמסר';
+const String gen_app_peruk12_ent1_c20 = 'סגור';
+const String gen_app_peruk12_ent1_c21 = 'סה"כ רשומות';
+const String gen_app_peruk12_ent1_c22 = '';

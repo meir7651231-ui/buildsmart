@@ -6,7 +6,6 @@ import '../dart-data-bs/auto/gen_app_peruk01_px2_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/auto/section_header.dart';
-import '../dart-ui-bs/ds/ds.dart';
 import 'package:flutter/material.dart';
 
 class GenAppPeruk01Px2Screen extends StatelessWidget {

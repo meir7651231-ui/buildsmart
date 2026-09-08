@@ -35,6 +35,33 @@ class AppStore extends ChangeNotifier {
   static const stageKey = '__stage'; // אינדקס שלב-המסע הנוכחי
   static const _pkey = 'ds_app_v1';  // מפתח-ההתמדה
 
+  // ── G32 · שכבת-הטריגרים (הכרעה-28): יומן-פעולות (אוטומטיות/שליחה, עם החזר) · זיכרון-הכרעות (אשר/דחה/תמיד) · הגדרות-התנהגות — באותו JSON ──
+  final List<Map<String, String>> _log = [];
+  final Map<String, String> _decided = {};
+  final Map<String, String> _settings = {};
+  List<Map<String, String>> get log => List.unmodifiable(_log);
+  String decision(String key) => _decided[key] ?? '';
+  void decide(String key, String v) { _decided[key] = v; notifyListeners(); }
+  String setting(String key, [String def = '']) => (_settings[key] ?? '').isEmpty ? def : _settings[key]!;
+  void setSetting(String key, String v) { _settings[key] = v; notifyListeners(); }
+  /// רישום פעולה: kind = auto (לבד) · decide (הכרעה שניתן להחזיר) · send (שליחה החוצה) · next (צעד-הבא). prev/field = מה להחזיר.
+  String logAction(String kind, String what, {String entity = '', String rid = '', String field = '', String prev = ''}) {
+    final id = 'l${++_seq}';
+    _log.insert(0, {'id': id, 'at': DateTime.now().toIso8601String(), 'kind': kind, 'what': what, 'entity': entity, 'rid': rid, 'field': field, 'prev': prev, 'undone': ''});
+    if (_log.length > 200) _log.removeRange(200, _log.length);
+    notifyListeners(); return id;
+  }
+  /// החזר: משחזר שדה-רשומה (entity+rid+field ⇒ prev) או מוחק הכרעה (kind=decide: field = מפתח-ההכרעה).
+  bool undo(String logId) {
+    final i = _log.indexWhere((x) => x['id'] == logId);
+    if (i < 0 || _log[i]['undone'] == '1') return false;
+    final e = _log[i];
+    if ((e['kind'] ?? '') == 'decide') { _decided.remove(e['field']); }
+    else if ((e['entity'] ?? '').isNotEmpty && (e['field'] ?? '').isNotEmpty) { final r = byId(e['entity']!, e['rid'] ?? ''); if (r != null) r[e['field']!] = e['prev'] ?? ''; }
+    e['undone'] = '1'; notifyListeners(); return true;
+  }
+  Map<String, String>? lastLog(String kind, String rid) { for (final x in _log) { if (x['kind'] == kind && x['rid'] == rid && x['undone'] != '1') return x; } return null; }
+
   AppStore() { _load(); }
 
   // התמדה: טעינה בלידה, שמירה בכל שינוי (מרוכב על notifyListeners). נכשל-רך.
@@ -46,6 +73,9 @@ class AppStore extends ChangeNotifier {
       _seq = (data['seq'] as num?)?.toInt() ?? 0;
       _role = (data['role'] as num?)?.toInt() ?? 0;
       _actor = (data['actor'] as String?) ?? '';
+      for (final e in (data['log'] as List? ?? const [])) _log.add((e as Map).map((k, v) => MapEntry(k.toString(), v.toString())));
+      ((data['decided'] as Map?) ?? const {}).forEach((k, v) => _decided[k.toString()] = v.toString());
+      ((data['settings'] as Map?) ?? const {}).forEach((k, v) => _settings[k.toString()] = v.toString());
       (data['rec'] as Map<String, dynamic>).forEach((k, v) {
         _rec[k] = (v as List)
             .map((e) => (e as Map).map((kk, vv) => MapEntry(kk.toString(), vv.toString())))
@@ -57,7 +87,7 @@ class AppStore extends ChangeNotifier {
   @override
   void notifyListeners() {
     try {
-      persistSave(_pkey, jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec}));
+      persistSave(_pkey, jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'settings': _settings}));
     } catch (_) {}
     super.notifyListeners();
   }
