@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final today = DateTime(2026, 9, 8);   // יום שלישי
-  BalaganModule mod(List<String> dates, List<String> nums) => BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, dates, nums, 'מה', '', 'x', const <BalaganField>[], 1, const <String>[]);
+  BalaganModule mod(List<String> dates, List<String> nums, [List<String> times = const []]) => BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, dates, nums, 'מה', '', 'x', const <BalaganField>[], 1, const <String>[], timeFields: times);
   test('עובדות 1: לשלם ארנונה מחר 350 ש"ח', () {
     final f = balaganFacts('לשלם ארנונה מחר 350 ש"ח', mod(['תאריך תשלום'], ['סכום']), today: today);
     expect(f['תאריך תשלום'], '2026-09-09');
@@ -72,6 +72,22 @@ void main() {
 
     expect(f['__note'], 'יום ה׳ אצל הרופא');
   });
+  test('עובדות 11: פגישה עם רו"ח מחר ב-16:30', () {
+    final f = balaganFacts('פגישה עם רו"ח מחר ב-16:30', mod(['מועד'], [], ['שעה']), today: today);
+    expect(f['מועד'], '2026-09-09');
+    expect(f['שעה'], '16:30');
+    expect(f['מה'], 'פגישה עם רו"ח');
+
+    expect(f['__note'], 'פגישה עם רו"ח מחר ב-16:30');
+  });
+  test('עובדות 12: בשעה 9 אצל דני בשבוע הבא', () {
+    final f = balaganFacts('בשעה 9 אצל דני בשבוע הבא', mod(['מועד'], [], ['שעה']), today: today);
+    expect(f['מועד'], '2026-09-15');
+    expect(f['שעה'], '09:00');
+    expect(f['מה'], 'אצל דני');
+
+    expect(f['__note'], 'בשעה 9 אצל דני בשבוע הבא');
+  });
   test('זיהוי: רגע כללי ⇒ שכבת-הבסיס ראשונה, המודול-החלש חלופה', () {
     final h = balaganIdentify('לשלם ארנונה מחר 350 ש"ח');
     expect(h.first.module.layer, 'base');
@@ -81,6 +97,16 @@ void main() {
     final h = balaganIdentify('המשכיר מקזז 6,200 מהפיקדון של 8,000, מסרתי מפתח');
     expect(h.first.module.layer, isNot('base'));
     expect(h.first.score / h.first.module.selfScore >= kBalaganWeak, isTrue);
+  });
+  test('שעה + רגע כללי ⇒ הבסיס עם שדה-שעה (פגישה), לא משימה', () {
+    final h = balaganIdentify('מחר ב-9:00 עם דני');
+    expect(h.first.module.layer, 'base');
+    expect(h.first.module.timeFields, isNotEmpty);
+  });
+  test('פיצול שורה לכמה רגעים', () {
+    expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
+    expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
+    expect(balaganSplit('שורה אחת\nשורה שתיים; ועוד אחת').length, 3);
   });
   test('זיהוי: כל כותרת-מודול ⇒ עצמו (הסף אינו בולע כותרות)', () {
     for (final m in kBalaganModules) { expect(balaganIdentify(m.title).first.module.ns, m.ns, reason: m.title); }
