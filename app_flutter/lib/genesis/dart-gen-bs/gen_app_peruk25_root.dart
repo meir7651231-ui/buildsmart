@@ -6,18 +6,20 @@ import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
 import 'gen_app_peruk25_ent1.dart';
 import 'gen_app_peruk25_rp1.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class GenAppPeruk25RootScreen extends StatelessWidget {
   const GenAppPeruk25RootScreen({required this.id, super.key});
-  final String id;
+  final String id;   // ignore: unused_element
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) {
     final r0 = appStore.byId('app_peruk25_ent1', id);
-    if (r0 == null) return DsScaffold(title: gen_app_peruk25_root_c38, subtitle: gen_app_peruk25_root_c39, icon: gen_app_peruk25_root_c40, children: const []);
-    return DsScaffold(title: appStore.displayOf('app_peruk25_ent1', id), subtitle: const [gen_app_peruk25_root_c33, gen_app_peruk25_root_c34, gen_app_peruk25_root_c35, gen_app_peruk25_root_c36, gen_app_peruk25_root_c37][appStore.stageOf('app_peruk25_ent1', id).clamp(0, 4)], icon: gen_app_peruk25_root_c41, children: [
+    if (r0 == null) return DsScaffold(title: gen_app_peruk25_root_c39, subtitle: gen_app_peruk25_root_c40, icon: gen_app_peruk25_root_c41, children: const []);
+    return DsScaffold(title: appStore.displayOf('app_peruk25_ent1', id), subtitle: const [gen_app_peruk25_root_c34, gen_app_peruk25_root_c35, gen_app_peruk25_root_c36, gen_app_peruk25_root_c37, gen_app_peruk25_root_c38][appStore.stageOf('app_peruk25_ent1', id).clamp(0, 4)], icon: gen_app_peruk25_root_c42, children: [
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsChipButton(label: gen_app_peruk25_root_c30, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk25Rp1Screen(initialId: id))))),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_peruk25_root_c32, details: [if ((r0[gen_app_peruk25_root_c24] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk25_root_c0, value: (r0[gen_app_peruk25_root_c1] ?? '')), if ((r0[gen_app_peruk25_root_c25] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk25_root_c4, value: (r0[gen_app_peruk25_root_c5] ?? '')), if ((r0[gen_app_peruk25_root_c26] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk25_root_c8, value: (r0[gen_app_peruk25_root_c9] ?? '')), if ((r0[gen_app_peruk25_root_c27] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk25_root_c12, value: (r0[gen_app_peruk25_root_c13] ?? '')), if ((r0[gen_app_peruk25_root_c28] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk25_root_c16, value: (r0[gen_app_peruk25_root_c17] ?? '')), if ((r0[gen_app_peruk25_root_c29] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk25_root_c20, value: (r0[gen_app_peruk25_root_c21] ?? ''))])),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__doc'] ?? '').startsWith('data:image') ? DsFold(title: gen_app_peruk25_root_c33, details: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(base64Decode((r0['__doc'] ?? '').split(',').last), fit: BoxFit.fitWidth))]) : const SizedBox.shrink())),
     ]);
   });
 }

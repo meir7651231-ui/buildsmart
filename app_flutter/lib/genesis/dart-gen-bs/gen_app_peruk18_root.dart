@@ -6,18 +6,20 @@ import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
 import 'gen_app_peruk18_ent1.dart';
 import 'gen_app_peruk18_rp1.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class GenAppPeruk18RootScreen extends StatelessWidget {
   const GenAppPeruk18RootScreen({required this.id, super.key});
-  final String id;
+  final String id;   // ignore: unused_element
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) {
     final r0 = appStore.byId('app_peruk18_ent1', id);
-    if (r0 == null) return DsScaffold(title: gen_app_peruk18_root_c43, subtitle: gen_app_peruk18_root_c44, icon: gen_app_peruk18_root_c45, children: const []);
-    return DsScaffold(title: appStore.displayOf('app_peruk18_ent1', id), subtitle: const [gen_app_peruk18_root_c38, gen_app_peruk18_root_c39, gen_app_peruk18_root_c40, gen_app_peruk18_root_c41, gen_app_peruk18_root_c42][appStore.stageOf('app_peruk18_ent1', id).clamp(0, 4)], icon: gen_app_peruk18_root_c46, children: [
+    if (r0 == null) return DsScaffold(title: gen_app_peruk18_root_c44, subtitle: gen_app_peruk18_root_c45, icon: gen_app_peruk18_root_c46, children: const []);
+    return DsScaffold(title: appStore.displayOf('app_peruk18_ent1', id), subtitle: const [gen_app_peruk18_root_c39, gen_app_peruk18_root_c40, gen_app_peruk18_root_c41, gen_app_peruk18_root_c42, gen_app_peruk18_root_c43][appStore.stageOf('app_peruk18_ent1', id).clamp(0, 4)], icon: gen_app_peruk18_root_c47, children: [
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsChipButton(label: gen_app_peruk18_root_c35, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk18Rp1Screen(initialId: id))))),
       Padding(padding: const EdgeInsets.only(bottom: 12), child: DsFold(title: gen_app_peruk18_root_c37, details: [if ((r0[gen_app_peruk18_root_c28] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c0, value: (r0[gen_app_peruk18_root_c1] ?? '')), if ((r0[gen_app_peruk18_root_c29] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c4, value: (r0[gen_app_peruk18_root_c5] ?? '')), if ((r0[gen_app_peruk18_root_c30] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c8, value: (r0[gen_app_peruk18_root_c9] ?? '')), if ((r0[gen_app_peruk18_root_c31] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c12, value: (r0[gen_app_peruk18_root_c13] ?? '')), if ((r0[gen_app_peruk18_root_c32] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c16, value: (r0[gen_app_peruk18_root_c17] ?? '')), if ((r0[gen_app_peruk18_root_c33] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c20, value: (r0[gen_app_peruk18_root_c21] ?? '')), if ((r0[gen_app_peruk18_root_c34] ?? '').trim().isNotEmpty) KvLine(label: gen_app_peruk18_root_c24, value: (r0[gen_app_peruk18_root_c25] ?? ''))])),
+      Padding(padding: const EdgeInsets.only(bottom: 12), child: ((r0['__doc'] ?? '').startsWith('data:image') ? DsFold(title: gen_app_peruk18_root_c38, details: [ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(base64Decode((r0['__doc'] ?? '').split(',').last), fit: BoxFit.fitWidth))]) : const SizedBox.shrink())),
     ]);
   });
 }

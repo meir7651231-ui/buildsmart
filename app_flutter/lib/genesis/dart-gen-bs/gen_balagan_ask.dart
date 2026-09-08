@@ -35,6 +35,7 @@ import 'gen_app_peruk25_ent1.dart';
 import 'gen_app_peruk26_ent1.dart';
 import 'gen_app_peruk27_ent1.dart';
 import 'gen_app_peruk28_ent1.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -85,27 +86,29 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   final _c = TextEditingController();
   List<BalaganHit> _hits = const [];
   Map<String, String> _extra = const {};
+  String _doc = '';   // data:URI של הצילום (מוקטן) — נשמר עם הרשומה (מחסנית-מסמכים)
   bool _asked = false, _busy = false;
   String _note = '';
 
-  void _go() { setState(() { _asked = true; _hits = balaganIdentify(_c.text); _note = _hits.isEmpty ? gen_balagan_ask_c0 : ''; }); }
+  void _go() { final hits = balaganIdentify(_c.text); setState(() { _asked = true; _hits = hits; _note = hits.isEmpty ? gen_balagan_ask_c0 : ''; }); if (hits.isNotEmpty) _open(context, hits.first, hits.skip(1).map((h) => h.module).toList()); }   // הקשה אחת: זיהוי ⇒ ישר לטופס-האישור (החלופות בתוכו)
   void _skip() { setState(() { _hits = _hits.length > 1 ? _hits.sublist(1) : const []; if (_hits.isEmpty) _note = gen_balagan_ask_c1; }); }
-  void _open(BuildContext context, BalaganHit h) {
+  void _open(BuildContext context, BalaganHit h, [List<BalaganModule> alts = const []]) {
     final facts = {...balaganFacts(_c.text, h.module), ..._extra}..removeWhere((key, v) => v.trim().isEmpty || !(h.module.dateFields.contains(key) || h.module.numFields.contains(key) || key == h.module.descField || key == h.module.longField));
-    Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: h.module, facts: facts))).then((saved) { if (saved == true && mounted) setState(() { _c.clear(); _hits = const []; _extra = const {}; _asked = false; _note = gen_balagan_ask_c2; }); });
+    Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: h.module, facts: facts, doc: _doc, alternatives: alts, text: _c.text))).then((saved) { if (saved == true && mounted) setState(() { _c.clear(); _hits = const []; _extra = const {}; _doc = ''; _asked = false; _note = gen_balagan_ask_c2; }); });
   }
   Future<void> _photo() async {
     final key = appStore.setting('ai.key');
     if (key.isEmpty) { setState(() => _note = gen_balagan_ask_c3); return; }
-    final x = await ImagePicker().pickImage(source: kIsWeb ? ImageSource.gallery : ImageSource.camera, imageQuality: 85);
+    final x = await ImagePicker().pickImage(source: kIsWeb ? ImageSource.gallery : ImageSource.camera, imageQuality: 60, maxWidth: 900);
     if (x == null) return;
     setState(() { _busy = true; _note = gen_balagan_ask_c4; });
     final bytes = await x.readAsBytes();
+    _doc = bytes.length <= 160000 ? 'data:' + (x.mimeType ?? 'image/jpeg') + ';base64,' + base64Encode(bytes) : '';   // ≤160KB במכשיר; גדול ⇒ רק התמלול (כנות במסך)
     final r = await dsAiExtract(apiKey: key, image: bytes, imageMime: x.mimeType ?? 'image/jpeg', fields: const ['תאריך', 'סכום', 'שם'], model: appStore.setting('ai.model', 'claude-sonnet-5'));
     if (!mounted) return;
     if (r == null) { setState(() { _busy = false; _note = gen_balagan_ask_c5; }); return; }
     final text = (r['_text'] ?? '').trim();
-    setState(() { _busy = false; _note = ''; if (text.isNotEmpty) _c.text = text; _extra = {for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value}; });
+    setState(() { _busy = false; _note = _doc.isEmpty ? gen_balagan_ask_c6 : gen_balagan_ask_c7; if (text.isNotEmpty) _c.text = text; _extra = {for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value}; });
     _go();
   }
 
@@ -113,21 +116,21 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   Widget build(BuildContext context) {
     final lk = DsLook.of(context);
     final top = _hits.isNotEmpty ? _hits.first : null;
-    return DsScaffold(title: gen_balagan_ask_c6, subtitle: gen_balagan_ask_c7, icon: gen_balagan_ask_c8, children: [
+    return DsScaffold(title: gen_balagan_ask_c8, subtitle: gen_balagan_ask_c9, icon: gen_balagan_ask_c10, children: [
       Container(
         decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(lk.r)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: TextField(controller: _c, minLines: 3, maxLines: 8, autofocus: true, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5), decoration: InputDecoration(border: InputBorder.none, hintText: gen_balagan_ask_c9, hintStyle: TextStyle(color: lk.faint)), onSubmitted: (_) => _go()),
+        child: TextField(controller: _c, minLines: 3, maxLines: 8, autofocus: true, textInputAction: TextInputAction.done, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.5), decoration: InputDecoration(border: InputBorder.none, hintText: gen_balagan_ask_c11, hintStyle: TextStyle(color: lk.faint)), onSubmitted: (_) => _go()),
       ),
       Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-        Expanded(child: DsPrimaryButton(label: gen_balagan_ask_c10, onTap: _busy ? null : _go)),
+        Expanded(child: DsPrimaryButton(label: gen_balagan_ask_c12, onTap: _busy ? null : _go)),
         const SizedBox(width: 8),
-        GestureDetector(onTap: _busy ? null : _photo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(gen_balagan_ask_c11, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
+        GestureDetector(onTap: _busy ? null : _photo, child: Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9), decoration: BoxDecoration(border: Border.all(color: lk.line), borderRadius: BorderRadius.circular(9)), child: Text(gen_balagan_ask_c13, style: TextStyle(color: lk.ink, fontSize: 14, fontWeight: FontWeight.w600)))),
       ])),
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: DsNote(message: _note, label: '', tone: 0)),
-      if (_asked && top != null) DsSection(title: gen_balagan_ask_c12, children: [
-        DsApproveCard(question: gen_balagan_ask_c13.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c14, noLabel: gen_balagan_ask_c15, onOk: () => _open(context, top), onNo: _skip),
-        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c16 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
+      if (_asked && top != null) DsSection(title: gen_balagan_ask_c14, children: [   // חזר בלי לשמור ⇒ הזיהוי נשאר על המסך (הקשה אחת חוזרת)
+        DsApproveCard(question: gen_balagan_ask_c15.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c16, noLabel: gen_balagan_ask_c17, onOk: () => _open(context, top, _hits.skip(1).map((h) => h.module).toList()), onNo: _skip),
+        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c18 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
       ]),
     ]);
   }

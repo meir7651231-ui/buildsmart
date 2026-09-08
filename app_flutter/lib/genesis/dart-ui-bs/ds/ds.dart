@@ -340,7 +340,8 @@ class DsDiffRow extends StatelessWidget {
 
 // ── G30 · הוספה-מהירה (quick-add): one text box, Enter creates (Todoist rule; ≤3 keys) ──
 class DsQuickAdd extends StatefulWidget {
-  const DsQuickAdd({required this.hint, required this.onSubmit, super.key});
+  const DsQuickAdd({required this.hint, required this.onSubmit, this.autofocus = false, super.key});
+  final bool autofocus;
   final String hint;
   final ValueChanged<String> onSubmit;
   @override
@@ -361,6 +362,7 @@ class _DsQuickAddState extends State<DsQuickAdd> {
         Expanded(
           child: TextField(
             controller: _c,
+            autofocus: widget.autofocus,
             style: TextStyle(color: lk.ink, fontSize: 16),
             decoration: InputDecoration(hintText: widget.hint, hintStyle: TextStyle(color: lk.faint, fontSize: 15), border: InputBorder.none, isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 12)),
             textInputAction: TextInputAction.done,
