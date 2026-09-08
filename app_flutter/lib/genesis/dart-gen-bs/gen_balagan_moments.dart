@@ -56,8 +56,14 @@ Set<String> balaganTokens(String s) {
   return out;
 }
 /// זיהוי: סכום-משקלים של מילות-הטקסט לכל מודול ⇒ 3 הטובים (ציון > 0). דטרמיניסטי; שוויון ⇒ המוקדם.
+/// מילות-דקדוק (תאריך · חזרה · שעה · טלפון) אינן זהות של רגע: «ב-15 לחודש» העלה את «לא משלם» (חודש) מעל הסף. מסירים את הטווחים לפני הזיהוי.
+String balaganStripGrammar(String text) {
+  final spans = [...balaganDates(text, DateTime.now()), ...balaganRepeat(text), ...balaganTimes(text), ...balaganPhones(text)]..sort((a, b) => a.start.compareTo(b.start));
+  var out = ''; var pos = 0; for (final sp in spans) { if (sp.start > pos) out += text.substring(pos, sp.start); if (sp.end > pos) pos = sp.end; } out += text.substring(pos);
+  return out;
+}
 List<BalaganHit> balaganIdentify(String text, {int k = 3}) {
-  final toks = balaganTokens(text);
+  final toks = balaganTokens(balaganStripGrammar(text));
   final hits = <BalaganHit>[];
   for (final m in kBalaganModules) { var s = 0.0; for (final t in toks) { s += m.weights[t] ?? 0; } if (s > 0) hits.add(BalaganHit(m, s)); }
   hits.sort((a, b) { final c = b.score.compareTo(a.score); return c != 0 ? c : a.module.index.compareTo(b.module.index); });
@@ -122,7 +128,36 @@ List<_DateAt> balaganPhones(String text) => [for (final x in RegExp(r'(?<![\d-])
 /// אחוז: 3.5% · 12 % ⇒ הערך; אינו סכום.
 List<_DateAt> balaganPercents(String text) => [for (final x in RegExp(r'(?<![\d.,])(\d+(?:[.,]\d+)?)\s*%').allMatches(text)) _DateAt(x.start, x.end, x.group(1)!.replaceAll(',', '.'))];
 /// מי: «עם דני» · «אצל הרו"ח» · «מול המשכיר» ⇒ המילה שאחרי מילת-היחס (≥3 אותיות, לא בתוך תאריך/שעה). דקדוק, לא רשימת-שמות.
-List<_DateAt> balaganPersons(String text, List<_DateAt> taken) => [for (final x in RegExp(r'(?<![\u0590-\u05FF])(?:עם|אצל|מול)\s+([\u0590-\u05FF][\u0590-\u05FF"״׳\u0027]{2,})').allMatches(text)) if (!taken.any((t) => x.start < t.end && x.end > t.start)) _DateAt(x.start, x.end, x.group(1)!)];
+List<_DateAt> balaganPersons(String text, List<_DateAt> taken, [List<_DateAt> phones = const []]) {
+  final out = [for (final x in RegExp(r'(?<![\u0590-\u05FF])(?:עם|אצל|מול)\s+([\u0590-\u05FF][\u0590-\u05FF"״׳\u0027]{2,})').allMatches(text)) if (!taken.any((t) => x.start < t.end && x.end > t.start)) _DateAt(x.start, x.end, x.group(1)!)];
+  // «רות לוי 052-…»: עד שתי מילים צמודות לפני מספר-טלפון = בעל הטלפון (ל-קידומת נקלפת: «לרות לוי»)
+  for (final ph in phones) {
+    final m = RegExp(r'([\u0590-\u05FF"״׳\u0027]{2,}(?:\s+[\u0590-\u05FF"״׳\u0027]{2,})?)[\s,:\-]*$').firstMatch(text.substring(0, ph.start));
+    if (m == null) continue; final st = m.start; if (taken.any((t) => st < t.end && m.end > t.start) || out.any((o) => st < o.end && m.end > o.start)) continue;
+    var name = m.group(1)!; if (name.length >= 4 && name.startsWith('ל')) name = name.substring(1);
+    out.add(_DateAt(st, m.end, name));
+  }
+  out.sort((a, b) => a.start.compareTo(b.start));
+  return out;
+}
+/// חזרה: «כל חודש» · «כל שבועיים» · «כל 3 ימים» · «כל שלושה שבועות» · «כל יום ראשון» · «כל שנה» ⇒ קוד d/w/m/y + N (דקדוק-זמן). הטווח נצרך.
+List<_DateAt> balaganRepeat(String text) {
+  final out = <_DateAt>[];
+  void put(RegExp re, String Function(RegExpMatch) f) { for (final x in re.allMatches(text)) { if (out.any((o) => x.start < o.end && x.end > o.start)) continue; out.add(_DateAt(x.start, x.end, f(x))); } }
+  put(RegExp(r'כל\s+יום\s+(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהו][׳\u0027]?)(?![\u0590-\u05FF])'), (_) => 'w1');
+  put(RegExp(r'כל\s+(יום|שבוע|חודש|שנה|יומיים|שבועיים|חודשיים)(?![\u0590-\u05FF])'), (x) { final u = x.group(1)!; if (u == 'יומיים') return 'd2'; if (u == 'שבועיים') return 'w2'; if (u == 'חודשיים') return 'm2'; return u == 'יום' ? 'd1' : u == 'שבוע' ? 'w1' : u == 'חודש' ? 'm1' : 'y1'; });
+  put(RegExp(r'כל\s+(\d+|[\u0590-\u05FF]+)\s+(ימים|שבועות|חודשים|שנים)(?![\u0590-\u05FF])'), (x) { final n = int.tryParse(x.group(1)!) ?? _heNum(x.group(1)!) ?? 1; final u = x.group(2)!; return (u == 'ימים' ? 'd' : u == 'שבועות' ? 'w' : u == 'חודשים' ? 'm' : 'y') + n.toString(); });
+  out.sort((a, b) => a.start.compareTo(b.start));
+  return out;
+}
+/// תיאור-החזרה לאדם (אותן מילים של הדקדוק).
+String balaganRepeatLabel(String code) {
+  if (code.length < 2) return '';
+  final n = int.tryParse(code.substring(1)) ?? 1; final u = code[0];
+  if (n == 1) return u == 'd' ? 'כל יום' : u == 'w' ? 'כל שבוע' : u == 'm' ? 'כל חודש' : 'כל שנה';
+  if (n == 2) return u == 'd' ? 'כל יומיים' : u == 'w' ? 'כל שבועיים' : u == 'm' ? 'כל חודשיים' : 'כל שנתיים';
+  return 'כל $n ' + (u == 'd' ? 'ימים' : u == 'w' ? 'שבועות' : u == 'm' ? 'חודשים' : 'שנים');
+}
 /// שורה עם כמה רגעים («שילמתי ארנונה. מחר תור לרופא») ⇒ חלקים לפי שורה/נקודה-ורווח/נקודה-פסיק — כל חלק רגע משלו (טופס-אישור אחר טופס-אישור). חלק = ≥2 מילים.
 List<String> balaganSplit(String text) {
   final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => p.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList();
@@ -164,7 +199,8 @@ Map<String, String> balaganFacts(String text, BalaganModule m, {DateTime? today}
   for (final f in numOnly) { final i = nearest(nStarts, f); if (i >= 0 && !usedN.contains(i)) { out[f] = numMs[i].value; usedN.add(i); } }
   var ni = 0; for (final f in numOnly) { if (out.containsKey(f)) continue; while (ni < numMs.length && usedN.contains(ni)) { ni++; } if (ni < numMs.length) { out[f] = numMs[ni].value; usedN.add(ni); } }
   final timeMs = balaganTimes(text);
-  final personMs = balaganPersons(text, [...dateMs, ...timeMs, ...phoneMs]);
+  final personMs = balaganPersons(text, [...dateMs, ...timeMs, ...phoneMs], phoneMs);
+  final repMs = balaganRepeat(text); if (repMs.isNotEmpty) out['__repeat'] = repMs.first.iso;   // ↻ נשמר ברשומה; «סיים» יוצר את הבא
   void assign(List<String> fields, List<_DateAt> ms, Set<int> used) {
     final st = [for (final x in ms) x.start];
     for (final f in fields) { final i = nearest(st, f); if (i >= 0 && !used.contains(i)) { out[f] = ms[i].iso; used.add(i); } }
@@ -183,12 +219,15 @@ Map<String, String> balaganFacts(String text, BalaganModule m, {DateTime? today}
   var di = 0; for (final f in m.dateFields) { if (out.containsKey(f)) continue; while (di < dateMs.length && usedD.contains(di)) { di++; } if (di < dateMs.length) { out[f] = dateMs[di].iso; usedD.add(di); } }
   if (text.trim().isNotEmpty) out['__note'] = text.trim();   // הטקסט המקורי לעולם לא אובד (מוצג בתיק: «מה כתבת»)
   // המתאר = השורה בלי העובדות שכבר נקלטו לשדות («לשלם ארנונה מחר 350 ש"ח» ⇒ «לשלם ארנונה»): הסרת-הטווחים שנצרכו + ניקוי מילת-יחס תלויה. אינו מילון — טווחי-ההתאמה עצמם.
-  final spans = <List<int>>[for (final i in usedD) [dateMs[i].start, dateMs[i].end], for (final i in usedN) [numMs[i].start, numMs[i].end], for (final i in usedT) [timeMs[i].start, timeMs[i].end], for (final i in usedP) [phoneMs[i].start, phoneMs[i].end], for (final i in usedPc) [pctMs[i].start, pctMs[i].end]]..sort((a, b) => a[0].compareTo(b[0]));
+  final spans = <List<int>>[for (final i in usedD) [dateMs[i].start, dateMs[i].end], for (final i in usedN) [numMs[i].start, numMs[i].end], for (final i in usedT) [timeMs[i].start, timeMs[i].end], for (final i in usedP) [phoneMs[i].start, phoneMs[i].end], for (final i in usedPc) [pctMs[i].start, pctMs[i].end], for (final x in repMs) [x.start, x.end]]..sort((a, b) => a[0].compareTo(b[0]));
   var cleaned = ''; var pos = 0; for (final sp in spans) { if (sp[0] > pos) cleaned += text.substring(pos, sp[0]); pos = sp[1] > pos ? sp[1] : pos; } cleaned += text.substring(pos);
   cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').replaceAll(RegExp(r'[\s,\-–—:]+$'), '').replaceAll(RegExp(r'\s[בלמוה]-?$'), '').replaceAll(RegExp(r'^[\s,\-–—:]+'), '').trim();
   final rawLine = text.trim().split(RegExp(r'[\n.]')).first.trim();
   final line = (cleaned.length >= 2 ? cleaned.split(RegExp(r'[\n]')).first.trim() : rawLine);
   if (m.descField.isNotEmpty && line.isNotEmpty && line.length <= 40 && !m.dateFields.contains(m.descField) && !m.numFields.contains(m.descField)) { out[m.descField] = line; }   // שורה קצרה = שם/מתאר; משפט ארוך אינו שם
-  if (m.longField.isNotEmpty && text.trim().length > 40) { out[m.longField] = text.trim(); }   // הטקסט המלא ⇒ שדה-הטקסט-הארוך הראשון (multiline), אם יש
+  if (m.longField.isNotEmpty && text.trim().length > 40) { out[m.longField] = text.trim(); }
+  // עובדה מטופסת בלי שדה-יעד (אחוז · טלפון · שעה) לא אובדת: נכנסת ל«הערה» (שדה-הטקסט-הארוך), אם הוא פנוי
+  final left = <String>[for (var i = 0; i < pctMs.length; i++) if (!usedPc.contains(i)) pctMs[i].iso + '%', for (var i = 0; i < phoneMs.length; i++) if (!usedP.contains(i)) phoneMs[i].iso, for (var i = 0; i < timeMs.length; i++) if (!usedT.contains(i)) timeMs[i].iso];
+  if (left.isNotEmpty && m.longField.isNotEmpty && !out.containsKey(m.longField)) { out[m.longField] = left.join(' · '); }   // הטקסט המלא ⇒ שדה-הטקסט-הארוך הראשון (multiline), אם יש
   return out;
 }

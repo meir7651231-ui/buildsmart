@@ -58,10 +58,11 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
     return DsScaffold(title: m.title, subtitle: gen_balagan_confirm_c1, icon: gen_balagan_confirm_c2, children: [
       if (m.moment.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: DsNote(message: gen_balagan_confirm_c3.replaceAll('{title}', m.title).replaceAll('{moment}', m.moment), label: '', tone: 0)),
       if (widget.alternatives.isNotEmpty) DsFold(title: gen_balagan_confirm_c4.replaceAll('{n}', widget.alternatives.length.toString()), details: [for (final a in widget.alternatives) DsNavTile(glyph: '', title: a.title, sub: a.moment, onTap: () => Navigator.of(context).pushReplacement<bool, bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: a, facts: balaganFacts(widget.text, a), doc: widget.doc, alternatives: [for (final x in [widget.module, ...widget.alternatives]) if (x.index != a.index) x], text: widget.text, queue: widget.queue))))]),
-      if (widget.queue.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 8), child: DsNote(message: gen_balagan_confirm_c5.replaceAll('{n}', widget.queue.length.toString()), label: '', tone: 0)),
+      if ((widget.facts['__repeat'] ?? '').isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 8), child: DsNote(message: gen_balagan_confirm_c5.replaceAll('{every}', balaganRepeatLabel(widget.facts['__repeat']!)), label: '', tone: 0)),
+      if (widget.queue.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 8), child: DsNote(message: gen_balagan_confirm_c6.replaceAll('{n}', widget.queue.length.toString()), label: '', tone: 0)),
       for (final f in shown) _field(f),
-      if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c6.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
-      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c7, onTap: _save)),
+      if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c7.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
+      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c8, onTap: _save)),
     ]);
   }
 }
