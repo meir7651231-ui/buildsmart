@@ -38,6 +38,7 @@ import 'gen_app_peruk28_home.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef _Items = List<DsTodayItem> Function(DateTime today, {required int dayDelta});
@@ -45,6 +46,14 @@ typedef _Props = List<Widget> Function(BuildContext context, DateTime today);
 typedef _Card = Widget Function(BuildContext context, Map<String, String> r);
 typedef _Props2 = List<Widget> Function(BuildContext context, DateTime today, {bool chain});
 class _Mod { const _Mod(this.name, this.open, this.items, this.proposals, this.card, this.autopilot, this.done, this.index); final String name; final List<Map<String, String>> Function() open; final _Items items; final _Props2 proposals; final _Card card; final void Function() autopilot; final List<Map<String, String>> Function() done; final int index; }
+
+/// «שתף את היום»: טקסט קריא של באיחור/היום (עם שעות) — נגזרת של אותן שורות; ללוח + wa.me (הנמען נבחר בוואטסאפ)
+String balaganDayText(List<DsTodayItem> overdue, List<DsTodayItem> todayItems, DateTime today) {
+  final b = StringBuffer(gen_balagan_home_c0 + ' · ' + today.toIso8601String().substring(0, 10) + '\n');
+  if (overdue.isNotEmpty) { b.write(gen_balagan_home_c1 + ':\n'); for (final it in overdue) { b.write('• ' + it.title + ' (' + it.module + ')\n'); } }
+  if (todayItems.isNotEmpty) { b.write(gen_balagan_home_c2 + ':\n'); for (final it in todayItems) { b.write('• ' + (it.time.isNotEmpty ? it.time + ' ' : '') + it.title + ' (' + it.module + ')\n'); } }
+  return b.toString().trim();
+}
 
 class GenBalaganHomeScreen extends StatefulWidget {
   const GenBalaganHomeScreen({super.key});
@@ -95,8 +104,8 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_balagan_home_c0, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_balagan_home_c1, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_balagan_home_c3, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_balagan_home_c4, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -108,9 +117,14 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final tok = appStore.setting('mail.token'); if (tok.isEmpty) return;
     final r = await dsMailRecent(token: tok, query: appStore.setting('mail.query', 'newer_than:7d'));
     if (!mounted) return;
-    setState(() { if (r == null) { _mailNote = gen_balagan_home_c2; } else { _mail = r; } });
+    setState(() { if (r == null) { _mailNote = gen_balagan_home_c5; } else { _mail = r; } });
   }
   // התוכנית להיום (Motion/Reclaim בגרסת-בלגן): הדברים של היום מסודרים לבלוקים מתחילת-היום (עריך) — דחוף/קשיח ראשון, בלוק-מיקוד שמור אם יש ≤4 דברים. דטרמיניסטי; «ליומן» לכל בלוק.
+  Future<void> _shareDay(List<DsTodayItem> overdue, List<DsTodayItem> todayItems, int planN) async {
+    final t = balaganDayText(overdue, todayItems, _day(DateTime.now()));
+    await Clipboard.setData(ClipboardData(text: t)); setState(() => _mailNote = gen_balagan_home_c6);
+    launchUrl(Uri.parse('https://wa.me/?text=' + Uri.encodeComponent(t)), mode: LaunchMode.externalApplication);
+  }
   List<Widget> _plan(DateTime today, List<DsTodayItem> overdue, List<DsTodayItem> todayItems) {
     final start = (int.tryParse(appStore.setting('dayStart', '9')) ?? 9).clamp(0, 23); final block = (int.tryParse(appStore.setting('blockMin', '30')) ?? 30).clamp(5, 240);
     final items = [...overdue.where((x) => x.hard), ...overdue.where((x) => !x.hard), ...todayItems.where((x) => x.hard), ...todayItems.where((x) => !x.hard)];
@@ -132,8 +146,8 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     rows.sort((x, y) => (x[0] as DateTime).compareTo(y[0] as DateTime));
     for (final r in rows) {
       final a = r[0] as DateTime, e = r[1] as DateTime; final it = r[2] as DsTodayItem?;
-      final title = it == null ? gen_balagan_home_c3 : it.title;
-      out.add(DsActionRow(title: gen_balagan_home_c4.replaceAll('{time}', hm(a)).replaceAll('{title}', title), sub: it == null ? '' : it.module, actions: [gen_balagan_home_c5], onAct: (_) => launchUrl(Uri.parse(cal(a, e, title)), mode: LaunchMode.externalApplication)));
+      final title = it == null ? gen_balagan_home_c7 : it.title;
+      out.add(DsActionRow(title: gen_balagan_home_c8.replaceAll('{time}', hm(a)).replaceAll('{title}', title), sub: it == null ? '' : it.module, actions: [gen_balagan_home_c9], onAct: (_) => launchUrl(Uri.parse(cal(a, e, title)), mode: LaunchMode.externalApplication)));
     }
     return out;
   }
@@ -143,7 +157,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
       if (appStore.decision('mail:${m.id}').isNotEmpty) continue;
       final hits = balaganIdentify(m.subject + ' ' + m.snippet, k: 1); if (hits.isEmpty) continue;
       final mod = hits.first.module;
-      out.add(DsApproveCard(question: gen_balagan_home_c6.replaceAll('{subject}', m.subject).replaceAll('{module}', mod.title), source: gen_balagan_home_c7.replaceAll('{from}', m.from).replaceAll('{date}', m.date), okLabel: gen_balagan_home_c8, noLabel: gen_balagan_home_c9,
+      out.add(DsApproveCard(question: gen_balagan_home_c10.replaceAll('{subject}', m.subject).replaceAll('{module}', mod.title), source: gen_balagan_home_c11.replaceAll('{from}', m.from).replaceAll('{date}', m.date), okLabel: gen_balagan_home_c12, noLabel: gen_balagan_home_c13,
         onOk: () { appStore.decide('mail:${m.id}', 'ok'); final facts = balaganFacts(m.subject + ' · ' + m.snippet, mod); Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: mod, facts: facts))); },
         onNo: () => appStore.decide('mail:${m.id}', 'no')));
     }
@@ -161,8 +175,8 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
         final days = today.difference(at).inDays; if (days < 7 || appStore.decision('stale:$rid').isNotEmpty) continue;
         if (appStore.log.any((e) => e['rid'] == rid && e['undone'] != '1' && e['kind'] != 'add')) continue;
         final who = bm.title + ' · ' + appStore.displayOf(bm.rootSlug, rid);
-        out.add(DsApproveCard(question: gen_balagan_home_c10.replaceAll('{who}', who).replaceAll('{n}', days.toString()), source: who, okLabel: gen_balagan_home_c11, noLabel: gen_balagan_home_c12,
-          onOk: () { final prev = appStore.stageOf(bm.rootSlug, rid).toString(); appStore.update(bm.rootSlug, rid, {AppStore.stageKey: (bm.stages - 1).toString()}); appStore.decide('stale:$rid', 'ok'); appStore.logAction('auto', gen_balagan_home_c13.replaceAll('{who}', who).replaceAll('{n}', days.toString()), entity: bm.rootSlug, rid: rid, field: AppStore.stageKey, prev: prev); },
+        out.add(DsApproveCard(question: gen_balagan_home_c14.replaceAll('{who}', who).replaceAll('{n}', days.toString()), source: who, okLabel: gen_balagan_home_c15, noLabel: gen_balagan_home_c16,
+          onOk: () { final prev = appStore.stageOf(bm.rootSlug, rid).toString(); appStore.update(bm.rootSlug, rid, {AppStore.stageKey: (bm.stages - 1).toString()}); appStore.decide('stale:$rid', 'ok'); appStore.logAction('auto', gen_balagan_home_c17.replaceAll('{who}', who).replaceAll('{n}', days.toString()), entity: bm.rootSlug, rid: rid, field: AppStore.stageKey, prev: prev); },
           onNo: () => appStore.decide('stale:$rid', 'no')));
       }
     }
@@ -172,8 +186,8 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
         final rid = r[AppStore.idKey] ?? '';
         final hits = balaganIdentify(bm.chain.first, k: 1); if (hits.isEmpty || hits.first.module.index == m.index) continue;
         final to = hits.first.module;
-        out.add(DsApproveCard(question: gen_balagan_home_c14.replaceAll('{from}', bm.title).replaceAll('{to}', to.title), source: bm.title + ' · ' + appStore.displayOf(bm.rootSlug, rid), okLabel: gen_balagan_home_c15, noLabel: gen_balagan_home_c16,
-          onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_balagan_home_c17.replaceAll('{to}', to.title).replaceAll('{from}', bm.title), entity: bm.rootSlug, rid: rid, field: 'next:$rid'); Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: to, facts: const {}))); },
+        out.add(DsApproveCard(question: gen_balagan_home_c18.replaceAll('{from}', bm.title).replaceAll('{to}', to.title), source: bm.title + ' · ' + appStore.displayOf(bm.rootSlug, rid), okLabel: gen_balagan_home_c19, noLabel: gen_balagan_home_c20,
+          onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_balagan_home_c21.replaceAll('{to}', to.title).replaceAll('{from}', bm.title), entity: bm.rootSlug, rid: rid, field: 'next:$rid'); Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: to, facts: const {}))); },
           onNo: () => appStore.decide('next:$rid', 'no')));
       }
     }
@@ -192,7 +206,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final overdue = all0.where((x) => x.overdue).toList();
     final todayItems = all0.where((x) => !x.overdue).toList()..sort((a, b) { final ta = a.time.isEmpty ? '99:99' : a.time, tb = b.time.isEmpty ? '99:99' : b.time; final c = ta.compareTo(tb); return c != 0 ? c : a.due.compareTo(b.due); });   // עם-שעה לפי השעה, בלי-שעה אחריהם
     final tomorrow = <DsTodayItem>[for (final m in _mods) ...m.items(today, dayDelta: 1)]..sort((a, b) => a.due.compareTo(b.due));
-    final dayNames = gen_balagan_home_c18.split(',');
+    final dayNames = gen_balagan_home_c22.split(',');
     final soon = <List<dynamic>>[for (var d = 2; d <= 7; d++) for (final m in _mods) for (final it in m.items(today, dayDelta: d)) [d, it]];   // השבוע הקרוב: ימים 2–7, לפי יום ⇒ הוא רואה מה בא, לא רק מחר
     final pending = <Widget>[..._inbox(context), ..._chain(context), for (final m in _mods) ...m.proposals(context, today, chain: false)];
     // סדר-הכרטיסים = דחיפות: מועד קרוב קודם (מהשורות של היום/מחר/השבוע), ואז החדש-ביותר (__at) — 3 למעלה שמשנים משהו
@@ -209,7 +223,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final wAdd = cnt('add'), wSend = cnt('send'), wAuto = cnt('auto') + cnt('decide') + cnt('next') + cnt('done');
     final wSaved = wAdd * mins('minAdd', '4') + wSend * mins('minSend', '12') + wAuto * mins('minAuto', '3');
     final n = overdue.length + todayItems.length + pending.length;
-    final lead = n == 0 && cards.isEmpty ? gen_balagan_home_c19 : n <= 1 ? gen_balagan_home_c20 : gen_balagan_home_c21.replaceAll('{n}', n.toString());
+    final lead = n == 0 && cards.isEmpty ? gen_balagan_home_c23 : n <= 1 ? gen_balagan_home_c24 : gen_balagan_home_c25.replaceAll('{n}', n.toString());
     final first = overdue.isNotEmpty ? overdue.first : (todayItems.isNotEmpty ? todayItems.first : null);   // הדבר-האחד (הכרעה-29): הכותרת = מה שדחוף עכשיו, לא ספירה
     final headline = first != null ? first.title : lead;
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
@@ -217,24 +231,25 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
     final empty = n == 0 && cards.isEmpty;
-    return DsScaffold(title: gen_balagan_home_c22, subtitle: empty ? gen_balagan_home_c23 : lead, icon: gen_balagan_home_c24, children: [
-      DsQuickAdd(hint: gen_balagan_home_c25, autofocus: true, onSubmit: (s0) { final parts = balaganSplit(s0); final s = parts.first; final hits = balaganIdentify(s); if (hits.isEmpty) { setState(() => _mailNote = gen_balagan_home_c26); return; } final m = hits.first.module; Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: m, facts: balaganFacts(s, m), alternatives: hits.skip(1).map((h) => h.module).toList(), text: s, queue: parts.sublist(1)))); }),   // שורה אחת מהמסך-הראשון ⇒ זיהוי ⇒ טופס-אישור: אפס ניווט
-      if (!empty) DsLoadMeter(count: n, label: gen_balagan_home_c27.replaceAll('{n}', n.toString()), stateLabels: [gen_balagan_home_c28, gen_balagan_home_c29, gen_balagan_home_c30]),
+    return DsScaffold(title: gen_balagan_home_c26, subtitle: empty ? gen_balagan_home_c27 : lead, icon: gen_balagan_home_c28, children: [
+      DsQuickAdd(hint: gen_balagan_home_c29, autofocus: true, onSubmit: (s0) { final parts = balaganSplit(s0); final s = parts.first; final hits = balaganIdentify(s); if (hits.isEmpty) { setState(() => _mailNote = gen_balagan_home_c30); return; } final m = hits.first.module; Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: m, facts: balaganFacts(s, m), alternatives: hits.skip(1).map((h) => h.module).toList(), text: s, queue: parts.sublist(1)))); }),   // שורה אחת מהמסך-הראשון ⇒ זיהוי ⇒ טופס-אישור: אפס ניווט
+      if (!empty) DsLoadMeter(count: n, label: gen_balagan_home_c31.replaceAll('{n}', n.toString()), stateLabels: [gen_balagan_home_c32, gen_balagan_home_c33, gen_balagan_home_c34]),
+      if (!empty) Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [DsChipButton(label: gen_balagan_home_c35, onTap: () => _shareDay(overdue, todayItems, plan.length))])),   // היום כטקסט: ללוח + וואטסאפ (לעצמו / לבן-הזוג) — אפס-שרת
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 4), child: Text(headline, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (first != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text((first.overdue ? gen_balagan_home_c31 : first.sub) + ' · ' + first.module + ' · ' + lead, style: TextStyle(color: lk.muted, fontSize: 14))),
-      if (overdue.isNotEmpty) DsSection(title: gen_balagan_home_c32, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub + ' · ' + it.module, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_balagan_home_c33, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub + ' · ' + it.module, actions: it.actions, onAct: it.act)]),
-      if (plan.isNotEmpty) DsFold(title: gen_balagan_home_c34.replaceAll('{n}', plan.length.toString()), details: plan),   // תזמון-אוטומטי: מקופל — הוא מסתכל כשהוא רוצה
+      if (first != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text((first.overdue ? gen_balagan_home_c36 : first.sub) + ' · ' + first.module + ' · ' + lead, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (overdue.isNotEmpty) DsSection(title: gen_balagan_home_c37, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub + ' · ' + it.module, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_balagan_home_c38, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub + ' · ' + it.module, actions: it.actions, onAct: it.act)]),
+      if (plan.isNotEmpty) DsFold(title: gen_balagan_home_c39.replaceAll('{n}', plan.length.toString()), details: plan),   // תזמון-אוטומטי: מקופל — הוא מסתכל כשהוא רוצה
       ...cards.take(3),   // 3 למעלה
-      if (cards.length > 3) DsFold(title: gen_balagan_home_c35.replaceAll('{n}', (cards.length - 3).toString()), details: cards.skip(3).toList()),
+      if (cards.length > 3) DsFold(title: gen_balagan_home_c40.replaceAll('{n}', (cards.length - 3).toString()), details: cards.skip(3).toList()),
       if (_mailNote.isNotEmpty) DsNote(message: _mailNote, label: '', tone: 0),
-      if (pending.isNotEmpty) DsSection(title: gen_balagan_home_c36 + ' · ' + pending.length.toString(), children: pending),   // D5 · הגיע (מייל) · הצעד-הבא (שרשרת) · תזכורות
-      if (did.isNotEmpty) DsSection(title: gen_balagan_home_c37 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_balagan_home_c38, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (wk.isNotEmpty) DsFold(title: gen_balagan_home_c39.replaceAll('{n}', wk.length.toString()).replaceAll('{m}', wSaved.toString()), details: [if (wAdd > 0) DsActionRow(title: gen_balagan_home_c40.replaceAll('{n}', wAdd.toString())), if (wSend > 0) DsActionRow(title: gen_balagan_home_c41.replaceAll('{n}', wSend.toString())), if (wAuto > 0) DsActionRow(title: gen_balagan_home_c42.replaceAll('{n}', wAuto.toString())), DsNote(message: gen_balagan_home_c43, label: '', tone: 0)]),   // שמירת-זמן: מקופל, מוכח מהיומן
-      if (soon.isNotEmpty) DsFold(title: gen_balagan_home_c44.replaceAll('{n}', soon.length.toString()), details: [for (final x in soon) DsActionRow(title: dayNames[today.add(Duration(days: x[0] as int)).weekday % 7] + ' · ' + (x[1] as DsTodayItem).title, sub: (x[1] as DsTodayItem).sub + ' · ' + (x[1] as DsTodayItem).module)]),
-      if (tomorrow.isNotEmpty) DsFold(title: gen_balagan_home_c45 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub + ' · ' + it.module)]),   // D8
-      if (!empty && overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_balagan_home_c46, style: TextStyle(color: lk.muted, fontSize: 14))),
-      if (empty) DsNote(message: gen_balagan_home_c47, label: '', tone: 0),
+      if (pending.isNotEmpty) DsSection(title: gen_balagan_home_c41 + ' · ' + pending.length.toString(), children: pending),   // D5 · הגיע (מייל) · הצעד-הבא (שרשרת) · תזכורות
+      if (did.isNotEmpty) DsSection(title: gen_balagan_home_c42 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_balagan_home_c43, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (wk.isNotEmpty) DsFold(title: gen_balagan_home_c44.replaceAll('{n}', wk.length.toString()).replaceAll('{m}', wSaved.toString()), details: [if (wAdd > 0) DsActionRow(title: gen_balagan_home_c45.replaceAll('{n}', wAdd.toString())), if (wSend > 0) DsActionRow(title: gen_balagan_home_c46.replaceAll('{n}', wSend.toString())), if (wAuto > 0) DsActionRow(title: gen_balagan_home_c47.replaceAll('{n}', wAuto.toString())), DsNote(message: gen_balagan_home_c48, label: '', tone: 0)]),   // שמירת-זמן: מקופל, מוכח מהיומן
+      if (soon.isNotEmpty) DsFold(title: gen_balagan_home_c49.replaceAll('{n}', soon.length.toString()), details: [for (final x in soon) DsActionRow(title: dayNames[today.add(Duration(days: x[0] as int)).weekday % 7] + ' · ' + (x[1] as DsTodayItem).title, sub: (x[1] as DsTodayItem).sub + ' · ' + (x[1] as DsTodayItem).module)]),
+      if (tomorrow.isNotEmpty) DsFold(title: gen_balagan_home_c50 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub + ' · ' + it.module)]),   // D8
+      if (!empty && overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_balagan_home_c51, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (empty) DsNote(message: gen_balagan_home_c52, label: '', tone: 0),
     ]);
   });
 }

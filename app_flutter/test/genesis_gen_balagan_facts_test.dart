@@ -2,6 +2,8 @@
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_moments.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_calendar_home.dart' show GenAppCalendarHomeScreenToday;
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
+import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
+import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -249,6 +251,12 @@ void main() {
     final lid = appStore.log.first['id']!; expect(appStore.log.first['kind'], 'merge');
     expect(appStore.undo(lid), isTrue);
     final r2 = appStore.byId('mrg_ent', id)!; expect(r2['טלפון'], ''); expect(r2['__note'], 'ראשון');
+  });
+  test('«שתף את היום»: טקסט עם באיחור/היום ושעות', () {
+    final a = DsTodayItem(title: 'רופא שיניים', sub: '', due: DateTime(2026, 9, 8), hard: false, overdue: false, module: 'יומן', actions: const [], act: (_) {}, time: '09:30');
+    final o = DsTodayItem(title: 'ארנונה', sub: '', due: DateTime(2026, 9, 5), hard: true, overdue: true, module: 'משימות', actions: const [], act: (_) {});
+    final t = balaganDayText([o], [a], DateTime(2026, 9, 8));
+    expect(t.contains('2026-09-08'), isTrue); expect(t.contains('• ארנונה (משימות)'), isTrue); expect(t.contains('• 09:30 רופא שיניים (יומן)'), isTrue);
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
