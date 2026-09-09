@@ -403,6 +403,10 @@ void main() {
     expect(p.first, before.isEmpty ? 'משה פרץ' : p.first);
     expect(p.length <= 6, isTrue);
   });
+  test('צ׳יפי-חזרה: כל תווית ⇒ קוד דרך מנתח-הרגעים (יום · שבוע · חודש · שנה)', () {
+    expect(balaganRepeatChips().map((x) => x[1]).toList(), ['d1', 'w1', 'm1', 'y1']);
+    expect(balaganRepeatChips().map((x) => balaganRepeatLabel(x[1])).toList(), balaganRepeatChips().map((x) => x[0]).toList());
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
