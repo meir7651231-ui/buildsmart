@@ -85,7 +85,7 @@ BalaganPerson? balaganPerson(String name) {
       final isOpen = m.stages == 0 || appStore.stageOf(m.rootSlug, r[AppStore.idKey] ?? '') < m.stages - 1;
       if (isOpen) { open++; if (numF.isNotEmpty) { final v = double.tryParse((r[numF.first] ?? '').replaceAll(',', '').trim()); if (v != null) money += v; } }
       for (final f in m.phoneFields) { final p = (r[f] ?? '').trim(); if (p.isNotEmpty) phones.add(p); }
-      final at = (r['__at'] ?? '').length >= 10 ? (r['__at'] ?? '').substring(0, 10) : ''; if (at.compareTo(last) > 0) last = at;
+      final at = (r['__at'] ?? '').length >= 10 ? (r['__at'] ?? '').substring(0, 10) : ''; if (at.compareTo(last) > 0) last = at; for (final e in appStore.log) { if (e['rid'] != (r[AppStore.idKey] ?? '') || e['undone'] == '1') continue; final la = (e['at'] ?? '').length >= 10 ? e['at']!.substring(0, 10) : ''; if (la.compareTo(last) > 0) last = la; }   /* ב׳-עא · נגיעה-אחרונה = גם פעולות ביומן, לא רק יצירה */
     }
   }
   return files == 0 ? null : BalaganPerson(name.trim(), files, open, money, phones.toList(), last);
