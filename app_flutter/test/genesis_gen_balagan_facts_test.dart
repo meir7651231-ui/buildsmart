@@ -458,6 +458,15 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קכב/קכג/קכה · «שבוע הבא» ⇒ היסט · «מעל 5000» ⇒ סינון-סכום · פריטי-טווח · ספירת-דחיות', () {
+    expect(balaganWeekOf('שבוע הבא'), 1); expect(balaganWeekOf(' השבוע '), 0); expect(balaganWeekOf('שבוע שעבר'), -1); expect(balaganWeekOf('שבוע'), isNull);
+    expect(balaganAmountFilter('מעל 5,000'), ['>', '5000']); expect(balaganAmountFilter('פחות מ-300'), ['<', '300']); expect(balaganAmountFilter('מעל הכל'), isEmpty); expect(balaganAmountFilter('5000'), isEmpty);
+    final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))); final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
+    final big = appStore.add(m.rootSlug, {m.descField: 'גדול', m.dateFields.first: '2032-05-13', nf: '9,999'}); appStore.add(m.rootSlug, {m.descField: 'קטן', m.dateFields.first: '2032-05-09', nf: '10'});
+    expect(balaganAmountItems('>', '5000').any((r) => r[1] == big), isTrue); expect(balaganAmountItems('<', '5000').any((r) => r[1] == big), isFalse);
+    final it = balaganRangeItems('2032-05-10', '2032-05-16'); expect(it.length, 1); expect(it.first[2], big); expect(balaganRangeItems('2032-05-01', '2032-05-16').length, 2);
+    for (var i = 0; i < 3; i++) { appStore.logAction('auto', 'דחה למחר' + ' · מועד', entity: m.rootSlug, rid: big, field: m.dateFields.first); } expect(balaganSnoozeCounts()[big], 3);
+  });
   test('ב׳-קכא · «ספטמבר» ⇒ מפתח-חודש · «באוקטובר 2027» · לא-חודש ⇒ ריק · פריטי-החודש ממוינים לפי יום', () {
     final today = DateTime(2026, 9, 8);
     expect(balaganMonthOf('ספטמבר', today), '2026-09'); expect(balaganMonthOf(' באוקטובר 2027 ', today), '2027-10'); expect(balaganMonthOf('ספטמבר 15', today), ''); expect(balaganMonthOf('שלום', today), ''); expect(balaganMonthName('2026-09'), 'ספטמבר');

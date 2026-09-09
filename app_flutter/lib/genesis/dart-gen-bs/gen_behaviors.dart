@@ -95,5 +95,8 @@ int bhMedianInt(List<int> xs) { if (xs.isEmpty) return 0; final s = [...xs]..sor
 int bhStreakDays(List<String> dates, String todayIso) { final set = {for (final d in dates) if (d.length >= 10) d.substring(0, 10)}; var day = set.contains(todayIso) ? todayIso : bhPlusDays(todayIso, -1); var n = 0; while (set.contains(day)) { n++; day = bhPlusDays(day, -1); } return n; }
 /// ב׳-קיח · דקות עד שעה 'HH:MM' של היום מרגע nowIsoT (minutesBetweenIso); שלילי = עבר
 int bhMinutesUntil(String nowIsoT, String todayIso, String hm) { if (hm.length < 5 || nowIsoT.length < 16) return -1; return minutesBetweenIso(nowIsoT, todayIso + 'T' + hm + ':00'); }
+/// ב׳-קכב · טווח-שבוע [ראשון, שבת] של השבוע delta מהיום (bhWeekStart · bhPlusDays) · האם iso בטווח (inRange)
+List<String> bhWeekRange(String todayIso, int delta) { final s = bhPlusDays(bhWeekStart(todayIso), 7 * delta); return [s, bhPlusDays(s, 6)]; }
+bool bhInRange(String iso, String from, String to) => iso.length >= 10 && inRange(iso.substring(0, 10), (from: from, to: to));
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');
