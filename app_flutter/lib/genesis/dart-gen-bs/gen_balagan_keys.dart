@@ -1,5 +1,6 @@
 // 🧭 חולל ע"י balagan (G33 · הכרעה-29 · חוק-6) — «חיבורים»: המפתחות של הלקוח, במכשיר בלבד. אל תערוך ידנית.
 import '../dart-data-bs/auto/gen_balagan_keys_content.dart';
+import 'gen_balagan_home.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
@@ -21,18 +22,19 @@ class _GenBalaganKeysScreenState extends State<GenBalaganKeysScreen> {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) => DsScaffold(title: gen_balagan_keys_c5, subtitle: gen_balagan_keys_c6, icon: gen_balagan_keys_c7, children: [
     DsSection(title: gen_balagan_keys_c8, children: [
-      DsPrimaryButton(label: gen_balagan_keys_c9, onTap: _copy),
-      Padding(padding: const EdgeInsets.only(top: 8), child: DsField(label: gen_balagan_keys_c10, hint: '{…}', value: _paste, onChanged: (v) => _paste = v)),
-      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c11, onTap: _restore), const SizedBox(width: 8), DsChipButton(label: gen_balagan_keys_c12, onTap: _undo)])),
+      for (final d in [DateTime.tryParse(appStore.setting('backupAt'))]) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(d == null ? gen_balagan_keys_c9 : gen_balagan_keys_c10.replaceAll('{d}', balaganDayLabel(d, DateTime.now())), style: TextStyle(color: DsLook.of(context).muted, fontSize: 13))),   // ב׳-מז · מתי גיבית לאחרונה
+      DsPrimaryButton(label: gen_balagan_keys_c11, onTap: _copy),
+      Padding(padding: const EdgeInsets.only(top: 8), child: DsField(label: gen_balagan_keys_c12, hint: '{…}', value: _paste, onChanged: (v) => _paste = v)),
+      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c13, onTap: _restore), const SizedBox(width: 8), DsChipButton(label: gen_balagan_keys_c14, onTap: _undo)])),
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: _note, label: '', tone: 0)),
-      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c13, label: '', tone: 0)),
-      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c14, label: '', tone: 0)),
+      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c15, label: '', tone: 0)),
+      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c16, label: '', tone: 0)),
     ]),
-    DsField(label: gen_balagan_keys_c15, hint: gen_balagan_keys_c16, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
-    DsField(label: gen_balagan_keys_c17, hint: gen_balagan_keys_c18, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c19, label: '', tone: 0)),
-    DsField(label: gen_balagan_keys_c20, hint: gen_balagan_keys_c21, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c22, label: '', tone: 0)),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c23, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c17, hint: gen_balagan_keys_c18, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
+    DsField(label: gen_balagan_keys_c19, hint: gen_balagan_keys_c20, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c21, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c22, hint: gen_balagan_keys_c23, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c24, label: '', tone: 0)),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c25, label: '', tone: 0)),
   ]));
 }

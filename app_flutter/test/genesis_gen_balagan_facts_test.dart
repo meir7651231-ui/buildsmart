@@ -465,6 +465,14 @@ void main() {
     expect(balaganOffsetsLabel('3,1,0'), '3 ימים לפני · יום לפני · ביום');
     expect(balaganOffsetsLabel('7'), '7 ימים לפני');
   });
+  test('מתי זה קרה: עכשיו · לפני 5 דק׳ · לפני שעה · לפני 3 שעות · אתמול', () {
+    final now = DateTime(2026, 9, 8, 14, 0);
+    expect(balaganAgo(DateTime(2026, 9, 8, 13, 59, 40), now), 'עכשיו');
+    expect(balaganAgo(DateTime(2026, 9, 8, 13, 55), now), 'לפני 5 דק׳');
+    expect(balaganAgo(DateTime(2026, 9, 8, 12, 50), now), 'לפני שעה');
+    expect(balaganAgo(DateTime(2026, 9, 8, 11, 0), now), 'לפני 3 שעות');
+    expect(balaganAgo(DateTime(2026, 9, 7, 23, 0), now), 'אתמול');
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
