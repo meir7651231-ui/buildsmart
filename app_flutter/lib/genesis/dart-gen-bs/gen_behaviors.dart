@@ -3,16 +3,26 @@ import '../dart-maor/add-days-iso.dart';
 import '../dart-maor/cockpit-days-since.dart';
 import '../dart-maor/count-by.dart';
 import '../dart-maor/enroll-new-family.dart';
+import '../dart-maor/gem-year.dart';
+import '../dart-maor/gematria.dart';
+import '../dart-maor/heb-date-full.dart';
+import '../dart-maor/heb-parts.dart';
 import '../dart-maor/in-range.dart';
 import '../dart-maor/minutes-between-iso.dart';
+import '../dart-maor/name-matches.dart';
 import '../dart-maor/norm-name.dart';
 import '../dart-maor/norm-phone.dart';
+import '../dart-maor/rule-contains.dart';
+import '../dart-maor/rule-exact.dart';
 import '../dart-maor/rule-prefix.dart';
 import '../dart-maor/task-overdue.dart';
 import '../dart-maor/time-to-min.dart';
+import '../dart/damerau_levenshtein.dart';
 import '../dart/f_money.dart';
 import '../dart/start_of_week_sunday.dart';
 import '../dart-data-maor/norm-search-sockets.dart';
+import '../dart-data-maor/gematria-sockets.dart';
+import '../dart-data-maor/heb-month-he-sockets.dart';
 
 String bhIso(DateTime d) => d.toIso8601String().substring(0, 10);
 String bhIsoT(DateTime d) => d.toIso8601String().substring(0, 19);
@@ -46,5 +56,16 @@ String bhDigitsQuery(String q) { final t = q.trim(); return RegExp(r'^[0-9][0-9,
 String bhPrefixRest(String s, List<String> words) { final t = s.trim(); for (final w in words) { if (w.isNotEmpty && rulePrefix(w + ' ', t) != null && t.length > w.length + 2) return t.substring(w.length + 1).trim(); } return ''; }
 /// ב׳-נב · כמה פתוחים (שלב לפני האחרון; בלי שלבים = הכל) — countBy
 int bhOpenCount(List<Map<String, String>> records, int stages) { var n = 0; for (final e in countBy(records, (r) => stages == 0 || (int.tryParse(((r as Map)['__stage'] ?? '0').toString()) ?? 0) < stages - 1 ? 'open' : 'closed')) { if (e[0] == 'open') n = e[1] as int; } return n; }
+/// ב׳-קב · ציון-חיפוש סלחן: מדויק 100 (ruleExact) · קידומת 80 (rulePrefix) · מכיל 62 (ruleContains) · מילה במרחק-עריכה ≤1 (≥5 אותיות: ≤2) ⇒ 50−d·10 (damerauLevenshtein); 0 = לא מתאים
+int bhSearchScore(String q, String text) { final nq = bhNormSearch(q), nt = bhNormSearch(text); if (nq.isEmpty || nt.isEmpty) return 0; final e = ruleExact(nq, nt); if (e != null) return e.toInt(); final p = rulePrefix(nq, nt); if (p != null) return p; final c = ruleContains(nq, nt); if (c != null) return c; if (nq.length < 3) return 0; final lim = nq.length >= 5 ? 2 : 1; var best = 0; for (final w in nt.split(' ')) { if (w.length < nq.length - lim || w.length > nq.length + lim) continue; final d = damerauLevenshtein(nq, w); if (d <= lim && 50 - d * 10 > best) best = 50 - d * 10; } return best; }
+/// ב׳-קג · אותו-אדם? שמות דומים (nameMatches על נרמול-חיפוש שומר-רווחים): «רות לוי» ≈ «לוי רות» · «ר. לוי» ≠
+bool bhSameName(String a, String b) => nameMatches(a, b, bhNormSearch);
+/// ב׳-קד · תאריך עברי מלא מ-ISO (hebDateFull ← hebParts · gem · gemYear · שמות-חודשים); ריק/שבור ⇒ ''
+String _bhGem(num n) => gem(n, gematria_U, gematria_T, gematria_H, gematria_T2);
+String bhHebDate(String iso) => hebDateFull(iso, _bhGem, (y) => gemYear(y, _bhGem), (d) => hebParts(d), hebMonthHe_monthNames);
+/// ב׳-קה · איחוד היסטי-תזכורת של כמה מועדים — כל היסט שלפחות מועד-אחד שלו עוד לפנינו (דרך bhAheadOffsets)
+List<int> bhAheadOffsetsUnion(List<String> dueIsos, bool hard, String todayIso, List<int> offsets) => [for (final o in offsets) if (dueIsos.any((d) => bhAheadOffsets(d, hard, todayIso, offsets).contains(o))) o];
+/// ב׳-קה · שורות-קבוצה: רשומות לפי מפתח-קבוצה (ריק = יחידה) ⇒ [[מפתח, n]…] בסדר-ההופעה (countBy)
+List<List<Object>> bhGroupRows(List<Map<String, String>> rows, String key) => countBy(rows, (r) => ((r as Map)[key] ?? '').toString());
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

@@ -173,7 +173,7 @@ List<Map<String, String>> balaganDuplicates(BalaganModule m, Map<String, String>
   String norm(String x) => x.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
   final keys = [m.descField, ...m.personFields].where((f) => f.isNotEmpty && norm(v[f] ?? '').length >= 3).toList();
   if (keys.isEmpty) return const [];
-  return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; return keys.any((f) => norm(r[f] ?? '') == norm(v[f]!)); }).toList();
+  return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; return keys.any((f) => m.personFields.contains(f) ? bhSameName(r[f] ?? '', v[f]!) : norm(r[f] ?? '') == norm(v[f]!)); }).toList();   /* ב׳-קג · שדה-אדם: אותו-אדם לפי דמיון-שם (bhSameName) — «לוי רות» = «רות לוי» */
 }
 /// מיזוג לתיק קיים: שדה ריק בקיים מקבל את הערך החדש · «מה כתבת» נצבר (שורה חדשה) · שדה מלא לא נדרס. פעולה אחת עם החזר (prev = JSON של מה שנגע).
 int balaganMerge(BalaganModule m, String id, Map<String, String> v, String logText) {

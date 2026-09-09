@@ -301,6 +301,8 @@ void main() {
     expect(balaganDuplicates(m, {'לקוח': ' רות  לוי '}).map((r) => r['__id']), [a]);
     expect(balaganDuplicates(m, {'לקוח': 'דן כהן'}), isEmpty);
     expect(balaganDuplicates(m, {'מה': 'פי'}), isEmpty);
+    expect(balaganDuplicates(m, {'לקוח': 'לוי רות'}).map((r) => r['__id']), [a]);   // ב׳-קג · סדר-מילים הפוך = אותו אדם
+    expect(balaganDuplicates(m, {'לקוח': 'רות כהן'}), isEmpty);   // ב׳-קג · מילה-אחת חופפת אינה אותו אדם
   });
   test('מיזוג לתיק קיים: ריק מתמלא · מלא לא נדרס · «מה כתבת» נצבר · החזר מחזיר הכל', () {
     final m = BalaganModule(0, 't', 'בדיקה', 'בדיקה', '', const <String, double>{}, const [], const [], 'לקוח', '', 'mrg_ent', const <BalaganField>[], 3, const <String>[], personFields: const ['לקוח'], phoneFields: const ['טלפון']);
@@ -445,6 +447,7 @@ void main() {
     expect(balaganPersonFor('שגב')!.name, 'נועה שגב');
     expect(balaganPersonFor('נועה'), isNull);
     expect(balaganPersonFor('ש'), isNull);
+    expect(balaganPersonFor('שגב נועה')!.name, 'נועה שגב');   // ב׳-קג · סדר-מילים הפוך ⇒ אותו אדם
     expect(balaganPersonFor(' נועה לב ')!.files, 1);
   });
   test('פותח-תיק: ישות מוכרת ⇒ עמוד-השורש שלה; לא מוכרת ⇒ ריק', () {
@@ -557,6 +560,14 @@ void main() {
     final id = appStore.add(S, {'מה': 'ארנונה 1,250 · 0521234567'});
     expect(appStore.search('1250').any((h) => h[1] == id), isTrue); expect(appStore.search('052-123').any((h) => h[1] == id), isTrue);
     expect(appStore.search('ארנונה').any((h) => h[1] == id), isTrue); expect(appStore.search('9999').any((h) => h[1] == id), isFalse);
+  });
+  test('ב׳-קב · חיפוש-סלחן מדורג: «ארנונא» מוצא «ארנונה» · מדויק לפני מכיל · ספרות דרך המחסן · אין-כלום ⇒ ריק', () {
+    const S = 'app_calendar_ent1';
+    final a = appStore.add(S, {'מה': 'חשמל לעירייה'});
+    final b = appStore.add(S, {'מה': 'חשמל'});
+    final r = balaganSearchRanked('חשמל'); expect(r.first[1], b); expect(r.any((h) => h[1] == a), isTrue);   // מדויק (100) לפני קידומת (80)
+    expect(balaganSearchRanked('חשמא').any((h) => h[1] == b), isTrue);   // שגיאת-כתיב אחת
+    expect(balaganSearchRanked('1250').any((h) => h[0] == S), isTrue); expect(balaganSearchRanked('זזזז'), isEmpty); expect(balaganSearchRanked('ח'), isEmpty);
   });
   test('ב׳-צג · grouped: «סיים» על שני תיקים-באיחור בתוך grouped ⇒ החזר אחד מחזיר את שניהם', () {
     const S = 'app_calendar_ent1'; const F = 'מועד';

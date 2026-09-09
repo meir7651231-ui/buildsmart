@@ -21,4 +21,12 @@ void main() {
     expect(bhPrefixRest('איפה הפיקדון', ['איפה', 'חפש']), 'הפיקדון'); expect(bhPrefixRest('הפיקדון איפה', ['איפה']), '');
     expect(bhOpenCount([{'__stage': '0'}, {'__stage': '2'}, {}], 3), 2); expect(bhThousands(1650), '1,650');
   });
+  test('G35 · חיפוש-סלחן · אותו-שם · תאריך-עברי · איחוד-היסטים · שורות-קבוצה', () {
+    expect(bhSearchScore('ארנונה', 'ארנונה'), 100); expect(bhSearchScore('ארנ', 'ארנונה 1250'), 80); expect(bhSearchScore('1250', 'ארנונה 1250'), 62);
+    expect(bhSearchScore('ארנונא', 'ארנונה לעירייה'), 40); expect(bhSearchScore('ארנונא', 'חשמל'), 0); expect(bhSearchScore('אר', 'ארט'), 80); expect(bhSearchScore('קק', 'חשמל'), 0);
+    expect(bhSameName('רות לוי', 'לוי רות'), true); expect(bhSameName('רות לוי', 'רות כהן'), false); expect(bhSameName('נועה', 'נועה'), true); expect(bhSameName('', 'נועה'), false);
+    expect(bhHebDate('2026-09-08'), 'כ״ו אלול תשפ״ו'); expect(bhHebDate(''), '');
+    expect(bhAheadOffsetsUnion(['2026-09-09', '2026-09-12'], true, '2026-09-08', [3, 1, 0]), [3, 1, 0]); expect(bhAheadOffsetsUnion(['2026-09-09'], true, '2026-09-08', [3, 1, 0]), [1, 0]);
+    expect(bhGroupRows([{'group': 'g1'}, {'group': 'g1'}, {}], 'group'), [['g1', 2], ['', 1]]);
+  });
 }
