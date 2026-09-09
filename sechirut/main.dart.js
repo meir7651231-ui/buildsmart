@@ -8306,9 +8306,9 @@ if(a0){b=a.a
 a1=B.e.ej(n-a.b+1000*(o-b),a7)
 b=A.aDV(a,b0)
 b=A.c2("\u05d4\u05d9\u05d4 {date}","{date}",b)
-if(a1===1)a0="\u05d0\u05ea\u05de\u05d5\u05dc"
+if(a1<=1)a0=""
 else{a0=B.e.k(a1)
-a0=A.c2("\u05dc\u05e4\u05e0\u05d9 {n} \u05d9\u05de\u05d9\u05dd","{n}",a0)}a9.push(A.aDW(j,b+" \xb7 "+a0,k,a8,a,!1,!0,b0,i,g,f,e))
+a0=" \xb7 "+A.c2("\u05dc\u05e4\u05e0\u05d9 {n} \u05d9\u05de\u05d9\u05dd","{n}",a0)}a9.push(A.aDW(j,b+a0,k,a8,a,!1,!0,b0,i,g,f,e))
 continue}b=b.h(0,h)
 if(b==null)b=""
 for(a0=A.aDX(),a2=a0.length,b=b!=="ok",a3=0;a3<a0.length;a0.length===a2||(0,A.D)(a0),++a3){a4=a0[a3]

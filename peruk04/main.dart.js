@@ -8086,9 +8086,9 @@ if(a1){a=a0.a
 a2=B.f.eg(n-a0.b+1000*(o-a),864e8)
 a=A.aAD(a0,a9)
 a=A.ci("\u05d4\u05d9\u05d4 {date}","{date}",a)
-if(a2===1)a1="\u05d0\u05ea\u05de\u05d5\u05dc"
+if(a2<=1)a1=""
 else{a1=B.f.k(a2)
-a1=A.ci("\u05dc\u05e4\u05e0\u05d9 {n} \u05d9\u05de\u05d9\u05dd","{n}",a1)}a8.push(A.aAE(b+" \xb7 "+j,a+" \xb7 "+a1,k,b,a0,!0,!0,a9,i,g,f,e))
+a1=" \xb7 "+A.ci("\u05dc\u05e4\u05e0\u05d9 {n} \u05d9\u05de\u05d9\u05dd","{n}",a1)}a8.push(A.aAE(b+" \xb7 "+j,a+a1,k,b,a0,!0,!0,a9,i,g,f,e))
 continue}a=a.h(0,h+b)
 if(a==null)a=""
 for(a1=A.aAF(),a3=a1.length,a=a!=="ok",a4=0;a4<a1.length;a1.length===a3||(0,A.E)(a1),++a4){a5=a1[a4]
