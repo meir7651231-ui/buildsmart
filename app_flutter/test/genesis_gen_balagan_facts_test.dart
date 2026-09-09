@@ -317,7 +317,7 @@ void main() {
     final a = DsTodayItem(title: 'רופא שיניים', sub: '', due: DateTime(2026, 9, 8), hard: false, overdue: false, module: 'יומן', actions: const [], act: (_) {}, time: '09:30');
     final o = DsTodayItem(title: 'ארנונה', sub: '', due: DateTime(2026, 9, 5), hard: true, overdue: true, module: 'משימות', actions: const [], act: (_) {});
     final t = balaganDayText([o], [a], DateTime(2026, 9, 8));
-    expect(t.contains('2026-09-08'), isTrue); expect(t.contains('• ארנונה (משימות)'), isTrue); expect(t.contains('• 09:30 רופא שיניים (יומן)'), isTrue);
+    expect(t.contains('8.9'), isTrue); expect(t.contains('2026-09-08'), isFalse);   // ב׳-מא · כותרת כמו שאומרים expect(t.contains('• ארנונה (משימות)'), isTrue); expect(t.contains('• 09:30 רופא שיניים (יומן)'), isTrue);
   });
   test('ייצוא-וואטסאפ: הכותרת נקלפת, השולח = אדם, חותמת-ההודעה אינה מועד', () {
     expect(balaganWaStrip('[8.9.2026, 16:30] דני: מחר ב-9:00'), 'מחר ב-9:00');
@@ -450,6 +450,16 @@ void main() {
   test('פותח-תיק: ישות מוכרת ⇒ עמוד-השורש שלה; לא מוכרת ⇒ ריק', () {
     expect(balaganOpenRoot('nope', 'x') is SizedBox, isTrue);
     for (final m in kBalaganModules) { expect(balaganOpenRoot(m.rootSlug, 'x') is SizedBox, isFalse, reason: m.rootSlug); }
+  });
+  test('תאריך כמו שאומרים: היום · מחר · אתמול · יום שלישי 15.9 · 30.11 · 3.10.2027', () {
+    expect(balaganDayLabel(DateTime(2026, 9, 8), today), 'היום');
+    expect(balaganDayLabel(DateTime(2026, 9, 9), today), 'מחר');
+    expect(balaganDayLabel(DateTime(2026, 9, 7), today), 'אתמול');
+    expect(balaganDayLabel(DateTime(2026, 9, 13), today).endsWith(' 13.9'), isTrue);
+    expect(balaganDayLabel(DateTime(2026, 9, 13), today).startsWith('יום'), isTrue);
+    expect(balaganDayLabel(DateTime(2026, 11, 30), today), '30.11');
+    expect(balaganDayLabel(DateTime(2027, 10, 3), today), '3.10.2027');
+    expect(balaganDayText(const [], const [], today, tomorrow: [DsTodayItem(title: 'ביטוח', sub: '', due: DateTime(2026, 9, 9), hard: false, overdue: false, module: 'משימות', actions: const [], act: (_) {})]).contains('• ביטוח (משימות)'), isTrue);
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
