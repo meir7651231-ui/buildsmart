@@ -37,6 +37,9 @@ class AppStore extends ChangeNotifier {
 
   // ── G32 · שכבת-הטריגרים (הכרעה-28): יומן-פעולות (אוטומטיות/שליחה, עם החזר) · זיכרון-הכרעות (אשר/דחה/תמיד) · הגדרות-התנהגות — באותו JSON ──
   final List<Map<String, String>> _log = [];
+  String _group = '';
+  /// ב׳-צג · פעולה-מרוכזת: כל שורות-היומן שנכתבות בתוך body חולקות group אחד ⇒ «החזר» אחד מחזיר את כולן (גם «סיים» שיצר רגע-חוזר)
+  void grouped(void Function() body) { _group = 'g' + DateTime.now().microsecondsSinceEpoch.toString(); try { body(); } finally { _group = ''; } }
   final Map<String, String> _decided = {};
   final Map<String, String> _settings = {};
   List<Map<String, String>> get log => List.unmodifiable(_log);
@@ -47,7 +50,7 @@ class AppStore extends ChangeNotifier {
   /// רישום פעולה: kind = auto (לבד) · decide (הכרעה שניתן להחזיר) · send (שליחה החוצה) · next (צעד-הבא). prev/field = מה להחזיר.
   String logAction(String kind, String what, {String entity = '', String rid = '', String field = '', String prev = '', String group = ''}) {
     final id = 'l${++_seq}';
-    _log.insert(0, {'id': id, 'at': DateTime.now().toIso8601String(), 'kind': kind, 'what': what, 'entity': entity, 'rid': rid, 'field': field, 'prev': prev, 'undone': '', if (group.isNotEmpty) 'group': group});   // ב׳-פז · group: פעולה-מרוכזת ⇒ החזר אחד לכולן
+    _log.insert(0, {'id': id, 'at': DateTime.now().toIso8601String(), 'kind': kind, 'what': what, 'entity': entity, 'rid': rid, 'field': field, 'prev': prev, 'undone': '', if ((group.isNotEmpty ? group : _group).isNotEmpty) 'group': group.isNotEmpty ? group : _group});   // ב׳-פז · group: פעולה-מרוכזת ⇒ החזר אחד לכולן
     if (_log.length > 200) _log.removeRange(200, _log.length);
     notifyListeners(); return id;
   }
@@ -110,8 +113,9 @@ class AppStore extends ChangeNotifier {
   /// Text search across every entity: any value containing q (case-insensitive). Returns (entity, id, matching value).
   List<List<String>> search(String q) {
     final needle = q.trim().toLowerCase(); if (needle.length < 2) return const [];
+    final digits = RegExp(r'^[0-9][0-9,.\- ]*$').hasMatch(needle) ? needle.replaceAll(RegExp(r'[^0-9]'), '') : '';   // ב׳-צב · שאילתת-ספרות ⇒ גם התאמה ספרות-מול-ספרות (סכום עם פסיקים · טלפון עם מקפים)
     final out = <List<String>>[];
-    _rec.forEach((entity, rows) { for (final r in rows) { for (final e in r.entries) { if (e.key == AppStore.idKey || e.key == '__doc' || e.key == '__at' || e.key == '__stage') continue; if (e.value.toLowerCase().contains(needle)) { out.add([entity, r[AppStore.idKey] ?? '', e.value]); break; } } } });
+    _rec.forEach((entity, rows) { for (final r in rows) { for (final e in r.entries) { if (e.key == AppStore.idKey || e.key == '__doc' || e.key == '__at' || e.key == '__stage') continue; if (e.value.toLowerCase().contains(needle) || (digits.length >= 2 && e.value.replaceAll(RegExp(r'[^0-9]'), '').contains(digits))) { out.add([entity, r[AppStore.idKey] ?? '', e.value]); break; } } } });
     return out;
   }
 

@@ -40,6 +40,8 @@ class GenAppPeruk26HomeScreenToday {
   static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
   static DateTime? _parse(String s) { final t = s.trim(); if (t.isEmpty) return null; try { return _day(DateTime.parse(t.length == 10 ? '${t}T12:00:00' : t)); } catch (_) { return null; } }
   static List<int> _offsets() => appStore.setting('offsets', '3,1,0').split(',').map((x) => int.tryParse(x.trim()) ?? 0).toList();
+  /// ב׳-צא · ההיסטים שעוד יכולים לירות (יום-הירי ≥ היום) — הצעת-התזכורת אומרת רק אמת
+  static List<int> aheadOffsets(DateTime d, bool hard, DateTime today) => [for (final o in _offsets()) if (!_shift(d.subtract(Duration(days: o)), hard).isBefore(today)) o];
   static DateTime _shift(DateTime d, bool hard) => hard ? d : (d.weekday == DateTime.saturday ? d.add(const Duration(days: 1)) : d);   // P8 · soft לא בשבת
   static String _iso(DateTime d) => d.toIso8601String().substring(0, 10);
   /// ב׳-מא · תאריך כמו שאומרים אותו: היום · מחר · אתמול · יום שלישי 8.9 (עד שבוע) · 15.9 · 3.10.2027 (שנה אחרת)
@@ -179,13 +181,14 @@ class GenAppPeruk26HomeScreenToday {
   // P11/P13 · הצעות: תזכורת לכל תאריך שטרם הוכרע · צעד-הבא בשלב-האחרון (P14) · תזכורת-אחרי-שליחה (P12) — הכל עם קטע-המקור
   static List<Widget> proposals(BuildContext context, DateTime today, {bool chain = true, bool rem = true}) {   // rem=false: «בלגן» מרכז את התזכורות לכרטיס אחד (ב׳-לז)   // chain=false: «בלגן» מרנדר את כרטיס-הצעד-הבא בעצמו (חוצה-מודולים)
     final out = <Widget>[];
-    final days = _offsets().map((o) => o == 0 ? gen_app_peruk26_home_c56 : o == 1 ? gen_app_peruk26_home_c57 : gen_app_peruk26_home_c58.replaceAll('{n}', o.toString())).join(' · ');   /* ב׳-מב · «3 ימים לפני · יום לפני · ביום» במקום (−3/−1/−0) */
+    String days(List<int> os) => os.map((o) => o == 0 ? gen_app_peruk26_home_c56 : o == 1 ? gen_app_peruk26_home_c57 : gen_app_peruk26_home_c58.replaceAll('{n}', o.toString())).join(' · ');   /* ב׳-מב · «3 ימים לפני · יום לפני · ביום» במקום (−3/−1/−0) · ב׳-צא · רק מה שעוד לפנינו */
     for (final r in open()) {
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk26_ent1', rid);
       if (rem) for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        out.add(DsApproveCard(question: gen_app_peruk26_home_c59.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _dayLabel(d, today)), source: module + ' · ' + who, okLabel: gen_app_peruk26_home_c60, noLabel: gen_app_peruk26_home_c61, alwaysLabel: gen_app_peruk26_home_c62,
+        final ahead = aheadOffsets(d, f.hard, today); if (ahead.isEmpty) continue;   /* ב׳-צא · מועד של מחר ⇒ «יום לפני · ביום», לא «3 ימים לפני» שכבר עבר */
+        out.add(DsApproveCard(question: gen_app_peruk26_home_c59.replaceAll('{field}', f.label).replaceAll('{days}', days(ahead)).replaceAll('{date}', _dayLabel(d, today)), source: module + ' · ' + who, okLabel: gen_app_peruk26_home_c60, noLabel: gen_app_peruk26_home_c61, alwaysLabel: gen_app_peruk26_home_c62,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }

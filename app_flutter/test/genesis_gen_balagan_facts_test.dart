@@ -539,4 +539,34 @@ void main() {
     expect(balaganLastAmount(m, 'אבי כהן'), '2,000'); expect(balaganLastAmount(m, 'דנה לוי'), '300'); expect(balaganLastAmount(m, ''), '300');
     expect(balaganLastAmount(m, 'מישהו אחר'), '');
   });
+  test('ב׳-צ · «שלח לו את הפתוחים»: שורה לכל תיק פתוח עם האדם, סגור לא נכלל', () {
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.stages > 0);
+    expect(balaganPersonOpenText('גל רון', today), '');
+    appStore.add(m.rootSlug, {m.personFields.first: 'גל רון', if (m.descField.isNotEmpty && m.descField != m.personFields.first) m.descField: 'פתוח'});   // שדה-התיאור יכול להיות שדה-האדם עצמו
+    appStore.add(m.rootSlug, {m.personFields.first: 'גל רון', if (m.descField.isNotEmpty && m.descField != m.personFields.first) m.descField: 'סגור', '__stage': (m.stages - 1).toString()});
+    final t = balaganPersonOpenText('גל רון', today);
+    expect(t.startsWith('גל רון, מה שפתוח אצלנו:'), isTrue); expect(t.split('\n').length, 2); expect(t.contains(m.title), isTrue);
+  });
+  test('ב׳-צא · הצעת-התזכורת אומרת רק מה שעוד לפנינו: מועד מחר ⇒ [1, 0], מועד בעוד 10 ימים ⇒ [3, 1, 0]', () {
+    expect(GenAppCalendarHomeScreenToday.aheadOffsets(DateTime(2026, 9, 9), true, today), [1, 0]);
+    expect(GenAppCalendarHomeScreenToday.aheadOffsets(DateTime(2026, 9, 18), true, today), [3, 1, 0]);
+    expect(GenAppCalendarHomeScreenToday.aheadOffsets(DateTime(2026, 9, 8), true, today), [0]);
+  });
+  test('ב׳-צב · חיפוש-ספרות: «1250» מוצא «1,250» · «052-123» מוצא «0521234567» · טקסט רגיל לא נשבר', () {
+    const S = 'app_calendar_ent1';
+    final id = appStore.add(S, {'מה': 'ארנונה 1,250 · 0521234567'});
+    expect(appStore.search('1250').any((h) => h[1] == id), isTrue); expect(appStore.search('052-123').any((h) => h[1] == id), isTrue);
+    expect(appStore.search('ארנונה').any((h) => h[1] == id), isTrue); expect(appStore.search('9999').any((h) => h[1] == id), isFalse);
+  });
+  test('ב׳-צג · grouped: «סיים» על שני תיקים-באיחור בתוך grouped ⇒ החזר אחד מחזיר את שניהם', () {
+    const S = 'app_calendar_ent1'; const F = 'מועד';
+    final a = appStore.add(S, {F: '2026-09-01'}); final b = appStore.add(S, {F: '2026-09-02'});
+    final its = GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).where((x) => x.rid == a || x.rid == b).toList(); expect(its.length, 2);
+    appStore.grouped(() { for (final it in its) { it.act(it.actions.indexOf('סיים')); } });
+    expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).any((x) => x.rid == a || x.rid == b), isFalse);
+    final g = appStore.log.first['group'] ?? ''; expect(g, isNotEmpty); expect(appStore.log.where((e) => e['group'] == g).length, 2);
+    expect(appStore.undo(appStore.log.first['id']!), isTrue);
+    expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).where((x) => x.rid == a || x.rid == b).length, 2);
+    appStore.logAction('auto', 'בודד'); expect(appStore.log.first['group'], isNull);   // מחוץ ל-grouped אין group
+  });
 }
