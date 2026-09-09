@@ -4,14 +4,11 @@ import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_mail.dart';
 import '../dart-maor/add-days-iso.dart';
-import '../dart-maor/weekday-of-iso.dart';
+import '../dart/start_of_week_sunday.dart';
 import '../dart-maor/cockpit-days-since.dart';
-import '../dart-maor/day-month-of-iso.dart';
 import '../dart-maor/time-to-min.dart';
 import '../dart-maor/minutes-between-iso.dart';
-import '../dart-maor/round-up-to.dart';
 import '../dart/f_money.dart';
-import '../dart-maor/digits-query.dart';
 import '../dart-maor/norm-phone.dart';
 import '../dart-maor/rule-prefix.dart';
 import 'gen_balagan_confirm.dart';
@@ -64,19 +61,21 @@ class _Mod { const _Mod(this.name, this.open, this.items, this.proposals, this.c
 /// ב׳-מא · תאריך כמו שאומרים אותו (היום · מחר · אתמול · יום שלישי 8.9 · 15.9 · 3.10.2027) — ל«היום», לשיתוף ולכרטיס-האדם
 String _isoD(DateTime d) => d.toIso8601String().substring(0, 10);
 String _isoT(DateTime d) => d.toIso8601String().substring(0, 19);
+int _wd(DateTime d) => cockpitDaysSince(_isoD(startOfWeekSunday(d)), _isoD(d)).toInt();   // G34 · יום-בשבוע (0=ראשון) = תחילת-השבוע + ימים-מאז
+String _dm(String iso, bool y) => int.parse(iso.substring(8, 10)).toString() + '.' + int.parse(iso.substring(5, 7)).toString() + (y ? '.' + iso.substring(0, 4) : '');   // יום.חודש — דבק-שפה
 DateTime _dayPlus(DateTime d, int n) { final s = addDaysIso(_isoD(d), n); return DateTime(int.parse(s.substring(0, 4)), int.parse(s.substring(5, 7)), int.parse(s.substring(8, 10))); }   // G34 · חלקיק הוספת-ימים
-String balaganDayLabel(DateTime d, DateTime today) { final n = -cockpitDaysSince(_isoD(d), _isoD(today)).toInt(); if (n == 0) return gen_balagan_home_c0; if (n == 1) return gen_balagan_home_c1; if (n == -1) return gen_balagan_home_c2; final dm = dayMonthOfIso(_isoD(d), d.year != today.year); return n.abs() <= 6 ? gen_balagan_home_c3.replaceAll('{day}', gen_balagan_home_c4.split(',')[weekdayOfIso(_isoD(d))]) + ' ' + dm : dm; }   // G34 · דבק: ימים-מאז · יום-בשבוע · יום.חודש — חלקיקים; כאן רק מונחים
+String balaganDayLabel(DateTime d, DateTime today) { final n = -cockpitDaysSince(_isoD(d), _isoD(today)).toInt(); if (n == 0) return gen_balagan_home_c0; if (n == 1) return gen_balagan_home_c1; if (n == -1) return gen_balagan_home_c2; final dm = _dm(_isoD(d), d.year != today.year); return n.abs() <= 6 ? gen_balagan_home_c3.replaceAll('{day}', gen_balagan_home_c4.split(',')[_wd(d)]) + ' ' + dm : dm; }   // G34 · דבק: ימים-מאז · תחילת-שבוע — חלקיקים; כאן רק מונחים
 /// ב׳-מב · «3 ימים לפני · יום לפני · ביום» — תיאור-ההיסטים כמו שאומרים (ל«בלגן» ולכרטיס-המרוכז)
 /// ב׳-צה · שורה של ספרות («1250» · «052-123») = חיפוש, לא רגע · ב׳-צז · «איפה X» / «חפש X» / «מה עם X» = חיפוש X (מילות-החיפוש מהכרום — דקדוק-ממשק, לא מילון-דומיין)
-String balaganSearchQuery(String s) { if (digitsQuery(s, normPhone).isNotEmpty) return s.trim(); final t = s.trim(); for (final w in gen_balagan_home_c5.split('|')) { if (rulePrefix(w + ' ', t) != null && t.length > w.length + 2) return t.substring(w.length + 1).trim(); } return ''; }   // G34 · דבק: שאילתת-ספרות (על חלקיק-הטלפון) · כלל-קידומת
+String balaganSearchQuery(String s) { final t = s.trim(); if (RegExp(r'^[0-9][0-9,.\- ]*$').hasMatch(t) && normPhone(t).length >= 2) return t; for (final w in gen_balagan_home_c5.split('|')) { if (rulePrefix(w + ' ', t) != null && t.length > w.length + 2) return t.substring(w.length + 1).trim(); } return ''; }   // G34 · דבק: שאילתת-ספרות (על חלקיק-הטלפון) · כלל-קידומת
 /// ב׳-צח · תחילת-התוכנית: תחילת-היום (הגדרה) — ואם היום כבר התקדם, מעכשיו מעוגל-מעלה ל-5 דק׳ (תוכנית שמתחילה בשעה שעברה אינה תוכנית)
-DateTime balaganPlanStart(DateTime today, int startHour, DateTime now) { final base = DateTime(today.year, today.month, today.day, startHour); if (_isoD(now) != _isoD(today)) return base; final nowMin = (timeToMin(now.toIso8601String().substring(11, 16)) as num).toInt(); if (nowMin <= startHour * 60) return base; final r = roundUpTo(nowMin, 5); return DateTime(today.year, today.month, today.day, r ~/ 60, r % 60); }   // G34 · דבק: HH:MM⇒דקות (timeToMin) · עיגול-לכפולה (roundUpTo)
+DateTime balaganPlanStart(DateTime today, int startHour, DateTime now) { final base = DateTime(today.year, today.month, today.day, startHour); if (_isoD(now) != _isoD(today)) return base; final nowMin = (timeToMin(now.toIso8601String().substring(11, 16)) as num).toInt(); if (nowMin <= startHour * 60) return base; final r = ((nowMin + 4) ~/ 5) * 5; return DateTime(today.year, today.month, today.day, r ~/ 60, r % 60); }   // G34 · דבק: HH:MM⇒דקות (חלקיק timeToMin) · עיגול ל-5 = חשבון-שפה
 String balaganOffsetsLabel(String offsets) => [for (final x in offsets.split(',')) int.tryParse(x.trim()) ?? 0].map((o) => o == 0 ? gen_balagan_home_c6 : o == 1 ? gen_balagan_home_c7 : gen_balagan_home_c8.replaceAll('{n}', o.toString())).join(' · ');
 /// ב׳-מח · מתי זה קרה, כמו שאומרים: עכשיו · לפני 5 דק׳ · לפני שעה · לפני 3 שעות · אתמול · יום שני 7.9
 String balaganAgo(DateTime at, DateTime now) { final m = minutesBetweenIso(_isoT(at), _isoT(now)); if (m < 1) return gen_balagan_home_c9; if (m < 60) return gen_balagan_home_c10.replaceAll('{n}', m.toString()); final h = m ~/ 60; if (h < 2) return gen_balagan_home_c11; if (_isoD(at) == _isoD(now)) return gen_balagan_home_c12.replaceAll('{n}', h.toString()); return balaganDayLabel(at, now); }   // G34 · דבק: דקות-בין (חלקיק) ⇒ מונחים
 /// «שתף את היום»: טקסט קריא של באיחור/היום (עם שעות) — נגזרת של אותן שורות; ללוח + wa.me (הנמען נבחר בוואטסאפ)
 String balaganDayText(List<DsTodayItem> overdue, List<DsTodayItem> todayItems, DateTime today, {double money = 0, List<DsTodayItem> tomorrow = const [], int undated = 0, int stale = 0}) {
-  final b = StringBuffer(gen_balagan_home_c13 + ' · ' + gen_balagan_home_c14.split(',')[weekdayOfIso(_isoD(today))] + ' ' + dayMonthOfIso(_isoD(today), false) + '\n');   // ב׳-מא · תאריך כמו שאומרים
+  final b = StringBuffer(gen_balagan_home_c13 + ' · ' + gen_balagan_home_c14.split(',')[_wd(today)] + ' ' + _dm(_isoD(today), false) + '\n');   // ב׳-מא · תאריך כמו שאומרים
   if (overdue.isNotEmpty) { b.write(gen_balagan_home_c15 + ':\n'); for (final it in overdue) { b.write('• ' + it.title + ' (' + it.module + ')\n'); } }
   if (todayItems.isNotEmpty) { b.write(gen_balagan_home_c16 + ':\n'); for (final it in todayItems) { b.write('• ' + (it.time.isNotEmpty ? it.time + ' ' : '') + it.title + ' (' + it.module + ')\n'); } }
   if (money > 0) b.write(gen_balagan_home_c17.replaceAll('{n}', balaganFmtMoney(money)) + '\n');   // ב׳-כט · כסף-במבט גם בשיתוף
@@ -135,7 +134,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
   static String _iso(DateTime d) => d.toIso8601String().substring(0, 10);
   /// ב׳-פז · כל הבאיחור ⇒ מחר (לא בשבת), שורת-יומן לכל תיק עם group אחד ⇒ «החזר» אחד מחזיר את כולם
   void _snoozeAll(List<DsTodayItem> overdue, DateTime today) {
-    final g = 'g' + DateTime.now().microsecondsSinceEpoch.toString(); var d = _dayPlus(today, 1); if (weekdayOfIso(_isoD(d)) == 6) d = _dayPlus(d, 1);
+    final g = 'g' + DateTime.now().microsecondsSinceEpoch.toString(); var d = _dayPlus(today, 1); if (_wd(d) == 6) d = _dayPlus(d, 1);
     for (final it in overdue) { final ms = kBalaganModules.where((mm) => mm.title == it.module); if (ms.isEmpty || it.field.isEmpty) continue; final slug = ms.first.rootSlug; final r = appStore.byId(slug, it.rid); if (r == null) continue; appStore.logAction('auto', gen_balagan_home_c20 + ' · ' + it.title, entity: slug, rid: it.rid, field: it.field, prev: r[it.field] ?? '', group: g); appStore.update(slug, it.rid, {it.field: _iso(d)}); }
   }
   void _openItem(BuildContext context, DsTodayItem it) { final ms = kBalaganModules.where((m) => m.title == it.module); if (ms.isEmpty || it.rid.isEmpty) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => balaganOpenRoot(ms.first.rootSlug, it.rid))); }   // ב׳-לט · הקשה על השורה ⇒ התיק
@@ -266,7 +265,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final cards = <Widget>[for (final x in cardRows) x[2] as Widget];
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next' || e['kind'] == 'add' || e['kind'] == 'done' || e['kind'] == 'del' || e['kind'] == 'merge') && e['undone'] != '1').take(5).toList();
     // «השבוע» — שמירת-זמן (§המוצר): נגזרת של היומן מיום-ראשון; הדקות-לפעולה = הגדרה עריכה, לא טענה
-    final weekStart = _dayPlus(today, -weekdayOfIso(_isoD(today)));
+    final weekStart = startOfWeekSunday(today);   // G34 · חלקיק startOfWeekSunday
     final wk = appStore.log.where((e) => e['undone'] != '1' && !(DateTime.tryParse(e['at'] ?? '') ?? DateTime(2000)).isBefore(weekStart)).toList();
     int cnt(String kind) => wk.where((e) => e['kind'] == kind).length;
     int mins(String key, String def) => int.tryParse(appStore.setting(key, def)) ?? int.parse(def);

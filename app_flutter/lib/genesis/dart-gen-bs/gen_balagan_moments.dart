@@ -2,8 +2,8 @@
 import 'dart:convert';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-maor/enroll-new-family.dart';
-import '../dart-maor/weekday-of-iso.dart';
-import '../dart-maor/add-days-iso.dart';
+import '../dart/start_of_week_sunday.dart';
+import '../dart-maor/cockpit-days-since.dart';
 import '../dart-data-maor/norm-search-sockets.dart';
 class BalaganField { const BalaganField(this.label, this.type, this.required, this.options); final String label, type; final bool required; final List<String> options; }
 class BalaganModule {
@@ -106,7 +106,7 @@ List<_DateAt> balaganDates(String text, DateTime today) {
   put(RegExp(r'בעוד\s+(?:(\d+|[\u0590-\u05FF]+)\s+)?(ימים|יום|יומיים|שבועות|שבוע|שבועיים|חודשים|חודש|חודשיים)(?![\u0590-\u05FF])'), (x) { final q = x.group(1); final u = x.group(2)!; var n = q == null ? 1 : (int.tryParse(q) ?? _heNum(q) ?? 1); if (u == 'יומיים' || u == 'שבועיים' || u == 'חודשיים') n = 2; if (u.startsWith('שבוע')) return add(7 * n); if (u.startsWith('חודש')) return DateTime(t0.year, t0.month + n, t0.day); return add(n); });
   put(RegExp(r'לפני\s+(\d+|[\u0590-\u05FF]+)\s+(ימים|שבועות|חודשים)'), (x) { final q = x.group(1)!; final u = x.group(2)!; final n = int.tryParse(q) ?? _heNum(q) ?? 1; if (u == 'שבועות') return add(-7 * n); if (u == 'חודשים') return DateTime(t0.year, t0.month - n, t0.day); return add(-n); });
   const wd = {'ראשון': 7, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6, 'א': 7, 'ב': 1, 'ג': 2, 'ד': 3, 'ה': 4, 'ו': 5};
-  DateTime next(int w) { final wd = weekdayOfIso(_isoOf(t0)); var d = (w - (wd == 0 ? 7 : wd) + 7) % 7; if (d == 0) d = 7; return add(d); }   // הבא, לא היום · G34 · חלקיק יום-בשבוע
+  DateTime next(int w) { final wd = cockpitDaysSince(_isoOf(startOfWeekSunday(t0)), _isoOf(t0)).toInt(); var d = (w - (wd == 0 ? 7 : wd) + 7) % 7; if (d == 0) d = 7; return add(d); }   // הבא, לא היום · G34 · חלקיק יום-בשבוע
   put(RegExp(r'ב?יום\s+(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהו])(?:[׳\u0027]|(?![\u0590-\u05FF]))'), (x) => next(wd[x.group(1)!]!));
   put(RegExp(r'(?<![\u0590-\u05FF])ב?שבת(?![\u0590-\u05FF])'), (_) => next(6));
   put(RegExp(r'בשבוע\s+הבא'), (_) => add(7));
