@@ -55,6 +55,8 @@ String balaganDayLabel(DateTime d, DateTime today) { DateTime day(DateTime x) =>
 /// ב׳-מב · «3 ימים לפני · יום לפני · ביום» — תיאור-ההיסטים כמו שאומרים (ל«בלגן» ולכרטיס-המרוכז)
 /// ב׳-צה · שורה של ספרות («1250» · «052-123») = חיפוש, לא רגע · ב׳-צז · «איפה X» / «חפש X» / «מה עם X» = חיפוש X (מילות-החיפוש מהכרום — דקדוק-ממשק, לא מילון-דומיין)
 String balaganSearchQuery(String s) { final t = s.trim(); if (t.isEmpty) return ''; if (RegExp(r'^[0-9][0-9,.\- ]*$').hasMatch(t) && t.replaceAll(RegExp(r'[^0-9]'), '').length >= 2) return t; for (final w in gen_balagan_home_c5.split('|')) { if (t.startsWith(w + ' ') && t.length > w.length + 2) return t.substring(w.length + 1).trim(); } return ''; }
+/// ב׳-צח · תחילת-התוכנית: תחילת-היום (הגדרה) — ואם היום כבר התקדם, מעכשיו מעוגל-מעלה ל-5 דק׳ (תוכנית שמתחילה בשעה שעברה אינה תוכנית)
+DateTime balaganPlanStart(DateTime today, int startHour, DateTime now) { final base = DateTime(today.year, today.month, today.day, startHour); if (DateTime(now.year, now.month, now.day) != DateTime(today.year, today.month, today.day) || !now.isAfter(base)) return base; final m = ((now.minute + 4) ~/ 5) * 5; return DateTime(now.year, now.month, now.day, now.hour, 0).add(Duration(minutes: m)); }
 String balaganOffsetsLabel(String offsets) => offsets.split(',').map((x) => int.tryParse(x.trim()) ?? 0).map((o) => o == 0 ? gen_balagan_home_c6 : o == 1 ? gen_balagan_home_c7 : gen_balagan_home_c8.replaceAll('{n}', o.toString())).join(' · ');
 /// ב׳-מח · מתי זה קרה, כמו שאומרים: עכשיו · לפני 5 דק׳ · לפני שעה · לפני 3 שעות · אתמול · יום שני 7.9
 String balaganAgo(DateTime at, DateTime now) { final m = now.difference(at).inMinutes; if (m < 1) return gen_balagan_home_c9; if (m < 60) return gen_balagan_home_c10.replaceAll('{n}', m.toString()); final h = now.difference(at).inHours; if (h < 2) return gen_balagan_home_c11; if (at.year == now.year && at.month == now.month && at.day == now.day) return gen_balagan_home_c12.replaceAll('{n}', h.toString()); return balaganDayLabel(at, now); }
@@ -166,7 +168,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final start = (int.tryParse(appStore.setting('dayStart', '9')) ?? 9).clamp(0, 23); final block = (int.tryParse(appStore.setting('blockMin', '30')) ?? 30).clamp(5, 240);
     final items = [...overdue.where((x) => x.hard), ...overdue.where((x) => !x.hard), ...todayItems.where((x) => x.hard), ...todayItems.where((x) => !x.hard)];
     if (items.isEmpty) return const [];
-    final out = <Widget>[]; var t = DateTime(today.year, today.month, today.day, start);
+    final out = <Widget>[]; var t = balaganPlanStart(today, start, DateTime.now());   /* ב׳-צח · מעכשיו, לא מתחילת-היום שכבר עברה */
     String hm(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
     // רגע עם שעה קבועה (16:30) = בלוק מקובע; השאר ממלאים סביבו — לא דורסים אותו
     final fixed = <List<dynamic>>[]; for (final it in items) { if (it.time.isEmpty) continue; final hh = int.tryParse(it.time.substring(0, 2)) ?? 0, mm = int.tryParse(it.time.substring(3, 5)) ?? 0; final a = DateTime(today.year, today.month, today.day, hh, mm); fixed.add([a, a.add(Duration(minutes: block)), it]); }

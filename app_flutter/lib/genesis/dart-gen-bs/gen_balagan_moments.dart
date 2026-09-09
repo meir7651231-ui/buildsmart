@@ -249,6 +249,10 @@ List<_NumAt> balaganNums(String text, List<_DateAt> dates) {
 }
 /// עובדות מהטקסט (תאריכים — גם יחסיים · סכומים · שורה-ראשונה) ⇒ שדות-השורש לפי טיפוס + קרבה למילות-תווית-השדה. `today` מוזרק (דטרמיניסטי; ברירת-מחדל עכשיו).
 /// ב׳-נט · האם השם כבר בתיקים (שדות-האדם של כל המודולים) — «רות לוי: …» בתחילת שורה = האדם, רק לשם מוכר (אפס-ניחוש)
+/// ב׳-צט · «שילמתי ארנונה» = לשון-עבר בגוף-ראשון: המילה הראשונה (אחרי הסרת-דקדוק) נגמרת ב«תי» ואורכה ≥5 כולל «תי» — דקדוק-שפה, לא מילון; «רותי» (4) ושם-מוכר לא נתפסים
+bool balaganIsPast(String text) { final t = balaganStripGrammar(balaganWaStrip(text)).trim(); if (t.contains(':')) return false; final w = t.split(RegExp(r'\s+')).first; return RegExp(r'^[\u05d0-\u05ea]{3,}תי$').hasMatch(w) && !balaganKnownPerson(w); }
+/// ב׳-צט · תיקים פתוחים שחולקים מילה (≥3) עם הרגע-שבעבר — «שילמתי ארנונה» מול «לשלם ארנונה»; המילה-בעבר עצמה לא נספרת
+List<Map<String, String>> balaganPastMatches(BalaganModule m, String text) { if (!balaganIsPast(text) || m.descField.isEmpty) return const []; final toks = balaganTokens(balaganStripGrammar(balaganWaStrip(text))).where((x) => x.length >= 3 && !x.endsWith('תי')).toSet(); if (toks.isEmpty) return const []; return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; final rt = balaganTokens(r[m.descField] ?? ''); return rt.any((x) => x.length >= 3 && toks.contains(x)); }).toList(); }
 bool balaganKnownPerson(String name) { final n = name.trim().toLowerCase(); if (n.length < 2) return false; for (final m in kBalaganModules) { for (final r in appStore.records(m.rootSlug)) { for (final f in m.personFields) { if ((r[f] ?? '').trim().toLowerCase() == n) return true; } } } return false; }
 Map<String, String> balaganFacts(String text0, BalaganModule m, {DateTime? today}) {
   final out = <String, String>{};

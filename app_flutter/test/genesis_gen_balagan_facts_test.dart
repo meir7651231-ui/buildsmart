@@ -574,4 +574,23 @@ void main() {
     expect(balaganSearchQuery('איפה הפיקדון של רות'), 'הפיקדון של רות'); expect(balaganSearchQuery('חפש ארנונה'), 'ארנונה'); expect(balaganSearchQuery('מה עם הגנן'), 'הגנן');
     expect(balaganSearchQuery('שילמתי ארנונה 1,250'), ''); expect(balaganSearchQuery('איפה'), ''); expect(balaganSearchQuery('איפהשהו בעיר'), '');
   });
+  test('ב׳-צח · התוכנית מתחילה מעכשיו: 15:03 ⇒ 15:05 · 07:00 ⇒ 09:00 · יום אחר ⇒ 09:00', () {
+    expect(balaganPlanStart(today, 9, DateTime(2026, 9, 8, 15, 3)), DateTime(2026, 9, 8, 15, 5));
+    expect(balaganPlanStart(today, 9, DateTime(2026, 9, 8, 7, 0)), DateTime(2026, 9, 8, 9, 0));
+    expect(balaganPlanStart(today, 9, DateTime(2026, 9, 9, 15, 3)), DateTime(2026, 9, 8, 9, 0));
+    expect(balaganPlanStart(today, 9, DateTime(2026, 9, 8, 9, 0)), DateTime(2026, 9, 8, 9, 0));
+  });
+  test('ב׳-צט · לשון-עבר: «שילמתי ארנונה» כן · «לשלם ארנונה» לא · «אתמול קיבלתי מכתב» כן · «רותי: …» לא · תיק-פתוח-תואם ⇒ «סיימת אותו?» ⇒ סגירה עם החזר', () {
+    expect(balaganIsPast('שילמתי ארנונה'), isTrue); expect(balaganIsPast('לשלם ארנונה'), isFalse); expect(balaganIsPast('אתמול קיבלתי מכתב מהעירייה'), isTrue);
+    expect(balaganIsPast('רותי: תור לרופא'), isFalse); expect(balaganIsPast('בית ספר מחר'), isFalse); expect(balaganIsPast(''), isFalse);
+    final m = kBalaganModules.firstWhere((x) => x.stages > 0 && x.descField.isNotEmpty && x.dateFields.isNotEmpty && (x.personFields.isEmpty || x.descField != x.personFields.first));
+    final S = m.rootSlug; final D = m.descField; final F = m.dateFields.first;
+    final id = appStore.add(S, {D: 'להחזיר מקדחה לשכן', F: '2026-09-01', '__stage': '0'});   // מילה ייחודית — בדיקות קודמות זרעו «ארנונה» באותו מודול
+    final closed = appStore.add(S, {D: 'להחזיר מקדחה ישנה', F: '2026-08-01', '__stage': (m.stages - 1).toString()});
+    final hits = balaganPastMatches(m, 'החזרתי מקדחה'); expect(hits.map((r) => r['__id']).toList(), [id]); expect(hits.any((r) => r['__id'] == closed), isFalse);
+    expect(balaganPastMatches(m, 'שילמתי לגנן'), isEmpty); expect(balaganPastMatches(m, 'לשלם ארנונה'), isEmpty);
+    balaganCloseFile(m, id);
+    expect(appStore.stageOf(S, id), m.stages - 1); expect(appStore.decision('ign:' + id + ':' + appStore.log.first['field']!), 'no'); expect(appStore.log.first['kind'], 'done');
+    expect(appStore.undo(appStore.log.first['id']!), isTrue); expect(appStore.stageOf(S, id), 0); expect(appStore.decision('ign:' + id + ':' + appStore.log.first['field']!), '');
+  });
 }
