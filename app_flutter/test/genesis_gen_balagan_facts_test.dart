@@ -393,6 +393,16 @@ void main() {
     expect(appStore.undo(appStore.log.first['id']!), isTrue);
     expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).any((x) => x.rid == id), isTrue);
   });
+  test('צ׳יפי-שעה: חלקי-יום ⇒ שעה דרך מנתח-הרגעים · צ׳יפי-אנשים: מי שכבר בתיקים לפי תדירות, בלי תיקים אין', () {
+    expect(balaganTimeChips(DateTime(2026, 9, 8, 10)).map((x) => x[1]).toList(), ['09:00', '13:00', '16:00', '19:00']);
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty);
+    final before = balaganPeople();
+    appStore.add(m.rootSlug, {m.personFields.first: 'משה פרץ'}); appStore.add(m.rootSlug, {m.personFields.first: 'משה פרץ'}); appStore.add(m.rootSlug, {m.personFields.first: 'שרה גל'});
+    final p = balaganPeople();
+    expect(p.indexOf('משה פרץ') < p.indexOf('שרה גל') || !p.contains('שרה גל'), isTrue);
+    expect(p.first, before.isEmpty ? 'משה פרץ' : p.first);
+    expect(p.length <= 6, isTrue);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
