@@ -1,10 +1,7 @@
 // 🧭 חולל ע"י balagan (G33 · הכרעה-29) — מזהה-הרגע: TF-IDF דטרמיניסטי מ-30 מסמכי-פירוק (כותרת+«הרגע» ×3). אפס-בינה, אפס-מילון. אל תערוך ידנית.
 import 'dart:convert';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/enroll-new-family.dart';
-import '../dart/start_of_week_sunday.dart';
-import '../dart-maor/cockpit-days-since.dart';
-import '../dart-data-maor/norm-search-sockets.dart';
+import 'gen_behaviors.dart';
 class BalaganField { const BalaganField(this.label, this.type, this.required, this.options); final String label, type; final bool required; final List<String> options; }
 class BalaganModule {
   const BalaganModule(this.index, this.ns, this.title, this.moment, this.topic, this.weights, this.dateFields, this.numFields, this.descField, this.longField, this.rootSlug, this.fields, this.stages, this.chain, {this.selfScore = 1, this.layer = '', this.required = 0, this.timeFields = const [], this.phoneFields = const [], this.personFields = const [], this.percentFields = const []});
@@ -52,7 +49,7 @@ const List<BalaganModule> kBalaganModules = [
 /// סף-החולשה — נגזר מהנתונים (לא קבוע-קסם): חצי מביטחון-הכותרת-הנמוך-ביותר בין המודולים. מתחתיו הרגע «כללי» ⇒ שכבת-הבסיס ראשונה.
 const double kBalaganWeak = 0.053;
 
-Set<String> balaganTokens(String s) { final out = <String>{}; for (final m in RegExp(r'[\u0590-\u05FF][\u0590-\u05FF״׳]*').allMatches(s)) { final w = normSearch(m.group(0)!.replaceAll(RegExp(r'[״׳]'), ''), normSearch_T); if (w.length < 2) continue; out.add(w); if (w.length >= 4 && 'והבלמשכ'.contains(w[0])) out.add(w.substring(1)); } return out; }   // G34 · דבק: מילים-בעברית (שפה) ⇒ חלקיק normSearch (סופיות) ⇒ אות-שימוש מדקדוק-האפיון
+Set<String> balaganTokens(String s) { final out = <String>{}; for (final m in RegExp(r'[\u0590-\u05FF][\u0590-\u05FF״׳]*').allMatches(s)) { final w = bhNormSearch(m.group(0)!.replaceAll(RegExp(r'[״׳]'), '')); if (w.length < 2) continue; out.add(w); if (w.length >= 4 && 'והבלמשכ'.contains(w[0])) out.add(w.substring(1)); } return out; }   // G34 · דבק: מילים-בעברית (שפה) ⇒ חלקיק normSearch (סופיות) ⇒ אות-שימוש מדקדוק-האפיון
 /// זיהוי: סכום-משקלים של מילות-הטקסט לכל מודול ⇒ 3 הטובים (ציון > 0). דטרמיניסטי; שוויון ⇒ המוקדם.
 /// מילות-דקדוק (תאריך · חזרה · שעה · טלפון) אינן זהות של רגע: «ב-15 לחודש» העלה את «לא משלם» (חודש) מעל הסף. מסירים את הטווחים לפני הזיהוי.
 String balaganStripGrammar(String text) {
@@ -106,7 +103,7 @@ List<_DateAt> balaganDates(String text, DateTime today) {
   put(RegExp(r'בעוד\s+(?:(\d+|[\u0590-\u05FF]+)\s+)?(ימים|יום|יומיים|שבועות|שבוע|שבועיים|חודשים|חודש|חודשיים)(?![\u0590-\u05FF])'), (x) { final q = x.group(1); final u = x.group(2)!; var n = q == null ? 1 : (int.tryParse(q) ?? _heNum(q) ?? 1); if (u == 'יומיים' || u == 'שבועיים' || u == 'חודשיים') n = 2; if (u.startsWith('שבוע')) return add(7 * n); if (u.startsWith('חודש')) return DateTime(t0.year, t0.month + n, t0.day); return add(n); });
   put(RegExp(r'לפני\s+(\d+|[\u0590-\u05FF]+)\s+(ימים|שבועות|חודשים)'), (x) { final q = x.group(1)!; final u = x.group(2)!; final n = int.tryParse(q) ?? _heNum(q) ?? 1; if (u == 'שבועות') return add(-7 * n); if (u == 'חודשים') return DateTime(t0.year, t0.month - n, t0.day); return add(-n); });
   const wd = {'ראשון': 7, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6, 'א': 7, 'ב': 1, 'ג': 2, 'ד': 3, 'ה': 4, 'ו': 5};
-  DateTime next(int w) { final wd = cockpitDaysSince(_isoOf(startOfWeekSunday(t0)), _isoOf(t0)).toInt(); var d = (w - (wd == 0 ? 7 : wd) + 7) % 7; if (d == 0) d = 7; return add(d); }   // הבא, לא היום · G34 · חלקיק יום-בשבוע
+  DateTime next(int w) { final wd = bhWeekday(_isoOf(t0)); var d = (w - (wd == 0 ? 7 : wd) + 7) % 7; if (d == 0) d = 7; return add(d); }   // הבא, לא היום · G34 · חלקיק יום-בשבוע
   put(RegExp(r'ב?יום\s+(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהו])(?:[׳\u0027]|(?![\u0590-\u05FF]))'), (x) => next(wd[x.group(1)!]!));
   put(RegExp(r'(?<![\u0590-\u05FF])ב?שבת(?![\u0590-\u05FF])'), (_) => next(6));
   put(RegExp(r'בשבוע\s+הבא'), (_) => add(7));

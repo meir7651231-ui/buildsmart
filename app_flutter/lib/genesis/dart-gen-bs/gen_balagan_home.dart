@@ -3,14 +3,7 @@ import '../dart-data-bs/auto/gen_balagan_home_content.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_mail.dart';
-import '../dart-maor/add-days-iso.dart';
-import '../dart/start_of_week_sunday.dart';
-import '../dart-maor/cockpit-days-since.dart';
-import '../dart-maor/time-to-min.dart';
-import '../dart-maor/minutes-between-iso.dart';
-import '../dart/f_money.dart';
-import '../dart-maor/norm-phone.dart';
-import '../dart-maor/rule-prefix.dart';
+import 'gen_behaviors.dart';
 import 'gen_balagan_confirm.dart';
 import 'gen_balagan_moments.dart';
 import 'gen_balagan_topics.dart';
@@ -61,21 +54,20 @@ class _Mod { const _Mod(this.name, this.open, this.items, this.proposals, this.c
 /// ב׳-מא · תאריך כמו שאומרים אותו (היום · מחר · אתמול · יום שלישי 8.9 · 15.9 · 3.10.2027) — ל«היום», לשיתוף ולכרטיס-האדם
 String _isoD(DateTime d) => d.toIso8601String().substring(0, 10);
 String _isoT(DateTime d) => d.toIso8601String().substring(0, 19);
-int _wd(DateTime d) => cockpitDaysSince(_isoD(startOfWeekSunday(d)), _isoD(d)).toInt();   // G34 · יום-בשבוע (0=ראשון) = תחילת-השבוע + ימים-מאז
-String _dm(String iso, bool y) => int.parse(iso.substring(8, 10)).toString() + '.' + int.parse(iso.substring(5, 7)).toString() + (y ? '.' + iso.substring(0, 4) : '');   // יום.חודש — דבק-שפה
-DateTime _dayPlus(DateTime d, int n) { final s = addDaysIso(_isoD(d), n); return DateTime(int.parse(s.substring(0, 4)), int.parse(s.substring(5, 7)), int.parse(s.substring(8, 10))); }   // G34 · חלקיק הוספת-ימים
-String balaganDayLabel(DateTime d, DateTime today) { final n = -cockpitDaysSince(_isoD(d), _isoD(today)).toInt(); if (n == 0) return gen_balagan_home_c0; if (n == 1) return gen_balagan_home_c1; if (n == -1) return gen_balagan_home_c2; final dm = _dm(_isoD(d), d.year != today.year); return n.abs() <= 6 ? gen_balagan_home_c3.replaceAll('{day}', gen_balagan_home_c4.split(',')[_wd(d)]) + ' ' + dm : dm; }   // G34 · דבק: ימים-מאז · תחילת-שבוע — חלקיקים; כאן רק מונחים
+int _wd(DateTime d) => bhWeekday(_isoD(d));
+DateTime _dayPlus(DateTime d, int n) => bhDate(bhPlusDays(_isoD(d), n));   // G34ב · שכבת-ההרכבה
+String balaganDayLabel(DateTime d, DateTime today) { final p = bhDayLabelParts(_isoD(d), _isoD(today)); switch (p[0]) { case 'today': return gen_balagan_home_c0; case 'tomorrow': return gen_balagan_home_c1; case 'yesterday': return gen_balagan_home_c2; case 'weekday': return gen_balagan_home_c3.replaceAll('{day}', gen_balagan_home_c4.split(',')[int.parse(p[1])]) + ' ' + p[2]; default: return p[2]; } }   // G34ב · שכבת-ההרכבה מחזירה חלקים; כאן רק מונחים
 /// ב׳-מב · «3 ימים לפני · יום לפני · ביום» — תיאור-ההיסטים כמו שאומרים (ל«בלגן» ולכרטיס-המרוכז)
 /// ב׳-צה · שורה של ספרות («1250» · «052-123») = חיפוש, לא רגע · ב׳-צז · «איפה X» / «חפש X» / «מה עם X» = חיפוש X (מילות-החיפוש מהכרום — דקדוק-ממשק, לא מילון-דומיין)
-String balaganSearchQuery(String s) { final t = s.trim(); if (RegExp(r'^[0-9][0-9,.\- ]*$').hasMatch(t) && normPhone(t).length >= 2) return t; for (final w in gen_balagan_home_c5.split('|')) { if (rulePrefix(w + ' ', t) != null && t.length > w.length + 2) return t.substring(w.length + 1).trim(); } return ''; }   // G34 · דבק: שאילתת-ספרות (על חלקיק-הטלפון) · כלל-קידומת
+String balaganSearchQuery(String s) { if (bhDigitsQuery(s).isNotEmpty) return s.trim(); return bhPrefixRest(s, gen_balagan_home_c5.split('|')); }   // G34ב · ב׳-צה/צז
 /// ב׳-צח · תחילת-התוכנית: תחילת-היום (הגדרה) — ואם היום כבר התקדם, מעכשיו מעוגל-מעלה ל-5 דק׳ (תוכנית שמתחילה בשעה שעברה אינה תוכנית)
-DateTime balaganPlanStart(DateTime today, int startHour, DateTime now) { final base = DateTime(today.year, today.month, today.day, startHour); if (_isoD(now) != _isoD(today)) return base; final nowMin = (timeToMin(now.toIso8601String().substring(11, 16)) as num).toInt(); if (nowMin <= startHour * 60) return base; final r = ((nowMin + 4) ~/ 5) * 5; return DateTime(today.year, today.month, today.day, r ~/ 60, r % 60); }   // G34 · דבק: HH:MM⇒דקות (חלקיק timeToMin) · עיגול ל-5 = חשבון-שפה
+DateTime balaganPlanStart(DateTime today, int startHour, DateTime now) { final hm = bhPlanStart(_isoD(today), startHour, _isoT(now)); return DateTime(today.year, today.month, today.day, int.parse(hm.substring(0, 2)), int.parse(hm.substring(3, 5))); }   // G34ב · ב׳-צח
 String balaganOffsetsLabel(String offsets) => [for (final x in offsets.split(',')) int.tryParse(x.trim()) ?? 0].map((o) => o == 0 ? gen_balagan_home_c6 : o == 1 ? gen_balagan_home_c7 : gen_balagan_home_c8.replaceAll('{n}', o.toString())).join(' · ');
 /// ב׳-מח · מתי זה קרה, כמו שאומרים: עכשיו · לפני 5 דק׳ · לפני שעה · לפני 3 שעות · אתמול · יום שני 7.9
-String balaganAgo(DateTime at, DateTime now) { final m = minutesBetweenIso(_isoT(at), _isoT(now)); if (m < 1) return gen_balagan_home_c9; if (m < 60) return gen_balagan_home_c10.replaceAll('{n}', m.toString()); final h = m ~/ 60; if (h < 2) return gen_balagan_home_c11; if (_isoD(at) == _isoD(now)) return gen_balagan_home_c12.replaceAll('{n}', h.toString()); return balaganDayLabel(at, now); }   // G34 · דבק: דקות-בין (חלקיק) ⇒ מונחים
+String balaganAgo(DateTime at, DateTime now) { final p = bhAgoParts(_isoT(at), _isoT(now)); switch (p[0]) { case 'now': return gen_balagan_home_c9; case 'min': return gen_balagan_home_c10.replaceAll('{n}', p[1]); case 'hour': return gen_balagan_home_c11; case 'hours': return gen_balagan_home_c12.replaceAll('{n}', p[1]); default: return balaganDayLabel(at, now); } }   // G34ב · ב׳-מח
 /// «שתף את היום»: טקסט קריא של באיחור/היום (עם שעות) — נגזרת של אותן שורות; ללוח + wa.me (הנמען נבחר בוואטסאפ)
 String balaganDayText(List<DsTodayItem> overdue, List<DsTodayItem> todayItems, DateTime today, {double money = 0, List<DsTodayItem> tomorrow = const [], int undated = 0, int stale = 0}) {
-  final b = StringBuffer(gen_balagan_home_c13 + ' · ' + gen_balagan_home_c14.split(',')[_wd(today)] + ' ' + _dm(_isoD(today), false) + '\n');   // ב׳-מא · תאריך כמו שאומרים
+  final b = StringBuffer(gen_balagan_home_c13 + ' · ' + gen_balagan_home_c14.split(',')[_wd(today)] + ' ' + bhDayMonth(_isoD(today), false) + '\n');   // ב׳-מא · תאריך כמו שאומרים
   if (overdue.isNotEmpty) { b.write(gen_balagan_home_c15 + ':\n'); for (final it in overdue) { b.write('• ' + it.title + ' (' + it.module + ')\n'); } }
   if (todayItems.isNotEmpty) { b.write(gen_balagan_home_c16 + ':\n'); for (final it in todayItems) { b.write('• ' + (it.time.isNotEmpty ? it.time + ' ' : '') + it.title + ' (' + it.module + ')\n'); } }
   if (money > 0) b.write(gen_balagan_home_c17.replaceAll('{n}', balaganFmtMoney(money)) + '\n');   // ב׳-כט · כסף-במבט גם בשיתוף
@@ -86,9 +78,9 @@ String balaganDayText(List<DsTodayItem> overdue, List<DsTodayItem> todayItems, D
 
 /// ב׳-כט · כסף-במבט: סכום שדה-הסכום הראשי (הראשון שאינו אחוז) של התיקים שבשורות — כל תיק פעם אחת. נגזרת של הרשומות, אפס-שדה-חדש, אפס-ניחוש: אין סכום ⇒ 0
 double balaganMoney(List<DsTodayItem> items) { var total = 0.0; final seen = <String>{}; for (final m in kBalaganModules) { final fs = m.numFields.where((f) => !m.percentFields.contains(f)); if (fs.isEmpty) continue; final recs = <Map<String, String>>[for (final it in items) if (it.module == m.title && it.rid.isNotEmpty && seen.add(m.title + '|' + it.rid)) for (final r in [appStore.byId(m.rootSlug, it.rid)]) if (r != null) r]; for (final r in recs) { total += double.tryParse((r[fs.first] ?? '').replaceAll(',', '').trim()) ?? 0; } } return total; }   // כסף-במבט: סכום שדה-הכסף-הראשי של תיקי-השורות (כל תיק פעם אחת)
-String balaganFmtMoney(double v) => fMoney(v).replaceFirst('₪', '');   // G34 · חלקיק fMoney (מפרידי-אלפים); ה-₪ נוסף במונח
+String balaganFmtMoney(double v) => bhThousands(v);   // G34ב
 /// ב׳-לו · גיבוי: הכל במכשיר בלבד (חוק-6) ⇒ גיל-הגיבוי בימים (−1 = מעולם) ומתי מזכירים (≥10 תיקים · מעולם או ≥30 יום). היום מוזרק
-int balaganBackupAge(String backupAt, DateTime today) { if (backupAt.length < 10) return -1; final n = cockpitDaysSince(backupAt.substring(0, 10), _isoD(today)); return n.isFinite ? n.toInt() : -1; }   // G34 · חלקיק ימים-מאז
+int balaganBackupAge(String backupAt, DateTime today) => backupAt.length < 10 ? -1 : bhDaysSince(backupAt.substring(0, 10), _isoD(today));   // G34ב · ב׳-לו
 bool balaganBackupDue(int records, int age) => records >= 10 && (age < 0 || age >= 30);
 
 class GenBalaganHomeScreen extends StatefulWidget {
@@ -215,7 +207,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
       final bm = kBalaganModules[m.index]; if (bm.stages == 0) continue;
       for (final r in m.open()) {
         final rid = r[AppStore.idKey] ?? ''; final at = DateTime.tryParse(r['__at'] ?? ''); if (at == null) continue;
-        final days = cockpitDaysSince(_isoD(at), _isoD(today)).toInt(); if (days < 7 || appStore.decision('stale:$rid').isNotEmpty) continue;
+        final days = bhDaysSince(_isoD(at), _isoD(today)); if (days < 7 || appStore.decision('stale:$rid').isNotEmpty) continue;
         if (appStore.log.any((e) => e['rid'] == rid && e['undone'] != '1' && e['kind'] != 'add')) continue;
         final who = bm.title + ' · ' + appStore.displayOf(bm.rootSlug, rid); _standing.add(rid);
         out.add(DsApproveCard(question: gen_balagan_home_c34.replaceAll('{who}', who).replaceAll('{n}', days.toString()), source: who, okLabel: gen_balagan_home_c35, noLabel: gen_balagan_home_c36,
@@ -265,7 +257,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final cards = <Widget>[for (final x in cardRows) x[2] as Widget];
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next' || e['kind'] == 'add' || e['kind'] == 'done' || e['kind'] == 'del' || e['kind'] == 'merge') && e['undone'] != '1').take(5).toList();
     // «השבוע» — שמירת-זמן (§המוצר): נגזרת של היומן מיום-ראשון; הדקות-לפעולה = הגדרה עריכה, לא טענה
-    final weekStart = startOfWeekSunday(today);   // G34 · חלקיק startOfWeekSunday
+    final weekStart = bhDate(bhWeekStart(_isoD(today)));   // G34ב
     final wk = appStore.log.where((e) => e['undone'] != '1' && !(DateTime.tryParse(e['at'] ?? '') ?? DateTime(2000)).isBefore(weekStart)).toList();
     int cnt(String kind) => wk.where((e) => e['kind'] == kind).length;
     int mins(String key, String def) => int.tryParse(appStore.setting(key, def)) ?? int.parse(def);
@@ -289,7 +281,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final lk = DsLook.of(context);
     final empty = n == 0 && cards.isEmpty;
     return DsScaffold(title: gen_balagan_home_c52, subtitle: empty ? gen_balagan_home_c53 : lead, icon: gen_balagan_home_c54, children: [
-      Row(crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: DsQuickAdd(hint: evening ? gen_balagan_home_c55 : gen_balagan_home_c56, autofocus: true, onSubmit: (s0) { final parts = balaganSplit(s0); final s = parts.first; if (parts.length == 1 && balaganPerson(s) != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenBalaganTopicsScreen(initialQuery: s.trim()))); return; } /* ב׳-לו · שם שכבר בתיקים ⇒ הכרטיס שלו */ for (final dd in [balaganDates(s.trim(), today)]) { if (parts.length == 1 && dd.length == 1 && dd.first.start == 0 && dd.first.end == s.trim().length) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => BalaganDay(delta: -cockpitDaysSince(dd.first.iso, _isoD(today)).toInt()))); return; } } /* ב׳-מד · «מחר» / «יום ראשון» לבד ⇒ מסך-היום של אותו יום */ for (final q in [balaganSearchQuery(s)]) { if (parts.length == 1 && q.isNotEmpty) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenBalaganTopicsScreen(initialQuery: q))); return; } } /* ב׳-צה · «1250» = חיפוש-סכום · ב׳-צז · «איפה הפיקדון» = חיפוש */ final hits = balaganIdentify(s); if (hits.isEmpty) { setState(() => _mailNote = gen_balagan_home_c57); return; } final m = hits.first.module; Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: m, facts: balaganFacts(s, m), alternatives: hits.skip(1).map((h) => h.module).toList(), text: s, queue: parts.sublist(1)))); })), const SizedBox(width: 8), DsChipButton(label: gen_balagan_home_c58, onTap: () async { if (!voiceSupported) { setState(() => _mailNote = gen_balagan_home_c59); return; } setState(() => _mailNote = gen_balagan_home_c60); final t = await voiceListen('he-IL'); if (!mounted) return; setState(() => _mailNote = (t == null || t.isEmpty) ? gen_balagan_home_c61 : ''); if (t == null || t.isEmpty) return; final parts = balaganSplit(t); final s = parts.first; if (parts.length == 1 && balaganPerson(s) != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenBalaganTopicsScreen(initialQuery: s.trim()))); return; } /* ב׳-מ · «רות לוי» בקול ⇒ הכרטיס */ final hits = balaganIdentify(s); if (hits.isEmpty) { setState(() => _mailNote = gen_balagan_home_c62); return; } Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: hits.first.module, facts: balaganFacts(s, hits.first.module), alternatives: hits.skip(1).map((h) => h.module).toList(), text: s, queue: parts.sublist(1)))); })]),   // שורה אחת / קול מהמסך-הראשון ⇒ זיהוי ⇒ טופס-אישור: אפס ניווט
+      Row(crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: DsQuickAdd(hint: evening ? gen_balagan_home_c55 : gen_balagan_home_c56, autofocus: true, onSubmit: (s0) { final parts = balaganSplit(s0); final s = parts.first; if (parts.length == 1 && balaganPerson(s) != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenBalaganTopicsScreen(initialQuery: s.trim()))); return; } /* ב׳-לו · שם שכבר בתיקים ⇒ הכרטיס שלו */ for (final dd in [balaganDates(s.trim(), today)]) { if (parts.length == 1 && dd.length == 1 && dd.first.start == 0 && dd.first.end == s.trim().length) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => BalaganDay(delta: -bhDaysSince(dd.first.iso, _isoD(today))))); return; } } /* ב׳-מד · «מחר» / «יום ראשון» לבד ⇒ מסך-היום של אותו יום */ for (final q in [balaganSearchQuery(s)]) { if (parts.length == 1 && q.isNotEmpty) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenBalaganTopicsScreen(initialQuery: q))); return; } } /* ב׳-צה · «1250» = חיפוש-סכום · ב׳-צז · «איפה הפיקדון» = חיפוש */ final hits = balaganIdentify(s); if (hits.isEmpty) { setState(() => _mailNote = gen_balagan_home_c57); return; } final m = hits.first.module; Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: m, facts: balaganFacts(s, m), alternatives: hits.skip(1).map((h) => h.module).toList(), text: s, queue: parts.sublist(1)))); })), const SizedBox(width: 8), DsChipButton(label: gen_balagan_home_c58, onTap: () async { if (!voiceSupported) { setState(() => _mailNote = gen_balagan_home_c59); return; } setState(() => _mailNote = gen_balagan_home_c60); final t = await voiceListen('he-IL'); if (!mounted) return; setState(() => _mailNote = (t == null || t.isEmpty) ? gen_balagan_home_c61 : ''); if (t == null || t.isEmpty) return; final parts = balaganSplit(t); final s = parts.first; if (parts.length == 1 && balaganPerson(s) != null) { Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenBalaganTopicsScreen(initialQuery: s.trim()))); return; } /* ב׳-מ · «רות לוי» בקול ⇒ הכרטיס */ final hits = balaganIdentify(s); if (hits.isEmpty) { setState(() => _mailNote = gen_balagan_home_c62); return; } Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: hits.first.module, facts: balaganFacts(s, hits.first.module), alternatives: hits.skip(1).map((h) => h.module).toList(), text: s, queue: parts.sublist(1)))); })]),   // שורה אחת / קול מהמסך-הראשון ⇒ זיהוי ⇒ טופס-אישור: אפס ניווט
       if (!empty) DsLoadMeter(count: n, label: gen_balagan_home_c63.replaceAll('{n}', n.toString()), stateLabels: [gen_balagan_home_c64, gen_balagan_home_c65, gen_balagan_home_c66]),
       if (money > 0 || moneyTm > 0) Padding(padding: const EdgeInsets.only(top: 6), child: Text([if (money > 0) gen_balagan_home_c67.replaceAll('{n}', balaganFmtMoney(money)), if (moneyTm > 0) gen_balagan_home_c68.replaceAll('{n}', balaganFmtMoney(moneyTm))].join(' · '), style: TextStyle(color: lk.ink, fontSize: 15, fontWeight: FontWeight.w600))),   // ב׳-כט · כסף-במבט
       if (showUndo) Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsNote(message: gen_balagan_home_c69.replaceAll('{what}', lastAct['what'] ?? ''), label: '', tone: 0)), const SizedBox(width: 8), DsChipButton(label: gen_balagan_home_c70, onTap: () => appStore.undo(lastAct['id'] ?? ''))])),

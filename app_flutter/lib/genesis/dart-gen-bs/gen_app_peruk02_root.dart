@@ -3,13 +3,11 @@
 import '../dart-data-bs/auto/gen_app_peruk02_root_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
-import '../dart-maor/cockpit-days-since.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
-import '../dart/f_money.dart';
-import '../dart/start_of_week_sunday.dart';
 import 'gen_app_peruk02_ent1.dart';
 import 'gen_app_peruk02_ent2.dart';
 import 'gen_app_peruk02_rp1.dart';
+import 'gen_behaviors.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,10 +15,10 @@ import 'package:flutter/material.dart';
 
 /// 8000 ⇒ 8,000 · 12.5 ⇒ 12.5 — סכום קריא בתיק (רק תצוגה; הרשומה נשארת ספרות)
 /// ב׳-מג · תאריך בתיק כמו שאומרים: היום (9.9) · מחר (10.9) · יום שני 21.9 · 3.10.2027 — ISO נשאר בנתונים
-String _fmtDate(String s) { final t = s.trim(); final d = DateTime.tryParse(t.length == 10 ? '${t}T12:00:00' : t); if (d == null) return t; final now = DateTime.now(); final iso = t.length >= 10 ? t.substring(0, 10) : t; final tIso = now.toIso8601String().substring(0, 10); final n = -cockpitDaysSince(iso, tIso).toInt(); if (n == 0) return gen_app_peruk02_root_c90; if (n == 1) return gen_app_peruk02_root_c91; if (n == -1) return gen_app_peruk02_root_c92; final dm = int.parse(iso.substring(8, 10)).toString() + '.' + int.parse(iso.substring(5, 7)).toString() + (d.year != now.year ? '.' + iso.substring(0, 4) : ''); return n.abs() <= 6 ? gen_app_peruk02_root_c93.replaceAll('{day}', gen_app_peruk02_root_c94.split(',')[cockpitDaysSince(startOfWeekSunday(d).toIso8601String().substring(0, 10), iso).toInt()]) + ' ' + dm : dm; }   // ב׳-מג · תאריך במילים בתיק · G34 · דבק על חלקיקים (ימים-מאז · יום-בשבוע · יום.חודש)
+String _fmtDate(String s) { final t = s.trim(); if (t.length < 10 || DateTime.tryParse(t.length == 10 ? '${t}T12:00:00' : t) == null) return t; final p = bhDayLabelParts(t.substring(0, 10), bhIso(DateTime.now())); switch (p[0]) { case 'today': return gen_app_peruk02_root_c90; case 'tomorrow': return gen_app_peruk02_root_c91; case 'yesterday': return gen_app_peruk02_root_c92; case 'weekday': return gen_app_peruk02_root_c93.replaceAll('{day}', gen_app_peruk02_root_c94.split(',')[int.parse(p[1])]) + ' ' + p[2]; default: return p[2]; } }   // ב׳-מג · תאריך במילים בתיק · G34ב · שכבת-ההרכבה
 /// ב׳-נד · שורות «מה קרה מאז?» — «2026-09-01 · טקסט» ⇒ «יום שלישי 1.9 · טקסט»
 String _noteText(String s) => s.split('\n').map((l) { final m = RegExp(r'^(\d{4}-\d{2}-\d{2}) · (.*)$').firstMatch(l); return m == null ? l : _fmtDate(m.group(1)!) + ' · ' + m.group(2)!; }).join('\n');
-String _fmtNum(String s) { final t = s.trim(); final v = num.tryParse(t.replaceAll(',', '')); if (v == null) return t; final parts = t.replaceAll(',', '').split('.'); final ip = fMoney(num.tryParse(parts[0]) ?? 0).replaceFirst('₪', ''); return parts.length > 1 ? ip + '.' + parts[1] : ip; }   // G34 · חלקיק fMoney (מפרידי-אלפים)
+String _fmtNum(String s) { final t = s.trim(); final v = num.tryParse(t.replaceAll(',', '')); if (v == null) return t; final parts = t.replaceAll(',', '').split('.'); final ip = bhThousands(num.tryParse(parts[0]) ?? 0); return parts.length > 1 ? ip + '.' + parts[1] : ip; }   // G34 · חלקיק fMoney (מפרידי-אלפים)
 
 class GenAppPeruk02RootScreen extends StatelessWidget {
   const GenAppPeruk02RootScreen({required this.id, super.key});
