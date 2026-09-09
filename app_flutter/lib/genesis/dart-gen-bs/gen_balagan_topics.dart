@@ -90,6 +90,9 @@ BalaganPerson? balaganPerson(String name) {
   return files == 0 ? null : BalaganPerson(name.trim(), files, open, money, phones.toList(), last);
 }
 /// טלפון ⇒ בינלאומי ל-wa.me (0… ⇒ 972…; + נופל) — אותו כלל של כרטיס-התיק
+/// ב׳-לח · כרטיס-אדם מחיפוש-חלקי: «שגב» ⇒ נועה שגב אם היא היחידה שמכילה; שניים ⇒ אין כרטיס (לא מנחשים)
+List<String> balaganPersonNames() { final out = <String>{}; for (final m in kBalaganModules) { for (final r in appStore.records(m.rootSlug)) { for (final f in m.personFields) { final v = (r[f] ?? '').trim(); if (v.length >= 2) out.add(v); } } } return out.toList(); }
+BalaganPerson? balaganPersonFor(String q) { final t = q.trim().toLowerCase(); if (t.length < 2) return null; final exact = balaganPerson(t); if (exact != null) return exact; final c = balaganPersonNames().where((n) => n.toLowerCase().contains(t)).toList(); return c.length == 1 ? balaganPerson(c.first) : null; }
 String balaganIntl(String ph) { final d = ph.replaceAll(RegExp(r'[^0-9+]'), ''); return d.startsWith('+') ? d.substring(1) : (d.startsWith('0') ? '972' + d.substring(1) : d); }
 
 class GenBalaganTopicsScreen extends StatefulWidget {
@@ -143,7 +146,7 @@ class _GenBalaganTopicsScreenState extends State<GenBalaganTopicsScreen> {
     final hits = appStore.search(_q);
     return DsScaffold(title: gen_balagan_topics_c0, subtitle: gen_balagan_topics_c1, icon: gen_balagan_topics_c2, children: [
     DsField(label: gen_balagan_topics_c3, hint: gen_balagan_topics_c4, value: _q, onChanged: (v) => setState(() => _q = v)),
-    for (final p in [balaganPerson(_q)]) if (p != null) DsSection(title: p.name, children: [
+    for (final p in [balaganPersonFor(_q)]) if (p != null) DsSection(title: p.name, children: [
       Text(gen_balagan_topics_c5.replaceAll('{n}', p.files.toString()).replaceAll('{open}', p.open.toString()) + (p.money > 0 ? ' · ' + gen_balagan_topics_c6.replaceAll('{n}', balaganFmtMoney(p.money)) : '') + (p.last.isNotEmpty ? ' · ' + gen_balagan_topics_c7.replaceAll('{d}', p.last) : ''), style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)),
       if (p.phones.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final ph in p.phones.take(2)) ...[DsChipButton(label: gen_balagan_topics_c8 + ' ' + ph, onTap: () => launchUrl(Uri.parse('tel:' + ph), mode: LaunchMode.externalApplication)), DsChipButton(label: gen_balagan_topics_c9, onTap: () => launchUrl(Uri.parse('https://wa.me/' + balaganIntl(ph)), mode: LaunchMode.externalApplication))]])),
     ]),   // ב׳-לה · כרטיס-אדם: השם בחיפוש = אדם מהתיקים ⇒ סיכום + התקשר/וואטסאפ מעל התוצאות

@@ -438,6 +438,14 @@ void main() {
     expect(keys.every((k) => appStore.decision(k).isEmpty), isTrue);
     expect(ids.skip(1).every((id) => GenAppCalendarHomeScreenToday.remPending(today).any((x) => x.rid == id)), isTrue);
   });
+  test('כרטיס-אדם מחיפוש-חלקי: יחיד-שמכיל ⇒ הכרטיס · שניים ⇒ אין · קצר ⇒ אין', () {
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty);
+    appStore.add(m.rootSlug, {m.personFields.first: 'נועה שגב'}); appStore.add(m.rootSlug, {m.personFields.first: 'נועה לב'});
+    expect(balaganPersonFor('שגב')!.name, 'נועה שגב');
+    expect(balaganPersonFor('נועה'), isNull);
+    expect(balaganPersonFor('ש'), isNull);
+    expect(balaganPersonFor(' נועה לב ')!.files, 1);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
