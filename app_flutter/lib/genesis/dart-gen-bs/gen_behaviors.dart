@@ -2,9 +2,11 @@
 import '../dart-boxes/hebdate.dart' as bx0;
 import '../dart-boxes/hebrew-calendar.dart' as bx1;
 import '../dart-boxes/hebrew.dart' as bx2;
-import '../dart-boxes/vcard-import.dart' as bx3;
+import '../dart-boxes/lib-nedarim-sync.dart' as bx3;
+import '../dart-boxes/vcard-import.dart' as bx4;
 import '../dart-maor/add-days-iso.dart';
 import '../dart-maor/build-ics.dart';
+import '../dart-maor/clamp-scale.dart';
 import '../dart-maor/cockpit-days-since.dart';
 import '../dart-maor/count-by.dart';
 import '../dart-maor/csv-escape.dart';
@@ -28,6 +30,7 @@ import '../dart-maor/phone-key.dart';
 import '../dart-maor/rule-contains.dart';
 import '../dart-maor/rule-exact.dart';
 import '../dart-maor/rule-prefix.dart';
+import '../dart-maor/step-scale.dart';
 import '../dart-maor/task-overdue.dart';
 import '../dart-maor/time-to-min.dart';
 import '../dart-maor/to-csv.dart';
@@ -120,8 +123,8 @@ String bhIcs(List<Map<String, String?>> occ, String calName, DateTime now) => bu
 /// ב׳-קמז · שורות ⇒ CSV (toCsv עם csvEscape; BOM לאקסל-בעברית) · CSV ⇒ שורות (parseCsv)
 String bhCsv(List<List<Object?>> rows) => toCsv(rows, (v) => csvEscape(v)) as String;
 List<List<String>> bhCsvParse(String text) => parseCsv(text);
-/// ב׳-קנד · אנשי-קשר מ-VCF ⇒ שורות name/phone/phone2/email/address/notes (bx3.vcardImportRows — קופסת-vcard-import מהמדף, G48)
-List<Map<String, String>> bhVcardRows(String? text) => bx3.vcardImportRows(text);
+/// ב׳-קנד · אנשי-קשר מ-VCF ⇒ שורות name/phone/phone2/email/address/notes (bx4.vcardImportRows — קופסת-vcard-import מהמדף, G48)
+List<Map<String, String>> bhVcardRows(String? text) => bx4.vcardImportRows(text);
 /// ב׳-קנה · חגים: חג/צום היום (bx2.hebHolidayOn) · החגים ב-days הימים הבאים [{iso,name}] (bx2.hebHolidaysAhead)
 String bhHolidayOn(String iso) => bx2.hebHolidayOn(iso) ?? '';
 List<Map<String, dynamic>> bhHolidaysAhead(String isoFrom, int days) => bx2.hebHolidaysAhead(isoFrom, days);
@@ -133,5 +136,14 @@ String bhHebInputIso(String dayTok, String monthHe, String todayIso) { final d =
 String bhHebNextYear(String iso) { final p = bx1.parts(iso); final d = (p['day'] as num).toInt(), y = (p['year'] as num).toInt(); final m = p['month'] as String; return bx0.hebToIsoEn(d, m, y + 1) ?? bx0.hebToIsoEn(d - 1, m, y + 1) ?? bhPlusDays(iso, 354); }
 /// ב׳-קנז · טלפון לתצוגה «050-123-4567» (formatIsraeliPhone)
 String bhPhoneFmt(String? ph) { final s = (ph ?? '').trim(); return s.isEmpty ? '' : formatIsraeliPhone(s); }
+/// ב׳-קנט · השכיח (bx3.modeOf); ריק ⇒ 0
+double bhMode(List<num> xs) => xs.isEmpty ? 0 : bx3.modeOf(xs).toDouble();
+/// ב׳-קס · חודשים מאז (bx3.monthsAgo)
+int bhMonthsAgo(String iso, String todayIso) { final n = bx3.monthsAgo(iso, todayIso); return n >= 999 ? 0 : n; }
+/// ב׳-קסא · גודל-טקסט: הגדרה ⇒ 0.8..1.6 (clampScale) · צעד ±0.1 (stepScale)
+double bhTextScale(String setting) => clampScale(double.tryParse(setting), 0.8, 1.6).toDouble();
+double bhTextScaleStep(double cur, int dir) => stepScale(cur, dir, (v) => clampScale(v, 0.8, 1.6), 0.1).toDouble();
+/// ב׳-קסב · יום-בחודש לחיוב חודשי (bx3.hokDayFromDate; 29–31 ⇒ 28)
+int bhMonthDay(String iso) => bx3.hokDayFromDate(iso).toInt();
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

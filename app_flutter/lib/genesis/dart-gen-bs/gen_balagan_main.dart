@@ -3,6 +3,7 @@ import '../dart-data-bs/auto/gen_balagan_main_content.dart';
 import '../dart-ui-bs/ds/ds_pure.dart';
 import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import 'gen_behaviors.dart';   // G50 · bhTextScale
 import 'gen_balagan_shell.dart';
 import 'gen_app_peruk01_relations.dart' as r_peruk01;
 import 'gen_app_peruk02_relations.dart' as r_peruk02;
@@ -29,7 +30,7 @@ class GenBalaganMainScreen extends StatelessWidget {
         title: gen_balagan_main_c0,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(useMaterial3: true, brightness: Brightness.light, fontFamily: 'Heebo', scaffoldBackgroundColor: DsPure.skins['paper']!.canvas, colorScheme: ColorScheme.fromSeed(seedColor: DsPure.themes['t-balagan']!.a, brightness: Brightness.light)),
-        builder: (context, child) => PureScope(theme: DsPure.themes['t-balagan']!, skin: DsPure.skins['paper']!, fonts: DsPure.fontSets['heebo']!, child: Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox.shrink())),
+        builder: (context, child) => AnimatedBuilder(animation: appStore, builder: (context, _) => MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(bhTextScale(appStore.setting('textScale')))), child: PureScope(theme: DsPure.themes['t-balagan']!, skin: DsPure.skins['paper']!, fonts: DsPure.fontSets['heebo']!, child: Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox.shrink())))),   // ב׳-קסא · G50 · גודל-טקסט מההגדרה
         home: const GenBalaganShellScreen(),
       );
 }

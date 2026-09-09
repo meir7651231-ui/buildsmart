@@ -2,6 +2,7 @@
 import '../dart-data-bs/auto/gen_balagan_keys_content.dart';
 import 'gen_balagan_home.dart';
 import 'gen_balagan_moments.dart';   // G46 · balaganImportCsv
+import 'gen_behaviors.dart';   // G50 · bhTextScale
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
@@ -47,10 +48,11 @@ class _GenBalaganKeysScreenState extends State<GenBalaganKeysScreen> {
     ]),
     DsField(label: gen_balagan_keys_c29, hint: gen_balagan_keys_c30, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
     DsField(label: gen_balagan_keys_c31, hint: gen_balagan_keys_c32, value: appStore.setting('budget'), onChanged: (v) => appStore.setSetting('budget', v.trim())),   // ב׳-קלב · G42
-    DsField(label: gen_balagan_keys_c33, hint: gen_balagan_keys_c34, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c35, label: '', tone: 0)),
-    DsField(label: gen_balagan_keys_c36, hint: gen_balagan_keys_c37, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c38, label: '', tone: 0)),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c39, label: '', tone: 0)),
+    Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [Text(gen_balagan_keys_c33, style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), const SizedBox(width: 10), DsChipButton(label: gen_balagan_keys_c34, onTap: () => appStore.setSetting('textScale', bhTextScaleStep(bhTextScale(appStore.setting('textScale')), -1).toString())), const SizedBox(width: 8), Text((bhTextScale(appStore.setting('textScale')) * 100).round().toString() + '%'), const SizedBox(width: 8), DsChipButton(label: gen_balagan_keys_c35, onTap: () => appStore.setSetting('textScale', bhTextScaleStep(bhTextScale(appStore.setting('textScale')), 1).toString()))])),   // ב׳-קסא · G50 · נגישות: 80%–160% (clampScale · stepScale מהמדף)
+    DsField(label: gen_balagan_keys_c36, hint: gen_balagan_keys_c37, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c38, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c39, hint: gen_balagan_keys_c40, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c41, label: '', tone: 0)),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c42, label: '', tone: 0)),
   ]));
 }

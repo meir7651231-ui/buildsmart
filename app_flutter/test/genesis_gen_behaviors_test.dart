@@ -45,6 +45,8 @@ void main() {
   test('G38 · סכום-לפי · חציון · רצף-ימים', () {
     expect(bhSumBy([{'t': 'דירה', 'n': '8,000'}, {'t': 'דירה', 'n': '3000'}, {'t': 'משימות', 'n': '1,250'}], 't', 'n'), [['דירה', 2, 11000.0], ['משימות', 1, 1250.0]]);
     expect(bhMedianInt([7, 1, 4]), 4); expect(bhMedianInt([]), 0); expect(bhMedianInt([2, 9]), 9);
+    expect(bhMode([350, 350, 400]), 350); expect(bhMode([]), 0); expect(bhMonthsAgo('2026-06-08', '2026-09-08'), 3); expect(bhMonthsAgo('', '2026-09-08'), 0);
+    expect(bhTextScale('1.9'), 1.6); expect(bhTextScale(''), 1.0); expect(bhTextScaleStep(1.0, 1), 1.1); expect(bhTextScaleStep(0.8, -1), 0.8); expect(bhMonthDay('2026-09-15'), 15); expect(bhMonthDay('2026-09-31'), 28);
     expect(bhHolidayOn('2026-04-02'), 'פסח'); expect(bhHolidayOn('2026-08-24'), ''); expect(bhHolidaysAhead('2026-09-08', 10).any((h) => h['iso'] == '2026-09-12'), isTrue);
     expect(bhGemToNum('ט״ו'), 15); expect(bhGemToNum('כ״ט'), 29); expect(bhGemToNum('א׳'), 1); expect(bhGemToNum('15'), 15); expect(bhGemToNum('שלום'), 376); expect(bhGemToNum('x'), 0);
     expect(bhHebInputIso('ט״ו', 'אלול', '2026-08-01'), '2026-08-28'); expect(bhHebInputIso('ל', 'אלול', '2026-08-01'), ''); expect(bhHebNextYear('2026-08-28'), '2027-09-17');   // ט״ו אלול תשפ״ז — הקופסה סורקת את הלוח, לא ניחוש

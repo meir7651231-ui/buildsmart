@@ -458,6 +458,12 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קנט/קסב · «₪ 350 כמו תמיד» = השכיח (≥2 שווים) · תווית «כל חודש (ב-15)»', () {
+    final m = kBalaganModules.where((x) => x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))).skip(1).first; final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
+    appStore.add(m.rootSlug, {m.descField: 'ועד בית', nf: '350'}); appStore.add(m.rootSlug, {m.descField: 'ועד בית', nf: '350'}); appStore.add(m.rootSlug, {m.descField: 'ועד בית', nf: '400'});
+    expect(balaganUsualAmount(m, {m.descField: 'ועד בית'}), '350'); expect(balaganUsualAmount(m, {m.descField: 'אחר'}), '');
+    expect(balaganRepeatLabelFor('m1', '2026-09-15').contains('15'), isTrue); expect(balaganRepeatLabelFor('w1', '2026-09-15'), balaganRepeatLabel('w1'));
+  });
   test('ב׳-קנו/קנח · «ט״ו אלול» ⇒ תאריך · «כ״ט באלול» · «כל שנה עברית» ⇒ h1 · תווית', () {
     final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty);
     final f1 = balaganFacts('לשלם ארנונה ט״ו אלול', m, today: DateTime(2026, 8, 1)); expect(f1[m.dateFields.first], '2026-08-28');
