@@ -483,6 +483,19 @@ void main() {
     final after = balaganOpenCount(m.rootSlug, m.stages);
     expect(after, isNot(before)); expect(after.contains('פתוחים'), isTrue);
   });
+  test('«שם: רגע» — שם מוכר בתחילת השורה = האדם, לא-מוכר = טקסט רגיל · מיזוג מעדכן מועד-שעבר בלבד', () {
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.dateFields.isNotEmpty);
+    appStore.add(m.rootSlug, {m.personFields.first: 'גלית בר'});
+    final f = balaganFacts('גלית בר: להתקשר מחר', m, today: today);
+    expect(f[m.personFields.first], 'גלית בר'); expect(f[m.dateFields.first], '2026-09-09');
+    final g = balaganFacts('הערה: להתקשר מחר', m, today: today);
+    expect(g[m.personFields.first], isNot('הערה'));
+    final id = appStore.add(m.rootSlug, {m.personFields.first: 'גלית בר', m.dateFields.first: '2020-01-01'});
+    balaganMerge(m, id, {m.dateFields.first: '2099-01-01'}, 'x'); expect(appStore.byId(m.rootSlug, id)![m.dateFields.first], '2099-01-01');
+    balaganMerge(m, id, {m.dateFields.first: '2098-01-01'}, 'x'); expect(appStore.byId(m.rootSlug, id)![m.dateFields.first], '2099-01-01');
+    final id2 = appStore.add(m.rootSlug, {m.personFields.first: 'גלית בר', m.dateFields.first: '2020-01-01'});
+    balaganMerge(m, id2, {m.dateFields.first: '2019-01-01'}, 'x'); expect(appStore.byId(m.rootSlug, id2)![m.dateFields.first], '2020-01-01');
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);

@@ -148,6 +148,7 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
       ])),
       if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 14), child: Text(gen_balagan_ask_c21, style: TextStyle(color: lk.muted, fontSize: 13))),
       if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final ex in gen_balagan_ask_c22.split('|')) DsChipButton(label: ex, onTap: () { _c.text = ex; _go(); })])),   // אפס-הקלדה: דוגמה = הקשה אחת ⇒ טופס-האישור
+      if (!_asked && _c.text.trim().isEmpty) for (final people in [balaganPeople()]) if (people.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final p in people) DsChipButton(label: p + ':', onTap: () => setState(() { _c.text = p + ': '; }))])),   // ב׳-ס · «רות לוי: » — השורה מתחילה מהאדם, בלי להקליד שם
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: DsNote(message: _note, label: '', tone: 0)),
       if (_asked && top != null) DsSection(title: gen_balagan_ask_c23, children: [   // חזר בלי לשמור ⇒ הזיהוי נשאר על המסך (הקשה אחת חוזרת)
         DsApproveCard(question: gen_balagan_ask_c24.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c25, noLabel: gen_balagan_ask_c26, onOk: () => _open(context, top, _hits.skip(1).map((h) => h.module).toList()), onNo: _skip),

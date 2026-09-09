@@ -189,7 +189,7 @@ int balaganMerge(BalaganModule m, String id, Map<String, String> v, String logTe
     final val = e.value.trim(); if (val.isEmpty || e.key == '__id' || e.key == '__at' || e.key == '__stage') continue;
     final cur = (r[e.key] ?? '').trim();
     if (e.key == '__note') { if (cur.contains(val)) continue; prev[e.key] = r[e.key] ?? ''; next[e.key] = cur.isEmpty ? val : cur + '\n' + val; continue; }
-    if (cur.isNotEmpty) continue;
+    if (cur.isNotEmpty) { final isDate = m.dateFields.contains(e.key); final dc = isDate ? DateTime.tryParse(cur) : null; final dn = isDate ? DateTime.tryParse(val) : null; final now = DateTime.now(); final t0 = DateTime(now.year, now.month, now.day); if (!(dc != null && dn != null && dc.isBefore(t0) && !dn.isBefore(t0))) continue; }   /* ב׳-נז · מועד שכבר עבר ⇒ המועד החדש (הרגע הבא של אותו עניין) — עם החזר; כל השאר: מלא לא נדרס */
     prev[e.key] = r[e.key] ?? ''; next[e.key] = val;
   }
   if (next.isEmpty) return 0;
@@ -247,10 +247,14 @@ List<_NumAt> balaganNums(String text, List<_DateAt> dates) {
   return res;
 }
 /// עובדות מהטקסט (תאריכים — גם יחסיים · סכומים · שורה-ראשונה) ⇒ שדות-השורש לפי טיפוס + קרבה למילות-תווית-השדה. `today` מוזרק (דטרמיניסטי; ברירת-מחדל עכשיו).
+/// ב׳-נט · האם השם כבר בתיקים (שדות-האדם של כל המודולים) — «רות לוי: …» בתחילת שורה = האדם, רק לשם מוכר (אפס-ניחוש)
+bool balaganKnownPerson(String name) { final n = name.trim().toLowerCase(); if (n.length < 2) return false; for (final m in kBalaganModules) { for (final r in appStore.records(m.rootSlug)) { for (final f in m.personFields) { if ((r[f] ?? '').trim().toLowerCase() == n) return true; } } } return false; }
 Map<String, String> balaganFacts(String text0, BalaganModule m, {DateTime? today}) {
   final out = <String, String>{};
   final t0 = today ?? DateTime.now();
-  final sender = balaganWaSender(text0); final text = balaganWaStrip(text0);   // כותרת-וואטסאפ: לא תאריך, לא שעה — השולח = אדם (רק כשלא נמצא אחר)
+  final sender0 = balaganWaSender(text0); final textA = balaganWaStrip(text0);   // כותרת-וואטסאפ: לא תאריך, לא שעה — השולח = אדם (רק כשלא נמצא אחר)
+  final pm = sender0.isEmpty ? RegExp(r'^([^:\n]{2,30}):\s+(.+)$', dotAll: true).firstMatch(textA) : null; final known = pm != null && balaganKnownPerson(pm.group(1)!.trim());   /* ב׳-נט · «רות לוי: להתקשר מחר» — שם מוכר בתחילת השורה = האדם, והשורה ממשיכה בלעדיו */
+  final sender = known ? pm!.group(1)!.trim() : sender0; final text = known ? pm!.group(2)!.trim() : textA;
   final dateMs = balaganDates(text, t0);
   final phoneMs = balaganPhones(text);
   final pctMs = balaganPercents(text);
