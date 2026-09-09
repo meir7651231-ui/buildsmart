@@ -419,6 +419,12 @@ void main() {
     expect(balaganIntl('050-123-4567'), '972501234567'); expect(balaganIntl('+972501234567'), '972501234567');
     expect(balaganPerson('אין כזה'), isNull);
   });
+  test('גיבוי: גיל בימים (מעולם = −1) · מזכירים רק מ-10 תיקים ורק מעולם/≥30 יום', () {
+    expect(balaganBackupAge('', today), -1); expect(balaganBackupAge('לא תאריך', today), -1);
+    expect(balaganBackupAge('2026-08-09', today), 30); expect(balaganBackupAge('2026-09-08', today), 0);
+    expect(balaganBackupDue(3, -1), isFalse); expect(balaganBackupDue(10, -1), isTrue);
+    expect(balaganBackupDue(10, 29), isFalse); expect(balaganBackupDue(10, 30), isTrue);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);

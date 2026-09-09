@@ -15,7 +15,7 @@ class GenBalaganKeysScreen extends StatefulWidget {
 class _GenBalaganKeysScreenState extends State<GenBalaganKeysScreen> {
   String _paste = '', _note = '';
   // גיבוי = טקסט (אותו JSON של ההתמדה) שהלקוח שומר איפה שנוח; שחזור מחליף הכל ושומר את הקודם פעם אחת ⇒ «בטל שחזור». אפס-שרת (חוק-6).
-  Future<void> _copy() async { final t = appStore.exportJson(); await Clipboard.setData(ClipboardData(text: t)); setState(() => _note = gen_balagan_keys_c0.replaceAll('{n}', t.length.toString())); }
+  Future<void> _copy() async { final t = appStore.exportJson(); await Clipboard.setData(ClipboardData(text: t)); appStore.setSetting('backupAt', DateTime.now().toIso8601String().substring(0, 10)); setState(() => _note = gen_balagan_keys_c0.replaceAll('{n}', t.length.toString())); }
   void _restore() { final n = appStore.importJson(_paste); setState(() { _note = n < 0 ? gen_balagan_keys_c1 : gen_balagan_keys_c2.replaceAll('{n}', n.toString()); if (n >= 0) _paste = ''; }); }
   void _undo() { final ok = appStore.undoImport(); setState(() => _note = ok ? gen_balagan_keys_c3 : gen_balagan_keys_c4); }
   @override
