@@ -16,3 +16,6 @@ const String gen_balagan_confirm_c13 = 'מוזג לתיק «{who}»: {n} שדו�
 const String gen_balagan_confirm_c14 = 'חוזר?';
 const String gen_balagan_confirm_c15 = 'עוד פרטים ({n})';
 const String gen_balagan_confirm_c16 = 'שמור. יופיע ב«היום».';
+const String gen_balagan_confirm_c17 = 'שמור. יופיע ב«היום».';
+const String gen_balagan_confirm_c18 = 'שמור. יופיע ב«היום».';
+const String gen_balagan_confirm_c19 = 'שמור. יופיע ב{day}.';

@@ -149,7 +149,7 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
         if (m.timeFields.isNotEmpty && f.label == m.timeFields.first && (_v[f.label] ?? '').trim().isEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final c in balaganTimeChips(DateTime.now())) DsChipButton(label: c[0], onTap: () => setState(() => _v[m.timeFields.first] = c[1]))])),   // ב׳-לג · «באיזו שעה?»
         if (m.personFields.isNotEmpty && f.label == m.personFields.first && (_v[f.label] ?? '').trim().isEmpty) for (final people in [balaganPeople()]) if (people.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final p in people) DsChipButton(label: p, onTap: () => setState(() => _v[m.personFields.first] = p))]))],   // ב׳-לג · «עם מי?» — מי שכבר בתיקים
       if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c15.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
-      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: gen_balagan_confirm_c16, onTap: _save)),
+      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: (() { if (dateF.isEmpty) return gen_balagan_confirm_c16; final d = DateTime.tryParse((_v[dateF] ?? '').trim()); if (d == null) return gen_balagan_confirm_c17; final t0 = DateTime.now(); final n = DateTime(d.year, d.month, d.day).difference(DateTime(t0.year, t0.month, t0.day)).inDays; return n == 0 ? gen_balagan_confirm_c18 : gen_balagan_confirm_c19.replaceAll('{day}', balaganDayLabel(d, t0)); })(), onTap: _save)   /* ב׳-סא · «יופיע במחר» — האדם יודע לאן זה הולך */),
     ]);
   }
 }

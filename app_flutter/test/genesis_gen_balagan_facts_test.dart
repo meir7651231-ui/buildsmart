@@ -496,6 +496,11 @@ void main() {
     final id2 = appStore.add(m.rootSlug, {m.personFields.first: 'גלית בר', m.dateFields.first: '2020-01-01'});
     balaganMerge(m, id2, {m.dateFields.first: '2019-01-01'}, 'x'); expect(appStore.byId(m.rootSlug, id2)![m.dateFields.first], '2020-01-01');
   });
+  test('אין מבוי-סתום: טקסט שלא זוהה ⇒ הבסיס (משימות) · שיתוף עם בלי-מועד/נשכחים', () {
+    final h = balaganIdentify('קסםקסם'); expect(h, isNotEmpty); expect(h.first.module.layer, 'base'); expect(h.first.module.dateFields, isNotEmpty);
+    expect(balaganDayText(const [], const [], today, undated: 2, stale: 1).contains('2 בלי מועד · 1 נשכחים'), isTrue);
+    expect(balaganDayText(const [], const [], today).contains('בלי מועד'), isFalse);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);

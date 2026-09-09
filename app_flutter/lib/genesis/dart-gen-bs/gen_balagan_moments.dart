@@ -84,6 +84,7 @@ List<BalaganHit> balaganIdentify(String text, {int k = 3}) {
       hits.insert(0, BalaganHit(b, sc(b)));
     }
   }
+  if (hits.isEmpty && text.trim().isNotEmpty) { final base = kBalaganModules.where((m) => m.layer == 'base' && m.dateFields.isNotEmpty); if (base.isNotEmpty) return [BalaganHit(base.first, 0)]; }   /* ב׳-סב · אין מבוי-סתום: מה שלא זוהה נשמר כמשימה (הבסיס), האדם מתקן בטופס */
   return hits.take(k).toList();
 }
 /// תאריך-יחסי בעברית — דקדוק-זמן, לא מילון-דומייני: היום · מחר · מחרתיים · אתמול · בעוד N ימים/שבועות/חודשים (גם במילים) · ביום ראשון…שבת / יום א׳ · בשבוע/בחודש הבא · בסוף החודש · ב-N לחודש · dd.mm
