@@ -31,10 +31,11 @@ class _GenBalaganKeysScreenState extends State<GenBalaganKeysScreen> {
       Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c16, label: '', tone: 0)),
     ]),
     DsField(label: gen_balagan_keys_c17, hint: gen_balagan_keys_c18, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
-    DsField(label: gen_balagan_keys_c19, hint: gen_balagan_keys_c20, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c21, label: '', tone: 0)),
-    DsField(label: gen_balagan_keys_c22, hint: gen_balagan_keys_c23, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c24, label: '', tone: 0)),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c25, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c19, hint: gen_balagan_keys_c20, value: appStore.setting('budget'), onChanged: (v) => appStore.setSetting('budget', v.trim())),   // ב׳-קלב · G42
+    DsField(label: gen_balagan_keys_c21, hint: gen_balagan_keys_c22, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c23, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c24, hint: gen_balagan_keys_c25, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c26, label: '', tone: 0)),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c27, label: '', tone: 0)),
   ]));
 }

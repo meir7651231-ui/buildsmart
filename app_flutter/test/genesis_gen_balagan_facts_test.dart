@@ -458,6 +458,13 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קל/קלא · «בין 1.9 ל-15.9» ⇒ טווח · «מ-15.9 עד 1.9» ⇒ ממוין · טקסט-זר ⇒ ריק · שולם-כבר ב-7 ימים ⇒ אזהרה', () {
+    final today = DateTime(2026, 9, 8);
+    expect(balaganRangeOf('בין 1.9 ל-15.9', today), ['2026-09-01', '2026-09-15']); expect(balaganRangeOf('מ-15.9 עד 1.9', today), ['2026-09-01', '2026-09-15']); expect(balaganRangeOf('לשלם בין 1.9 ל-15.9', today), isEmpty); expect(balaganRangeOf('15.9', today), isEmpty);
+    final m = kBalaganModules.where((x) => x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))).skip(2).first; final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
+    final id = appStore.add(m.rootSlug, {m.descField: 'ביטוח רכב', nf: '1,200'}); appStore.logAction('done', 'סיים', entity: m.rootSlug, rid: id);
+    expect(balaganPaidRecently(m, {m.descField: 'ביטוח רכב', nf: '1200'}, DateTime.now()).isNotEmpty, isTrue); expect(balaganPaidRecently(m, {m.descField: 'ביטוח רכב', nf: '900'}, DateTime.now()), isEmpty); expect(balaganPaidRecently(m, {m.descField: 'ביטוח דירה', nf: '1200'}, DateTime.now()), isEmpty); expect(balaganPaidRecently(m, {m.descField: 'ביטוח רכב', nf: '1200'}, DateTime.now().add(const Duration(days: 30))), isEmpty);
+  });
   test('ב׳-קכח · טלפון מוכר ⇒ שם-האדם (052… = +972…) · קצר/זר ⇒ ריק', () {
     final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty);
     appStore.add(m.rootSlug, {m.personFields.first: 'יוסי ברק', m.phoneFields.first: '054-777-8899'});
