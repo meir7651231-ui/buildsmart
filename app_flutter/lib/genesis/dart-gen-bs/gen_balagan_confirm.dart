@@ -38,6 +38,7 @@ import 'gen_app_peruk26_root.dart';
 import 'gen_app_peruk27_root.dart';
 import 'gen_app_peruk28_root.dart';
 import 'gen_balagan_home.dart';
+import 'gen_balagan_ask.dart';
 import 'package:flutter/material.dart';
 
 /// זיכרון-חיים: שדה-טקסט קצר (≤30) נזכר לפי התווית שלו ומוצע בכל מודול עם אותה תווית. מקומי-למכשיר (AppStore.settings).
@@ -113,13 +114,14 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
     if (f.options.isNotEmpty) return DsEnumField(label: f.label, options: f.options, value: v, onChanged: (x) => setState(() => _v[f.label] = x));
     return DsField(label: f.label, hint: '', value: v, onChanged: (x) => _v[f.label] = x);
   }
-  void _save() {
+  void _save({bool again = false}) {
     final map = <String, String>{for (final e in _v.entries) if (e.value.trim().isNotEmpty) e.key: e.value.trim()};
     if (map.isEmpty) return;
     for (final f in widget.module.fields) { if (map.containsKey(f.label)) balaganLearn(f, map[f.label]!); }
     final id = appStore.add(widget.module.rootSlug, {...map, if (widget.module.stages > 0) '__stage': '0', if (widget.doc.isNotEmpty) '__doc': widget.doc});
     appStore.logAction('add', gen_balagan_confirm_c3.replaceAll('{title}', widget.module.title + ' · ' + appStore.displayOf(widget.module.rootSlug, id)), entity: widget.module.rootSlug, rid: id);   // «עשיתי» + החזר (מחיקה)
     if (widget.queue.isNotEmpty) { _next(); return; }
+    if (again) { Navigator.of(context).pushReplacement<bool, bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganAskScreen())); return; }   /* ב׳-עח · רשימת-קניות: שומרים וממשיכים לרגע הבא בלי לחזור */
     Navigator.of(context).pop(true);
   }
   void _next() {   // הרגע הבא מאותה שורה: זיהוי ⇒ טופס-אישור במקום הנוכחי
@@ -150,7 +152,8 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
         if (m.timeFields.isNotEmpty && f.label == m.timeFields.first && (_v[f.label] ?? '').trim().isEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final c in balaganTimeChips(DateTime.now())) DsChipButton(label: c[0], onTap: () => setState(() => _v[m.timeFields.first] = c[1]))])),   // ב׳-לג · «באיזו שעה?»
         if (m.personFields.isNotEmpty && f.label == m.personFields.first && (_v[f.label] ?? '').trim().isEmpty) for (final people in [balaganPeople()]) if (people.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final p in people) DsChipButton(label: p, onTap: () => setState(() => _v[m.personFields.first] = p))]))],   // ב׳-לג · «עם מי?» — מי שכבר בתיקים
       if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c15.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
-      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: (() { if (dateF.isEmpty) return gen_balagan_confirm_c16; final d = DateTime.tryParse((_v[dateF] ?? '').trim()); if (d == null) return gen_balagan_confirm_c17; final t0 = DateTime.now(); final n = DateTime(d.year, d.month, d.day).difference(DateTime(t0.year, t0.month, t0.day)).inDays; return n == 0 ? gen_balagan_confirm_c18 : gen_balagan_confirm_c19.replaceAll('{day}', balaganDayLabel(d, t0)); })(), onTap: _save)   /* ב׳-סא · «יופיע במחר» — האדם יודע לאן זה הולך */),
+      Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [DsChipButton(label: gen_balagan_confirm_c16, onTap: () => _save(again: true))])),   // ב׳-עח
+      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: (() { if (dateF.isEmpty) return gen_balagan_confirm_c17; final d = DateTime.tryParse((_v[dateF] ?? '').trim()); if (d == null) return gen_balagan_confirm_c18; final t0 = DateTime.now(); final n = DateTime(d.year, d.month, d.day).difference(DateTime(t0.year, t0.month, t0.day)).inDays; return n == 0 ? gen_balagan_confirm_c19 : gen_balagan_confirm_c20.replaceAll('{day}', balaganDayLabel(d, t0)); })(), onTap: () => _save())   /* ב׳-סא · «יופיע במחר» — האדם יודע לאן זה הולך */),
     ]);
   }
 }
