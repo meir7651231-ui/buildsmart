@@ -90,3 +90,7 @@ const String gen_balagan_home_c87 = 'הכל מסודר. תנוח.';
 const String gen_balagan_home_c88 = 'קרה משהו? לחץ «מה קרה?» למטה — צלם או כתוב שורה, ואני אסדר.';
 const String gen_balagan_home_c89 = 'נסה עכשיו (הקשה אחת):';
 const String gen_balagan_home_c90 = 'לשלם ארנונה מחר 350 ש"ח|המשכיר מקזז 6,200 מהפיקדון של 8,000, מסרתי מפתח ב-1.8.2026|מחר ב-16:30 פגישה עם דני|רות לוי 052-123-4567 ליקויים בדירה, יש רטיבות';
+const String gen_balagan_home_c91 = 'מה מחכה ביום הזה';
+const String gen_balagan_home_c92 = '';
+const String gen_balagan_home_c93 = 'אין כלום ביום הזה.';
+const String gen_balagan_home_c94 = '₪ {n}';
