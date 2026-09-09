@@ -45,6 +45,7 @@ void main() {
   test('G38 · סכום-לפי · חציון · רצף-ימים', () {
     expect(bhSumBy([{'t': 'דירה', 'n': '8,000'}, {'t': 'דירה', 'n': '3000'}, {'t': 'משימות', 'n': '1,250'}], 't', 'n'), [['דירה', 2, 11000.0], ['משימות', 1, 1250.0]]);
     expect(bhMedianInt([7, 1, 4]), 4); expect(bhMedianInt([]), 0); expect(bhMedianInt([2, 9]), 9);
+    expect(bhMedianHm(['16:30', '16:00', '17:00']), '16:30'); expect(bhMedianHm(['16:30']), ''); expect(bhMedianHm(['', 'x', '09:00', '10:00']), '10:00');
     expect(bhMonthEnd('2026-09-08'), '2026-09-30'); expect(bhMonthEnd('2026-12-05'), '2026-12-31'); expect(bhMonthEnd('2028-02-10'), '2028-02-29'); expect(bhMonthEnd('2027-02-01'), '2027-02-28');
     expect(bhMoney('1,250'), 1250); expect(bhMoney('₪ 8,000'), 8000); expect(bhMoney(''), 0); expect(bhMoney(null), 0); expect(bhMoney('abc'), 0); expect(bhMoney(bhThousands(1650)), 1650);
     expect(bhWeekRange('2026-09-08', 0), ['2026-09-06', '2026-09-12']); expect(bhWeekRange('2026-09-08', 1), ['2026-09-13', '2026-09-19']); expect(bhInRange('2026-09-12', '2026-09-06', '2026-09-12'), true); expect(bhInRange('2026-09-13', '2026-09-06', '2026-09-12'), false); expect(bhInRange('', '2026-09-06', '2026-09-12'), false);

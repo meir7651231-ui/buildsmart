@@ -102,5 +102,7 @@ bool bhInRange(String iso, String from, String to) => iso.length >= 10 && inRang
 double bhMoney(String? s) => double.tryParse((s ?? '').replaceAll(',', '').replaceAll('₪', '').trim()) ?? 0;
 /// ב׳-קלד · סוף-החודש של iso: היום שלפני ה-1 של החודש הבא (bhMonthKey · bhPlusDays) — פברואר/מעוברת דרך לוח-השנה, לא טבלה
 String bhMonthEnd(String iso) { final mk = bhMonthKey(iso); final y = int.parse(mk.substring(0, 4)), m = int.parse(mk.substring(5, 7)); final next = m == 12 ? (y + 1).toString() + '-01-01' : y.toString() + '-' + (m + 1).toString().padLeft(2, '0') + '-01'; return bhPlusDays(next, -1); }
+/// ב׳-קלט · חציון-שעות 'HH:MM' (timeToMin ⇒ bhMedianInt ⇒ HH:MM); פחות מ-2 ⇒ ''
+String bhMedianHm(List<String> hms) { final ms = <int>[]; for (final h in hms) { if (h.length < 5) continue; final v = timeToMin(h); if (v.isFinite) ms.add(v.toInt()); } return ms.length < 2 ? '' : _hm(bhMedianInt(ms)); }
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

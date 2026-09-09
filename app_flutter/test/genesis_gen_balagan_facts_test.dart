@@ -458,6 +458,12 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קלט/קמא · השעה הרגילה (חציון של אותו מתאר, ≥2) · פג-תוקף בקרוב (שדה-תוקף ב-30 יום, פתוח בלבד)', () {
+    final mt = kBalaganModules.where((x) => x.descField.isNotEmpty && x.timeFields.isNotEmpty).firstOrNull;
+    if (mt != null) { appStore.add(mt.rootSlug, {mt.descField: 'חוג שחייה', mt.timeFields.first: '16:00'}); appStore.add(mt.rootSlug, {mt.descField: 'חוג שחייה', mt.timeFields.first: '17:00'}); appStore.add(mt.rootSlug, {mt.descField: 'חוג שחייה', mt.timeFields.first: '16:30'}); expect(balaganUsualTime(mt, {mt.descField: 'חוג שחייה'}), '16:30'); expect(balaganUsualTime(mt, {mt.descField: 'אחר'}), ''); }
+    final me = kBalaganModules.where((x) => x.dateFields.any((f) => f.contains('תוקף') || f.contains('חידוש') || f.contains('סיום'))).firstOrNull;
+    if (me != null) { final f = me.dateFields.firstWhere((x) => x.contains('תוקף') || x.contains('חידוש') || x.contains('סיום')); final id = appStore.add(me.rootSlug, {f: DateTime.now().add(const Duration(days: 10)).toIso8601String().substring(0, 10), '__stage': '0'}); appStore.add(me.rootSlug, {f: DateTime.now().add(const Duration(days: 90)).toIso8601String().substring(0, 10), '__stage': '0'}); final ex = balaganExpiring(DateTime.now()); expect(ex.any((e) => e[2] == id), isTrue); expect(ex.length, 1); }
+  });
   test('ב׳-קלו · המתארים השכיחים: «ארנונה» ×3 (גם «ארנונה ») ראשון · יחיד לא נכנס', () {
     final m = kBalaganModules.where((x) => x.descField.isNotEmpty).skip(3).first;
     appStore.add(m.rootSlug, {m.descField: 'ארנונה-בדיקה'}); appStore.add(m.rootSlug, {m.descField: 'ארנונה-בדיקה '}); appStore.add(m.rootSlug, {m.descField: 'ארנונה-בדיקה'}); appStore.add(m.rootSlug, {m.descField: 'יחיד-בדיקה'});
