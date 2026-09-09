@@ -331,6 +331,23 @@ void main() {
     expect(st.undo(lid), isTrue);
     expect(st.byId('d_ent', id)!['טלפון'], '05'); expect(st.byId('d_ent', id)!['__stage'], '1');
   });
+  test('בלי תאריך: תיק בלי מועד לא נעלם — «קבע למחר»/«לשבוע» נותנים מועד עם החזר · «התעלם» מסתיר', () {
+    final id = appStore.add('app_calendar_ent1', {'מה': 'לתקן את הברז'});
+    final u = GenAppCalendarHomeScreenToday.undated(today);
+    expect(u.any((x) => x.rid == id), isTrue);
+    final it = u.firstWhere((x) => x.rid == id);
+    it.act(0);
+    expect(appStore.byId('app_calendar_ent1', id)![it.field], '2026-09-09');
+    expect(GenAppCalendarHomeScreenToday.undated(today).any((x) => x.rid == id), isFalse);
+    expect(appStore.undo(appStore.log.first['id']!), isTrue);
+    expect(appStore.byId('app_calendar_ent1', id)![it.field], '');
+    GenAppCalendarHomeScreenToday.undated(today).firstWhere((x) => x.rid == id).act(1);
+    expect(appStore.byId('app_calendar_ent1', id)![it.field], '2026-09-15');
+    expect(appStore.undo(appStore.log.first['id']!), isTrue);
+    GenAppCalendarHomeScreenToday.undated(today).firstWhere((x) => x.rid == id).act(2);
+    expect(GenAppCalendarHomeScreenToday.undated(today).any((x) => x.rid == id), isFalse);
+    expect(appStore.byId('app_calendar_ent1', id)![it.field], '');
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
