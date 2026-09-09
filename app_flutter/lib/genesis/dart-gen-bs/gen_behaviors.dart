@@ -93,5 +93,7 @@ List<List<Object>> bhSumBy(List<Map<String, String>> rows, String key, String nu
 int bhMedianInt(List<int> xs) { if (xs.isEmpty) return 0; final s = [...xs]..sort(); return s[s.length ~/ 2]; }
 /// ב׳-קטז · רצף-ימים: כמה ימים רצופים (מהיום או מאתמול אחורה) יש בהם לפחות תאריך אחד (bhPlusDays)
 int bhStreakDays(List<String> dates, String todayIso) { final set = {for (final d in dates) if (d.length >= 10) d.substring(0, 10)}; var day = set.contains(todayIso) ? todayIso : bhPlusDays(todayIso, -1); var n = 0; while (set.contains(day)) { n++; day = bhPlusDays(day, -1); } return n; }
+/// ב׳-קיח · דקות עד שעה 'HH:MM' של היום מרגע nowIsoT (minutesBetweenIso); שלילי = עבר
+int bhMinutesUntil(String nowIsoT, String todayIso, String hm) { if (hm.length < 5 || nowIsoT.length < 16) return -1; return minutesBetweenIso(nowIsoT, todayIso + 'T' + hm + ':00'); }
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

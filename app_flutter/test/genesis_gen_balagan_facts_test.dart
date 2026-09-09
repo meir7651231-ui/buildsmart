@@ -458,6 +458,12 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קכא · «ספטמבר» ⇒ מפתח-חודש · «באוקטובר 2027» · לא-חודש ⇒ ריק · פריטי-החודש ממוינים לפי יום', () {
+    final today = DateTime(2026, 9, 8);
+    expect(balaganMonthOf('ספטמבר', today), '2026-09'); expect(balaganMonthOf(' באוקטובר 2027 ', today), '2027-10'); expect(balaganMonthOf('ספטמבר 15', today), ''); expect(balaganMonthOf('שלום', today), ''); expect(balaganMonthName('2026-09'), 'ספטמבר');
+    final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty); appStore.add(m.rootSlug, {m.descField: 'חודש-ב', m.dateFields.first: '2031-03-20'}); appStore.add(m.rootSlug, {m.descField: 'חודש-א', m.dateFields.first: '2031-03-05'});
+    final it = balaganMonthItems('2031-03'); expect(it.length, 2); expect(it.first[0], '2031-03-05'); expect(balaganMonthItems('2031-04'), isEmpty);
+  });
   test('ב׳-קיד/קטו/קיז · החודש לפי נושא · בדרך-כלל נסגר תוך n · נסגר אחרי n', () {
     final m = kBalaganModules.where((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))).skip(1).first;   /* מודול אחר מזה של ב׳-קי — ה-store משותף בין הבדיקות */ final S = m.rootSlug; final df = m.dateFields.first; final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
     appStore.add(S, {m.descField: 'א', df: '2026-09-03', nf: '100', '__stage': '0'}); appStore.add(S, {m.descField: 'ב', df: '2026-09-25', nf: '250', '__stage': '0'});
