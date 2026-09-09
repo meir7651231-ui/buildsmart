@@ -425,6 +425,19 @@ void main() {
     expect(balaganBackupDue(3, -1), isFalse); expect(balaganBackupDue(10, -1), isTrue);
     expect(balaganBackupDue(10, 29), isFalse); expect(balaganBackupDue(10, 30), isTrue);
   });
+  test('תזכורות-מרוכזות: מועדים קרובים בלי הכרעה נמנים · שהוכרע יוצא · החזר-מרוכז מוחק את כל ההכרעות', () {
+    const S = 'app_calendar_ent1'; const F = 'מועד';
+    final ids = [for (var i = 1; i <= 4; i++) appStore.add(S, {'מה': 'תזכורת $i', F: '2026-09-1$i'})];
+    expect(ids.every((id) => GenAppCalendarHomeScreenToday.remPending(today).any((x) => x.rid == id)), isTrue);
+    appStore.decide('rem:' + ids[0] + ':' + F, 'ok');
+    expect(GenAppCalendarHomeScreenToday.remPending(today).any((x) => x.rid == ids[0]), isFalse);
+    final keys = [for (final id in ids.skip(1)) 'rem:' + id + ':' + F];
+    for (final k in keys) { appStore.decide(k, 'ok'); }
+    final lid = appStore.logAction('decide', 'תזכורות', field: keys.first, prev: keys.skip(1).join(','));
+    expect(appStore.undo(lid), isTrue);
+    expect(keys.every((k) => appStore.decision(k).isEmpty), isTrue);
+    expect(ids.skip(1).every((id) => GenAppCalendarHomeScreenToday.remPending(today).any((x) => x.rid == id)), isTrue);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);

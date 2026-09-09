@@ -154,13 +154,27 @@ class GenAppPeruk13HomeScreenToday {
     appStore.decide('stale:$rid', 'no'); appStore.logAction('decide', gen_app_peruk13_home_c48.replaceAll('{what}', appStore.displayOf('app_peruk13_ent1', rid)), entity: 'app_peruk13_ent1', rid: rid, field: 'stale:$rid');
   }
 
+  // ב׳-לז · המועדים הקרובים שטרם הוכרעה להם תזכורת — ל«בלגן», שמרכז n כרטיסים לאחד (שאלה אחת, הכרעה אחת, החזר אחד)
+  static List<DsTodayItem> remPending(DateTime today) {
+    final out = <DsTodayItem>[];
+    for (final r in open()) {
+      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk13_ent1', rid);
+      for (final f in _dates) {
+        final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;
+        if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
+        out.add(DsTodayItem(title: who, sub: '', rid: rid, field: f.label, due: d, hard: f.hard, overdue: false, module: module, actions: const [], act: (_) {}));
+      }
+    }
+    return out;
+  }
+
   // P11/P13 · הצעות: תזכורת לכל תאריך שטרם הוכרע · צעד-הבא בשלב-האחרון (P14) · תזכורת-אחרי-שליחה (P12) — הכל עם קטע-המקור
-  static List<Widget> proposals(BuildContext context, DateTime today, {bool chain = true}) {   // chain=false: «בלגן» מרנדר את כרטיס-הצעד-הבא בעצמו (חוצה-מודולים)
+  static List<Widget> proposals(BuildContext context, DateTime today, {bool chain = true, bool rem = true}) {   // rem=false: «בלגן» מרכז את התזכורות לכרטיס אחד (ב׳-לז)   // chain=false: «בלגן» מרנדר את כרטיס-הצעד-הבא בעצמו (חוצה-מודולים)
     final out = <Widget>[];
     final days = _offsets().map((o) => '−$o').join('/');
     for (final r in open()) {
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk13_ent1', rid);
-      for (final f in _dates) {
+      if (rem) for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         out.add(DsApproveCard(question: gen_app_peruk13_home_c49.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_peruk13_home_c50, noLabel: gen_app_peruk13_home_c51, alwaysLabel: gen_app_peruk13_home_c52,

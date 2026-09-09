@@ -56,7 +56,7 @@ class AppStore extends ChangeNotifier {
     final i = _log.indexWhere((x) => x['id'] == logId);
     if (i < 0 || _log[i]['undone'] == '1') return false;
     final e = _log[i];
-    if ((e['kind'] ?? '') == 'decide') { _decided.remove(e['field']); }
+    if ((e['kind'] ?? '') == 'decide') { _decided.remove(e['field']); for (final k in (e['prev'] ?? '').split(',')) { if (k.isNotEmpty) _decided.remove(k); } }   /* ב׳-לז · הכרעה-מרוכזת: מפתחות נוספים ב-prev, החזר אחד מוחק את כולן */
     else if ((e['kind'] ?? '') == 'add') { removeById(e['entity'] ?? '', e['rid'] ?? ''); }   // החזר של שמירה = מחיקת הרשומה
     else if ((e['kind'] ?? '') == 'del') { try { final m = (jsonDecode(e['prev'] ?? '{}') as Map).map((k, v) => MapEntry(k.toString(), v.toString())); restore(e['entity'] ?? '', m); } catch (_) {} }   // undo of a delete: the record returns as it was
     else if ((e['kind'] ?? '') == 'merge') { final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null) { try { ((jsonDecode(e['prev'] ?? '{}') as Map)).forEach((k, v) { r[k.toString()] = v.toString(); }); } catch (_) {} } }   // undo of a merge: every touched field goes back (prev = JSON map)
