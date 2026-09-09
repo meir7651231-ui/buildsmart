@@ -6,6 +6,7 @@ import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_confirm.dart';
+import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_topics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -406,6 +407,17 @@ void main() {
   test('צ׳יפי-חזרה: כל תווית ⇒ קוד דרך מנתח-הרגעים (יום · שבוע · חודש · שנה)', () {
     expect(balaganRepeatChips().map((x) => x[1]).toList(), ['d1', 'w1', 'm1', 'y1']);
     expect(balaganRepeatChips().map((x) => balaganRepeatLabel(x[1])).toList(), balaganRepeatChips().map((x) => x[0]).toList());
+  });
+  test('כרטיס-אדם: תיקים · פתוחים · ₪ פתוח (שדה ראשי, פסיקים) · טלפונים · לא-קיים ⇒ null · 0⇒972', () {
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f)));
+    final nf = m.numFields.firstWhere((f) => !m.percentFields.contains(f));
+    appStore.add(m.rootSlug, {m.personFields.first: 'יעל ברק', nf: '1,000', if (m.phoneFields.isNotEmpty) m.phoneFields.first: '0501234567'});
+    appStore.add(m.rootSlug, {m.personFields.first: ' יעל ברק ', nf: '250', if (m.stages > 0) '__stage': (m.stages - 1).toString()});
+    final p = balaganPerson('יעל ברק')!;
+    expect(p.files, 2); expect(p.open, m.stages > 0 ? 1 : 2); expect(p.money, m.stages > 0 ? 1000 : 1250);
+    if (m.phoneFields.isNotEmpty) expect(p.phones, ['0501234567']);
+    expect(balaganIntl('050-123-4567'), '972501234567'); expect(balaganIntl('+972501234567'), '972501234567');
+    expect(balaganPerson('אין כזה'), isNull);
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
