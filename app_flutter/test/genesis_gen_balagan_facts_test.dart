@@ -458,6 +458,12 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קנד · ייבוא-VCF ⇒ ספר-טלפונים (דדופ לפי מפתח) · טלפון-לפי-שם · שם-לפי-טלפון מהספר', () {
+    appStore.setSetting('phonebook', '');
+    final r1 = balaganImportVcf('BEGIN:VCARD\nFN:יעל ברק\nTEL;CELL:054-333-4444\nEND:VCARD\nBEGIN:VCARD\nFN:יעל ברק\nTEL:+972543334444\nEND:VCARD\n'); expect(r1, [1, 1]);
+    expect(balaganBookPhone('ברק יעל'), '054-333-4444'); expect(balaganBookPhone('אין'), ''); expect(balaganPersonByPhone('0543334444'), 'יעל ברק');
+    expect(balaganImportVcf('שטויות'), [0, 0]); appStore.setSetting('phonebook', '');
+  });
   test('ב׳-קנ/קנא/קנג · טלפון מתיק אחר · CSV-הכל · «טלפון של X» ⇒ ערך · «של» בלי צדדים ⇒ ריק', () {
     final mp = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty);
     appStore.add(mp.rootSlug, {mp.personFields.first: 'גדי פרץ', mp.phoneFields.first: '053-999-1111'}); expect(balaganPhoneOfPerson('גדי פרץ'), '053-999-1111'); expect(balaganPhoneOfPerson('אין כזה'), '');

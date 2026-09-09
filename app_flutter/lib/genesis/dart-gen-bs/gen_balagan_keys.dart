@@ -20,31 +20,37 @@ class _GenBalaganKeysScreenState extends State<GenBalaganKeysScreen> {
   Future<void> _copy() async { final t = appStore.exportJson(); await Clipboard.setData(ClipboardData(text: t)); appStore.setSetting('backupAt', DateTime.now().toIso8601String().substring(0, 10)); setState(() => _note = gen_balagan_keys_c0.replaceAll('{n}', t.length.toString())); }
   void _restore() { final n = appStore.importJson(_paste); setState(() { _note = n < 0 ? gen_balagan_keys_c1 : gen_balagan_keys_c2.replaceAll('{n}', n.toString()); if (n >= 0) _paste = ''; }); }
   void _undo() { final ok = appStore.undoImport(); setState(() => _note = ok ? gen_balagan_keys_c3 : gen_balagan_keys_c4); }
-  String _csv = '', _csvNote = '';
-  void _importCsv() { final r = balaganImportCsv(_csv); setState(() { _csvNote = (r[1] as int) == 0 ? gen_balagan_keys_c5 : gen_balagan_keys_c6.replaceAll('{n}', r[1].toString()).replaceAll('{module}', r[0] as String); if ((r[1] as int) > 0) _csv = ''; }); }   // ב׳-קמח · G46
+  String _csv = '', _csvNote = '', _vcf = '', _vcfNote = '';
+  void _importVcf() { final r = balaganImportVcf(_vcf); setState(() { _vcfNote = r[1] == 0 && r[0] == 0 ? gen_balagan_keys_c5 : gen_balagan_keys_c6.replaceAll('{n}', r[0].toString()).replaceAll('{m}', r[1].toString()); if (r[0] > 0) _vcf = ''; }); }   // ב׳-קנד · G48
+  void _importCsv() { final r = balaganImportCsv(_csv); setState(() { _csvNote = (r[1] as int) == 0 ? gen_balagan_keys_c7 : gen_balagan_keys_c8.replaceAll('{n}', r[1].toString()).replaceAll('{module}', r[0] as String); if ((r[1] as int) > 0) _csv = ''; }); }   // ב׳-קמח · G46
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) => DsScaffold(title: gen_balagan_keys_c7, subtitle: gen_balagan_keys_c8, icon: gen_balagan_keys_c9, children: [
-    DsSection(title: gen_balagan_keys_c10, children: [
-      for (final d in [DateTime.tryParse(appStore.setting('backupAt'))]) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(d == null ? gen_balagan_keys_c11 : gen_balagan_keys_c12.replaceAll('{d}', balaganDayLabel(d, DateTime.now())), style: TextStyle(color: DsLook.of(context).muted, fontSize: 13))),   // ב׳-מז · מתי גיבית לאחרונה
-      DsPrimaryButton(label: gen_balagan_keys_c13, onTap: _copy),
-      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c14, onTap: () async { final t = balaganCsvAll(); await Clipboard.setData(ClipboardData(text: t)); setState(() => _note = gen_balagan_keys_c15.replaceAll('{n}', (t.split('\n').length - 1).toString())); })])),   // ב׳-קנא · G47 · כל התיקים לאקסל
-      Padding(padding: const EdgeInsets.only(top: 8), child: DsField(label: gen_balagan_keys_c16, hint: '{…}', value: _paste, onChanged: (v) => _paste = v)),
-      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c17, onTap: _restore), const SizedBox(width: 8), DsChipButton(label: gen_balagan_keys_c18, onTap: _undo)])),
+  Widget build(BuildContext context) => AnimatedBuilder(animation: appStore, builder: (context, _) => DsScaffold(title: gen_balagan_keys_c9, subtitle: gen_balagan_keys_c10, icon: gen_balagan_keys_c11, children: [
+    DsSection(title: gen_balagan_keys_c12, children: [
+      for (final d in [DateTime.tryParse(appStore.setting('backupAt'))]) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(d == null ? gen_balagan_keys_c13 : gen_balagan_keys_c14.replaceAll('{d}', balaganDayLabel(d, DateTime.now())), style: TextStyle(color: DsLook.of(context).muted, fontSize: 13))),   // ב׳-מז · מתי גיבית לאחרונה
+      DsPrimaryButton(label: gen_balagan_keys_c15, onTap: _copy),
+      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c16, onTap: () async { final t = balaganCsvAll(); await Clipboard.setData(ClipboardData(text: t)); setState(() => _note = gen_balagan_keys_c17.replaceAll('{n}', (t.split('\n').length - 1).toString())); })])),   // ב׳-קנא · G47 · כל התיקים לאקסל
+      Padding(padding: const EdgeInsets.only(top: 8), child: DsField(label: gen_balagan_keys_c18, hint: '{…}', value: _paste, onChanged: (v) => _paste = v)),
+      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c19, onTap: _restore), const SizedBox(width: 8), DsChipButton(label: gen_balagan_keys_c20, onTap: _undo)])),
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: _note, label: '', tone: 0)),
-      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c19, label: '', tone: 0)),
+      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c21, label: '', tone: 0)),
     ]),
-    DsSection(title: gen_balagan_keys_c20, children: [
-      DsField(label: gen_balagan_keys_c21, hint: 'מה,מועד,סכום', value: _csv, onChanged: (v) => _csv = v),
-      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c22, onTap: _importCsv)])),
+    DsSection(title: gen_balagan_keys_c22, children: [
+      DsField(label: gen_balagan_keys_c23, hint: 'מה,מועד,סכום', value: _csv, onChanged: (v) => _csv = v),
+      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c24, onTap: _importCsv)])),
       if (_csvNote.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: _csvNote, label: '', tone: 0)),   // ב׳-קמח · G46 · ייבוא CSV לפי שמות-שדות
-      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c23, label: '', tone: 0)),
     ]),
-    DsField(label: gen_balagan_keys_c24, hint: gen_balagan_keys_c25, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
-    DsField(label: gen_balagan_keys_c26, hint: gen_balagan_keys_c27, value: appStore.setting('budget'), onChanged: (v) => appStore.setSetting('budget', v.trim())),   // ב׳-קלב · G42
-    DsField(label: gen_balagan_keys_c28, hint: gen_balagan_keys_c29, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c30, label: '', tone: 0)),
-    DsField(label: gen_balagan_keys_c31, hint: gen_balagan_keys_c32, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c33, label: '', tone: 0)),
-    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c34, label: '', tone: 0)),
+    DsSection(title: gen_balagan_keys_c25, children: [
+      DsField(label: gen_balagan_keys_c26, hint: 'BEGIN:VCARD…', value: _vcf, onChanged: (v) => _vcf = v),
+      Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_balagan_keys_c27, onTap: _importVcf)])),
+      if (_vcfNote.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: _vcfNote, label: '', tone: 0)),   // ב׳-קנד · G48 · אנשי-קשר ⇒ ספר-טלפונים (לא תיקים)
+      Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c28, label: '', tone: 0)),
+    ]),
+    DsField(label: gen_balagan_keys_c29, hint: gen_balagan_keys_c30, value: appStore.setting('ai.key'), onChanged: (v) => appStore.setSetting('ai.key', v.trim())),
+    DsField(label: gen_balagan_keys_c31, hint: gen_balagan_keys_c32, value: appStore.setting('budget'), onChanged: (v) => appStore.setSetting('budget', v.trim())),   // ב׳-קלב · G42
+    DsField(label: gen_balagan_keys_c33, hint: gen_balagan_keys_c34, value: appStore.setting('ai.model'), onChanged: (v) => appStore.setSetting('ai.model', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 12), child: DsNote(message: gen_balagan_keys_c35, label: '', tone: 0)),
+    DsField(label: gen_balagan_keys_c36, hint: gen_balagan_keys_c37, value: appStore.setting('mail.token'), onChanged: (v) => appStore.setSetting('mail.token', v.trim())),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c38, label: '', tone: 0)),
+    Padding(padding: const EdgeInsets.only(top: 8), child: DsNote(message: gen_balagan_keys_c39, label: '', tone: 0)),
   ]));
 }

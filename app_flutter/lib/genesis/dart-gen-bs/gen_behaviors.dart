@@ -1,4 +1,5 @@
 // 🧩 חולל ע"י behavior-compose (G34ב · הכרעה-30) — שכבת-ההרכבה: התנהגויות מחלקיקים מוכחים (behavior-plan.json), במקום אחד. אל תערוך ידנית.
+import '../dart-boxes/vcard-import.dart';
 import '../dart-maor/add-days-iso.dart';
 import '../dart-maor/build-ics.dart';
 import '../dart-maor/cockpit-days-since.dart';
@@ -115,5 +116,7 @@ String bhIcs(List<Map<String, String?>> occ, String calName, DateTime now) => bu
 /// ב׳-קמז · שורות ⇒ CSV (toCsv עם csvEscape; BOM לאקסל-בעברית) · CSV ⇒ שורות (parseCsv)
 String bhCsv(List<List<Object?>> rows) => toCsv(rows, (v) => csvEscape(v)) as String;
 List<List<String>> bhCsvParse(String text) => parseCsv(text);
+/// ב׳-קנד · אנשי-קשר מ-VCF ⇒ שורות name/phone/phone2/email/address/notes (vcardImportRows — קופסת-vcard-import מהמדף, G48)
+List<Map<String, String>> bhVcardRows(String? text) => vcardImportRows(text);
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

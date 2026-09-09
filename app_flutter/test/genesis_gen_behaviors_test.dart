@@ -45,6 +45,7 @@ void main() {
   test('G38 · סכום-לפי · חציון · רצף-ימים', () {
     expect(bhSumBy([{'t': 'דירה', 'n': '8,000'}, {'t': 'דירה', 'n': '3000'}, {'t': 'משימות', 'n': '1,250'}], 't', 'n'), [['דירה', 2, 11000.0], ['משימות', 1, 1250.0]]);
     expect(bhMedianInt([7, 1, 4]), 4); expect(bhMedianInt([]), 0); expect(bhMedianInt([2, 9]), 9);
+    final vc = bhVcardRows('BEGIN:VCARD\nFN:אבי כהן\nTEL;CELL:050-1234567\nEND:VCARD\n'); expect(vc.length, 1); expect(vc[0]['phone'], '050-1234567'); expect(bhVcardRows(''), isEmpty);
     expect(bhCsv([['a', 'b'], ['1', 'x,y']]).endsWith('a,b\n1,"x,y"'), isTrue); expect(bhCsvParse('a,b\n1,"x,y"')[1][1], 'x,y');
     final ics = bhIcs([{'uid': 'u1', 'date': '2026-09-15', 'title': 'ארנונה, 1250'}], 'בלגן', DateTime(2026, 9, 8, 10)); expect(ics.contains('DTSTART;VALUE=DATE:20260915'), isTrue); expect(ics.contains('SUMMARY:ארנונה\\, 1250'), isTrue); expect(ics.endsWith('END:VCALENDAR\r\n'), isTrue);
     expect(bhMedianHm(['16:30', '16:00', '17:00']), '16:30'); expect(bhMedianHm(['16:30']), ''); expect(bhMedianHm(['', 'x', '09:00', '10:00']), '10:00');
