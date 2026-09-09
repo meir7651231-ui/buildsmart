@@ -100,5 +100,7 @@ List<String> bhWeekRange(String todayIso, int delta) { final s = bhPlusDays(bhWe
 bool bhInRange(String iso, String from, String to) => iso.length >= 10 && inRange(iso.substring(0, 10), (from: from, to: to));
 /// ב׳-קכו · סכום-מטקסט: «1,250» · «₪ 8,000» · ריק ⇒ 0 (אין חלקיק-פרסור-סכום במדף — נסרק: (String)→num; ההיפוך של fMoney)
 double bhMoney(String? s) => double.tryParse((s ?? '').replaceAll(',', '').replaceAll('₪', '').trim()) ?? 0;
+/// ב׳-קלד · סוף-החודש של iso: היום שלפני ה-1 של החודש הבא (bhMonthKey · bhPlusDays) — פברואר/מעוברת דרך לוח-השנה, לא טבלה
+String bhMonthEnd(String iso) { final mk = bhMonthKey(iso); final y = int.parse(mk.substring(0, 4)), m = int.parse(mk.substring(5, 7)); final next = m == 12 ? (y + 1).toString() + '-01-01' : y.toString() + '-' + (m + 1).toString().padLeft(2, '0') + '-01'; return bhPlusDays(next, -1); }
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

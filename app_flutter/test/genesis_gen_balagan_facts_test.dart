@@ -458,6 +458,11 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קלו · המתארים השכיחים: «ארנונה» ×3 (גם «ארנונה ») ראשון · יחיד לא נכנס', () {
+    final m = kBalaganModules.where((x) => x.descField.isNotEmpty).skip(3).first;
+    appStore.add(m.rootSlug, {m.descField: 'ארנונה-בדיקה'}); appStore.add(m.rootSlug, {m.descField: 'ארנונה-בדיקה '}); appStore.add(m.rootSlug, {m.descField: 'ארנונה-בדיקה'}); appStore.add(m.rootSlug, {m.descField: 'יחיד-בדיקה'});
+    final top = balaganTopDescs(); expect(top.any((t) => t[0] == 'ארנונה-בדיקה' && t[1] == 3), isTrue); expect(top.any((t) => t[0] == 'יחיד-בדיקה'), isFalse);
+  });
   test('ב׳-קל/קלא · «בין 1.9 ל-15.9» ⇒ טווח · «מ-15.9 עד 1.9» ⇒ ממוין · טקסט-זר ⇒ ריק · שולם-כבר ב-7 ימים ⇒ אזהרה', () {
     final today = DateTime(2026, 9, 8);
     expect(balaganRangeOf('בין 1.9 ל-15.9', today), ['2026-09-01', '2026-09-15']); expect(balaganRangeOf('מ-15.9 עד 1.9', today), ['2026-09-01', '2026-09-15']); expect(balaganRangeOf('לשלם בין 1.9 ל-15.9', today), isEmpty); expect(balaganRangeOf('15.9', today), isEmpty);
