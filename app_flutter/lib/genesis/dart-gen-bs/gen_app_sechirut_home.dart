@@ -122,7 +122,7 @@ class GenAppSechirutHomeScreenToday {
       if (_dates.any((x) => _parse(r[x.label] ?? '') != null)) continue;
       if (appStore.decision('undated:$rid') == 'no') continue;
       final acts = [gen_app_sechirut_home_c90, gen_app_sechirut_home_c91, gen_app_sechirut_home_c92];
-      out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: f.label, rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
+      out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: [f.label, _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
     }
     return out;
   }
@@ -153,7 +153,7 @@ class GenAppSechirutHomeScreenToday {
       if (visible) continue;
       final t = _touched(r, rid); if (t == null) continue; final n = today.difference(t).inDays; if (n < 14) continue;
       final acts = [gen_app_sechirut_home_c96, gen_app_sechirut_home_c97, gen_app_sechirut_home_c98];
-      out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: gen_app_sechirut_home_c99.replaceAll('{n}', n.toString()), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
+      out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: [gen_app_sechirut_home_c99.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
     }
     out.sort((a, b) => a.due.compareTo(b.due));   // הישן ביותר ראשון
     return out;

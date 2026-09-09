@@ -476,7 +476,7 @@ void main() {
   test('הקשר לכרטיס-הכפול (מודול · מועד · ₪) · «n פתוחים» למודול', () {
     final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f)));
     final nf = m.numFields.firstWhere((f) => !m.percentFields.contains(f));
-    expect(balaganDupSub(m, {m.dateFields.first: '2026-09-09', nf: '350'}, today), m.title + ' · מחר · ₪ 350');
+    expect(balaganDupSub(m, {m.dateFields.first: '2026-09-09', nf: '8000'}, today), m.title + ' · מחר · ₪ 8,000');
     expect(balaganDupSub(m, {}, today), m.title);
     final before = balaganOpenCount(m.rootSlug, m.stages);
     appStore.add(m.rootSlug, {nf: '1'}); if (m.stages > 0) appStore.add(m.rootSlug, {nf: '2', '__stage': (m.stages - 1).toString()});

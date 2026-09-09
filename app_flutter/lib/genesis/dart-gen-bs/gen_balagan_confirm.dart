@@ -81,7 +81,7 @@ Widget balaganOpenRoot(String entity, String id) {
   }
 }
 /// ב׳-נ · הקשר לכרטיס-הכפול: המודול · המועד הקרוב של התיק הקיים · ₪ — כדי להכריע «אותו עניין?» בלי לפתוח
-String balaganDupSub(BalaganModule m, Map<String, String> d, DateTime today) { final parts = <String>[m.title]; for (final f in m.dateFields) { final dd = DateTime.tryParse((d[f] ?? '').trim()); if (dd != null) { parts.add(balaganDayLabel(dd, today)); break; } } for (final f in m.numFields.where((x) => !m.percentFields.contains(x)).take(1)) { final v = (d[f] ?? '').trim(); if (v.isNotEmpty) parts.add('₪ ' + v); } return parts.join(' · '); }
+String balaganDupSub(BalaganModule m, Map<String, String> d, DateTime today) { final parts = <String>[m.title]; for (final f in m.dateFields) { final dd = DateTime.tryParse((d[f] ?? '').trim()); if (dd != null) { parts.add(balaganDayLabel(dd, today)); break; } } for (final f in m.numFields.where((x) => !m.percentFields.contains(x)).take(1)) { final v = double.tryParse((d[f] ?? '').replaceAll(',', '').trim()); if (v != null && v > 0) parts.add('₪ ' + balaganFmtMoney(v)); } return parts.join(' · '); }
 List<List<String>> balaganDateChips(DateTime today) => [for (final c in gen_balagan_confirm_c0.split('|')) for (final d in balaganDates(c, today).take(1)) [c, d.iso]];
 /// ב׳-לג · צ׳יפי-שעה: חלקי-יום דרך אותו balaganTimes של הרגעים (בבוקר 09:00 · בצהריים 13:00 · אחר הצהריים 16:00 · בערב 19:00)
 List<List<String>> balaganTimeChips(DateTime now) => [for (final c in gen_balagan_confirm_c1.split('|')) for (final t in balaganTimes(c, now: now).take(1)) [c, t.iso]];

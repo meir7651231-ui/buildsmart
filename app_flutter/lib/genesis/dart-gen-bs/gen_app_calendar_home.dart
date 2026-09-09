@@ -106,7 +106,7 @@ class GenAppCalendarHomeScreenToday {
       if (_dates.any((x) => _parse(r[x.label] ?? '') != null)) continue;
       if (appStore.decision('undated:$rid') == 'no') continue;
       final acts = [gen_app_calendar_home_c37, gen_app_calendar_home_c38, gen_app_calendar_home_c39];
-      out.add(DsTodayItem(title: appStore.displayOf('app_calendar_ent1', rid), sub: f.label, rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
+      out.add(DsTodayItem(title: appStore.displayOf('app_calendar_ent1', rid), sub: [f.label, _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
     }
     return out;
   }
@@ -137,7 +137,7 @@ class GenAppCalendarHomeScreenToday {
       if (visible) continue;
       final t = _touched(r, rid); if (t == null) continue; final n = today.difference(t).inDays; if (n < 14) continue;
       final acts = [gen_app_calendar_home_c43, gen_app_calendar_home_c44, gen_app_calendar_home_c45];
-      out.add(DsTodayItem(title: appStore.displayOf('app_calendar_ent1', rid), sub: gen_app_calendar_home_c46.replaceAll('{n}', n.toString()), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
+      out.add(DsTodayItem(title: appStore.displayOf('app_calendar_ent1', rid), sub: [gen_app_calendar_home_c46.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
     }
     out.sort((a, b) => a.due.compareTo(b.due));   // הישן ביותר ראשון
     return out;
