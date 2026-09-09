@@ -569,4 +569,9 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).where((x) => x.rid == a || x.rid == b).length, 2);
     appStore.logAction('auto', 'בודד'); expect(appStore.log.first['group'], isNull);   // מחוץ ל-grouped אין group
   });
+  test('ב׳-צה/צז · שורה-מהירה: ספרות = חיפוש · «איפה X»/«חפש X»/«מה עם X» = חיפוש X · רגע רגיל = לא', () {
+    expect(balaganSearchQuery('1250'), '1250'); expect(balaganSearchQuery('052-123'), '052-123'); expect(balaganSearchQuery('7'), '');
+    expect(balaganSearchQuery('איפה הפיקדון של רות'), 'הפיקדון של רות'); expect(balaganSearchQuery('חפש ארנונה'), 'ארנונה'); expect(balaganSearchQuery('מה עם הגנן'), 'הגנן');
+    expect(balaganSearchQuery('שילמתי ארנונה 1,250'), ''); expect(balaganSearchQuery('איפה'), ''); expect(balaganSearchQuery('איפהשהו בעיר'), '');
+  });
 }
