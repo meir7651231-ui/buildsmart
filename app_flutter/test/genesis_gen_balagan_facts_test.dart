@@ -348,6 +348,17 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.undated(today).any((x) => x.rid == id), isFalse);
     expect(appStore.byId('app_calendar_ent1', id)![it.field], '');
   });
+  test('כסף-במבט: סכום שדה-הסכום הראשי של שורות-היום — תיק פעם אחת · פסיקים נקראים · עיצוב-אלפים · בשיתוף', () {
+    final m = kBalaganModules.firstWhere((x) => x.numFields.any((f) => !x.percentFields.contains(f)));
+    final f = m.numFields.firstWhere((x) => !m.percentFields.contains(x));
+    final a = appStore.add(m.rootSlug, {f: '1250'}); final b = appStore.add(m.rootSlug, {f: '8,000'}); final c = appStore.add(m.rootSlug, {f: ''});
+    DsTodayItem it(String rid) => DsTodayItem(title: 'x', sub: '', due: today, hard: false, overdue: false, module: m.title, actions: const [], act: (_) {}, rid: rid);
+    expect(balaganMoney([it(a), it(a), it(b), it(c)]), 9250);
+    expect(balaganMoney(const []), 0);
+    expect(balaganFmtMoney(9250), '9,250'); expect(balaganFmtMoney(350), '350');
+    expect(balaganDayText(const [], [it(a)], today, money: 1250).contains('1,250'), isTrue);
+    expect(balaganDayText(const [], [it(a)], today).contains('סה'), isFalse);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
