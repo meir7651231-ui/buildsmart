@@ -61,10 +61,11 @@ class GenAppSechirutHomeScreenToday {
 
   static DsTodayItem _mk(String title, String sub, String rid, String field, DateTime d, bool hard, bool overdue, DateTime today, [String time = '', bool rep = false, String phone = '', String money = '']) {
     final acts = <String>[...(overdue ? [gen_app_sechirut_home_c66, gen_app_sechirut_home_c67, gen_app_sechirut_home_c68, gen_app_sechirut_home_c69] : (d == today ? [gen_app_sechirut_home_c70, gen_app_sechirut_home_c71] : [gen_app_sechirut_home_c72, gen_app_sechirut_home_c73, gen_app_sechirut_home_c74])), if (phone.isNotEmpty) gen_app_sechirut_home_c75];   /* ב׳-לח · תיק עם טלפון ⇒ «התקשר» מהשורה, הקשה אחת */   // P4 · ביום-ההכרעה אין דחייה · «ליומן» = קישור-יומן, אפס-מפתח
-    return DsTodayItem(title: (rep ? '↻ ' : '') + title, sub: [time, sub, money].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: field, due: d, hard: hard, overdue: overdue, module: module, actions: acts, act: (i) => _act(rid, field, d, acts, i), time: time);   /* ב׳-מ · מה · מתי · כמה — באותה שורה */
+    return DsTodayItem(title: (rep ? '↻ ' : '') + title, sub: [time, sub, money].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: field, due: d, hard: hard, overdue: overdue, module: module, actions: acts, act: (i) => _act(rid, field, d, acts, i, today), time: time);   /* ב׳-מ · מה · מתי · כמה — באותה שורה */
   }
-  static void _act(String rid, String field, DateTime due, List<String> acts, int i) {
+  static void _act(String rid, String field, DateTime due0, List<String> acts, int i, [DateTime? today]) {
     final a = acts[i.clamp(0, acts.length - 1)];
+    final due = today != null && due0.isBefore(today) ? today : due0;   /* ב׳-פו · «דחה למחר» מבאיחור = מחר (לא יום-אחרי-המועד-שעבר, שנשאר באיחור) */
     if (a == gen_app_sechirut_home_c76) {
       final r0 = appStore.byId('app_sechirut_ent1', rid); final rep = (r0 == null ? '' : (r0['__repeat'] ?? '')).trim();
       final prevStage = r0 == null ? '' : (r0[AppStore.stageKey] ?? '0');
@@ -73,7 +74,7 @@ class GenAppSechirutHomeScreenToday {
       appStore.logAction('done', gen_app_sechirut_home_c77.replaceAll('{what}', field + ' · ' + appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: field, prev: prevStage);   // «עשיתי» + החזר (השורה חוזרת, השלב חוזר)
       if (r0 != null && rep.isNotEmpty) {   // ↻ רגע חוזר: «סיים» יוצר את הבא לבד (המועד-הבא בשדה שנסגר), עם החזר
         final next = <String, String>{for (final e in r0.entries) if (!e.key.startsWith('__') || e.key == '__repeat' || e.key == '__note') e.key: e.value};
-        next[field] = _iso(nextRepeat(due, rep)); next['__stage'] = '0';
+        next[field] = _iso(nextRepeat(due0, rep)); next['__stage'] = '0';
         final nid = appStore.add('app_sechirut_ent1', next);
         appStore.logAction('add', gen_app_sechirut_home_c78.replaceAll('{title}', appStore.displayOf('app_sechirut_ent1', nid) + ' · ' + next[field]!), entity: 'app_sechirut_ent1', rid: nid);
       }
@@ -81,10 +82,10 @@ class GenAppSechirutHomeScreenToday {
     else if (a == gen_app_sechirut_home_c79) { final r = appStore.byId('app_sechirut_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_sechirut_ent1', rid, {field: _iso(_shift(due.add(const Duration(days: 1)), false))}); /* «דחה למחר» לא נוחת בשבת (אותו _shift של תזכורת-רכה) */ appStore.logAction('auto', gen_app_sechirut_home_c80 + ' · ' + field, entity: 'app_sechirut_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
     else if (a == gen_app_sechirut_home_c81) { final r = appStore.byId('app_sechirut_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_sechirut_ent1', rid, {field: _iso(_shift(due.add(const Duration(days: 7)), false))}); appStore.logAction('auto', gen_app_sechirut_home_c82 + ' · ' + field, entity: 'app_sechirut_ent1', rid: rid, field: field, prev: prev); } }   /* «דחה לשבוע» — נגיעה-ידנית עם החזר, לא בשבת */
     else if (a == gen_app_sechirut_home_c83) {   // «ליומן»: עם שעה ⇒ אירוע בשעתו (אורך = בלוק-ההגדרה); בלי ⇒ יום-שלם
-      final r = appStore.byId('app_sechirut_ent1', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due).replaceAll('-', '');
+      final r = appStore.byId('app_sechirut_ent1', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due0).replaceAll('-', '');
       String z(DateTime x) => x.toIso8601String().substring(0, 16).replaceAll(RegExp(r'[-:]'), '') + '00';
       final block = (int.tryParse(appStore.setting('blockMin', '30')) ?? 30).clamp(5, 240);
-      final dates = tm.isEmpty ? d + '/' + d : () { final a0 = DateTime(due.year, due.month, due.day, int.parse(tm.substring(0, 2)), int.parse(tm.substring(3, 5))); return z(a0) + '/' + z(a0.add(Duration(minutes: block))); }();
+      final dates = tm.isEmpty ? d + '/' + d : () { final a0 = DateTime(due0.year, due0.month, due0.day, int.parse(tm.substring(0, 2)), int.parse(tm.substring(3, 5))); return z(a0) + '/' + z(a0.add(Duration(minutes: block))); }();
       launchUrl(Uri.parse('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + Uri.encodeComponent(field + ' · ' + appStore.displayOf('app_sechirut_ent1', rid)) + '&dates=' + dates), mode: LaunchMode.externalApplication);
     }
     else if (a == gen_app_sechirut_home_c84) { final r = appStore.byId('app_sechirut_ent1', rid); final ph = r == null ? '' : _phoneOf(r); if (ph.isNotEmpty) launchUrl(Uri.parse('tel:' + ph), mode: LaunchMode.externalApplication); }

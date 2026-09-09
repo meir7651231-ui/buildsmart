@@ -509,4 +509,34 @@ void main() {
   test('זיהוי: כל כותרת-מודול ⇒ עצמו (הסף אינו בולע כותרות)', () {
     for (final m in kBalaganModules) { expect(balaganIdentify(m.title).first.module.ns, m.ns, reason: m.title); }
   });
+  test('ב׳-פו · «דחה למחר» מבאיחור = מחר (לא יום-אחרי-המועד-שעבר) · «דחה לשבוע» = בעוד שבוע · החזר', () {
+    const S = 'app_calendar_ent1'; const F = 'מועד';
+    final id = appStore.add(S, {'מה': 'ישן', F: '2026-09-01'});
+    final it = GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).firstWhere((x) => x.rid == id); expect(it.overdue, isTrue);
+    it.act(it.actions.indexOf('דחה למחר')); expect(appStore.byId(S, id)![F], '2026-09-09');
+    expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).any((x) => x.rid == id), isFalse); expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 1).any((x) => x.rid == id), isTrue);
+    expect(appStore.undo(appStore.log.first['id']!), isTrue); expect(appStore.byId(S, id)![F], '2026-09-01');
+    final it2 = GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).firstWhere((x) => x.rid == id); it2.act(it2.actions.indexOf('דחה לשבוע')); expect(appStore.byId(S, id)![F], '2026-09-15');
+  });
+  test('ב׳-פז · החזר-קבוצתי: כמה שורות-יומן עם group אחד ⇒ החזר של אחת מחזיר את כולן', () {
+    const S = 'app_calendar_ent1'; const F = 'מועד';
+    final a = appStore.add(S, {F: '2026-09-01'}); final b = appStore.add(S, {F: '2026-09-02'});
+    final ia = appStore.logAction('auto', 'א', entity: S, rid: a, field: F, prev: '2026-09-01', group: 'g1'); appStore.update(S, a, {F: '2026-09-09'});
+    appStore.logAction('auto', 'ב', entity: S, rid: b, field: F, prev: '2026-09-02', group: 'g1'); appStore.update(S, b, {F: '2026-09-09'});
+    expect(appStore.undo(ia), isTrue);
+    expect(appStore.byId(S, a)![F], '2026-09-01'); expect(appStore.byId(S, b)![F], '2026-09-02');
+    expect(appStore.log.where((e) => e['group'] == 'g1' && e['undone'] != '1'), isEmpty);
+  });
+  test('ב׳-פח/פט · טלפון מהאדם המוכר · «כמו בפעם הקודמת» = הסכום של התיק האחרון (אותו אדם כשיש)', () {
+    final ms = kBalaganModules.where((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))).toList();
+    expect(ms, isNotEmpty);
+    final m = ms.first; final nf = m.numFields.firstWhere((f) => !m.percentFields.contains(f));
+    expect(balaganPhoneOf('אבי כהן'), ''); expect(balaganLastAmount(m, 'אבי כהן'), '');
+    appStore.add(m.rootSlug, {m.personFields.first: 'אבי כהן', m.phoneFields.first: '052-1234567', nf: '1,500'});
+    appStore.add(m.rootSlug, {m.personFields.first: 'אבי כהן', nf: '2,000'});
+    appStore.add(m.rootSlug, {m.personFields.first: 'דנה לוי', nf: '300'});
+    expect(balaganPhoneOf('אבי כהן'), '052-1234567'); expect(balaganPhoneOf('אבי'), '');
+    expect(balaganLastAmount(m, 'אבי כהן'), '2,000'); expect(balaganLastAmount(m, 'דנה לוי'), '300'); expect(balaganLastAmount(m, ''), '300');
+    expect(balaganLastAmount(m, 'מישהו אחר'), '');
+  });
 }

@@ -45,9 +45,9 @@ class AppStore extends ChangeNotifier {
   String setting(String key, [String def = '']) => (_settings[key] ?? '').isEmpty ? def : _settings[key]!;
   void setSetting(String key, String v) { _settings[key] = v; notifyListeners(); }
   /// רישום פעולה: kind = auto (לבד) · decide (הכרעה שניתן להחזיר) · send (שליחה החוצה) · next (צעד-הבא). prev/field = מה להחזיר.
-  String logAction(String kind, String what, {String entity = '', String rid = '', String field = '', String prev = ''}) {
+  String logAction(String kind, String what, {String entity = '', String rid = '', String field = '', String prev = '', String group = ''}) {
     final id = 'l${++_seq}';
-    _log.insert(0, {'id': id, 'at': DateTime.now().toIso8601String(), 'kind': kind, 'what': what, 'entity': entity, 'rid': rid, 'field': field, 'prev': prev, 'undone': ''});
+    _log.insert(0, {'id': id, 'at': DateTime.now().toIso8601String(), 'kind': kind, 'what': what, 'entity': entity, 'rid': rid, 'field': field, 'prev': prev, 'undone': '', if (group.isNotEmpty) 'group': group});   // ב׳-פז · group: פעולה-מרוכזת ⇒ החזר אחד לכולן
     if (_log.length > 200) _log.removeRange(200, _log.length);
     notifyListeners(); return id;
   }
@@ -62,7 +62,9 @@ class AppStore extends ChangeNotifier {
     else if ((e['kind'] ?? '') == 'merge') { final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null) { try { ((jsonDecode(e['prev'] ?? '{}') as Map)).forEach((k, v) { r[k.toString()] = v.toString(); }); } catch (_) {} } }   // undo of a merge: every touched field goes back (prev = JSON map)
     else if ((e['kind'] ?? '') == 'done') { _decided.remove('ign:${e['rid']}:${e['field']}'); final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null && (e['prev'] ?? '').isNotEmpty) r[stageKey] = e['prev']!; }   // undo of «done»: the date row returns and the stage goes back
     else if ((e['entity'] ?? '').isNotEmpty && (e['field'] ?? '').isNotEmpty) { final r = byId(e['entity']!, e['rid'] ?? ''); if (r != null) r[e['field']!] = e['prev'] ?? ''; }
-    e['undone'] = '1'; notifyListeners(); return true;
+    e['undone'] = '1';
+    final g = e['group'] ?? ''; if (g.isNotEmpty) { for (final x in _log.where((x) => (x['group'] ?? '') == g && x['undone'] != '1').toList()) { undo(x['id'] ?? ''); } }   // ב׳-פז · החזר-קבוצתי: «דחה הכל למחר» חוזר בהקשה אחת
+    notifyListeners(); return true;
   }
   Map<String, String>? lastLog(String kind, String rid) { for (final x in _log) { if (x['kind'] == kind && x['rid'] == rid && x['undone'] != '1') return x; } return null; }
 
