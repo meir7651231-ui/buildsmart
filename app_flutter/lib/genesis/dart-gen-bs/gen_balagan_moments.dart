@@ -1,6 +1,10 @@
 // 🧭 חולל ע"י balagan (G33 · הכרעה-29) — מזהה-הרגע: TF-IDF דטרמיניסטי מ-30 מסמכי-פירוק (כותרת+«הרגע» ×3). אפס-בינה, אפס-מילון. אל תערוך ידנית.
 import 'dart:convert';
 import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart-maor/enroll-new-family.dart';
+import '../dart-maor/weekday-of-iso.dart';
+import '../dart-maor/add-days-iso.dart';
+import '../dart-data-maor/norm-search-sockets.dart';
 class BalaganField { const BalaganField(this.label, this.type, this.required, this.options); final String label, type; final bool required; final List<String> options; }
 class BalaganModule {
   const BalaganModule(this.index, this.ns, this.title, this.moment, this.topic, this.weights, this.dateFields, this.numFields, this.descField, this.longField, this.rootSlug, this.fields, this.stages, this.chain, {this.selfScore = 1, this.layer = '', this.required = 0, this.timeFields = const [], this.phoneFields = const [], this.personFields = const [], this.percentFields = const []});
@@ -48,15 +52,7 @@ const List<BalaganModule> kBalaganModules = [
 /// סף-החולשה — נגזר מהנתונים (לא קבוע-קסם): חצי מביטחון-הכותרת-הנמוך-ביותר בין המודולים. מתחתיו הרגע «כללי» ⇒ שכבת-הבסיס ראשונה.
 const double kBalaganWeak = 0.053;
 
-String _definal(String w) => w.replaceAll(RegExp(r'ך$'), 'כ').replaceAll(RegExp(r'ם$'), 'מ').replaceAll(RegExp(r'ן$'), 'נ').replaceAll(RegExp(r'ף$'), 'פ').replaceAll(RegExp(r'ץ$'), 'צ');
-Set<String> balaganTokens(String s) {
-  final out = <String>{};
-  for (final m in RegExp(r'[\u0590-\u05FF][\u0590-\u05FF״׳]*').allMatches(s)) {
-    final w = _definal(m.group(0)!.replaceAll(RegExp(r'[״׳]'), '')); if (w.length < 2) continue;
-    out.add(w); if (w.length >= 4 && 'והבלמשכ'.contains(w[0])) out.add(w.substring(1));
-  }
-  return out;
-}
+Set<String> balaganTokens(String s) { final out = <String>{}; for (final m in RegExp(r'[\u0590-\u05FF][\u0590-\u05FF״׳]*').allMatches(s)) { final w = normSearch(m.group(0)!.replaceAll(RegExp(r'[״׳]'), ''), normSearch_T); if (w.length < 2) continue; out.add(w); if (w.length >= 4 && 'והבלמשכ'.contains(w[0])) out.add(w.substring(1)); } return out; }   // G34 · דבק: מילים-בעברית (שפה) ⇒ חלקיק normSearch (סופיות) ⇒ אות-שימוש מדקדוק-האפיון
 /// זיהוי: סכום-משקלים של מילות-הטקסט לכל מודול ⇒ 3 הטובים (ציון > 0). דטרמיניסטי; שוויון ⇒ המוקדם.
 /// מילות-דקדוק (תאריך · חזרה · שעה · טלפון) אינן זהות של רגע: «ב-15 לחודש» העלה את «לא משלם» (חודש) מעל הסף. מסירים את הטווחים לפני הזיהוי.
 String balaganStripGrammar(String text) {
@@ -110,7 +106,7 @@ List<_DateAt> balaganDates(String text, DateTime today) {
   put(RegExp(r'בעוד\s+(?:(\d+|[\u0590-\u05FF]+)\s+)?(ימים|יום|יומיים|שבועות|שבוע|שבועיים|חודשים|חודש|חודשיים)(?![\u0590-\u05FF])'), (x) { final q = x.group(1); final u = x.group(2)!; var n = q == null ? 1 : (int.tryParse(q) ?? _heNum(q) ?? 1); if (u == 'יומיים' || u == 'שבועיים' || u == 'חודשיים') n = 2; if (u.startsWith('שבוע')) return add(7 * n); if (u.startsWith('חודש')) return DateTime(t0.year, t0.month + n, t0.day); return add(n); });
   put(RegExp(r'לפני\s+(\d+|[\u0590-\u05FF]+)\s+(ימים|שבועות|חודשים)'), (x) { final q = x.group(1)!; final u = x.group(2)!; final n = int.tryParse(q) ?? _heNum(q) ?? 1; if (u == 'שבועות') return add(-7 * n); if (u == 'חודשים') return DateTime(t0.year, t0.month - n, t0.day); return add(-n); });
   const wd = {'ראשון': 7, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6, 'א': 7, 'ב': 1, 'ג': 2, 'ד': 3, 'ה': 4, 'ו': 5};
-  DateTime next(int w) { var d = (w - t0.weekday + 7) % 7; if (d == 0) d = 7; return add(d); }   // הבא, לא היום
+  DateTime next(int w) { final wd = weekdayOfIso(_isoOf(t0)); var d = (w - (wd == 0 ? 7 : wd) + 7) % 7; if (d == 0) d = 7; return add(d); }   // הבא, לא היום · G34 · חלקיק יום-בשבוע
   put(RegExp(r'ב?יום\s+(ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהו])(?:[׳\u0027]|(?![\u0590-\u05FF]))'), (x) => next(wd[x.group(1)!]!));
   put(RegExp(r'(?<![\u0590-\u05FF])ב?שבת(?![\u0590-\u05FF])'), (_) => next(6));
   put(RegExp(r'בשבוע\s+הבא'), (_) => add(7));
@@ -199,14 +195,11 @@ int balaganMerge(BalaganModule m, String id, Map<String, String> v, String logTe
   return next.length;
 }
 /// שורת-ייצוא-וואטסאפ: «[8.9.2026, 16:30] דני: …» / «8.9.26, 16:30 - דני: …» ⇒ הטקסט בלי הכותרת + השולח (מבנה, לא מילון). חותמת-ההודעה אינה מועד.
-final RegExp _waHead = RegExp(r'^\s*\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4}),?\s+(\d{1,2}:\d{2})(?::\d{2})?\]?\s*-?\s*([^:\n]{2,30}):\s+');
+final RegExp _waHead = RegExp(r'^\s*\[?(\d{1,2}[./]\d{1,2}[./]\d{2,4}),?\s+(\d{1,2}:\d{2})(?::\d{2})?\]?\s*-?\s*([^:\n]{2,30}):\s+');   // דקדוק-ייצוא-וואטסאפ (spec-lang), לא מילון
 String balaganWaStrip(String text) { final m = _waHead.firstMatch(text); return m == null ? text : text.substring(m.end); }
 String balaganWaSender(String text) { final m = _waHead.firstMatch(text); return m == null ? '' : m.group(3)!.trim(); }
 /// שורה עם כמה רגעים («שילמתי ארנונה. מחר תור לרופא») ⇒ חלקים לפי שורה/נקודה-ורווח/נקודה-פסיק — כל חלק רגע משלו (טופס-אישור אחר טופס-אישור). חלק = ≥2 מילים.
-List<String> balaganSplit(String text) {
-  final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => balaganWaStrip(p).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList();   // חלק = ≥2 מילים אחרי הסרת כותרת-וואטסאפ
-  return parts.length >= 2 ? parts : [text.trim()];
-}
+List<String> balaganSplit(String text) { final parts = text.split(RegExp(r'\n|;|(?<=[\u0590-\u05FF\d])\.\s+(?=[\u0590-\u05FF])')).map((p) => p.trim()).where((p) => balaganWaStrip(p).split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length >= 2).toList(); return parts.length >= 2 ? parts : [text.trim()]; }   // מפרידי-רגעים מדקדוק-האפיון · חלק = ≥2 מילים
 /// סכום במילים: «מאתיים» · «שלוש מאות» · «אלף וחמש מאות» · «שלושת אלפים ומאתיים» · «עשרת אלפים» ⇒ מספר (דקדוק-מספרים, לא מילון-דומייני)
 List<_NumAt> balaganNumberWords(String text) {
   const hundreds = {'מאה': 100, 'מאתיים': 200};
@@ -250,9 +243,9 @@ List<_NumAt> balaganNums(String text, List<_DateAt> dates) {
 /// עובדות מהטקסט (תאריכים — גם יחסיים · סכומים · שורה-ראשונה) ⇒ שדות-השורש לפי טיפוס + קרבה למילות-תווית-השדה. `today` מוזרק (דטרמיניסטי; ברירת-מחדל עכשיו).
 /// ב׳-נט · האם השם כבר בתיקים (שדות-האדם של כל המודולים) — «רות לוי: …» בתחילת שורה = האדם, רק לשם מוכר (אפס-ניחוש)
 /// ב׳-צט · «שילמתי ארנונה» = לשון-עבר בגוף-ראשון: המילה הראשונה (אחרי הסרת-דקדוק) נגמרת ב«תי» ואורכה ≥5 כולל «תי» — דקדוק-שפה, לא מילון; «רותי» (4) ושם-מוכר לא נתפסים
-bool balaganIsPast(String text) { final t = balaganStripGrammar(balaganWaStrip(text)).trim(); if (t.contains(':')) return false; final w = t.split(RegExp(r'\s+')).first; return RegExp(r'^[\u05d0-\u05ea]{3,}תי$').hasMatch(w) && !balaganKnownPerson(w); }
+bool balaganIsPast(String text) { final t = balaganStripGrammar(balaganWaStrip(text)).trim(); if (t.contains(':')) return false; final w = t.split(RegExp(r'\s+')).first; return w.length >= 5 && w.endsWith('תי') && RegExp(r'^[\u05d0-\u05ea]+$').hasMatch(w) && !balaganKnownPerson(w); }   // לשון-עבר = סיומת מדקדוק-האפיון (pastSuffix), לא מילון
 /// ב׳-צט · תיקים פתוחים שחולקים מילה (≥3) עם הרגע-שבעבר — «שילמתי ארנונה» מול «לשלם ארנונה»; המילה-בעבר עצמה לא נספרת
-List<Map<String, String>> balaganPastMatches(BalaganModule m, String text) { if (!balaganIsPast(text) || m.descField.isEmpty) return const []; final toks = balaganTokens(balaganStripGrammar(balaganWaStrip(text))).where((x) => x.length >= 3 && !x.endsWith('תי')).toSet(); if (toks.isEmpty) return const []; return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; final rt = balaganTokens(r[m.descField] ?? ''); return rt.any((x) => x.length >= 3 && toks.contains(x)); }).toList(); }
+List<Map<String, String>> balaganPastMatches(BalaganModule m, String text) { if (!balaganIsPast(text) || m.descField.isEmpty) return const []; final toks = balaganTokens(balaganStripGrammar(balaganWaStrip(text))).where((x) => x.length >= 3 && !x.endsWith('תי')).toSet(); if (toks.isEmpty) return const []; return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; return balaganTokens(r[m.descField] ?? '').any((x) => x.length >= 3 && toks.contains(x)); }).toList(); }
 bool balaganKnownPerson(String name) { final n = name.trim().toLowerCase(); if (n.length < 2) return false; for (final m in kBalaganModules) { for (final r in appStore.records(m.rootSlug)) { for (final f in m.personFields) { if ((r[f] ?? '').trim().toLowerCase() == n) return true; } } } return false; }
 Map<String, String> balaganFacts(String text0, BalaganModule m, {DateTime? today}) {
   final out = <String, String>{};

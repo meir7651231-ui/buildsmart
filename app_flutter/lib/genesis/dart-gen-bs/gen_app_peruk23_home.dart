@@ -2,10 +2,17 @@
 //   הכל נגזר ברינדור מהרשומות ומשדות-התאריך (P3) · תזכורות −N ימים (P1, עריך) · soft לא בשבת (P8) · יום-ההכרעה = בלי דחייה (P4) · שאל-לפני-פעולה (P11) · «תמיד אשר» ⇒ לבד + יומן + החזר (T2) · שליחה רק בהקשה (T5). אל תערוך ידנית.
 
 import '../dart-data-bs/auto/gen_app_peruk23_home_content.dart';
+import '../dart-maor/add-days-iso.dart';
+import '../dart-maor/cockpit-days-since.dart';
+import '../dart-maor/day-month-of-iso.dart';
+import '../dart-maor/in-range.dart';
+import '../dart-maor/task-overdue.dart';
 import '../dart-maor/wa-digits.dart';
 import '../dart-maor/wa-link.dart';
+import '../dart-maor/weekday-of-iso.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart/f_money.dart';
 import 'gen_app_peruk23_root.dart';
 import 'gen_app_peruk23_rp1.dart';
 import 'package:share_plus/share_plus.dart';
@@ -23,7 +30,7 @@ class GenAppPeruk23HomeScreenToday {
   static const List<String> _times = [];
   static const List<String> _phones = [gen_app_peruk23_home_c11];
   static const List<String> _nums = [];
-  static String _moneyOf(Map<String, String> r) { if (_nums.isEmpty) return ''; final v = double.tryParse((r[_nums.first] ?? '').replaceAll(',', '').trim()); if (v == null || v <= 0) return ''; final s = v.round().toString(); final b = StringBuffer(); for (var i = 0; i < s.length; i++) { if (i > 0 && (s.length - i) % 3 == 0) b.write(','); b.write(s[i]); } return '₪ ' + b.toString(); }   // ב׳-מ · הכסף של התיק, על השורה (אותו שדה-ראשי של כסף-במבט)
+  static String _moneyOf(Map<String, String> r) { if (_nums.isEmpty) return ''; final v = double.tryParse((r[_nums.first] ?? '').replaceAll(',', '').trim()); if (v == null || v <= 0) return ''; return '₪ ' + fMoney(v).replaceFirst('₪', ''); }   // ב׳-מ · הכסף של התיק, על השורה · G34 · חלקיק fMoney
   static String _phoneOf(Map<String, String> r) { for (final l in _phones) { final v = (r[l] ?? '').replaceAll(RegExp(r'[^0-9+]'), ''); if (v.length >= 9) return v; } return ''; }   // ב׳-לח · הטלפון של התיק (הראשון שנראה כמו טלפון)
   /// חזרה («כל חודש» = m1 · «כל שבועיים» = w2 · «כל 3 ימים» = d3 · «כל שנה» = y1): המועד-הבא מהמועד שנסגר; חודש עם פחות ימים ⇒ היום-האחרון
   static DateTime nextRepeat(DateTime d, String code) {
@@ -39,13 +46,14 @@ class GenAppPeruk23HomeScreenToday {
   static String _timeOf(Map<String, String> r) { for (final l in _times) { final v = (r[l] ?? '').trim(); if (RegExp(r'^\d{1,2}:\d{2}$').hasMatch(v)) return v.padLeft(5, '0'); } return ''; }
   static DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
   static DateTime? _parse(String s) { final t = s.trim(); if (t.isEmpty) return null; try { return _day(DateTime.parse(t.length == 10 ? '${t}T12:00:00' : t)); } catch (_) { return null; } }
-  static List<int> _offsets() => appStore.setting('offsets', '3,1,0').split(',').map((x) => int.tryParse(x.trim()) ?? 0).toList();
+  static List<int> _offsets() => [for (final x in appStore.setting('offsets', '3,1,0').split(',')) int.tryParse(x.trim()) ?? 0];
   /// ב׳-צא · ההיסטים שעוד יכולים לירות (יום-הירי ≥ היום) — הצעת-התזכורת אומרת רק אמת
-  static List<int> aheadOffsets(DateTime d, bool hard, DateTime today) => [for (final o in _offsets()) if (!_shift(d.subtract(Duration(days: o)), hard).isBefore(today)) o];
-  static DateTime _shift(DateTime d, bool hard) => hard ? d : (d.weekday == DateTime.saturday ? d.add(const Duration(days: 1)) : d);   // P8 · soft לא בשבת
+  static List<int> aheadOf(DateTime d, bool hard, DateTime today) => [for (final o in _offsets()) if (inRange(_iso(_shift(_plus(d, -o), hard)), (from: _iso(today), to: null))) o];   // G34 · דבק: הוספת-ימים · לא-בשבת · בטווח — חלקיקים
+  static DateTime _plus(DateTime d, int n) => _parse(addDaysIso(_iso(d), n)) ?? d;
+  static DateTime _shift(DateTime d, bool hard) => hard || weekdayOfIso(_iso(d)) != 6 ? d : _plus(d, 1);   // P8 · soft לא בשבת · G34 · דבק: יום-בשבוע + הוספת-יום
   static String _iso(DateTime d) => d.toIso8601String().substring(0, 10);
   /// ב׳-מא · תאריך כמו שאומרים אותו: היום · מחר · אתמול · יום שלישי 8.9 (עד שבוע) · 15.9 · 3.10.2027 (שנה אחרת)
-  static String _dayLabel(DateTime d, DateTime today) { final n = _day(d).difference(_day(today)).inDays; if (n == 0) return gen_app_peruk23_home_c15; if (n == 1) return gen_app_peruk23_home_c16; if (n == -1) return gen_app_peruk23_home_c17; final dm = '${d.day}.${d.month}' + (d.year == today.year ? '' : '.${d.year}'); return n.abs() <= 6 ? gen_app_peruk23_home_c18.replaceAll('{day}', gen_app_peruk23_home_c19.split(',')[d.weekday % 7]) + ' ' + dm : dm; }
+  static String _dayLabel(DateTime d, DateTime today) { final n = -cockpitDaysSince(_iso(d), _iso(today)).toInt(); if (n == 0) return gen_app_peruk23_home_c15; if (n == 1) return gen_app_peruk23_home_c16; if (n == -1) return gen_app_peruk23_home_c17; final dm = dayMonthOfIso(_iso(d), d.year != today.year); return n.abs() <= 6 ? gen_app_peruk23_home_c18.replaceAll('{day}', gen_app_peruk23_home_c19.split(',')[weekdayOfIso(_iso(d))]) + ' ' + dm : dm; }   // G34 · דבק: ימים-מאז · יום-בשבוע · יום.חודש — חלקיקים; כאן רק מונחים
   static String _remKey(String rid, String field) => 'rem:$rid:$field';
   static List<Map<String, String>> open() => appStore.records('app_peruk23_ent1').where((r) => appStore.stageOf('app_peruk23_ent1', r[AppStore.idKey] ?? '') < 4).toList();
   static Future<void> send(BuildContext context, Map<String, String> r0, String id0) async {
@@ -62,7 +70,7 @@ class GenAppPeruk23HomeScreenToday {
   }
   static void _act(String rid, String field, DateTime due0, List<String> acts, int i, [DateTime? today]) {
     final a = acts[i.clamp(0, acts.length - 1)];
-    final due = today != null && due0.isBefore(today) ? today : due0;   /* ב׳-פו · «דחה למחר» מבאיחור = מחר (לא יום-אחרי-המועד-שעבר, שנשאר באיחור) */
+    final due = today == null ? due0 : (taskOverdue({'due': _iso(due0)}, _iso(today)) ? today : due0);   /* G34 · חלקיק taskOverdue · ב׳-פו · «דחה למחר» מבאיחור = מחר (לא יום-אחרי-המועד-שעבר, שנשאר באיחור) */
     if (a == gen_app_peruk23_home_c30) {
       final r0 = appStore.byId('app_peruk23_ent1', rid); final rep = (r0 == null ? '' : (r0['__repeat'] ?? '')).trim();
       final prevStage = r0 == null ? '' : (r0[AppStore.stageKey] ?? '0');
@@ -76,8 +84,8 @@ class GenAppPeruk23HomeScreenToday {
         appStore.logAction('add', gen_app_peruk23_home_c32.replaceAll('{title}', appStore.displayOf('app_peruk23_ent1', nid) + ' · ' + next[field]!), entity: 'app_peruk23_ent1', rid: nid);
       }
     }
-    else if (a == gen_app_peruk23_home_c33) { final r = appStore.byId('app_peruk23_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_peruk23_ent1', rid, {field: _iso(_shift(due.add(const Duration(days: 1)), false))}); /* «דחה למחר» לא נוחת בשבת (אותו _shift של תזכורת-רכה) */ appStore.logAction('auto', gen_app_peruk23_home_c34 + ' · ' + field, entity: 'app_peruk23_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
-    else if (a == gen_app_peruk23_home_c35) { final r = appStore.byId('app_peruk23_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_peruk23_ent1', rid, {field: _iso(_shift(due.add(const Duration(days: 7)), false))}); appStore.logAction('auto', gen_app_peruk23_home_c36 + ' · ' + field, entity: 'app_peruk23_ent1', rid: rid, field: field, prev: prev); } }   /* «דחה לשבוע» — נגיעה-ידנית עם החזר, לא בשבת */
+    else if (a == gen_app_peruk23_home_c33) { final r = appStore.byId('app_peruk23_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_peruk23_ent1', rid, {field: _iso(_shift(_plus(due, 1), false))}); /* «דחה למחר» לא נוחת בשבת (אותו _shift של תזכורת-רכה) */ appStore.logAction('auto', gen_app_peruk23_home_c34 + ' · ' + field, entity: 'app_peruk23_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
+    else if (a == gen_app_peruk23_home_c35) { final r = appStore.byId('app_peruk23_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_peruk23_ent1', rid, {field: _iso(_shift(_plus(due, 7), false))}); appStore.logAction('auto', gen_app_peruk23_home_c36 + ' · ' + field, entity: 'app_peruk23_ent1', rid: rid, field: field, prev: prev); } }   /* «דחה לשבוע» — נגיעה-ידנית עם החזר, לא בשבת */
     else if (a == gen_app_peruk23_home_c37) {   // «ליומן»: עם שעה ⇒ אירוע בשעתו (אורך = בלוק-ההגדרה); בלי ⇒ יום-שלם
       final r = appStore.byId('app_peruk23_ent1', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due0).replaceAll('-', '');
       String z(DateTime x) => x.toIso8601String().substring(0, 16).replaceAll(RegExp(r'[-:]'), '') + '00';
@@ -97,12 +105,12 @@ class GenAppPeruk23HomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null) continue;
         if (appStore.decision('ign:$rid:${f.label}') == 'no') continue;
-        if (dayDelta == 0 && d.isBefore(today)) { final ago = today.difference(d).inDays; out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', gen_app_peruk23_home_c40.replaceAll('{date}', _dayLabel(d, today)) + (ago <= 1 ? '' : ' · ' + gen_app_peruk23_home_c41.replaceAll('{n}', ago.toString()))   /* ב׳-עז · «היה אתמול» כבר אומר הכל — בלי «· אתמול» כפול */, rid, f.label, d, f.hard, true, today, tm, rep, ph, mo)); continue; }
+        if (dayDelta == 0 && d.isBefore(today)) { final ago = cockpitDaysSince(_iso(d), _iso(today)).toInt(); out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', gen_app_peruk23_home_c40.replaceAll('{date}', _dayLabel(d, today)) + (ago <= 1 ? '' : ' · ' + gen_app_peruk23_home_c41.replaceAll('{n}', ago.toString()))   /* ב׳-עז · «היה אתמול» כבר אומר הכל — בלי «· אתמול» כפול */, rid, f.label, d, f.hard, true, today, tm, rep, ph, mo)); continue; }
         final okRem = appStore.decision(_remKey(rid, f.label)) == 'ok';   // תזכורת-מוקדמת (−3/−1) = הצעה שדורשת אישור; יום-ההכרעה עצמו = עובדה — מוצג בלי אישור
         for (final off in _offsets()) {
           if (off > 0 && !okRem) continue;
-          final fire = _shift(d.subtract(Duration(days: off)), f.hard);
-          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? '' : gen_app_peruk23_home_c42.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep, ph, mo)); break; }
+          final fire = _shift(_plus(d, -off), f.hard);
+          if (fire == _plus(today, dayDelta)) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? '' : gen_app_peruk23_home_c42.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep, ph, mo)); break; }
         }
       }
     }
@@ -129,7 +137,7 @@ class GenAppPeruk23HomeScreenToday {
     if (a == gen_app_peruk23_home_c46) { appStore.decide('undated:$rid', 'no'); appStore.logAction('decide', gen_app_peruk23_home_c47.replaceAll('{what}', appStore.displayOf('app_peruk23_ent1', rid)), entity: 'app_peruk23_ent1', rid: rid, field: 'undated:$rid'); return; }
     final r = appStore.byId('app_peruk23_ent1', rid); if (r == null) return;
     final prev = r[field] ?? '';
-    appStore.update('app_peruk23_ent1', rid, {field: _iso(_shift(today.add(Duration(days: a == gen_app_peruk23_home_c48 ? 7 : 1)), false))});   /* «קבע» לא נוחת בשבת */
+    appStore.update('app_peruk23_ent1', rid, {field: _iso(_shift(_plus(today, a == gen_app_peruk23_home_c48 ? 7 : 1), false))});   /* «קבע» לא נוחת בשבת */
     appStore.logAction('auto', a + ' · ' + field, entity: 'app_peruk23_ent1', rid: rid, field: field, prev: prev);
   }
 
@@ -149,7 +157,7 @@ class GenAppPeruk23HomeScreenToday {
       for (final f in _dates) { final d = _parse(r[f.label] ?? ''); if (d == null) continue; any = true; if (!d.isBefore(today) || appStore.decision('ign:$rid:${f.label}') != 'no') { visible = true; break; } }
       if (!any && appStore.decision('undated:$rid') != 'no') visible = true;
       if (visible) continue;
-      final t = _touched(r, rid); if (t == null) continue; final n = today.difference(t).inDays; if (n < 14) continue;
+      final t = _touched(r, rid); if (t == null) continue; final n = cockpitDaysSince(_iso(t), _iso(today)).toInt(); if (n < 14) continue;
       final acts = [gen_app_peruk23_home_c49, gen_app_peruk23_home_c50, gen_app_peruk23_home_c51];
       out.add(DsTodayItem(title: appStore.displayOf('app_peruk23_ent1', rid), sub: [gen_app_peruk23_home_c52.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
     }
@@ -187,13 +195,13 @@ class GenAppPeruk23HomeScreenToday {
       if (rem) for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        final ahead = aheadOffsets(d, f.hard, today); if (ahead.isEmpty) continue;   /* ב׳-צא · מועד של מחר ⇒ «יום לפני · ביום», לא «3 ימים לפני» שכבר עבר */
+        final ahead = aheadOf(d, f.hard, today); if (ahead.isEmpty) continue;   /* ב׳-צא · מועד של מחר ⇒ «יום לפני · ביום», לא «3 ימים לפני» שכבר עבר */
         out.add(DsApproveCard(question: gen_app_peruk23_home_c60.replaceAll('{field}', f.label).replaceAll('{days}', days(ahead)).replaceAll('{date}', _dayLabel(d, today)), source: module + ' · ' + who, okLabel: gen_app_peruk23_home_c61, noLabel: gen_app_peruk23_home_c62, alwaysLabel: gen_app_peruk23_home_c63,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }
       final last = appStore.lastLog('send', rid);   // P12 · טיוטה, לא שליחה: אחרי 3 ימים בלי שינוי-שלב ⇒ הצעה; השליחה עצמה רק בהקשה (T5)
-      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_peruk23_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_peruk23_home_c64.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_peruk23_home_c65, noLabel: gen_app_peruk23_home_c66, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
+      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : cockpitDaysSince(_iso(_day(at)), _iso(today)).toInt(); if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_peruk23_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_peruk23_home_c64.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_peruk23_home_c65, noLabel: gen_app_peruk23_home_c66, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
     }
     if (chain) for (final r in appStore.records('app_peruk23_ent1')) {   // P14 · הצעד-הבא: רשומה שהגיעה לשלב-האחרון (סגורה — לא ב-open) ובלי הכרעה
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk23_ent1', rid);

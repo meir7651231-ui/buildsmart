@@ -548,9 +548,9 @@ void main() {
     expect(t.startsWith('גל רון, מה שפתוח אצלנו:'), isTrue); expect(t.split('\n').length, 2); expect(t.contains(m.title), isTrue);
   });
   test('ב׳-צא · הצעת-התזכורת אומרת רק מה שעוד לפנינו: מועד מחר ⇒ [1, 0], מועד בעוד 10 ימים ⇒ [3, 1, 0]', () {
-    expect(GenAppCalendarHomeScreenToday.aheadOffsets(DateTime(2026, 9, 9), true, today), [1, 0]);
-    expect(GenAppCalendarHomeScreenToday.aheadOffsets(DateTime(2026, 9, 18), true, today), [3, 1, 0]);
-    expect(GenAppCalendarHomeScreenToday.aheadOffsets(DateTime(2026, 9, 8), true, today), [0]);
+    expect(GenAppCalendarHomeScreenToday.aheadOf(DateTime(2026, 9, 9), true, today), [1, 0]);
+    expect(GenAppCalendarHomeScreenToday.aheadOf(DateTime(2026, 9, 18), true, today), [3, 1, 0]);
+    expect(GenAppCalendarHomeScreenToday.aheadOf(DateTime(2026, 9, 8), true, today), [0]);
   });
   test('ב׳-צב · חיפוש-ספרות: «1250» מוצא «1,250» · «052-123» מוצא «0521234567» · טקסט רגיל לא נשבר', () {
     const S = 'app_calendar_ent1';

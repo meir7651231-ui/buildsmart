@@ -6,6 +6,11 @@ import '../dart-ui-bs/ds/ds_enum_field.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_number_field.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart-maor/norm-name.dart';
+import '../dart-maor/enroll-new-family.dart';
+import '../dart-maor/norm-phone.dart';
+import '../dart-maor/cockpit-days-since.dart';
+import '../dart-data-maor/norm-search-sockets.dart';
 import 'gen_balagan_moments.dart';
 import 'gen_app_calendar_root.dart';
 import 'gen_app_tasks_root.dart';
@@ -92,9 +97,10 @@ List<List<String>> balaganTimeChips(DateTime now) => [for (final c in gen_balaga
 List<List<String>> balaganRepeatChips() => [for (final c in gen_balagan_confirm_c3.split('|')) for (final r in balaganRepeat(c).take(1)) [c, r.iso]];
 /// ב׳-לג · צ׳יפי-אנשים: מי שכבר בתיקים (שדות-האדם של כל המודולים, לפי תדירות, עד 6) — «עם מי?» בהקשה; אפס-ניחוש: אין תיקים ⇒ אין צ׳יפים
 /// ב׳-פח · הטלפון של אדם מוכר — מהתיקים שכבר יש (שדה-אדם == השם · שדה-טלפון שנראה כמו טלפון)
-String balaganPhoneOf(String name) { final n = name.trim().toLowerCase(); if (n.length < 2) return ''; for (final m in kBalaganModules) { if (m.phoneFields.isEmpty || m.personFields.isEmpty) continue; for (final r in appStore.records(m.rootSlug)) { if (!m.personFields.any((f) => (r[f] ?? '').trim().toLowerCase() == n)) continue; for (final pf in m.phoneFields) { final v = (r[pf] ?? '').trim(); if (v.replaceAll(RegExp(r'[^0-9+]'), '').length >= 9) return v; } } } return ''; }
+String _nn(String s) => normName(s, (t) => normSearch(t, normSearch_T));   // G34 · חלקיקים: נרמול-שם על נרמול-חיפוש (סופיות)
+String balaganPhoneOf(String name) { final n = _nn(name); if (n.length < 2) return ''; for (final m in kBalaganModules) { if (m.phoneFields.isEmpty || m.personFields.isEmpty) continue; for (final r in appStore.records(m.rootSlug)) { if (!m.personFields.any((f) => _nn(r[f] ?? '') == n)) continue; for (final pf in m.phoneFields) { if (normPhone(r[pf]).length >= 9) return (r[pf] ?? '').trim(); } } } return ''; }   // G34 · דבק: שם-מנורמל · ספרות-טלפון — חלקיקים
 /// ב׳-פט · «כמו בפעם הקודמת»: הסכום (שדה-הכסף הראשי) של התיק האחרון באותו מודול — עם אותו אדם כשיש; מהנתונים, לא ניחוש
-String balaganLastAmount(BalaganModule m, String person) { final nf = m.numFields.where((f) => !m.percentFields.contains(f)).toList(); if (nf.isEmpty) return ''; final p = person.trim().toLowerCase(); Map<String, String>? best; for (final r in appStore.records(m.rootSlug)) { if (p.isNotEmpty && m.personFields.isNotEmpty && !m.personFields.any((f) => (r[f] ?? '').trim().toLowerCase() == p)) continue; final v = (r[nf.first] ?? '').trim(); if (v.isEmpty || (double.tryParse(v.replaceAll(',', '')) ?? 0) <= 0) continue; if (best == null || (r['__at'] ?? '').compareTo(best['__at'] ?? '') >= 0) best = r; } return best == null ? '' : (best[nf.first] ?? '').trim(); }
+String balaganLastAmount(BalaganModule m, String person) { final nf = m.numFields.where((f) => !m.percentFields.contains(f)).toList(); if (nf.isEmpty) return ''; final p = _nn(person); Map<String, String>? best; for (final r in appStore.records(m.rootSlug)) { if (p.isNotEmpty && m.personFields.isNotEmpty && !m.personFields.any((f) => _nn(r[f] ?? '') == p)) continue; final v = (r[nf.first] ?? '').trim(); if (v.isEmpty || (double.tryParse(v.replaceAll(',', '')) ?? 0) <= 0) continue; if (best == null || (r['__at'] ?? '').compareTo(best['__at'] ?? '') >= 0) best = r; } return best == null ? '' : (best[nf.first] ?? '').trim(); }   // «כמו בפעם הקודמת»: הרשומה האחרונה (מאוחר-ביותר לפי __at) של אותו אדם — דבק על חלקיק נרמול-השם
 List<String> balaganPeople({int max = 6}) { final counts = <String, int>{}; for (final m in kBalaganModules) { for (final r in appStore.records(m.rootSlug)) { for (final f in m.personFields) { final v = (r[f] ?? '').trim(); if (v.length >= 2) counts[v] = (counts[v] ?? 0) + 1; } } } final names = counts.keys.toList()..sort((a, b) => counts[b]!.compareTo(counts[a]!)); return names.take(max).toList(); }
 
 class GenBalaganConfirmScreen extends StatefulWidget {
@@ -162,7 +168,7 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
         if (m.numFields.isNotEmpty && f.type == 'num' && !m.percentFields.contains(f.label) && f.label == m.numFields.firstWhere((x) => !m.percentFields.contains(x), orElse: () => '') && (_v[f.label] ?? '').trim().isEmpty) for (final a in [balaganLastAmount(m, m.personFields.isEmpty ? '' : (_v[m.personFields.first] ?? ''))]) if (a.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 8, runSpacing: 8, children: [DsChipButton(label: gen_balagan_confirm_c19.replaceAll('{n}', a), onTap: () => setState(() => _v[f.label] = a))]))],   // ב׳-פט · «₪ 1,500 כמו בפעם הקודמת» — הסכום מהתיק האחרון (אותו אדם אם יש), מהנתונים
       if (rest.isNotEmpty) DsFold(title: gen_balagan_confirm_c20.replaceAll('{n}', rest.length.toString()), details: [for (final f in rest) _field(f)]),
       Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [DsChipButton(label: gen_balagan_confirm_c21, onTap: () => _save(again: true))])),   // ב׳-עח
-      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: (() { if (m.stages > 0 && balaganIsPast(widget.text)) return gen_balagan_confirm_c22; /* ב׳-קא */ if (dateF.isEmpty) return gen_balagan_confirm_c23; final d = DateTime.tryParse((_v[dateF] ?? '').trim()); if (d == null) return gen_balagan_confirm_c24; final t0 = DateTime.now(); final n = DateTime(d.year, d.month, d.day).difference(DateTime(t0.year, t0.month, t0.day)).inDays; return n == 0 ? gen_balagan_confirm_c25 : n < 0 ? gen_balagan_confirm_c26 : gen_balagan_confirm_c27.replaceAll('{day}', balaganDayLabel(d, t0)); })(), onTap: () => _save())   /* ב׳-סא · «יופיע במחר» — האדם יודע לאן זה הולך */),
+      Padding(padding: const EdgeInsets.only(top: 14), child: DsPrimaryButton(label: (() { if (m.stages > 0 && balaganIsPast(widget.text)) return gen_balagan_confirm_c22; /* ב׳-קא */ if (dateF.isEmpty) return gen_balagan_confirm_c23; final d = DateTime.tryParse((_v[dateF] ?? '').trim()); if (d == null) return gen_balagan_confirm_c24; final t0 = DateTime.now(); final n = -cockpitDaysSince(d.toIso8601String().substring(0, 10), t0.toIso8601String().substring(0, 10)).toInt(); return n == 0 ? gen_balagan_confirm_c25 : n < 0 ? gen_balagan_confirm_c26 : gen_balagan_confirm_c27.replaceAll('{day}', balaganDayLabel(d, t0)); })(), onTap: () => _save())   /* ב׳-סא · «יופיע במחר» — האדם יודע לאן זה הולך */),
     ]);
   }
 }

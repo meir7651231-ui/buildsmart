@@ -17,6 +17,7 @@ String _jsStr(dynamic t) {
 
 /// נרמול-חיפוש מוטמע (מקור: maor/src/lib/validate.ts:51-59) — regex/string, אפס-IO.
 /// זהה-למקור: lower → הסרת-ניקוד → סופיות→רגילות → הסרת-פיסוק → trim.
+/// normSearch — נרמול טקסט לחיפוש: אותיות-סופיות ⇒ רגילות (שקעי T), אותיות-קטנות; מוצא: maor lib/normSearch
 String normSearch(dynamic t, Map<String, String> T) {
   // מפתח-עברי שקושר-שקע = חיווט; הערכים מאטום-הדאטה norm-search-sockets (הכרעה 16)
   final Map<String, String> finals = {

@@ -3,7 +3,11 @@
 import '../dart-data-bs/auto/gen_app_calendar_root_content.dart';
 import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart-maor/cockpit-days-since.dart';
+import '../dart-maor/day-month-of-iso.dart';
+import '../dart-maor/weekday-of-iso.dart';
 import '../dart-ui-bs/auto/kv_line.dart';
+import '../dart/f_money.dart';
 import 'gen_app_calendar_ent1.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
@@ -12,10 +16,10 @@ import 'package:flutter/material.dart';
 
 /// 8000 ⇒ 8,000 · 12.5 ⇒ 12.5 — סכום קריא בתיק (רק תצוגה; הרשומה נשארת ספרות)
 /// ב׳-מג · תאריך בתיק כמו שאומרים: היום (9.9) · מחר (10.9) · יום שני 21.9 · 3.10.2027 — ISO נשאר בנתונים
-String _fmtDate(String s) { final t = s.trim(); final d = DateTime.tryParse(t.length == 10 ? '${t}T12:00:00' : t); if (d == null) return t; final now = DateTime.now(); final n = DateTime(d.year, d.month, d.day).difference(DateTime(now.year, now.month, now.day)).inDays; final dm = '${d.day}.${d.month}'; if (n == 0) return gen_app_calendar_root_c43 + ' (' + dm + ')'; if (n == 1) return gen_app_calendar_root_c44 + ' (' + dm + ')'; if (n == -1) return gen_app_calendar_root_c45 + ' (' + dm + ')'; if (n.abs() <= 6) return gen_app_calendar_root_c46.replaceAll('{day}', gen_app_calendar_root_c47.split(',')[d.weekday % 7]) + ' ' + dm; return dm + '.${d.year}'; }
+String _fmtDate(String s) { final t = s.trim(); final d = DateTime.tryParse(t.length == 10 ? '${t}T12:00:00' : t); if (d == null) return t; final now = DateTime.now(); final iso = t.length >= 10 ? t.substring(0, 10) : t; final tIso = now.toIso8601String().substring(0, 10); final n = -cockpitDaysSince(iso, tIso).toInt(); if (n == 0) return gen_app_calendar_root_c43; if (n == 1) return gen_app_calendar_root_c44; if (n == -1) return gen_app_calendar_root_c45; final dm = dayMonthOfIso(iso, d.year != now.year); return n.abs() <= 6 ? gen_app_calendar_root_c46.replaceAll('{day}', gen_app_calendar_root_c47.split(',')[weekdayOfIso(iso)]) + ' ' + dm : dm; }   // ב׳-מג · תאריך במילים בתיק · G34 · דבק על חלקיקים (ימים-מאז · יום-בשבוע · יום.חודש)
 /// ב׳-נד · שורות «מה קרה מאז?» — «2026-09-01 · טקסט» ⇒ «יום שלישי 1.9 · טקסט»
 String _noteText(String s) => s.split('\n').map((l) { final m = RegExp(r'^(\d{4}-\d{2}-\d{2}) · (.*)$').firstMatch(l); return m == null ? l : _fmtDate(m.group(1)!) + ' · ' + m.group(2)!; }).join('\n');
-String _fmtNum(String s) { final t = s.trim(); final v = num.tryParse(t.replaceAll(',', '')); if (v == null) return t; final parts = t.replaceAll(',', '').split('.'); final ip = parts[0].replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (m) => ','); return parts.length > 1 ? ip + '.' + parts[1] : ip; }
+String _fmtNum(String s) { final t = s.trim(); final v = num.tryParse(t.replaceAll(',', '')); if (v == null) return t; final parts = t.replaceAll(',', '').split('.'); final ip = fMoney(num.tryParse(parts[0]) ?? 0).replaceFirst('₪', ''); return parts.length > 1 ? ip + '.' + parts[1] : ip; }   // G34 · חלקיק fMoney (מפרידי-אלפים)
 
 class GenAppCalendarRootScreen extends StatelessWidget {
   const GenAppCalendarRootScreen({required this.id, super.key});
