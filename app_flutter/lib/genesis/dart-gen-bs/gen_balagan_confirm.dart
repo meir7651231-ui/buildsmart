@@ -43,6 +43,42 @@ import 'package:flutter/material.dart';
 String balaganRemember(String label) => appStore.setting('mem:' + label);
 void balaganLearn(BalaganField f, String v) { if (f.type == 'text' && f.options.isEmpty && v.trim().isNotEmpty && v.trim().length <= 30) appStore.setSetting('mem:' + f.label, v.trim()); }
 /// ב׳-לא · צ׳יפי-מועד: תווית ⇒ תאריך דרך אותו מנתח-התאריכים של הרגעים (אפס-כפל-לוגיקה) — «מתי?» בהקשה אחת, אפס-הקלדה; תווית שהמנתח לא מבין נופלת (לא מומצאת)
+/// ב׳-לט · פותח-תיק לפי ישות (כל 31 עמודי-השורש) — ל«היום»: הקשה על שורה ⇒ התיק
+Widget balaganOpenRoot(String entity, String id) {
+  switch (entity) {
+    case 'app_calendar_ent1': return GenAppCalendarRootScreen(id: id);
+    case 'app_tasks_ent1': return GenAppTasksRootScreen(id: id);
+    case 'app_peruk01_ent1': return GenAppPeruk01RootScreen(id: id);
+    case 'app_peruk02_ent1': return GenAppPeruk02RootScreen(id: id);
+    case 'app_peruk03_ent1': return GenAppPeruk03RootScreen(id: id);
+    case 'app_peruk04_ent1': return GenAppPeruk04RootScreen(id: id);
+    case 'app_peruk05_ent1': return GenAppPeruk05RootScreen(id: id);
+    case 'app_peruk06_ent1': return GenAppPeruk06RootScreen(id: id);
+    case 'app_peruk07_ent1': return GenAppPeruk07RootScreen(id: id);
+    case 'app_peruk08_ent1': return GenAppPeruk08RootScreen(id: id);
+    case 'app_peruk09_ent1': return GenAppPeruk09RootScreen(id: id);
+    case 'app_peruk10_ent1': return GenAppPeruk10RootScreen(id: id);
+    case 'app_peruk11_ent1': return GenAppPeruk11RootScreen(id: id);
+    case 'app_peruk12_ent1': return GenAppPeruk12RootScreen(id: id);
+    case 'app_peruk13_ent1': return GenAppPeruk13RootScreen(id: id);
+    case 'app_peruk14_ent1': return GenAppPeruk14RootScreen(id: id);
+    case 'app_peruk15_ent1': return GenAppPeruk15RootScreen(id: id);
+    case 'app_peruk16_ent1': return GenAppPeruk16RootScreen(id: id);
+    case 'app_peruk17_ent1': return GenAppPeruk17RootScreen(id: id);
+    case 'app_peruk18_ent1': return GenAppPeruk18RootScreen(id: id);
+    case 'app_peruk19_ent1': return GenAppPeruk19RootScreen(id: id);
+    case 'app_peruk20_ent1': return GenAppPeruk20RootScreen(id: id);
+    case 'app_peruk21_ent1': return GenAppPeruk21RootScreen(id: id);
+    case 'app_peruk22_ent1': return GenAppPeruk22RootScreen(id: id);
+    case 'app_peruk23_ent1': return GenAppPeruk23RootScreen(id: id);
+    case 'app_peruk24_ent1': return GenAppPeruk24RootScreen(id: id);
+    case 'app_peruk25_ent1': return GenAppPeruk25RootScreen(id: id);
+    case 'app_peruk26_ent1': return GenAppPeruk26RootScreen(id: id);
+    case 'app_peruk27_ent1': return GenAppPeruk27RootScreen(id: id);
+    case 'app_peruk28_ent1': return GenAppPeruk28RootScreen(id: id);
+    default: return const SizedBox.shrink();
+  }
+}
 List<List<String>> balaganDateChips(DateTime today) => [for (final c in gen_balagan_confirm_c0.split('|')) for (final d in balaganDates(c, today).take(1)) [c, d.iso]];
 /// ב׳-לג · צ׳יפי-שעה: חלקי-יום דרך אותו balaganTimes של הרגעים (בבוקר 09:00 · בצהריים 13:00 · אחר הצהריים 16:00 · בערב 19:00)
 List<List<String>> balaganTimeChips(DateTime now) => [for (final c in gen_balagan_confirm_c1.split('|')) for (final t in balaganTimes(c, now: now).take(1)) [c, t.iso]];
@@ -65,41 +101,7 @@ class GenBalaganConfirmScreen extends StatefulWidget {
 
 class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
   bool _forceNew = false;
-  Widget _openRoot(String entity, String id) {
-    switch (entity) {
-      case 'app_calendar_ent1': return GenAppCalendarRootScreen(id: id);
-      case 'app_tasks_ent1': return GenAppTasksRootScreen(id: id);
-      case 'app_peruk01_ent1': return GenAppPeruk01RootScreen(id: id);
-      case 'app_peruk02_ent1': return GenAppPeruk02RootScreen(id: id);
-      case 'app_peruk03_ent1': return GenAppPeruk03RootScreen(id: id);
-      case 'app_peruk04_ent1': return GenAppPeruk04RootScreen(id: id);
-      case 'app_peruk05_ent1': return GenAppPeruk05RootScreen(id: id);
-      case 'app_peruk06_ent1': return GenAppPeruk06RootScreen(id: id);
-      case 'app_peruk07_ent1': return GenAppPeruk07RootScreen(id: id);
-      case 'app_peruk08_ent1': return GenAppPeruk08RootScreen(id: id);
-      case 'app_peruk09_ent1': return GenAppPeruk09RootScreen(id: id);
-      case 'app_peruk10_ent1': return GenAppPeruk10RootScreen(id: id);
-      case 'app_peruk11_ent1': return GenAppPeruk11RootScreen(id: id);
-      case 'app_peruk12_ent1': return GenAppPeruk12RootScreen(id: id);
-      case 'app_peruk13_ent1': return GenAppPeruk13RootScreen(id: id);
-      case 'app_peruk14_ent1': return GenAppPeruk14RootScreen(id: id);
-      case 'app_peruk15_ent1': return GenAppPeruk15RootScreen(id: id);
-      case 'app_peruk16_ent1': return GenAppPeruk16RootScreen(id: id);
-      case 'app_peruk17_ent1': return GenAppPeruk17RootScreen(id: id);
-      case 'app_peruk18_ent1': return GenAppPeruk18RootScreen(id: id);
-      case 'app_peruk19_ent1': return GenAppPeruk19RootScreen(id: id);
-      case 'app_peruk20_ent1': return GenAppPeruk20RootScreen(id: id);
-      case 'app_peruk21_ent1': return GenAppPeruk21RootScreen(id: id);
-      case 'app_peruk22_ent1': return GenAppPeruk22RootScreen(id: id);
-      case 'app_peruk23_ent1': return GenAppPeruk23RootScreen(id: id);
-      case 'app_peruk24_ent1': return GenAppPeruk24RootScreen(id: id);
-      case 'app_peruk25_ent1': return GenAppPeruk25RootScreen(id: id);
-      case 'app_peruk26_ent1': return GenAppPeruk26RootScreen(id: id);
-      case 'app_peruk27_ent1': return GenAppPeruk27RootScreen(id: id);
-      case 'app_peruk28_ent1': return GenAppPeruk28RootScreen(id: id);
-      default: return const SizedBox.shrink();
-    }
-  }
+  Widget _openRoot(String entity, String id) => balaganOpenRoot(entity, id);   // ב׳-לט · פותח-אחד לכולם
   late final Map<String, String> _v = {for (final f in widget.module.fields) if (balaganRemember(f.label).isNotEmpty) f.label: balaganRemember(f.label), ...widget.facts};
   Widget _field(BalaganField f) {
     final v = _v[f.label] ?? '';

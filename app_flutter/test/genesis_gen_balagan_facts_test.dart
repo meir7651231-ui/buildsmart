@@ -7,6 +7,7 @@ import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_confirm.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_topics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -445,6 +446,10 @@ void main() {
     expect(balaganPersonFor('נועה'), isNull);
     expect(balaganPersonFor('ש'), isNull);
     expect(balaganPersonFor(' נועה לב ')!.files, 1);
+  });
+  test('פותח-תיק: ישות מוכרת ⇒ עמוד-השורש שלה; לא מוכרת ⇒ ריק', () {
+    expect(balaganOpenRoot('nope', 'x') is SizedBox, isTrue);
+    for (final m in kBalaganModules) { expect(balaganOpenRoot(m.rootSlug, 'x') is SizedBox, isFalse, reason: m.rootSlug); }
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
