@@ -458,6 +458,15 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קמב/קמד/קמה · ICS מפריטי-טווח · «מתי ארנונה» ⇒ הפעם האחרונה · חסר-טלפון', () {
+    final m = kBalaganModules.where((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty).skip(4).first;
+    final id = appStore.add(m.rootSlug, {m.descField: 'ביקורת רכב', m.dateFields.first: '2033-04-05'}); final ics = balaganIcsOf(balaganRangeItems('2033-04-01', '2033-04-30'), 'בדיקה', DateTime(2026, 9, 8, 10));
+    expect(ics.contains('DTSTART;VALUE=DATE:20330405'), isTrue); expect(ics.contains('X-WR-CALNAME:בדיקה'), isTrue);
+    expect(balaganWhenOf('מתי ארנונה'), 'ארנונה'); expect(balaganWhenOf('מתי היה ביקורת רכב'), 'ביקורת רכב'); expect(balaganWhenOf('ארנונה'), '');
+    expect(balaganLastDone('ביקורת רכב'), isEmpty); appStore.logAction('done', 'סיים', entity: m.rootSlug, rid: id); expect(balaganLastDone('ביקורת רכב').isNotEmpty, isTrue); expect(balaganLastDone('זזזזז'), isEmpty);
+    final mp = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty); final a = appStore.add(mp.rootSlug, {mp.personFields.first: 'בלי טלפון', '__stage': '0'}); final b = appStore.add(mp.rootSlug, {mp.personFields.first: 'עם טלפון', mp.phoneFields.first: '050-1112222', '__stage': '0'});
+    final np = balaganNoPhone(); expect(np.any((e) => e[1] == a), isTrue); expect(np.any((e) => e[1] == b), isFalse);
+  });
   test('ב׳-קלט/קמא · השעה הרגילה (חציון של אותו מתאר, ≥2) · פג-תוקף בקרוב (שדה-תוקף ב-30 יום, פתוח בלבד)', () {
     final mt = kBalaganModules.where((x) => x.descField.isNotEmpty && x.timeFields.isNotEmpty).firstOrNull;
     if (mt != null) { appStore.add(mt.rootSlug, {mt.descField: 'חוג שחייה', mt.timeFields.first: '16:00'}); appStore.add(mt.rootSlug, {mt.descField: 'חוג שחייה', mt.timeFields.first: '17:00'}); appStore.add(mt.rootSlug, {mt.descField: 'חוג שחייה', mt.timeFields.first: '16:30'}); expect(balaganUsualTime(mt, {mt.descField: 'חוג שחייה'}), '16:30'); expect(balaganUsualTime(mt, {mt.descField: 'אחר'}), ''); }

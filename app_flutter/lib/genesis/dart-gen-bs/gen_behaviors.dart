@@ -1,13 +1,16 @@
 // 🧩 חולל ע"י behavior-compose (G34ב · הכרעה-30) — שכבת-ההרכבה: התנהגויות מחלקיקים מוכחים (behavior-plan.json), במקום אחד. אל תערוך ידנית.
 import '../dart-maor/add-days-iso.dart';
+import '../dart-maor/build-ics.dart';
 import '../dart-maor/cockpit-days-since.dart';
 import '../dart-maor/count-by.dart';
 import '../dart-maor/enroll-new-family.dart';
 import '../dart-maor/find-duplicate-groups.dart';
+import '../dart-maor/fold-ics-line.dart';
 import '../dart-maor/gem-year.dart';
 import '../dart-maor/gematria.dart';
 import '../dart-maor/heb-date-full.dart';
 import '../dart-maor/heb-parts.dart';
+import '../dart-maor/ics-escape.dart';
 import '../dart-maor/in-range.dart';
 import '../dart-maor/minutes-between-iso.dart';
 import '../dart-maor/month-key.dart';
@@ -104,5 +107,7 @@ double bhMoney(String? s) => double.tryParse((s ?? '').replaceAll(',', '').repla
 String bhMonthEnd(String iso) { final mk = bhMonthKey(iso); final y = int.parse(mk.substring(0, 4)), m = int.parse(mk.substring(5, 7)); final next = m == 12 ? (y + 1).toString() + '-01-01' : y.toString() + '-' + (m + 1).toString().padLeft(2, '0') + '-01'; return bhPlusDays(next, -1); }
 /// ב׳-קלט · חציון-שעות 'HH:MM' (timeToMin ⇒ bhMedianInt ⇒ HH:MM); פחות מ-2 ⇒ ''
 String bhMedianHm(List<String> hms) { final ms = <int>[]; for (final h in hms) { if (h.length < 5) continue; final v = timeToMin(h); if (v.isFinite) ms.add(v.toInt()); } return ms.length < 2 ? '' : _hm(bhMedianInt(ms)); }
+/// ב׳-קמב · קובץ-ICS (RFC 5545) ממופעים [{uid,date,time?,title,notes?}] — buildIcs עם icsEscape · foldIcsLine
+String bhIcs(List<Map<String, String?>> occ, String calName, DateTime now) => buildIcs(occ, calName, now, (s) => icsEscape(s), (l) => foldIcsLine(l));
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');
