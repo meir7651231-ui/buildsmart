@@ -53,7 +53,7 @@ const RESOURCES = {"firebase-messaging-sw.js": "2a2983a6c96c2735ec25d203145bf534
 "index.html": "b4579b4d4a93afd8b4145c9d25ec5b51",
 "/": "b4579b4d4a93afd8b4145c9d25ec5b51",
 "flutter.js": "76f08d47ff9f5715220992f993002504",
-"main.dart.js": "02884214315ae4ed2056ee56490287a3",
+"main.dart.js": "56c040529c51e933a7d6a4c169a05920",
 "manifest.json": "1783a1f7b122cc19b14212b9ec99febf",
 "icons/Icon-512.png": "ab7423867da116fab43ccb21fc6d6d25",
 "icons/og-image.png": "7f8ec28dafb1d75afd28cb1f0d5552b9",
