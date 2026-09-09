@@ -474,8 +474,10 @@ class DsActionRow extends StatelessWidget {
         Expanded(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: TextStyle(color: lk.ink, fontSize: 16, height: 1.4)),
           if (sub.isNotEmpty) Text(sub, style: TextStyle(color: tone == 2 ? lk.danger : lk.muted, fontSize: 13)),
+          // more than 3 actions: second line (Wrap) so the title keeps its room on a phone
+          if (actions.length > 3) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 6, runSpacing: 6, children: [for (var i = 0; i < actions.length && i < 6; i++) GestureDetector(onTap: onAct == null ? null : () => onAct!(i), child: DsChip(label: actions[i], tone: i == 0 ? 0 : 2))])),
         ])),
-        for (var i = 0; i < actions.length && i < 5; i++) GestureDetector(onTap: onAct == null ? null : () => onAct!(i), child: Padding(padding: const EdgeInsets.only(right: 6), child: DsChip(label: actions[i], tone: i == 0 ? 0 : 2))),
+        if (actions.length <= 3) for (var i = 0; i < actions.length; i++) GestureDetector(onTap: onAct == null ? null : () => onAct!(i), child: Padding(padding: const EdgeInsets.only(right: 6), child: DsChip(label: actions[i], tone: i == 0 ? 0 : 2))),
       ]),
     );
   }
