@@ -458,6 +458,14 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קמז/קמח · CSV מפריטי-טווח · ייבוא-CSV לפי כותרות ⇒ רשומות · כותרות זרות ⇒ אין', () {
+    final m = kBalaganModules.where((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))).last; final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
+    final csv = m.descField + ',' + m.dateFields.first + ',' + nf + '\nייבוא-א,2034-01-05,"1,500"\nייבוא-ב,2034-01-06,200';
+    final r = balaganImportCsv(csv); expect(r[0], m.title); expect(r[1], 2);
+    expect(appStore.records(m.rootSlug).any((x) => x[m.descField] == 'ייבוא-א' && x[nf] == '1,500'), isTrue);
+    expect(balaganImportCsv('זזז,קקק\n1,2')[1], 0); expect(balaganImportCsv('')[1], 0);
+    final out = balaganCsvOf(balaganRangeItems('2034-01-01', '2034-01-31')); expect(out.contains('ייבוא-א'), isTrue); expect(out.contains('"1,500"'), isTrue);
+  });
   test('ב׳-קמב/קמד/קמה · ICS מפריטי-טווח · «מתי ארנונה» ⇒ הפעם האחרונה · חסר-טלפון', () {
     final m = kBalaganModules.where((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty).skip(4).first;
     final id = appStore.add(m.rootSlug, {m.descField: 'ביקורת רכב', m.dateFields.first: '2033-04-05'}); final ics = balaganIcsOf(balaganRangeItems('2033-04-01', '2033-04-30'), 'בדיקה', DateTime(2026, 9, 8, 10));

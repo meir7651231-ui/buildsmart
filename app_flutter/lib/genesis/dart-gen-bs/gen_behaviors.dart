@@ -3,6 +3,7 @@ import '../dart-maor/add-days-iso.dart';
 import '../dart-maor/build-ics.dart';
 import '../dart-maor/cockpit-days-since.dart';
 import '../dart-maor/count-by.dart';
+import '../dart-maor/csv-escape.dart';
 import '../dart-maor/enroll-new-family.dart';
 import '../dart-maor/find-duplicate-groups.dart';
 import '../dart-maor/fold-ics-line.dart';
@@ -17,12 +18,14 @@ import '../dart-maor/month-key.dart';
 import '../dart-maor/name-matches.dart';
 import '../dart-maor/norm-name.dart';
 import '../dart-maor/norm-phone.dart';
+import '../dart-maor/parse-csv.dart';
 import '../dart-maor/phone-key.dart';
 import '../dart-maor/rule-contains.dart';
 import '../dart-maor/rule-exact.dart';
 import '../dart-maor/rule-prefix.dart';
 import '../dart-maor/task-overdue.dart';
 import '../dart-maor/time-to-min.dart';
+import '../dart-maor/to-csv.dart';
 import '../dart/damerau_levenshtein.dart';
 import '../dart/f_money.dart';
 import '../dart/start_of_week_sunday.dart';
@@ -109,5 +112,8 @@ String bhMonthEnd(String iso) { final mk = bhMonthKey(iso); final y = int.parse(
 String bhMedianHm(List<String> hms) { final ms = <int>[]; for (final h in hms) { if (h.length < 5) continue; final v = timeToMin(h); if (v.isFinite) ms.add(v.toInt()); } return ms.length < 2 ? '' : _hm(bhMedianInt(ms)); }
 /// ב׳-קמב · קובץ-ICS (RFC 5545) ממופעים [{uid,date,time?,title,notes?}] — buildIcs עם icsEscape · foldIcsLine
 String bhIcs(List<Map<String, String?>> occ, String calName, DateTime now) => buildIcs(occ, calName, now, (s) => icsEscape(s), (l) => foldIcsLine(l));
+/// ב׳-קמז · שורות ⇒ CSV (toCsv עם csvEscape; BOM לאקסל-בעברית) · CSV ⇒ שורות (parseCsv)
+String bhCsv(List<List<Object?>> rows) => toCsv(rows, (v) => csvEscape(v)) as String;
+List<List<String>> bhCsvParse(String text) => parseCsv(text);
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');
