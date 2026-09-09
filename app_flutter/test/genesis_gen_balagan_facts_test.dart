@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
+import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_confirm.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -376,6 +377,11 @@ void main() {
     expect(appStore.byId(S, old)![F], '2026-09-09');
     expect(GenAppCalendarHomeScreenToday.stale(today).any((x) => x.rid == old), isFalse);
     expect(GenAppCalendarHomeScreenToday.items(today.add(const Duration(days: 1)), dayDelta: 0).any((x) => x.rid == old), isTrue);
+  });
+  test('צ׳יפי-מועד: כל תווית ⇒ תאריך דרך מנתח-הרגעים (היום · מחר · ביום ראשון · בעוד שבוע)', () {
+    final c = balaganDateChips(today);
+    expect(c.length, 4);
+    expect(c.map((x) => x[1]).toList(), ['2026-09-08', '2026-09-09', '2026-09-13', '2026-09-15']);
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
