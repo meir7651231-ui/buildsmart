@@ -449,6 +449,15 @@ void main() {
     expect(balaganPersonFor('ש'), isNull);
     expect(balaganPersonFor('שגב נועה')!.name, 'נועה שגב');   // ב׳-קג · סדר-מילים הפוך ⇒ אותו אדם
   });
+  test('ב׳-קי/קיא/קיב · החודש (מונה+₪ של תיקים פתוחים) · נראה-חוזר (3 ארנונות חודשיות ⇒ m1) · שלחת-ואין-תשובה (3 ימים; פעולה מאוחרת מבטלת)', () {
+    final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))); final S = m.rootSlug; final D = m.descField; final df = m.dateFields.first; final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
+    appStore.add(S, {D: 'ארנונה', df: '2026-07-15', nf: '350', '__stage': '0'}); appStore.add(S, {D: 'ארנונה', df: '2026-08-15', nf: '350', '__stage': '0'}); appStore.add(S, {D: 'ביטוח', df: '2026-09-20', nf: '1,200', '__stage': '0'});
+    expect(balaganRecurHint(m, {D: 'ארנונה', df: '2026-09-15'}), 'm1'); expect(balaganRecurHint(m, {D: 'ביטוח', df: '2026-09-15'}), ''); expect(balaganRecurHint(m, {D: 'ארנונה', df: ''}), '');
+    final ms = balaganMonthSummary(DateTime(2026, 9, 8)); expect(ms[0] >= 1, isTrue); expect(ms[1] >= 1200, isTrue);
+    final id = appStore.add(S, {D: 'לשלוח הצעה', df: '2026-09-01'}); appStore.logAction('send', 'שלח', entity: S, rid: id); final i0 = appStore.log.first['id'] ?? '';
+    expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
+    appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
+  });
   test('ב׳-קו · אותו אדם בכמה שמות: טלפון משותף ⇒ כינויים · הכרטיס מאחד את התיקים · שם זר לא נדבק', () {
     final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty);
     appStore.add(m.rootSlug, {m.personFields.first: 'רות לוי', m.phoneFields.first: '052-111-2233'}); appStore.add(m.rootSlug, {m.personFields.first: 'רותי לוי', m.phoneFields.first: '+972521112233'}); appStore.add(m.rootSlug, {m.personFields.first: 'דן כהן', m.phoneFields.first: '03-5551234'});

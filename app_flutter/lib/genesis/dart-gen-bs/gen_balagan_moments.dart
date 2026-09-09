@@ -175,6 +175,8 @@ List<Map<String, String>> balaganDuplicates(BalaganModule m, Map<String, String>
   if (keys.isEmpty) return const [];
   return appStore.records(m.rootSlug).where((r) { final st = int.tryParse(r['__stage'] ?? '0') ?? 0; if (m.stages > 0 && st >= m.stages - 1) return false; return keys.any((f) => m.personFields.contains(f) ? bhSameName(r[f] ?? '', v[f]!) : norm(r[f] ?? '') == norm(v[f]!)); }).toList();   /* ב׳-קג · שדה-אדם: אותו-אדם לפי דמיון-שם (bhSameName) — «לוי רות» = «רות לוי» */
 }
+/// ב׳-קיא · «נראה חוזר»: תיקים קיימים עם אותו מתאר (נרמול-חיפוש) + המועד החדש ⇒ bhRecurCode על המועדים; אין מתאר/מועד ⇒ ''
+String balaganRecurHint(BalaganModule m, Map<String, String> v) { if (m.descField.isEmpty || m.dateFields.isEmpty) return ''; final d0 = bhNormSearch(v[m.descField] ?? ''); final nd = (v[m.dateFields.first] ?? '').trim(); if (d0.length < 3 || nd.length < 10) return ''; final dates = <String>[nd]; for (final r in appStore.records(m.rootSlug)) { if (bhNormSearch(r[m.descField] ?? '') != d0) continue; final d = (r[m.dateFields.first] ?? '').trim(); if (d.length >= 10 && (r['__repeat'] ?? '').isEmpty) dates.add(d); } return bhRecurCode(dates); }
 /// מיזוג לתיק קיים: שדה ריק בקיים מקבל את הערך החדש · «מה כתבת» נצבר (שורה חדשה) · שדה מלא לא נדרס. פעולה אחת עם החזר (prev = JSON של מה שנגע).
 int balaganMerge(BalaganModule m, String id, Map<String, String> v, String logText) {
   final r = appStore.byId(m.rootSlug, id); if (r == null) return 0;

@@ -10,6 +10,7 @@ import '../dart-maor/heb-date-full.dart';
 import '../dart-maor/heb-parts.dart';
 import '../dart-maor/in-range.dart';
 import '../dart-maor/minutes-between-iso.dart';
+import '../dart-maor/month-key.dart';
 import '../dart-maor/name-matches.dart';
 import '../dart-maor/norm-name.dart';
 import '../dart-maor/norm-phone.dart';
@@ -79,5 +80,12 @@ List<List<String>> bhPersonGroups(List<String> names, Map<String, List<String>> 
 String bhClosest(String q, List<String> cands) { final nq = bhNormSearch(q); if (nq.length < 3) return ''; final lim = nq.length >= 5 ? 2 : 1; var best = ''; var bd = lim + 1; for (final c in cands) { final nc = bhNormSearch(c); if (nc.isEmpty) continue; for (final w in [nc, ...nc.split(' ')]) { if (w == nq) { bd = -1; break; } if (w.length < nq.length - lim || w.length > nq.length + lim) continue; final d = damerauLevenshtein(nq, w); if (d < bd) { bd = d; best = c; } } if (bd < 0) return ''; } return best; }   // גם מילה-בתוך-הכותרת («ליקוים» ⇒ «ליקויים אחרי כניסה…»); שוויון-מלא = אין הצעה
 /// ב׳-קח · חלונות-פנויים בין בלוקים תפוסים ([['HH:MM','HH:MM']…] ממוינים) מ-fromHM עד toHM, רק ≥ minMin דק׳ (timeToMin)
 List<List<String>> bhFreeWindows(List<List<String>> busy, String fromHM, String toHM, int minMin) { int mn(String t) { final v = timeToMin(t); return v.isFinite ? v.toInt() : 0; } final out = <List<String>>[]; var cur = mn(fromHM); final end = mn(toHM); for (final b in busy) { final a = mn(b[0]), e = mn(b[1]); if (a - cur >= minMin) out.add([_hm(cur), _hm(a)]); if (e > cur) cur = e; } if (end - cur >= minMin) out.add([_hm(cur), _hm(end)]); return out; }
+/// ב׳-קי · מפתח-חודש (monthKey) · אותו-חודש
+String bhMonthKey(String iso) => monthKey(iso);
+bool bhSameMonth(String a, String b) => a.length >= 7 && b.length >= 7 && bhMonthKey(a) == bhMonthKey(b);
+/// ב׳-קיא · «נראה חוזר»: כל המרווחים בין המועדים הממוינים (bhDaysSince) באותו קצב ⇒ קוד-חזרה d1/w1/w2/m1/m2/y1; פחות מ-3 מועדים, מרווח-לא-מוכר או קצב-מעורב ⇒ ''
+String bhRecurCode(List<String> isos) { final s = [...isos]..sort(); if (s.length < 3) return ''; String code(int g) => g == 1 ? 'd1' : g >= 6 && g <= 8 ? 'w1' : g >= 13 && g <= 15 ? 'w2' : g >= 26 && g <= 35 ? 'm1' : g >= 55 && g <= 65 ? 'm2' : g >= 360 && g <= 370 ? 'y1' : ''; String? c; for (var i = 1; i < s.length; i++) { final k = code(bhDaysSince(s[i - 1], s[i])); if (k.isEmpty || (c != null && c != k)) return ''; c = k; } return c ?? ''; }   // כל המרווחים באותו קצב — אחרת אין הצעה
+/// ב׳-קיב · ימים בלי תשובה מאז שליחה (bhDaysSince): פעולה מאוחרת על אותו תיק ⇒ −1 (נענה/טופל)
+int bhSilentDays(String sentAt, String? laterAt, String todayIso) { if (sentAt.length < 10) return -1; if (laterAt != null && laterAt.length >= 10 && laterAt.compareTo(sentAt) > 0) return -1; return bhDaysSince(sentAt.substring(0, 10), todayIso); }
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');
