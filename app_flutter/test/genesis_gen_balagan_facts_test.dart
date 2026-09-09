@@ -458,6 +458,13 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קנ/קנא/קנג · טלפון מתיק אחר · CSV-הכל · «טלפון של X» ⇒ ערך · «של» בלי צדדים ⇒ ריק', () {
+    final mp = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty);
+    appStore.add(mp.rootSlug, {mp.personFields.first: 'גדי פרץ', mp.phoneFields.first: '053-999-1111'}); expect(balaganPhoneOfPerson('גדי פרץ'), '053-999-1111'); expect(balaganPhoneOfPerson('אין כזה'), '');
+    expect(balaganFieldOf('טלפון של גדי פרץ'), ['טלפון', 'גדי פרץ']); expect(balaganFieldOf('של גדי'), isEmpty); expect(balaganFieldOf('טלפון'), isEmpty);
+    final fv = balaganFieldValue(mp.phoneFields.first, 'גדי פרץ'); expect(fv.isNotEmpty, isTrue); expect(fv[2], '053-999-1111'); expect(balaganFieldValue('זזזז', 'גדי פרץ'), isEmpty);
+    final all = balaganCsvAll(); expect(all.contains('גדי פרץ'), isTrue); expect(all.startsWith('\uFEFF') || all.codeUnitAt(0) == 0xFEFF, isTrue);
+  });
   test('ב׳-קמז/קמח · CSV מפריטי-טווח · ייבוא-CSV לפי כותרות ⇒ רשומות · כותרות זרות ⇒ אין', () {
     final m = kBalaganModules.where((x) => x.dateFields.isNotEmpty && x.descField.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f))).last; final nf = m.numFields.where((f) => !m.percentFields.contains(f)).first;
     final csv = m.descField + ',' + m.dateFields.first + ',' + nf + '\nייבוא-א,2034-01-05,"1,500"\nייבוא-ב,2034-01-06,200';
