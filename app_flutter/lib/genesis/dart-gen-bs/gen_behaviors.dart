@@ -3,6 +3,7 @@ import '../dart-maor/add-days-iso.dart';
 import '../dart-maor/cockpit-days-since.dart';
 import '../dart-maor/count-by.dart';
 import '../dart-maor/enroll-new-family.dart';
+import '../dart-maor/find-duplicate-groups.dart';
 import '../dart-maor/gem-year.dart';
 import '../dart-maor/gematria.dart';
 import '../dart-maor/heb-date-full.dart';
@@ -12,6 +13,7 @@ import '../dart-maor/minutes-between-iso.dart';
 import '../dart-maor/name-matches.dart';
 import '../dart-maor/norm-name.dart';
 import '../dart-maor/norm-phone.dart';
+import '../dart-maor/phone-key.dart';
 import '../dart-maor/rule-contains.dart';
 import '../dart-maor/rule-exact.dart';
 import '../dart-maor/rule-prefix.dart';
@@ -67,5 +69,15 @@ String bhHebDate(String iso) => hebDateFull(iso, _bhGem, (y) => gemYear(y, _bhGe
 List<int> bhAheadOffsetsUnion(List<String> dueIsos, bool hard, String todayIso, List<int> offsets) => [for (final o in offsets) if (dueIsos.any((d) => bhAheadOffsets(d, hard, todayIso, offsets).contains(o))) o];
 /// ב׳-קה · שורות-קבוצה: רשומות לפי מפתח-קבוצה (ריק = יחידה) ⇒ [[מפתח, n]…] בסדר-ההופעה (countBy)
 List<List<Object>> bhGroupRows(List<Map<String, String>> rows, String key) => countBy(rows, (r) => ((r as Map)[key] ?? '').toString());
+/// ב׳-קו · מפתח-טלפון קנוני (phoneKey): 052-123-4567 · +972521234567 · 00972… ⇒ 521234567
+String bhPhoneKey(String? ph) => phoneKey(ph);
+/// ב׳-קט · טלפון ל-wa.me = 972 + המפתח-הקנוני; בלי ספרות ⇒ ''
+String bhWaPhone(String? ph) { final k = bhPhoneKey(ph); return k.isEmpty ? '' : '972' + k; }
+/// ב׳-קו · אותו-אדם בכמה שמות: קבוצות של שמות שחולקים טלפון (מפתח-קנוני) או שם-מנורמל (findDuplicateGroups — רכיבי-קשירות)
+List<List<String>> bhPersonGroups(List<String> names, Map<String, List<String>> phonesOf) => findDuplicateGroups([for (final n in names) <String, dynamic>{'id': n, 'phones': phonesOf[n] ?? const <String>[]}], (f) => [for (final p in (f['phones'] as List)) if (bhPhoneKey(p.toString()).isNotEmpty) bhPhoneKey(p.toString())], (f) => bhNormName(f['id'] as String));
+/// ב׳-קז · «התכוונת ל…?» — המועמד הקרוב ביותר במרחק-עריכה ≤1 (≥5 אותיות: ≤2) על נרמול-חיפוש (damerauLevenshtein); אין ⇒ ''
+String bhClosest(String q, List<String> cands) { final nq = bhNormSearch(q); if (nq.length < 3) return ''; final lim = nq.length >= 5 ? 2 : 1; var best = ''; var bd = lim + 1; for (final c in cands) { final nc = bhNormSearch(c); if (nc.isEmpty) continue; for (final w in [nc, ...nc.split(' ')]) { if (w == nq) { bd = -1; break; } if (w.length < nq.length - lim || w.length > nq.length + lim) continue; final d = damerauLevenshtein(nq, w); if (d < bd) { bd = d; best = c; } } if (bd < 0) return ''; } return best; }   // גם מילה-בתוך-הכותרת («ליקוים» ⇒ «ליקויים אחרי כניסה…»); שוויון-מלא = אין הצעה
+/// ב׳-קח · חלונות-פנויים בין בלוקים תפוסים ([['HH:MM','HH:MM']…] ממוינים) מ-fromHM עד toHM, רק ≥ minMin דק׳ (timeToMin)
+List<List<String>> bhFreeWindows(List<List<String>> busy, String fromHM, String toHM, int minMin) { int mn(String t) { final v = timeToMin(t); return v.isFinite ? v.toInt() : 0; } final out = <List<String>>[]; var cur = mn(fromHM); final end = mn(toHM); for (final b in busy) { final a = mn(b[0]), e = mn(b[1]); if (a - cur >= minMin) out.add([_hm(cur), _hm(a)]); if (e > cur) cur = e; } if (end - cur >= minMin) out.add([_hm(cur), _hm(end)]); return out; }
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

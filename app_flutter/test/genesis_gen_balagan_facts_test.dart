@@ -448,6 +448,12 @@ void main() {
     expect(balaganPersonFor('נועה'), isNull);
     expect(balaganPersonFor('ש'), isNull);
     expect(balaganPersonFor('שגב נועה')!.name, 'נועה שגב');   // ב׳-קג · סדר-מילים הפוך ⇒ אותו אדם
+  });
+  test('ב׳-קו · אותו אדם בכמה שמות: טלפון משותף ⇒ כינויים · הכרטיס מאחד את התיקים · שם זר לא נדבק', () {
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty);
+    appStore.add(m.rootSlug, {m.personFields.first: 'רות לוי', m.phoneFields.first: '052-111-2233'}); appStore.add(m.rootSlug, {m.personFields.first: 'רותי לוי', m.phoneFields.first: '+972521112233'}); appStore.add(m.rootSlug, {m.personFields.first: 'דן כהן', m.phoneFields.first: '03-5551234'});
+    expect(balaganAliases('רות לוי'), {'רות לוי', 'רותי לוי'}); expect(balaganAliases('דן כהן'), {'דן כהן'});
+    expect(balaganPerson('רות לוי')!.files, 2); expect(balaganPerson('רותי לוי')!.files, 2); expect(balaganPerson('דן כהן')!.files, 1);
     expect(balaganPersonFor(' נועה לב ')!.files, 1);
   });
   test('פותח-תיק: ישות מוכרת ⇒ עמוד-השורש שלה; לא מוכרת ⇒ ריק', () {
