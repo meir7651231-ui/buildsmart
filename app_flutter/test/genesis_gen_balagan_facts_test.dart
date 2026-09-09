@@ -458,6 +458,11 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קכח · טלפון מוכר ⇒ שם-האדם (052… = +972…) · קצר/זר ⇒ ריק', () {
+    final m = kBalaganModules.firstWhere((x) => x.personFields.isNotEmpty && x.phoneFields.isNotEmpty);
+    appStore.add(m.rootSlug, {m.personFields.first: 'יוסי ברק', m.phoneFields.first: '054-777-8899'});
+    expect(balaganPersonByPhone('+972547778899'), 'יוסי ברק'); expect(balaganPersonByPhone('054-000-0000'), ''); expect(balaganPersonByPhone('054'), '');
+  });
   test('ב׳-קכב/קכג/קכה · «שבוע הבא» ⇒ היסט · «מעל 5000» ⇒ סינון-סכום · פריטי-טווח · ספירת-דחיות', () {
     expect(balaganWeekOf('שבוע הבא'), 1); expect(balaganWeekOf(' השבוע '), 0); expect(balaganWeekOf('שבוע שעבר'), -1); expect(balaganWeekOf('שבוע'), isNull);
     expect(balaganAmountFilter('מעל 5,000'), ['>', '5000']); expect(balaganAmountFilter('פחות מ-300'), ['<', '300']); expect(balaganAmountFilter('מעל הכל'), isEmpty); expect(balaganAmountFilter('5000'), isEmpty);

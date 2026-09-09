@@ -98,5 +98,7 @@ int bhMinutesUntil(String nowIsoT, String todayIso, String hm) { if (hm.length <
 /// ב׳-קכב · טווח-שבוע [ראשון, שבת] של השבוע delta מהיום (bhWeekStart · bhPlusDays) · האם iso בטווח (inRange)
 List<String> bhWeekRange(String todayIso, int delta) { final s = bhPlusDays(bhWeekStart(todayIso), 7 * delta); return [s, bhPlusDays(s, 6)]; }
 bool bhInRange(String iso, String from, String to) => iso.length >= 10 && inRange(iso.substring(0, 10), (from: from, to: to));
+/// ב׳-קכו · סכום-מטקסט: «1,250» · «₪ 8,000» · ריק ⇒ 0 (אין חלקיק-פרסור-סכום במדף — נסרק: (String)→num; ההיפוך של fMoney)
+double bhMoney(String? s) => double.tryParse((s ?? '').replaceAll(',', '').replaceAll('₪', '').trim()) ?? 0;
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');
