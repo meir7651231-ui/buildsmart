@@ -128,6 +128,37 @@ class GenAppPeruk05HomeScreenToday {
     appStore.logAction('auto', a + ' · ' + field, entity: 'app_peruk05_ent1', rid: rid, field: field, prev: prev);
   }
 
+  // ב׳-ל · נשכחים: תיק פתוח ש«היום» הפסיק לדבר עליו (כל מועד עבר ונדחה-בהתעלם / בלי מועד והתעלמו) ו-14 יום בלי נגיעה — לא נעלם; מוצע: סגור · קבע למחר · התעלם. הכל בהקשה, אפס-אוטומטי
+  static DateTime? _touched(Map<String, String> r, String rid) {
+    final at = r['__at'] ?? ''; DateTime? t = _parse(at.length >= 10 ? at.substring(0, 10) : '');
+    for (final e in appStore.log) { if (e['rid'] != rid || e['undone'] == '1') continue; final a = DateTime.tryParse(e['at'] ?? ''); if (a != null && (t == null || a.isAfter(t))) t = _day(a); }
+    return t;
+  }
+  static List<DsTodayItem> stale(DateTime today) {
+    if (_dates.isEmpty) return const [];
+    final out = <DsTodayItem>[];
+    for (final r in open()) {
+      final rid = r[AppStore.idKey] ?? '';
+      if (appStore.decision('stale:$rid') == 'no') continue;
+      var visible = false, any = false;
+      for (final f in _dates) { final d = _parse(r[f.label] ?? ''); if (d == null) continue; any = true; if (!d.isBefore(today) || appStore.decision('ign:$rid:${f.label}') != 'no') { visible = true; break; } }
+      if (!any && appStore.decision('undated:$rid') != 'no') visible = true;
+      if (visible) continue;
+      final t = _touched(r, rid); if (t == null) continue; final n = today.difference(t).inDays; if (n < 14) continue;
+      final acts = [gen_app_peruk05_home_c68, gen_app_peruk05_home_c69, gen_app_peruk05_home_c70];
+      out.add(DsTodayItem(title: appStore.displayOf('app_peruk05_ent1', rid), sub: gen_app_peruk05_home_c71.replaceAll('{n}', n.toString()), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
+    }
+    out.sort((a, b) => a.due.compareTo(b.due));   // הישן ביותר ראשון
+    return out;
+  }
+  static void _staleAct(String rid, DateTime today, List<String> acts, int i) {
+    final a = acts[i.clamp(0, acts.length - 1)];
+    final r = appStore.byId('app_peruk05_ent1', rid); if (r == null) return;
+    if (a == gen_app_peruk05_home_c72) { final f = _dates.firstWhere((x) => x.hard, orElse: () => _dates.first); appStore.decide('ign:$rid:${f.label}', ''); appStore.decide('undated:$rid', ''); _setDate(rid, f.label, today, [a], 0); return; }   /* המועד החדש חוזר ל«היום» — ההתעלמות הישנה נמחקת */
+    if (a == gen_app_peruk05_home_c73) { final prev = r[AppStore.stageKey] ?? '0'; appStore.update('app_peruk05_ent1', rid, {AppStore.stageKey: '4'}); appStore.logAction('auto', gen_app_peruk05_home_c74.replaceAll('{who}', appStore.displayOf('app_peruk05_ent1', rid)), entity: 'app_peruk05_ent1', rid: rid, field: AppStore.stageKey, prev: prev); return; }
+    appStore.decide('stale:$rid', 'no');
+  }
+
   // P11/P13 · הצעות: תזכורת לכל תאריך שטרם הוכרע · צעד-הבא בשלב-האחרון (P14) · תזכורת-אחרי-שליחה (P12) — הכל עם קטע-המקור
   static List<Widget> proposals(BuildContext context, DateTime today, {bool chain = true}) {   // chain=false: «בלגן» מרנדר את כרטיס-הצעד-הבא בעצמו (חוצה-מודולים)
     final out = <Widget>[];
@@ -137,16 +168,16 @@ class GenAppPeruk05HomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        out.add(DsApproveCard(question: gen_app_peruk05_home_c68.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_peruk05_home_c69, noLabel: gen_app_peruk05_home_c70, alwaysLabel: gen_app_peruk05_home_c71,
+        out.add(DsApproveCard(question: gen_app_peruk05_home_c75.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_peruk05_home_c76, noLabel: gen_app_peruk05_home_c77, alwaysLabel: gen_app_peruk05_home_c78,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }
       final last = appStore.lastLog('send', rid);   // P12 · טיוטה, לא שליחה: אחרי 3 ימים בלי שינוי-שלב ⇒ הצעה; השליחה עצמה רק בהקשה (T5)
-      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_peruk05_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_peruk05_home_c72.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_peruk05_home_c73, noLabel: gen_app_peruk05_home_c74, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
+      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_peruk05_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_peruk05_home_c79.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_peruk05_home_c80, noLabel: gen_app_peruk05_home_c81, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
     }
     if (chain) for (final r in appStore.records('app_peruk05_ent1')) {   // P14 · הצעד-הבא: רשומה שהגיעה לשלב-האחרון (סגורה — לא ב-open) ובלי הכרעה
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_peruk05_ent1', rid);
-      if (appStore.stageOf('app_peruk05_ent1', rid) >= 4 && appStore.decision('next:$rid').isEmpty) out.add(DsApproveCard(question: gen_app_peruk05_home_c75.replaceAll('{next}', gen_app_peruk05_home_c39), source: module + ' · ' + who, okLabel: gen_app_peruk05_home_c76, noLabel: gen_app_peruk05_home_c77, onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_app_peruk05_home_c78.replaceAll('{next}', gen_app_peruk05_home_c39), entity: 'app_peruk05_ent1', rid: rid, field: 'next:$rid'); }, onNo: () => appStore.decide('next:$rid', 'no')));
+      if (appStore.stageOf('app_peruk05_ent1', rid) >= 4 && appStore.decision('next:$rid').isEmpty) out.add(DsApproveCard(question: gen_app_peruk05_home_c82.replaceAll('{next}', gen_app_peruk05_home_c39), source: module + ' · ' + who, okLabel: gen_app_peruk05_home_c83, noLabel: gen_app_peruk05_home_c84, onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_app_peruk05_home_c85.replaceAll('{next}', gen_app_peruk05_home_c39), entity: 'app_peruk05_ent1', rid: rid, field: 'next:$rid'); }, onNo: () => appStore.decide('next:$rid', 'no')));
     }
     return out;
   }
@@ -154,9 +185,9 @@ class GenAppPeruk05HomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_peruk05_ent1').where((r) => appStore.stageOf('app_peruk05_ent1', r[AppStore.idKey] ?? '') >= 4 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_peruk05_home_c0] ?? '')).trim().isEmpty ? gen_app_peruk05_home_c79 : (r[gen_app_peruk05_home_c0] ?? '')), trailing: Text(const [gen_app_peruk05_home_c34, gen_app_peruk05_home_c35, gen_app_peruk05_home_c36, gen_app_peruk05_home_c37, gen_app_peruk05_home_c38][appStore.stageOf('app_peruk05_ent1', r[AppStore.idKey] ?? '').clamp(0, 4)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_peruk05_home_c0] ?? '')).trim().isEmpty ? gen_app_peruk05_home_c86 : (r[gen_app_peruk05_home_c0] ?? '')), trailing: Text(const [gen_app_peruk05_home_c34, gen_app_peruk05_home_c35, gen_app_peruk05_home_c36, gen_app_peruk05_home_c37, gen_app_peruk05_home_c38][appStore.stageOf('app_peruk05_ent1', r[AppStore.idKey] ?? '').clamp(0, 4)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         AnimatedBuilder(animation: appStore, builder: (context, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final r in [r]) Padding(padding: const EdgeInsets.only(bottom: 8), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Padding(padding: const EdgeInsets.only(bottom: 8), child: ForgeMustChip(bare: true, items: [for (final s in [gen_app_peruk05_home_c10, gen_app_peruk05_home_c11, gen_app_peruk05_home_c12, gen_app_peruk05_home_c13]) [s]], selected: {((r[gen_app_peruk05_home_c2] ?? '') == gen_app_peruk05_home_c3 ? 0 : (r[gen_app_peruk05_home_c4] ?? '') == gen_app_peruk05_home_c5 ? 1 : (r[gen_app_peruk05_home_c6] ?? '') == gen_app_peruk05_home_c7 ? 2 : (r[gen_app_peruk05_home_c8] ?? '') == gen_app_peruk05_home_c9 ? 3 : 0)}, onSelect: (i) => appStore.update('app_peruk05_ent1', (r[AppStore.idKey] ?? ''), {gen_app_peruk05_home_c14: [gen_app_peruk05_home_c15, gen_app_peruk05_home_c16, gen_app_peruk05_home_c17, gen_app_peruk05_home_c18][i]}))), DsNote(message: [gen_app_peruk05_home_c19, ([(r[gen_app_peruk05_home_c21] ?? '')].any((x) => x.trim().isEmpty) ? '' : (gen_app_peruk05_home_c20 + (r[gen_app_peruk05_home_c21] ?? '') + gen_app_peruk05_home_c22)), ([appStore.referencing('app_peruk05_ent2', gen_app_peruk05_home_c24, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_peruk05_home_c25] ?? '')).where((x) => x.trim().isNotEmpty).join(', ')].any((x) => x.trim().isEmpty) ? '' : (gen_app_peruk05_home_c23 + appStore.referencing('app_peruk05_ent2', gen_app_peruk05_home_c24, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_peruk05_home_c25] ?? '')).where((x) => x.trim().isNotEmpty).join(', ') + gen_app_peruk05_home_c26))].where((x) => x.trim().isNotEmpty).join(' '), label: gen_app_peruk05_home_c27, tone: 0)]))])),
-        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_peruk05_home_c80, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_peruk05_home_c81, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk05RootScreen(id: r[AppStore.idKey] ?? ''))))])),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_peruk05_home_c87, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_peruk05_home_c88, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppPeruk05RootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
 
   // «תמיד אשר» ⇒ לבד: הכרעות-תזכורת פתוחות נסגרות ונרשמות ביומן עם החזר (T2). אחרי הפריים, לא בתוך build. לעולם לא שולח (T5). P5: לא נוגע בתאריכים.
@@ -169,7 +200,7 @@ class GenAppPeruk05HomeScreenToday {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_peruk05_home_c82.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_peruk05_ent1', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_peruk05_home_c89.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_peruk05_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
@@ -193,8 +224,8 @@ class _GenAppPeruk05HomeScreenState extends State<GenAppPeruk05HomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_app_peruk05_home_c83, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_app_peruk05_home_c84, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_app_peruk05_home_c90, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_app_peruk05_home_c91, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -216,20 +247,20 @@ class _GenAppPeruk05HomeScreenState extends State<GenAppPeruk05HomeScreen> {
     final pending = GenAppPeruk05HomeScreenToday.proposals(context, today);
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next') && e['undone'] != '1').take(5).toList();
     final n = overdue.length + todayItems.length + pending.length;   // הדברים שדורשים אותו היום (הכרעה-29: לא סופרים רשומות פתוחות פעמיים)
-    final lead = n == 0 && open.isEmpty ? gen_app_peruk05_home_c85 : n <= 1 ? gen_app_peruk05_home_c86 : gen_app_peruk05_home_c87.replaceAll('{n}', n.toString());
+    final lead = n == 0 && open.isEmpty ? gen_app_peruk05_home_c92 : n <= 1 ? gen_app_peruk05_home_c93 : gen_app_peruk05_home_c94.replaceAll('{n}', n.toString());
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
-    return DsScaffold(title: gen_app_peruk05_home_c88, subtitle: lead, icon: gen_app_peruk05_home_c89, children: [
-      DsLoadMeter(count: n, label: gen_app_peruk05_home_c90.replaceAll('{n}', n.toString()), stateLabels: [gen_app_peruk05_home_c91, gen_app_peruk05_home_c92, gen_app_peruk05_home_c93]),
+    return DsScaffold(title: gen_app_peruk05_home_c95, subtitle: lead, icon: gen_app_peruk05_home_c96, children: [
+      DsLoadMeter(count: n, label: gen_app_peruk05_home_c97.replaceAll('{n}', n.toString()), stateLabels: [gen_app_peruk05_home_c98, gen_app_peruk05_home_c99, gen_app_peruk05_home_c100]),
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 12), child: Text(lead, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (overdue.isNotEmpty) DsSection(title: gen_app_peruk05_home_c94, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_app_peruk05_home_c95, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
+      if (overdue.isNotEmpty) DsSection(title: gen_app_peruk05_home_c101, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_app_peruk05_home_c102, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
       for (final r in open) GenAppPeruk05HomeScreenToday.card(context, r),
-      if (pending.isNotEmpty) DsSection(title: gen_app_peruk05_home_c96 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
-      if (did.isNotEmpty) DsSection(title: gen_app_peruk05_home_c97 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_peruk05_home_c98, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (tomorrow.isNotEmpty) DsFold(title: gen_app_peruk05_home_c99 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
-      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_peruk05_home_c100 + ' ' + gen_app_peruk05_home_c101, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (pending.isNotEmpty) DsSection(title: gen_app_peruk05_home_c103 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
+      if (did.isNotEmpty) DsSection(title: gen_app_peruk05_home_c104 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_peruk05_home_c105, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (tomorrow.isNotEmpty) DsFold(title: gen_app_peruk05_home_c106 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
+      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_peruk05_home_c107 + ' ' + gen_app_peruk05_home_c108, style: TextStyle(color: lk.muted, fontSize: 14))),
     ]);
   });
 }

@@ -359,6 +359,24 @@ void main() {
     expect(balaganDayText(const [], [it(a)], today, money: 1250).contains('1,250'), isTrue);
     expect(balaganDayText(const [], [it(a)], today).contains('סה'), isFalse);
   });
+  test('נשכחים: תיק ישן שכל מועדיו עברו ונדחו-בהתעלם ⇒ מופיע; טרי/עתידי ⇒ לא; «סגור תיק» עם החזר; «קבע למחר» מחזיר ל«היום»', () {
+    const F = 'מועד'; const S = 'app_calendar_ent1';
+    final old = appStore.add(S, {'מה': 'ישן', F: '2026-08-01', '__at': '2026-07-30'}); appStore.decide('ign:$old:' + F, 'no');
+    final fresh = appStore.add(S, {'מה': 'טרי', F: '2026-08-01', '__at': '2026-09-01'}); appStore.decide('ign:$fresh:' + F, 'no');
+    final fut = appStore.add(S, {'מה': 'עתידי', F: '2026-10-01', '__at': '2026-07-30'});
+    final s = GenAppCalendarHomeScreenToday.stale(today);
+    expect(s.map((x) => x.rid), contains(old)); expect(s.map((x) => x.rid), isNot(contains(fresh))); expect(s.map((x) => x.rid), isNot(contains(fut)));
+    expect(s.firstWhere((x) => x.rid == old).sub.contains('40'), isTrue);
+    s.firstWhere((x) => x.rid == old).act(0);
+    expect(appStore.stageOf(S, old), 1);
+    expect(GenAppCalendarHomeScreenToday.stale(today).any((x) => x.rid == old), isFalse);
+    expect(appStore.undo(appStore.log.first['id']!), isTrue);
+    expect(GenAppCalendarHomeScreenToday.stale(today).any((x) => x.rid == old), isTrue);
+    GenAppCalendarHomeScreenToday.stale(today).firstWhere((x) => x.rid == old).act(1);
+    expect(appStore.byId(S, old)![F], '2026-09-09');
+    expect(GenAppCalendarHomeScreenToday.stale(today).any((x) => x.rid == old), isFalse);
+    expect(GenAppCalendarHomeScreenToday.items(today.add(const Duration(days: 1)), dayDelta: 0).any((x) => x.rid == old), isTrue);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
