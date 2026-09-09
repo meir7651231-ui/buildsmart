@@ -383,6 +383,16 @@ void main() {
     expect(c.length, 4);
     expect(c.map((x) => x[1]).toList(), ['2026-09-08', '2026-09-09', '2026-09-13', '2026-09-15']);
   });
+  test('«התעלם» עם החזר: שורת-באיחור נעלמת, נרשמת ביומן, והחזר מחזיר אותה', () {
+    const S = 'app_calendar_ent1'; const F = 'מועד';
+    final id = appStore.add(S, {'מה': 'להתעלם', F: '2026-09-01'});
+    final it = GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).firstWhere((x) => x.rid == id);
+    expect(it.overdue, isTrue); it.act(it.actions.length - 1);
+    expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).any((x) => x.rid == id), isFalse);
+    expect(appStore.log.first['kind'], 'decide'); expect(appStore.log.first['field'], 'ign:' + id + ':' + F);
+    expect(appStore.undo(appStore.log.first['id']!), isTrue);
+    expect(GenAppCalendarHomeScreenToday.items(today, dayDelta: 0).any((x) => x.rid == id), isTrue);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
