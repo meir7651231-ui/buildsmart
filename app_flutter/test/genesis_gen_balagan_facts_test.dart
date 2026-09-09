@@ -461,6 +461,10 @@ void main() {
     expect(balaganDayLabel(DateTime(2027, 10, 3), today), '3.10.2027');
     expect(balaganDayText(const [], const [], today, tomorrow: [DsTodayItem(title: 'ביטוח', sub: '', due: DateTime(2026, 9, 9), hard: false, overdue: false, module: 'משימות', actions: const [], act: (_) {})]).contains('• ביטוח (משימות)'), isTrue);
   });
+  test('היסטי-תזכורת כמו שאומרים: 3,1,0 ⇒ «3 ימים לפני · יום לפני · ביום»', () {
+    expect(balaganOffsetsLabel('3,1,0'), '3 ימים לפני · יום לפני · ביום');
+    expect(balaganOffsetsLabel('7'), '7 ימים לפני');
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);

@@ -183,22 +183,22 @@ class GenAppSechirutHomeScreenToday {
   // P11/P13 · הצעות: תזכורת לכל תאריך שטרם הוכרע · צעד-הבא בשלב-האחרון (P14) · תזכורת-אחרי-שליחה (P12) — הכל עם קטע-המקור
   static List<Widget> proposals(BuildContext context, DateTime today, {bool chain = true, bool rem = true}) {   // rem=false: «בלגן» מרכז את התזכורות לכרטיס אחד (ב׳-לז)   // chain=false: «בלגן» מרנדר את כרטיס-הצעד-הבא בעצמו (חוצה-מודולים)
     final out = <Widget>[];
-    final days = _offsets().map((o) => '−$o').join('/');
+    final days = _offsets().map((o) => o == 0 ? gen_app_sechirut_home_c104 : o == 1 ? gen_app_sechirut_home_c105 : gen_app_sechirut_home_c106.replaceAll('{n}', o.toString())).join(' · ');   /* ב׳-מב · «3 ימים לפני · יום לפני · ביום» במקום (−3/−1/−0) */
     for (final r in open()) {
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_sechirut_ent1', rid);
       if (rem) for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        out.add(DsApproveCard(question: gen_app_sechirut_home_c104.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _iso(d)), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c105, noLabel: gen_app_sechirut_home_c106, alwaysLabel: gen_app_sechirut_home_c107,
+        out.add(DsApproveCard(question: gen_app_sechirut_home_c107.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _dayLabel(d, today)), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c108, noLabel: gen_app_sechirut_home_c109, alwaysLabel: gen_app_sechirut_home_c110,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }
       final last = appStore.lastLog('send', rid);   // P12 · טיוטה, לא שליחה: אחרי 3 ימים בלי שינוי-שלב ⇒ הצעה; השליחה עצמה רק בהקשה (T5)
-      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_sechirut_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_sechirut_home_c108.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c109, noLabel: gen_app_sechirut_home_c110, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
+      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_sechirut_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_sechirut_home_c111.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c112, noLabel: gen_app_sechirut_home_c113, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
     }
     if (chain) for (final r in appStore.records('app_sechirut_ent1')) {   // P14 · הצעד-הבא: רשומה שהגיעה לשלב-האחרון (סגורה — לא ב-open) ובלי הכרעה
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_sechirut_ent1', rid);
-      if (appStore.stageOf('app_sechirut_ent1', rid) >= 5 && appStore.decision('next:$rid').isEmpty) out.add(DsApproveCard(question: gen_app_sechirut_home_c111.replaceAll('{next}', gen_app_sechirut_home_c58), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c112, noLabel: gen_app_sechirut_home_c113, onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_app_sechirut_home_c114.replaceAll('{next}', gen_app_sechirut_home_c58), entity: 'app_sechirut_ent1', rid: rid, field: 'next:$rid'); }, onNo: () => appStore.decide('next:$rid', 'no')));
+      if (appStore.stageOf('app_sechirut_ent1', rid) >= 5 && appStore.decision('next:$rid').isEmpty) out.add(DsApproveCard(question: gen_app_sechirut_home_c114.replaceAll('{next}', gen_app_sechirut_home_c58), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c115, noLabel: gen_app_sechirut_home_c116, onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_app_sechirut_home_c117.replaceAll('{next}', gen_app_sechirut_home_c58), entity: 'app_sechirut_ent1', rid: rid, field: 'next:$rid'); }, onNo: () => appStore.decide('next:$rid', 'no')));
     }
     return out;
   }
@@ -206,9 +206,9 @@ class GenAppSechirutHomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_sechirut_ent1').where((r) => appStore.stageOf('app_sechirut_ent1', r[AppStore.idKey] ?? '') >= 5 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_sechirut_home_c0] ?? '')).trim().isEmpty ? gen_app_sechirut_home_c115 : (r[gen_app_sechirut_home_c0] ?? '')), trailing: Text(const [gen_app_sechirut_home_c50, gen_app_sechirut_home_c51, gen_app_sechirut_home_c52, gen_app_sechirut_home_c53, gen_app_sechirut_home_c54, gen_app_sechirut_home_c55][appStore.stageOf('app_sechirut_ent1', r[AppStore.idKey] ?? '').clamp(0, 5)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_sechirut_home_c0] ?? '')).trim().isEmpty ? gen_app_sechirut_home_c118 : (r[gen_app_sechirut_home_c0] ?? '')), trailing: Text(const [gen_app_sechirut_home_c50, gen_app_sechirut_home_c51, gen_app_sechirut_home_c52, gen_app_sechirut_home_c53, gen_app_sechirut_home_c54, gen_app_sechirut_home_c55][appStore.stageOf('app_sechirut_ent1', r[AppStore.idKey] ?? '').clamp(0, 5)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         AnimatedBuilder(animation: appStore, builder: (context, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final r in [r]) Padding(padding: const EdgeInsets.only(bottom: 8), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Padding(padding: const EdgeInsets.only(bottom: 8), child: ForgeMustChip(bare: true, items: [for (final s in [gen_app_sechirut_home_c8, gen_app_sechirut_home_c9, gen_app_sechirut_home_c10]) [s]], selected: {((r[gen_app_sechirut_home_c2] ?? '') == gen_app_sechirut_home_c3 ? 0 : (r[gen_app_sechirut_home_c4] ?? '') == gen_app_sechirut_home_c5 ? 1 : (r[gen_app_sechirut_home_c6] ?? '') == gen_app_sechirut_home_c7 ? 2 : 0)}, onSelect: (i) => appStore.update('app_sechirut_ent1', (r[AppStore.idKey] ?? ''), {gen_app_sechirut_home_c11: [gen_app_sechirut_home_c12, gen_app_sechirut_home_c13, gen_app_sechirut_home_c14][i]}))), DsNote(message: ((r[gen_app_sechirut_home_c35] ?? '') == gen_app_sechirut_home_c36 ? ([gen_app_sechirut_home_c37, ([appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c39, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c40] ?? '')).where((x) => x.trim().isNotEmpty).join(', ')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c38 + appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c39, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c40] ?? '')).where((x) => x.trim().isNotEmpty).join(', ') + gen_app_sechirut_home_c41)), gen_app_sechirut_home_c42].where((x) => x.trim().isNotEmpty).join(' ')) : (((r[gen_app_sechirut_home_c24] ?? '') == gen_app_sechirut_home_c25 ? ([gen_app_sechirut_home_c26, ([appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c28, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c29] ?? '')).where((x) => x.trim().isNotEmpty).join(', ')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c27 + appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c28, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c29] ?? '')).where((x) => x.trim().isNotEmpty).join(', ') + gen_app_sechirut_home_c30)), ([(r[gen_app_sechirut_home_c32] ?? '')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c31 + (r[gen_app_sechirut_home_c32] ?? '') + gen_app_sechirut_home_c33)), gen_app_sechirut_home_c34].where((x) => x.trim().isNotEmpty).join(' ')) : (((r[gen_app_sechirut_home_c20] ?? '') == gen_app_sechirut_home_c21 ? ([gen_app_sechirut_home_c22, gen_app_sechirut_home_c23].where((x) => x.trim().isNotEmpty).join(' ')) : ([gen_app_sechirut_home_c15, ([(r[gen_app_sechirut_home_c17] ?? '')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c16 + (r[gen_app_sechirut_home_c17] ?? '') + gen_app_sechirut_home_c18)), gen_app_sechirut_home_c19].where((x) => x.trim().isNotEmpty).join(' '))))))), label: gen_app_sechirut_home_c43, tone: 0)]))])),
-        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_sechirut_home_c116, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_sechirut_home_c117, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppSechirutRootScreen(id: r[AppStore.idKey] ?? ''))))])),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_sechirut_home_c119, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_sechirut_home_c120, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppSechirutRootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
 
   // «תמיד אשר» ⇒ לבד: הכרעות-תזכורת פתוחות נסגרות ונרשמות ביומן עם החזר (T2). אחרי הפריים, לא בתוך build. לעולם לא שולח (T5). P5: לא נוגע בתאריכים.
@@ -221,7 +221,7 @@ class GenAppSechirutHomeScreenToday {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_sechirut_home_c118.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_sechirut_ent1', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_sechirut_home_c121.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_sechirut_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
@@ -245,8 +245,8 @@ class _GenAppSechirutHomeScreenState extends State<GenAppSechirutHomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_app_sechirut_home_c119, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_app_sechirut_home_c120, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_app_sechirut_home_c122, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_app_sechirut_home_c123, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -268,20 +268,20 @@ class _GenAppSechirutHomeScreenState extends State<GenAppSechirutHomeScreen> {
     final pending = GenAppSechirutHomeScreenToday.proposals(context, today);
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next') && e['undone'] != '1').take(5).toList();
     final n = overdue.length + todayItems.length + pending.length;   // הדברים שדורשים אותו היום (הכרעה-29: לא סופרים רשומות פתוחות פעמיים)
-    final lead = n == 0 && open.isEmpty ? gen_app_sechirut_home_c121 : n <= 1 ? gen_app_sechirut_home_c122 : gen_app_sechirut_home_c123.replaceAll('{n}', n.toString());
+    final lead = n == 0 && open.isEmpty ? gen_app_sechirut_home_c124 : n <= 1 ? gen_app_sechirut_home_c125 : gen_app_sechirut_home_c126.replaceAll('{n}', n.toString());
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
-    return DsScaffold(title: gen_app_sechirut_home_c124, subtitle: lead, icon: gen_app_sechirut_home_c125, children: [
-      DsLoadMeter(count: n, label: gen_app_sechirut_home_c126.replaceAll('{n}', n.toString()), stateLabels: [gen_app_sechirut_home_c127, gen_app_sechirut_home_c128, gen_app_sechirut_home_c129]),
+    return DsScaffold(title: gen_app_sechirut_home_c127, subtitle: lead, icon: gen_app_sechirut_home_c128, children: [
+      DsLoadMeter(count: n, label: gen_app_sechirut_home_c129.replaceAll('{n}', n.toString()), stateLabels: [gen_app_sechirut_home_c130, gen_app_sechirut_home_c131, gen_app_sechirut_home_c132]),
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 12), child: Text(lead, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (overdue.isNotEmpty) DsSection(title: gen_app_sechirut_home_c130, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_app_sechirut_home_c131, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
+      if (overdue.isNotEmpty) DsSection(title: gen_app_sechirut_home_c133, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_app_sechirut_home_c134, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
       for (final r in open) GenAppSechirutHomeScreenToday.card(context, r),
-      if (pending.isNotEmpty) DsSection(title: gen_app_sechirut_home_c132 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
-      if (did.isNotEmpty) DsSection(title: gen_app_sechirut_home_c133 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_sechirut_home_c134, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (tomorrow.isNotEmpty) DsFold(title: gen_app_sechirut_home_c135 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
-      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_sechirut_home_c136 + ' ' + gen_app_sechirut_home_c137, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (pending.isNotEmpty) DsSection(title: gen_app_sechirut_home_c135 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
+      if (did.isNotEmpty) DsSection(title: gen_app_sechirut_home_c136 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_sechirut_home_c137, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (tomorrow.isNotEmpty) DsFold(title: gen_app_sechirut_home_c138 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
+      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_sechirut_home_c139 + ' ' + gen_app_sechirut_home_c140, style: TextStyle(color: lk.muted, fontSize: 14))),
     ]);
   });
 }
