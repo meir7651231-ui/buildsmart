@@ -1,5 +1,8 @@
 // 🧩 חולל ע"י behavior-compose (G34ב · הכרעה-30) — שכבת-ההרכבה: התנהגויות מחלקיקים מוכחים (behavior-plan.json), במקום אחד. אל תערוך ידנית.
-import '../dart-boxes/vcard-import.dart';
+import '../dart-boxes/hebdate.dart' as bx0;
+import '../dart-boxes/hebrew-calendar.dart' as bx1;
+import '../dart-boxes/hebrew.dart' as bx2;
+import '../dart-boxes/vcard-import.dart' as bx3;
 import '../dart-maor/add-days-iso.dart';
 import '../dart-maor/build-ics.dart';
 import '../dart-maor/cockpit-days-since.dart';
@@ -8,6 +11,7 @@ import '../dart-maor/csv-escape.dart';
 import '../dart-maor/enroll-new-family.dart';
 import '../dart-maor/find-duplicate-groups.dart';
 import '../dart-maor/fold-ics-line.dart';
+import '../dart-maor/format-israeli-phone.dart';
 import '../dart-maor/gem-year.dart';
 import '../dart-maor/gematria.dart';
 import '../dart-maor/heb-date-full.dart';
@@ -116,7 +120,18 @@ String bhIcs(List<Map<String, String?>> occ, String calName, DateTime now) => bu
 /// ב׳-קמז · שורות ⇒ CSV (toCsv עם csvEscape; BOM לאקסל-בעברית) · CSV ⇒ שורות (parseCsv)
 String bhCsv(List<List<Object?>> rows) => toCsv(rows, (v) => csvEscape(v)) as String;
 List<List<String>> bhCsvParse(String text) => parseCsv(text);
-/// ב׳-קנד · אנשי-קשר מ-VCF ⇒ שורות name/phone/phone2/email/address/notes (vcardImportRows — קופסת-vcard-import מהמדף, G48)
-List<Map<String, String>> bhVcardRows(String? text) => vcardImportRows(text);
+/// ב׳-קנד · אנשי-קשר מ-VCF ⇒ שורות name/phone/phone2/email/address/notes (bx3.vcardImportRows — קופסת-vcard-import מהמדף, G48)
+List<Map<String, String>> bhVcardRows(String? text) => bx3.vcardImportRows(text);
+/// ב׳-קנה · חגים: חג/צום היום (bx2.hebHolidayOn) · החגים ב-days הימים הבאים [{iso,name}] (bx2.hebHolidaysAhead)
+String bhHolidayOn(String iso) => bx2.hebHolidayOn(iso) ?? '';
+List<Map<String, dynamic>> bhHolidaysAhead(String isoFrom, int days) => bx2.hebHolidaysAhead(isoFrom, days);
+/// ב׳-קנו · גימטריה ⇒ מספר (ההיפוך של gem, מאותם שקעי-דאטה): «ט״ו» ⇒ 15 · «כ״ט» ⇒ 29 · ספרות ⇒ כמו-שהן; לא-מוכר ⇒ 0
+int bhGemToNum(String s) { final t = bhNormSearch(s.replaceAll(RegExp(r'[\u05F3\u05F4\u0027\u0022]'), '')).trim();   /* סופיות ⇒ בסיס (ם⇒מ) דרך נרמול-החיפוש */ if (t.isEmpty) return 0; final dig = int.tryParse(t); if (dig != null) return dig; var sum = 0; for (final ch in t.split('')) { var v = 0; for (var i = 1; i < gematria_U.length; i++) { if (gematria_U[i] == ch) v = i; } for (var i = 1; i < gematria_T.length; i++) { if (gematria_T[i] == ch) v = 10 * i; } for (var i = 1; i <= 4 && i < gematria_H.length; i++) { if (gematria_H[i] == ch) v = 100 * i; } if (v == 0) return 0; sum += v; } return sum; }
+/// ב׳-קנו · קלט-עברי «ט״ו אלול» ⇒ ISO בשנה העברית של היום (bx0.hebInputToIso · bx1.parts); לא-קיים ⇒ ''
+String bhHebInputIso(String dayTok, String monthHe, String todayIso) { final d = bhGemToNum(dayTok); if (d < 1 || d > 30) return ''; final y = (bx1.parts(todayIso)['year'] as num).toInt(); return bx0.hebInputToIso(d, monthHe, y) ?? ''; }
+/// ב׳-קנח · אותו תאריך עברי בשנה הבאה (bx1.parts ⇒ bx0.hebToIsoEn); ל׳ בחודש-חסר ⇒ כ״ט
+String bhHebNextYear(String iso) { final p = bx1.parts(iso); final d = (p['day'] as num).toInt(), y = (p['year'] as num).toInt(); final m = p['month'] as String; return bx0.hebToIsoEn(d, m, y + 1) ?? bx0.hebToIsoEn(d - 1, m, y + 1) ?? bhPlusDays(iso, 354); }
+/// ב׳-קנז · טלפון לתצוגה «050-123-4567» (formatIsraeliPhone)
+String bhPhoneFmt(String? ph) { final s = (ph ?? '').trim(); return s.isEmpty ? '' : formatIsraeliPhone(s); }
 /// מפרידי-אלפים בלי ₪ (fMoney)
 String bhThousands(num v) => fMoney(v).replaceFirst('₪', '');

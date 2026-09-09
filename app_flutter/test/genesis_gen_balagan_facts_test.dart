@@ -458,6 +458,12 @@ void main() {
     expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isTrue); expect(balaganSilentSends(DateTime.now()).any((s) => s[1] == id), isFalse);
     appStore.logAction('done', 'סיים', entity: S, rid: id); expect(balaganSilentSends(DateTime.now().add(const Duration(days: 4))).any((s) => s[1] == id), isFalse); expect(i0.isNotEmpty, isTrue);
   });
+  test('ב׳-קנו/קנח · «ט״ו אלול» ⇒ תאריך · «כ״ט באלול» · «כל שנה עברית» ⇒ h1 · תווית', () {
+    final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty);
+    final f1 = balaganFacts('לשלם ארנונה ט״ו אלול', m, today: DateTime(2026, 8, 1)); expect(f1[m.dateFields.first], '2026-08-28');
+    final f2 = balaganFacts('חתונה כ״ט באלול', m, today: DateTime(2026, 8, 1)); expect(f2[m.dateFields.first], '2026-09-11');
+    final f3 = balaganFacts('יארצייט כל שנה עברית ט״ו אלול', m, today: DateTime(2026, 8, 1)); expect(f3['__repeat'], 'h1'); expect(balaganRepeatLabel('h1').isNotEmpty, isTrue);
+  });
   test('ב׳-קנד · ייבוא-VCF ⇒ ספר-טלפונים (דדופ לפי מפתח) · טלפון-לפי-שם · שם-לפי-טלפון מהספר', () {
     appStore.setSetting('phonebook', '');
     final r1 = balaganImportVcf('BEGIN:VCARD\nFN:יעל ברק\nTEL;CELL:054-333-4444\nEND:VCARD\nBEGIN:VCARD\nFN:יעל ברק\nTEL:+972543334444\nEND:VCARD\n'); expect(r1, [1, 1]);

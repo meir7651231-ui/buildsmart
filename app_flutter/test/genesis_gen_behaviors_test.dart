@@ -45,6 +45,10 @@ void main() {
   test('G38 · סכום-לפי · חציון · רצף-ימים', () {
     expect(bhSumBy([{'t': 'דירה', 'n': '8,000'}, {'t': 'דירה', 'n': '3000'}, {'t': 'משימות', 'n': '1,250'}], 't', 'n'), [['דירה', 2, 11000.0], ['משימות', 1, 1250.0]]);
     expect(bhMedianInt([7, 1, 4]), 4); expect(bhMedianInt([]), 0); expect(bhMedianInt([2, 9]), 9);
+    expect(bhHolidayOn('2026-04-02'), 'פסח'); expect(bhHolidayOn('2026-08-24'), ''); expect(bhHolidaysAhead('2026-09-08', 10).any((h) => h['iso'] == '2026-09-12'), isTrue);
+    expect(bhGemToNum('ט״ו'), 15); expect(bhGemToNum('כ״ט'), 29); expect(bhGemToNum('א׳'), 1); expect(bhGemToNum('15'), 15); expect(bhGemToNum('שלום'), 376); expect(bhGemToNum('x'), 0);
+    expect(bhHebInputIso('ט״ו', 'אלול', '2026-08-01'), '2026-08-28'); expect(bhHebInputIso('ל', 'אלול', '2026-08-01'), ''); expect(bhHebNextYear('2026-08-28'), '2027-09-17');   // ט״ו אלול תשפ״ז — הקופסה סורקת את הלוח, לא ניחוש
+    expect(bhPhoneFmt('0501234567').contains('-'), isTrue); expect(bhPhoneFmt(''), '');
     final vc = bhVcardRows('BEGIN:VCARD\nFN:אבי כהן\nTEL;CELL:050-1234567\nEND:VCARD\n'); expect(vc.length, 1); expect(vc[0]['phone'], '050-1234567'); expect(bhVcardRows(''), isEmpty);
     expect(bhCsv([['a', 'b'], ['1', 'x,y']]).endsWith('a,b\n1,"x,y"'), isTrue); expect(bhCsvParse('a,b\n1,"x,y"')[1][1], 'x,y');
     final ics = bhIcs([{'uid': 'u1', 'date': '2026-09-15', 'title': 'ארנונה, 1250'}], 'בלגן', DateTime(2026, 9, 8, 10)); expect(ics.contains('DTSTART;VALUE=DATE:20260915'), isTrue); expect(ics.contains('SUMMARY:ארנונה\\, 1250'), isTrue); expect(ics.endsWith('END:VCALENDAR\r\n'), isTrue);

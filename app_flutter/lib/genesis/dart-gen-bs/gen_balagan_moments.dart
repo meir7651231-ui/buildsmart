@@ -92,6 +92,7 @@ List<_DateAt> balaganDates(String text, DateTime today) {
   void put(RegExp re, DateTime? Function(RegExpMatch) f) { for (final x in re.allMatches(text)) { final d = f(x); if (d != null) out.add(_DateAt(x.start, x.end, _isoOf(d))); } }
   put(RegExp(r'(\d{4})-(\d{2})-(\d{2})'), (x) => DateTime(int.parse(x.group(1)!), int.parse(x.group(2)!), int.parse(x.group(3)!)));
   put(RegExp(r'(?<![\d.])(\d{1,2})[./](\d{1,2})[./](\d{2,4})(?![\d.])'), (x) { var y = int.parse(x.group(3)!); if (y < 100) y += 2000; final mo = int.parse(x.group(2)!), d = int.parse(x.group(1)!); return (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) ? DateTime(y, mo, d) : null; });
+  put(RegExp(r'(?<![\u0590-\u05FF\d])([\u05D0-\u05EA\u05F3\u05F4]{1,4}|\d{1,2})\s+ב?(אדר א[\u05F3\u0027]?|אדר ב[\u05F3\u0027]?|חשוון|סיוון|תמוז|אלול|כסלו|ניסן|תשרי|אייר|טבת|שבט|אדר|אב)(?![\u0590-\u05FF])'), (x) { final iso = bhHebInputIso(x.group(1)!, x.group(2)!.replaceAll('\u0027', '\u05F3'), bhIso(today)); return iso.isEmpty ? null : DateTime.parse(iso + 'T12:00:00'); });   /* ב׳-קנו · G49 · «ט״ו אלול» / «כ״ט באלול» ⇒ תאריך לועזי (חודשים מ-heb-month-he-sockets) */
   put(RegExp(r'(?<![\d.])(\d{1,2})\.(\d{1,2})(?![\d.%]|\s*(?:אלף|%|₪))'), (x) { final mo = int.parse(x.group(2)!), d = int.parse(x.group(1)!); if (!(mo >= 1 && mo <= 12 && d >= 1 && d <= 31)) return null; var c = DateTime(t0.year, mo, d); if (c.isBefore(t0)) c = DateTime(t0.year + 1, mo, d); return c; });   // dd.mm בלי שנה: הקרוב-הבא
   const months = kBalaganMonths;
   put(RegExp(r'(?<![\d.])(\d{1,2})\s*ב?(ינואר|פברואר|מרץ|מרס|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר)(?:\s+(\d{4}))?(?![\u0590-\u05FF])'), (x) { final d = int.parse(x.group(1)!); final mo = months[x.group(2)!]!; if (d < 1 || d > 31) return null; if (x.group(3) != null) return DateTime(int.parse(x.group(3)!), mo, d); var c = DateTime(t0.year, mo, d); if (c.isBefore(t0)) c = DateTime(t0.year + 1, mo, d); return c; });   // «15 בספטמבר» · «3 באוקטובר 2027»: שמות-חודשים = לוח, לא דומיין
@@ -164,6 +165,7 @@ List<_DateAt> balaganRepeat(String text) {
 String balaganRepeatLabel(String code) {
   if (code.length < 2) return '';
   final n = int.tryParse(code.substring(1)) ?? 1; final u = code[0];
+  if (u == 'h') return 'כל שנה (לפי התאריך העברי)';   /* ב׳-קנח */
   if (n == 1) return u == 'd' ? 'כל יום' : u == 'w' ? 'כל שבוע' : u == 'm' ? 'כל חודש' : 'כל שנה';
   if (n == 2) return u == 'd' ? 'כל יומיים' : u == 'w' ? 'כל שבועיים' : u == 'm' ? 'כל חודשיים' : 'כל שנתיים';
   return 'כל $n ' + (u == 'd' ? 'ימים' : u == 'w' ? 'שבועות' : u == 'm' ? 'חודשים' : 'שנים');
@@ -323,6 +325,7 @@ Map<String, String> balaganFacts(String text0, BalaganModule m, {DateTime? today
   final timeMs = balaganTimes(text, now: today == null ? null : DateTime(today.year, today.month, today.day, 10, 0));   // בבדיקה: «עכשיו» = 10:00 של היום-המוזרק
   final personMs = balaganPersons(text, [...dateMs, ...timeMs, ...phoneMs], phoneMs);
   final repMs = balaganRepeat(text); if (repMs.isNotEmpty) out['__repeat'] = repMs.first.iso;   // ↻ נשמר ברשומה; «סיים» יוצר את הבא
+  if (['כל שנה עברית', 'בתאריך העברי', 'לפי התאריך העברי', 'כל שנה בתאריך העברי', 'בתאריך עברי'].any((w) => text.contains(w))) out['__repeat'] = 'h1';   // ב׳-קנח · G49 · חזרה שנתית לפי הלוח העברי
   void assign(List<String> fields, List<_DateAt> ms, Set<int> used) {
     final st = [for (final x in ms) x.start];
     for (final f in fields) { final i = nearest(st, f); if (i >= 0 && !used.contains(i)) { out[f] = ms[i].iso; used.add(i); } }

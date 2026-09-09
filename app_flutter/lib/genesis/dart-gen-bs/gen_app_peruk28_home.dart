@@ -34,6 +34,7 @@ class GenAppPeruk28HomeScreenToday {
       case 'w': return DateTime(d.year, d.month, d.day + 7 * n);
       case 'm': { final t = DateTime(d.year, d.month + n, 1); final last = DateTime(t.year, t.month + 1, 0).day; return DateTime(t.year, t.month, d.day > last ? last : d.day); }
       case 'y': { final t = DateTime(d.year + n, d.month, 1); final last = DateTime(t.year, t.month + 1, 0).day; return DateTime(t.year, t.month, d.day > last ? last : d.day); }
+      case 'h': return DateTime.parse(bhHebNextYear(_iso(d)) + 'T12:00:00');   // ב׳-קנח · G49 · אותו תאריך עברי בשנה הבאה (bhHebNextYear)
       default: return d;
     }
   }
