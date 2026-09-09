@@ -1,6 +1,7 @@
 // 🧭 חולל ע"י balagan (G33 ב׳-ה · הכרעה-29) — הוכחת-עובדות: תאריכים-יחסיים בעברית · צורות-סכום · קרבה-למילת-השדה. היום מוזרק ⇒ דטרמיניסטי. אל תערוך ידנית.
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_moments.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_app_calendar_home.dart' show GenAppCalendarHomeScreenToday;
+import 'dart:convert';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
@@ -320,6 +321,15 @@ void main() {
     expect(balaganWaSender('8.9.26, 16:30 - רות לוי: שלום'), 'רות לוי');
     expect(balaganWaSender('מחר ב-9:00'), '');
     expect(balaganSplit('[8.9.2026, 16:30] דני: מחר אצל הרופא\n[8.9.2026, 16:31] דני: ok').length, 1);
+  });
+  test('מחיקה עם החזר: הרשומה חוזרת כמו שהייתה', () {
+    final st = AppStore();
+    final id = st.add('d_ent', {'מה': 'x', 'טלפון': '05', '__stage': '1'});
+    final snap = Map<String, String>.from(st.byId('d_ent', id)!);
+    st.removeById('d_ent', id); expect(st.byId('d_ent', id), isNull);
+    final lid = st.logAction('del', 'נמחק', entity: 'd_ent', rid: id, prev: jsonEncode(snap));
+    expect(st.undo(lid), isTrue);
+    expect(st.byId('d_ent', id)!['טלפון'], '05'); expect(st.byId('d_ent', id)!['__stage'], '1');
   });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);

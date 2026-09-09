@@ -215,7 +215,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     final cardRows = <List<dynamic>>[for (final m in _mods) for (final r in m.open()) [dueOf[m.name + '|' + (r['__id'] ?? '')], r['__at'] ?? '', m.card(context, r)]];
     cardRows.sort((a, b) { final da = a[0] as DateTime?, db = b[0] as DateTime?; if (da != null && db != null) { final c = da.compareTo(db); if (c != 0) return c; } else if (da != null) { return -1; } else if (db != null) { return 1; } return (b[1] as String).compareTo(a[1] as String); });
     final cards = <Widget>[for (final x in cardRows) x[2] as Widget];
-    final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next' || e['kind'] == 'add' || e['kind'] == 'done') && e['undone'] != '1').take(5).toList();
+    final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next' || e['kind'] == 'add' || e['kind'] == 'done' || e['kind'] == 'del' || e['kind'] == 'merge') && e['undone'] != '1').take(5).toList();
     // «השבוע» — שמירת-זמן (§המוצר): נגזרת של היומן מיום-ראשון; הדקות-לפעולה = הגדרה עריכה, לא טענה
     final weekStart = today.subtract(Duration(days: today.weekday % 7));
     final wk = appStore.log.where((e) => e['undone'] != '1' && !(DateTime.tryParse(e['at'] ?? '') ?? DateTime(2000)).isBefore(weekStart)).toList();
@@ -233,7 +233,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
     // הפעולה האחרונה (עד 90 שניות) עם «החזר» — «סיים» מעלים שורה, וההחזר צריך להיות איפה שהעין
     final lastAct = appStore.log.isNotEmpty ? appStore.log.first : null;
     final lastAt = lastAct == null ? null : DateTime.tryParse(lastAct['at'] ?? '');
-    final showUndo = lastAct != null && lastAt != null && lastAct['undone'] != '1' && DateTime.now().difference(lastAt).inSeconds <= 90 && (lastAct['kind'] == 'done' || lastAct['kind'] == 'auto' || lastAct['kind'] == 'add' || lastAct['kind'] == 'merge');
+    final showUndo = lastAct != null && lastAt != null && lastAct['undone'] != '1' && DateTime.now().difference(lastAt).inSeconds <= 90 && (lastAct['kind'] == 'done' || lastAct['kind'] == 'auto' || lastAct['kind'] == 'add' || lastAct['kind'] == 'merge' || lastAct['kind'] == 'del');
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     final plan = _plan(today, overdue, todayItems);
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
