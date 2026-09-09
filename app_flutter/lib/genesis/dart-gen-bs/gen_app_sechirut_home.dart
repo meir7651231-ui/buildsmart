@@ -99,12 +99,12 @@ class GenAppSechirutHomeScreenToday {
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null) continue;
         if (appStore.decision('ign:$rid:${f.label}') == 'no') continue;
-        if (dayDelta == 0 && d.isBefore(today)) { final ago = today.difference(d).inDays; out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', gen_app_sechirut_home_c86.replaceAll('{date}', _dayLabel(d, today)) + ' · ' + (ago == 1 ? gen_app_sechirut_home_c87 : gen_app_sechirut_home_c88.replaceAll('{n}', ago.toString())), rid, f.label, d, f.hard, true, today, tm, rep, ph, mo)); continue; }
+        if (dayDelta == 0 && d.isBefore(today)) { final ago = today.difference(d).inDays; out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', gen_app_sechirut_home_c86.replaceAll('{date}', _dayLabel(d, today)) + (ago <= 1 ? '' : ' · ' + gen_app_sechirut_home_c87.replaceAll('{n}', ago.toString()))   /* ב׳-עז · «היה אתמול» כבר אומר הכל — בלי «· אתמול» כפול */, rid, f.label, d, f.hard, true, today, tm, rep, ph, mo)); continue; }
         final okRem = appStore.decision(_remKey(rid, f.label)) == 'ok';   // תזכורת-מוקדמת (−3/−1) = הצעה שדורשת אישור; יום-ההכרעה עצמו = עובדה — מוצג בלי אישור
         for (final off in _offsets()) {
           if (off > 0 && !okRem) continue;
           final fire = _shift(d.subtract(Duration(days: off)), f.hard);
-          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? '' : gen_app_sechirut_home_c89.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep, ph, mo)); break; }
+          if (fire == today.add(Duration(days: dayDelta))) { out.add(_mk(_dates.length == 1 ? who : '${f.label} · $who', off == 0 ? '' : gen_app_sechirut_home_c88.replaceAll('{n}', off.toString()), rid, f.label, d, f.hard, false, today, off == 0 ? tm : '', rep, ph, mo)); break; }
         }
       }
     }
@@ -121,17 +121,17 @@ class GenAppSechirutHomeScreenToday {
       final rid = r[AppStore.idKey] ?? '';
       if (_dates.any((x) => _parse(r[x.label] ?? '') != null)) continue;
       if (appStore.decision('undated:$rid') == 'no') continue;
-      final acts = [gen_app_sechirut_home_c90, gen_app_sechirut_home_c91, gen_app_sechirut_home_c92];
+      final acts = [gen_app_sechirut_home_c89, gen_app_sechirut_home_c90, gen_app_sechirut_home_c91];
       out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: [f.label, _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
     }
     return out;
   }
   static void _setDate(String rid, String field, DateTime today, List<String> acts, int i) {
     final a = acts[i.clamp(0, acts.length - 1)];
-    if (a == gen_app_sechirut_home_c93) { appStore.decide('undated:$rid', 'no'); appStore.logAction('decide', gen_app_sechirut_home_c94.replaceAll('{what}', appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: 'undated:$rid'); return; }
+    if (a == gen_app_sechirut_home_c92) { appStore.decide('undated:$rid', 'no'); appStore.logAction('decide', gen_app_sechirut_home_c93.replaceAll('{what}', appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: 'undated:$rid'); return; }
     final r = appStore.byId('app_sechirut_ent1', rid); if (r == null) return;
     final prev = r[field] ?? '';
-    appStore.update('app_sechirut_ent1', rid, {field: _iso(_shift(today.add(Duration(days: a == gen_app_sechirut_home_c95 ? 7 : 1)), false))});   /* «קבע» לא נוחת בשבת */
+    appStore.update('app_sechirut_ent1', rid, {field: _iso(_shift(today.add(Duration(days: a == gen_app_sechirut_home_c94 ? 7 : 1)), false))});   /* «קבע» לא נוחת בשבת */
     appStore.logAction('auto', a + ' · ' + field, entity: 'app_sechirut_ent1', rid: rid, field: field, prev: prev);
   }
 
@@ -152,8 +152,8 @@ class GenAppSechirutHomeScreenToday {
       if (!any && appStore.decision('undated:$rid') != 'no') visible = true;
       if (visible) continue;
       final t = _touched(r, rid); if (t == null) continue; final n = today.difference(t).inDays; if (n < 14) continue;
-      final acts = [gen_app_sechirut_home_c96, gen_app_sechirut_home_c97, gen_app_sechirut_home_c98];
-      out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: [gen_app_sechirut_home_c99.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
+      final acts = [gen_app_sechirut_home_c95, gen_app_sechirut_home_c96, gen_app_sechirut_home_c97];
+      out.add(DsTodayItem(title: appStore.displayOf('app_sechirut_ent1', rid), sub: [gen_app_sechirut_home_c98.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
     }
     out.sort((a, b) => a.due.compareTo(b.due));   // הישן ביותר ראשון
     return out;
@@ -161,9 +161,9 @@ class GenAppSechirutHomeScreenToday {
   static void _staleAct(String rid, DateTime today, List<String> acts, int i) {
     final a = acts[i.clamp(0, acts.length - 1)];
     final r = appStore.byId('app_sechirut_ent1', rid); if (r == null) return;
-    if (a == gen_app_sechirut_home_c100) { final f = _dates.firstWhere((x) => x.hard, orElse: () => _dates.first); appStore.decide('ign:$rid:${f.label}', ''); appStore.decide('undated:$rid', ''); _setDate(rid, f.label, today, [a], 0); return; }   /* המועד החדש חוזר ל«היום» — ההתעלמות הישנה נמחקת */
-    if (a == gen_app_sechirut_home_c101) { final prev = r[AppStore.stageKey] ?? '0'; appStore.update('app_sechirut_ent1', rid, {AppStore.stageKey: '5'}); appStore.logAction('auto', gen_app_sechirut_home_c102.replaceAll('{who}', appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: AppStore.stageKey, prev: prev); return; }
-    appStore.decide('stale:$rid', 'no'); appStore.logAction('decide', gen_app_sechirut_home_c103.replaceAll('{what}', appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: 'stale:$rid');
+    if (a == gen_app_sechirut_home_c99) { final f = _dates.firstWhere((x) => x.hard, orElse: () => _dates.first); appStore.decide('ign:$rid:${f.label}', ''); appStore.decide('undated:$rid', ''); _setDate(rid, f.label, today, [a], 0); return; }   /* המועד החדש חוזר ל«היום» — ההתעלמות הישנה נמחקת */
+    if (a == gen_app_sechirut_home_c100) { final prev = r[AppStore.stageKey] ?? '0'; appStore.update('app_sechirut_ent1', rid, {AppStore.stageKey: '5'}); appStore.logAction('auto', gen_app_sechirut_home_c101.replaceAll('{who}', appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: AppStore.stageKey, prev: prev); return; }
+    appStore.decide('stale:$rid', 'no'); appStore.logAction('decide', gen_app_sechirut_home_c102.replaceAll('{what}', appStore.displayOf('app_sechirut_ent1', rid)), entity: 'app_sechirut_ent1', rid: rid, field: 'stale:$rid');
   }
 
   // ב׳-לז · המועדים הקרובים שטרם הוכרעה להם תזכורת — ל«בלגן», שמרכז n כרטיסים לאחד (שאלה אחת, הכרעה אחת, החזר אחד)
@@ -183,22 +183,22 @@ class GenAppSechirutHomeScreenToday {
   // P11/P13 · הצעות: תזכורת לכל תאריך שטרם הוכרע · צעד-הבא בשלב-האחרון (P14) · תזכורת-אחרי-שליחה (P12) — הכל עם קטע-המקור
   static List<Widget> proposals(BuildContext context, DateTime today, {bool chain = true, bool rem = true}) {   // rem=false: «בלגן» מרכז את התזכורות לכרטיס אחד (ב׳-לז)   // chain=false: «בלגן» מרנדר את כרטיס-הצעד-הבא בעצמו (חוצה-מודולים)
     final out = <Widget>[];
-    final days = _offsets().map((o) => o == 0 ? gen_app_sechirut_home_c104 : o == 1 ? gen_app_sechirut_home_c105 : gen_app_sechirut_home_c106.replaceAll('{n}', o.toString())).join(' · ');   /* ב׳-מב · «3 ימים לפני · יום לפני · ביום» במקום (−3/−1/−0) */
+    final days = _offsets().map((o) => o == 0 ? gen_app_sechirut_home_c103 : o == 1 ? gen_app_sechirut_home_c104 : gen_app_sechirut_home_c105.replaceAll('{n}', o.toString())).join(' · ');   /* ב׳-מב · «3 ימים לפני · יום לפני · ביום» במקום (−3/−1/−0) */
     for (final r in open()) {
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_sechirut_ent1', rid);
       if (rem) for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
-        out.add(DsApproveCard(question: gen_app_sechirut_home_c107.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _dayLabel(d, today)), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c108, noLabel: gen_app_sechirut_home_c109, alwaysLabel: gen_app_sechirut_home_c110,
+        out.add(DsApproveCard(question: gen_app_sechirut_home_c106.replaceAll('{field}', f.label).replaceAll('{days}', days).replaceAll('{date}', _dayLabel(d, today)), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c107, noLabel: gen_app_sechirut_home_c108, alwaysLabel: gen_app_sechirut_home_c109,
           onOk: () => appStore.decide(_remKey(rid, f.label), 'ok'), onNo: () => appStore.decide(_remKey(rid, f.label), 'no'),
           onAlways: () { appStore.setSetting('always:rem', '1'); appStore.decide(_remKey(rid, f.label), 'ok'); }));
       }
       final last = appStore.lastLog('send', rid);   // P12 · טיוטה, לא שליחה: אחרי 3 ימים בלי שינוי-שלב ⇒ הצעה; השליחה עצמה רק בהקשה (T5)
-      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_sechirut_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_sechirut_home_c111.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c112, noLabel: gen_app_sechirut_home_c113, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
+      if (last != null && appStore.decision('fu:$rid:${last['id']}').isEmpty) { final at = DateTime.tryParse(last['at'] ?? ''); final n = at == null ? 0 : today.difference(_day(at)).inDays; if (n >= 3 && (last['prev'] ?? '') == appStore.stageOf('app_sechirut_ent1', rid).toString()) out.add(DsApproveCard(question: gen_app_sechirut_home_c110.replaceAll('{n}', n.toString()), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c111, noLabel: gen_app_sechirut_home_c112, onOk: () { appStore.decide('fu:$rid:${last['id']}', 'ok'); send(context, r, rid); }, onNo: () => appStore.decide('fu:$rid:${last['id']}', 'no'))); }
     }
     if (chain) for (final r in appStore.records('app_sechirut_ent1')) {   // P14 · הצעד-הבא: רשומה שהגיעה לשלב-האחרון (סגורה — לא ב-open) ובלי הכרעה
       final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_sechirut_ent1', rid);
-      if (appStore.stageOf('app_sechirut_ent1', rid) >= 5 && appStore.decision('next:$rid').isEmpty) out.add(DsApproveCard(question: gen_app_sechirut_home_c114.replaceAll('{next}', gen_app_sechirut_home_c58), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c115, noLabel: gen_app_sechirut_home_c116, onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_app_sechirut_home_c117.replaceAll('{next}', gen_app_sechirut_home_c58), entity: 'app_sechirut_ent1', rid: rid, field: 'next:$rid'); }, onNo: () => appStore.decide('next:$rid', 'no')));
+      if (appStore.stageOf('app_sechirut_ent1', rid) >= 5 && appStore.decision('next:$rid').isEmpty) out.add(DsApproveCard(question: gen_app_sechirut_home_c113.replaceAll('{next}', gen_app_sechirut_home_c58), source: module + ' · ' + who, okLabel: gen_app_sechirut_home_c114, noLabel: gen_app_sechirut_home_c115, onOk: () { appStore.decide('next:$rid', 'ok'); appStore.logAction('next', gen_app_sechirut_home_c116.replaceAll('{next}', gen_app_sechirut_home_c58), entity: 'app_sechirut_ent1', rid: rid, field: 'next:$rid'); }, onNo: () => appStore.decide('next:$rid', 'no')));
     }
     return out;
   }
@@ -206,9 +206,9 @@ class GenAppSechirutHomeScreenToday {
   static List<Map<String, String>> done() => appStore.records('app_sechirut_ent1').where((r) => appStore.stageOf('app_sechirut_ent1', r[AppStore.idKey] ?? '') >= 5 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_sechirut_home_c0] ?? '')).trim().isEmpty ? gen_app_sechirut_home_c118 : (r[gen_app_sechirut_home_c0] ?? '')), trailing: Text(const [gen_app_sechirut_home_c50, gen_app_sechirut_home_c51, gen_app_sechirut_home_c52, gen_app_sechirut_home_c53, gen_app_sechirut_home_c54, gen_app_sechirut_home_c55][appStore.stageOf('app_sechirut_ent1', r[AppStore.idKey] ?? '').clamp(0, 5)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_sechirut_home_c0] ?? '')).trim().isEmpty ? gen_app_sechirut_home_c117 : (r[gen_app_sechirut_home_c0] ?? '')), trailing: Text(const [gen_app_sechirut_home_c50, gen_app_sechirut_home_c51, gen_app_sechirut_home_c52, gen_app_sechirut_home_c53, gen_app_sechirut_home_c54, gen_app_sechirut_home_c55][appStore.stageOf('app_sechirut_ent1', r[AppStore.idKey] ?? '').clamp(0, 5)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         AnimatedBuilder(animation: appStore, builder: (context, _) => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final r in [r]) Padding(padding: const EdgeInsets.only(bottom: 8), child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [Padding(padding: const EdgeInsets.only(bottom: 8), child: ForgeMustChip(bare: true, items: [for (final s in [gen_app_sechirut_home_c8, gen_app_sechirut_home_c9, gen_app_sechirut_home_c10]) [s]], selected: {((r[gen_app_sechirut_home_c2] ?? '') == gen_app_sechirut_home_c3 ? 0 : (r[gen_app_sechirut_home_c4] ?? '') == gen_app_sechirut_home_c5 ? 1 : (r[gen_app_sechirut_home_c6] ?? '') == gen_app_sechirut_home_c7 ? 2 : 0)}, onSelect: (i) => appStore.update('app_sechirut_ent1', (r[AppStore.idKey] ?? ''), {gen_app_sechirut_home_c11: [gen_app_sechirut_home_c12, gen_app_sechirut_home_c13, gen_app_sechirut_home_c14][i]}))), DsNote(message: ((r[gen_app_sechirut_home_c35] ?? '') == gen_app_sechirut_home_c36 ? ([gen_app_sechirut_home_c37, ([appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c39, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c40] ?? '')).where((x) => x.trim().isNotEmpty).join(', ')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c38 + appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c39, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c40] ?? '')).where((x) => x.trim().isNotEmpty).join(', ') + gen_app_sechirut_home_c41)), gen_app_sechirut_home_c42].where((x) => x.trim().isNotEmpty).join(' ')) : (((r[gen_app_sechirut_home_c24] ?? '') == gen_app_sechirut_home_c25 ? ([gen_app_sechirut_home_c26, ([appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c28, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c29] ?? '')).where((x) => x.trim().isNotEmpty).join(', ')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c27 + appStore.referencing('app_sechirut_ent3', gen_app_sechirut_home_c28, (r[AppStore.idKey] ?? '')).map((c) => (c[gen_app_sechirut_home_c29] ?? '')).where((x) => x.trim().isNotEmpty).join(', ') + gen_app_sechirut_home_c30)), ([(r[gen_app_sechirut_home_c32] ?? '')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c31 + (r[gen_app_sechirut_home_c32] ?? '') + gen_app_sechirut_home_c33)), gen_app_sechirut_home_c34].where((x) => x.trim().isNotEmpty).join(' ')) : (((r[gen_app_sechirut_home_c20] ?? '') == gen_app_sechirut_home_c21 ? ([gen_app_sechirut_home_c22, gen_app_sechirut_home_c23].where((x) => x.trim().isNotEmpty).join(' ')) : ([gen_app_sechirut_home_c15, ([(r[gen_app_sechirut_home_c17] ?? '')].any((x) => x.trim().isEmpty) ? '' : (gen_app_sechirut_home_c16 + (r[gen_app_sechirut_home_c17] ?? '') + gen_app_sechirut_home_c18)), gen_app_sechirut_home_c19].where((x) => x.trim().isNotEmpty).join(' '))))))), label: gen_app_sechirut_home_c43, tone: 0)]))])),
-        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_sechirut_home_c119, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_sechirut_home_c120, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppSechirutRootScreen(id: r[AppStore.idKey] ?? ''))))])),
+        Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [Expanded(child: DsPrimaryButton(label: gen_app_sechirut_home_c118, onTap: () => send(context, r, r[AppStore.idKey] ?? ''))), const SizedBox(width: 8), DsChipButton(label: gen_app_sechirut_home_c119, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppSechirutRootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
 
   // «תמיד אשר» ⇒ לבד: הכרעות-תזכורת פתוחות נסגרות ונרשמות ביומן עם החזר (T2). אחרי הפריים, לא בתוך build. לעולם לא שולח (T5). P5: לא נוגע בתאריכים.
@@ -221,7 +221,7 @@ class GenAppSechirutHomeScreenToday {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_sechirut_home_c121.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_sechirut_ent1', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_sechirut_home_c120.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_sechirut_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
@@ -245,8 +245,8 @@ class _GenAppSechirutHomeScreenState extends State<GenAppSechirutHomeScreen> {
     try {
       final n = FlutterLocalNotificationsPlugin();
       await n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'), iOS: DarwinInitializationSettings()));
-      await n.show(1, gen_app_sechirut_home_c122, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
-      if (hardToday > 0) await n.show(2, gen_app_sechirut_home_c123, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
+      await n.show(1, gen_app_sechirut_home_c121, lead, const NotificationDetails(android: AndroidNotificationDetails('balagan_digest', 'digest')));
+      if (hardToday > 0) await n.show(2, gen_app_sechirut_home_c122, '$hardToday', const NotificationDetails(android: AndroidNotificationDetails('balagan_hard', 'hard')));
       appStore.setSetting('digestShown', key);
     } catch (_) {}
   }
@@ -268,20 +268,20 @@ class _GenAppSechirutHomeScreenState extends State<GenAppSechirutHomeScreen> {
     final pending = GenAppSechirutHomeScreenToday.proposals(context, today);
     final did = appStore.log.where((e) => (e['kind'] == 'decide' || e['kind'] == 'auto' || e['kind'] == 'next') && e['undone'] != '1').take(5).toList();
     final n = overdue.length + todayItems.length + pending.length;   // הדברים שדורשים אותו היום (הכרעה-29: לא סופרים רשומות פתוחות פעמיים)
-    final lead = n == 0 && open.isEmpty ? gen_app_sechirut_home_c124 : n <= 1 ? gen_app_sechirut_home_c125 : gen_app_sechirut_home_c126.replaceAll('{n}', n.toString());
+    final lead = n == 0 && open.isEmpty ? gen_app_sechirut_home_c123 : n <= 1 ? gen_app_sechirut_home_c124 : gen_app_sechirut_home_c125.replaceAll('{n}', n.toString());
     final hardToday = todayItems.where((x) => x.hard && x.due == today).length;
     WidgetsBinding.instance.addPostFrameCallback((_) { _digest(lead, hardToday); });
     final lk = DsLook.of(context);
-    return DsScaffold(title: gen_app_sechirut_home_c127, subtitle: lead, icon: gen_app_sechirut_home_c128, children: [
-      DsLoadMeter(count: n, label: gen_app_sechirut_home_c129.replaceAll('{n}', n.toString()), stateLabels: [gen_app_sechirut_home_c130, gen_app_sechirut_home_c131, gen_app_sechirut_home_c132]),
+    return DsScaffold(title: gen_app_sechirut_home_c126, subtitle: lead, icon: gen_app_sechirut_home_c127, children: [
+      DsLoadMeter(count: n, label: gen_app_sechirut_home_c128.replaceAll('{n}', n.toString()), stateLabels: [gen_app_sechirut_home_c129, gen_app_sechirut_home_c130, gen_app_sechirut_home_c131]),
       Padding(padding: const EdgeInsets.only(top: 16, bottom: 12), child: Text(lead, style: TextStyle(color: lk.ink, fontSize: 28, fontWeight: FontWeight.w600, height: 1.2))),
-      if (overdue.isNotEmpty) DsSection(title: gen_app_sechirut_home_c133, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
-      if (todayItems.isNotEmpty) DsSection(title: gen_app_sechirut_home_c134, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
+      if (overdue.isNotEmpty) DsSection(title: gen_app_sechirut_home_c132, tone: 2, children: [for (final it in overdue) DsActionRow(title: it.title, sub: it.sub, tone: 2, actions: it.actions, onAct: it.act)]),   // D6/P6/P7 · באיחור ראשון
+      if (todayItems.isNotEmpty) DsSection(title: gen_app_sechirut_home_c133, children: [for (final it in todayItems) DsActionRow(title: it.title, sub: it.sub, actions: it.actions, onAct: it.act)]),
       for (final r in open) GenAppSechirutHomeScreenToday.card(context, r),
-      if (pending.isNotEmpty) DsSection(title: gen_app_sechirut_home_c135 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
-      if (did.isNotEmpty) DsSection(title: gen_app_sechirut_home_c136 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_sechirut_home_c137, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
-      if (tomorrow.isNotEmpty) DsFold(title: gen_app_sechirut_home_c138 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
-      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_sechirut_home_c139 + ' ' + gen_app_sechirut_home_c140, style: TextStyle(color: lk.muted, fontSize: 14))),
+      if (pending.isNotEmpty) DsSection(title: gen_app_sechirut_home_c134 + ' · ' + pending.length.toString(), children: pending),   // D5 · תיבה ≠ היום
+      if (did.isNotEmpty) DsSection(title: gen_app_sechirut_home_c135 + ' · ' + did.length.toString(), children: [for (final e in did) DsLogRow(text: e['what'] ?? '', undoLabel: gen_app_sechirut_home_c136, onUndo: () => appStore.undo(e['id'] ?? ''))]),   // T2
+      if (tomorrow.isNotEmpty) DsFold(title: gen_app_sechirut_home_c137 + ' (' + tomorrow.length.toString() + ')', details: [for (final it in tomorrow) DsActionRow(title: it.title, sub: it.sub)]),   // D8 · יום-יחיד; מחר מקופל
+      if (overdue.isEmpty && todayItems.isEmpty && pending.isEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(gen_app_sechirut_home_c138 + ' ' + gen_app_sechirut_home_c139, style: TextStyle(color: lk.muted, fontSize: 14))),
     ]);
   });
 }

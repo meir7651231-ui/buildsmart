@@ -135,6 +135,7 @@ class _GenBalaganConfirmScreenState extends State<GenBalaganConfirmScreen> {
     final shown = <BalaganField>[]; for (final f in m.fields) { if (widget.facts.containsKey(f.label)) shown.add(f); } for (final f in m.fields) { if (shown.length >= 6) break; if (f.required && !shown.contains(f)) shown.add(f); }
     if (dateF.isNotEmpty && shown.length < 6 && !shown.any((f) => f.label == dateF)) shown.add(m.fields.firstWhere((f) => f.label == dateF));   // ב׳-לא · המועד תמיד על השולחן — בלי מועד התיק נעלם מ«היום»
     if (m.timeFields.isNotEmpty && shown.length < 6 && !shown.any((f) => f.label == m.timeFields.first)) shown.add(m.fields.firstWhere((f) => f.label == m.timeFields.first));   // ב׳-לג · השעה על השולחן (ביומן היא העיקר)
+    if (m.personFields.isNotEmpty && shown.length < 6 && !shown.any((f) => f.label == m.personFields.first)) shown.add(m.fields.firstWhere((f) => f.label == m.personFields.first));   // ב׳-עד · האדם על השולחן (צ׳יפי-אנשים)
     shown.sort((a, b) => m.fields.indexOf(a).compareTo(m.fields.indexOf(b)));
     final rest = m.fields.where((f) => !shown.contains(f)).toList();
     return DsScaffold(title: m.title, subtitle: gen_balagan_confirm_c4, icon: gen_balagan_confirm_c5, children: [
