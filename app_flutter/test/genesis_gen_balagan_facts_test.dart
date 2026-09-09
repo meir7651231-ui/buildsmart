@@ -473,6 +473,16 @@ void main() {
     expect(balaganAgo(DateTime(2026, 9, 8, 11, 0), now), 'לפני 3 שעות');
     expect(balaganAgo(DateTime(2026, 9, 7, 23, 0), now), 'אתמול');
   });
+  test('הקשר לכרטיס-הכפול (מודול · מועד · ₪) · «n פתוחים» למודול', () {
+    final m = kBalaganModules.firstWhere((x) => x.dateFields.isNotEmpty && x.numFields.any((f) => !x.percentFields.contains(f)));
+    final nf = m.numFields.firstWhere((f) => !m.percentFields.contains(f));
+    expect(balaganDupSub(m, {m.dateFields.first: '2026-09-09', nf: '350'}, today), m.title + ' · מחר · ₪ 350');
+    expect(balaganDupSub(m, {}, today), m.title);
+    final before = balaganOpenCount(m.rootSlug, m.stages);
+    appStore.add(m.rootSlug, {nf: '1'}); if (m.stages > 0) appStore.add(m.rootSlug, {nf: '2', '__stage': (m.stages - 1).toString()});
+    final after = balaganOpenCount(m.rootSlug, m.stages);
+    expect(after, isNot(before)); expect(after.contains('פתוחים'), isTrue);
+  });
   test('פיצול שורה לכמה רגעים', () {
     expect(balaganSplit('שילמתי ארנונה. מחר תור לרופא ב-9:00'), ['שילמתי ארנונה', 'מחר תור לרופא ב-9:00']);
     expect(balaganSplit('מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200'), ['מסרתי מפתח ב-1.8.2026 והמשכיר מקזז 6,200']);
