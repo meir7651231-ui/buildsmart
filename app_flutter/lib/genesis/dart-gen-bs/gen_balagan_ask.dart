@@ -5,6 +5,7 @@ import '../dart-ui-bs/ds/ds_ai.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/ds/ds_voice.dart';
 import 'gen_balagan_confirm.dart';
+import 'gen_balagan_home.dart';
 import 'gen_balagan_moments.dart';
 import 'gen_app_calendar_ent1.dart';
 import 'gen_app_tasks_ent1.dart';
@@ -149,10 +150,11 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
       if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 14), child: Text(gen_balagan_ask_c21, style: TextStyle(color: lk.muted, fontSize: 13))),
       if (!_asked && _c.text.trim().isEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final ex in gen_balagan_ask_c22.split('|')) DsChipButton(label: ex, onTap: () { _c.text = ex; _go(); })])),   // אפס-הקלדה: דוגמה = הקשה אחת ⇒ טופס-האישור
       if (!_asked && _c.text.trim().isEmpty) for (final people in [balaganPeople()]) if (people.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final p in people) DsChipButton(label: p + ':', onTap: () => setState(() { _c.text = p + ': '; }))])),   // ב׳-ס · «רות לוי: » — השורה מתחילה מהאדם, בלי להקליד שם
+      if (!_asked && _c.text.trim().isEmpty) for (final recent in [appStore.log.where((e) => e['kind'] == 'add' && e['undone'] != '1' && (e['entity'] ?? '').isNotEmpty && appStore.byId(e['entity'] ?? '', e['rid'] ?? '') != null).take(3).toList()]) if (recent.isNotEmpty) DsSection(title: gen_balagan_ask_c23, children: [for (final e in recent) DsNavTile(glyph: '', title: appStore.displayOf(e['entity'] ?? '', e['rid'] ?? ''), sub: (() { final at = DateTime.tryParse(e['at'] ?? ''); return at == null ? '' : balaganAgo(at, DateTime.now()); })(), onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => balaganOpenRoot(e['entity'] ?? '', e['rid'] ?? ''))))]),   // ב׳-פה · «כבר הוספתי את זה?» — 3 האחרונים, הקשה ⇒ התיק
       if (_note.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 10), child: DsNote(message: _note, label: '', tone: 0)),
-      if (_asked && top != null) DsSection(title: gen_balagan_ask_c23, children: [   // חזר בלי לשמור ⇒ הזיהוי נשאר על המסך (הקשה אחת חוזרת)
-        DsApproveCard(question: gen_balagan_ask_c24.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c25, noLabel: gen_balagan_ask_c26, onOk: () => _open(context, top, _hits.skip(1).map((h) => h.module).toList()), onNo: _skip),
-        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c27 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
+      if (_asked && top != null) DsSection(title: gen_balagan_ask_c24, children: [   // חזר בלי לשמור ⇒ הזיהוי נשאר על המסך (הקשה אחת חוזרת)
+        DsApproveCard(question: gen_balagan_ask_c25.replaceAll('{title}', top.module.title).replaceAll('{moment}', top.module.moment), source: _c.text.length > 80 ? _c.text.substring(0, 80) : _c.text, okLabel: gen_balagan_ask_c26, noLabel: gen_balagan_ask_c27, onOk: () => _open(context, top, _hits.skip(1).map((h) => h.module).toList()), onNo: _skip),
+        if (_hits.length > 1) DsFold(title: gen_balagan_ask_c28 + ' (' + (_hits.length - 1).toString() + ')', details: [for (final h in _hits.skip(1)) DsNavTile(glyph: '', title: h.module.title, sub: h.module.moment, onTap: () => _open(context, h))]),
       ]),
     ]);
   }

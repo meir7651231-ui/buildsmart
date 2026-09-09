@@ -11,6 +11,7 @@ import 'gen_app_sechirut_ent4.dart';
 import 'gen_app_sechirut_rp1.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+
 import 'package:flutter/material.dart';
 
 /// 8000 ⇒ 8,000 · 12.5 ⇒ 12.5 — סכום קריא בתיק (רק תצוגה; הרשומה נשארת ספרות)
