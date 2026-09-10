@@ -2,10 +2,14 @@
 // מבוקר (חוק-6: הצבה, לא אטום-טהור). נכשל-רך אם האחסון חסום (חלון-פרטי/הרשאות).
 import 'package:web/web.dart' as web;
 
-void persistSave(String key, String value) {
+/// G51 · מחזיר האם נשמר בפועל. מכסה-מלאה/אחסון-חסום ⇒ false (הקורא חייב להראות זאת; אסור לבלוע).
+bool persistSave(String key, String value) {
   try {
     web.window.localStorage.setItem(key, value);
-  } catch (_) {}
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 String? persistLoad(String key) {

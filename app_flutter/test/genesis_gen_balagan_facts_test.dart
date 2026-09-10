@@ -272,6 +272,21 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2028, 2, 29), 'y1'), DateTime(2029, 2, 28));
     expect(balaganRepeatLabel('m2'), 'כל חודשיים');
   });
+  test('G51 · אמון: החזר-מחיקה מחזיר את תת-העץ (אב+בנות) · דגלי-אחסון נקיים בלידה', () {
+    final st = AppStore();
+    st.registerRelation('c_ent', 'אב', 'p_ent', 1);   // מפל: מחיקת-אב מוחקת בנות
+    final pid = st.add('p_ent', {'מה': 'תיק-אב'});
+    final c1 = st.add('c_ent', {'מה': 'תשלום א', 'אב': pid});
+    final c2 = st.add('c_ent', {'מה': 'תשלום ב', 'אב': pid});
+    final snap = st.snapshotSubtree('p_ent', pid);
+    expect(st.removeById('p_ent', pid), isTrue);
+    expect(st.records('p_ent'), isEmpty); expect(st.records('c_ent'), isEmpty);   // הבנות נמחקו במפל
+    expect(st.restoreSubtree(snap), isTrue);
+    expect(st.byId('p_ent', pid), isNotNull);
+    expect(st.byId('c_ent', c1), isNotNull); expect(st.byId('c_ent', c2), isNotNull);   // ⇐ הפער שהביקורת מצאה: קודם חזר רק האב
+    expect(st.restoreSubtree('{}'), isFalse);   // פורמט-ישן ⇒ נפילה לרשומה-בודדת בקורא
+    expect(st.storageOk, isTrue); expect(st.storageBlocked, isFalse);
+  });
   test('גיבוי: ייצוא ⇒ שחזור מחזיר את התיקים · טקסט זר נדחה · חיפוש מוצא בכל שדה', () {
     final st = AppStore();
     final id = st.add('x_ent', {'מה': 'לשלם ארנונה', 'טלפון': '0521234567'});

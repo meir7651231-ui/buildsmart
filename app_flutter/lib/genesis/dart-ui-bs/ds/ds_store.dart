@@ -35,6 +35,15 @@ class AppStore extends ChangeNotifier {
   static const stageKey = '__stage'; // אינדקס שלב-המסע הנוכחי
   static const _pkey = 'ds_app_v1';  // מפתח-ההתמדה
 
+  // ── G51 · בריאות-האחסון (הכרעת-הביקורת 10.9): כשל-שמירה ואי-קריאות אסור שיהיו שקטים.
+  //    _saveOk=false ⇒ עבודה שלא נשמרה (מכסה מלאה / אחסון חסום) · _blocked=true ⇒ הבלוב
+  //    הקיים לא נקרא, הכתיבה מושהית כדי לא לדרוס אותו, והעותק נשמר תחת '<key>.corrupt'.
+  bool _saveOk = true, _blocked = false;
+  bool get storageOk => _saveOk;
+  bool get storageBlocked => _blocked;
+  /// המשתמש הכריע «התחל חדש» — משחרר את חסימת-הכתיבה (העותק הפגום נשאר שמור).
+  void clearStorageBlock() { _blocked = false; notifyListeners(); }
+
   // ── G32 · שכבת-הטריגרים (הכרעה-28): יומן-פעולות (אוטומטיות/שליחה, עם החזר) · זיכרון-הכרעות (אשר/דחה/תמיד) · הגדרות-התנהגות — באותו JSON ──
   final List<Map<String, String>> _log = [];
   String _group = '';
@@ -61,7 +70,7 @@ class AppStore extends ChangeNotifier {
     final e = _log[i];
     if ((e['kind'] ?? '') == 'decide') { _decided.remove(e['field']); for (final k in (e['prev'] ?? '').split(',')) { if (k.isNotEmpty) _decided.remove(k); } }   /* ב׳-לז · הכרעה-מרוכזת: מפתחות נוספים ב-prev, החזר אחד מוחק את כולן */
     else if ((e['kind'] ?? '') == 'add') { removeById(e['entity'] ?? '', e['rid'] ?? ''); }   // החזר של שמירה = מחיקת הרשומה
-    else if ((e['kind'] ?? '') == 'del') { try { final m = (jsonDecode(e['prev'] ?? '{}') as Map).map((k, v) => MapEntry(k.toString(), v.toString())); restore(e['entity'] ?? '', m); } catch (_) {} }   // undo of a delete: the record returns as it was
+    else if ((e['kind'] ?? '') == 'del') { if (!restoreSubtree(e['prev'] ?? '')) { try { final m = (jsonDecode(e['prev'] ?? '{}') as Map).map((k, v) => MapEntry(k.toString(), v.toString())); restore(e['entity'] ?? '', m); } catch (_) {} } }   // G51 · תת-עץ מלא (צאצאים+שדות-מנוקים); פורמט-ישן ⇒ נפילה לרשומה-בודדת
     else if ((e['kind'] ?? '') == 'merge') { final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null) { try { ((jsonDecode(e['prev'] ?? '{}') as Map)).forEach((k, v) { r[k.toString()] = v.toString(); }); } catch (_) {} } }   // undo of a merge: every touched field goes back (prev = JSON map)
     else if ((e['kind'] ?? '') == 'done') { _decided.remove('ign:${e['rid']}:${e['field']}'); final r = byId(e['entity'] ?? '', e['rid'] ?? ''); if (r != null && (e['prev'] ?? '').isNotEmpty) r[stageKey] = e['prev']!; }   // undo of «done»: the date row returns and the stage goes back
     else if ((e['entity'] ?? '').isNotEmpty && (e['field'] ?? '').isNotEmpty) { final r = byId(e['entity']!, e['rid'] ?? ''); if (r != null) r[e['field']!] = e['prev'] ?? ''; }
@@ -90,7 +99,11 @@ class AppStore extends ChangeNotifier {
             .map((e) => (e as Map).map((kk, vv) => MapEntry(kk.toString(), vv.toString())))
             .toList();
       });
-    } catch (_) {}
+    } catch (_) {
+      // G51 · בלוב קיים שלא נקרא: שומרים עותק וחוסמים כתיבה. בלי זה הכתיבה הבאה דורסת אותו לתמיד.
+      persistSave('\$_pkey.corrupt', raw);
+      _blocked = true;
+    }
   }
 
   /// Backup as text (same JSON as persistence). Restore replaces everything; the previous state is kept once for undo.
@@ -99,7 +112,10 @@ class AppStore extends ChangeNotifier {
     Map<String, dynamic> data;
     try { data = jsonDecode(raw) as Map<String, dynamic>; } catch (_) { return -1; }
     if (data['rec'] is! Map) return -1;
-    try { persistSave('\$_pkey.prev', exportJson()); } catch (_) {}
+    // G51 · אין דרך-חזרה ⇒ לא משחזרים. (-2 = «לא הצלחתי לשמור עותק»; קודם המחיקה קרתה בכל מקרה.)
+    final back = exportJson();
+    final backOk = persistSave('\$_pkey.prev', back); final backRead = persistLoad('\$_pkey.prev');
+    if (!backOk || (backRead != null && backRead != back)) return -2;   // readback==null = שכבה ללא-התמדה (בדיקות) ⇒ לא כשל
     _rec.clear(); _log.clear(); _decided.clear(); _settings.clear();
     _seq = (data['seq'] as num?)?.toInt() ?? 0; _role = (data['role'] as num?)?.toInt() ?? 0; _actor = (data['actor'] as String?) ?? '';
     for (final e in (data['log'] as List? ?? const [])) _log.add((e as Map).map((k, v) => MapEntry(k.toString(), v.toString())));
@@ -121,9 +137,10 @@ class AppStore extends ChangeNotifier {
 
   @override
   void notifyListeners() {
+    if (_blocked) { super.notifyListeners(); return; }   // G51 · לא דורסים בלוב שלא נקרא
     try {
-      persistSave(_pkey, jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'settings': _settings}));
-    } catch (_) {}
+      _saveOk = persistSave(_pkey, jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'settings': _settings}));
+    } catch (_) { _saveOk = false; }   // G51 · כשל-שמירה נראה במסך, לא נבלע
     super.notifyListeners();
   }
 
@@ -226,6 +243,46 @@ class AppStore extends ChangeNotifier {
   }
 
   /// Put a record back exactly as it was (undo of a delete): same id, same fields, at the end of the list.
+  // ── G51 · החזר-מחיקה מלא: removeById מוחק במפל גם צאצאים (וגם מנקה שדות-מצביעים);
+  //    צילום-הרשומה-לבדה החזיר רק את האב והבנות אבדו לתמיד. כאן מצלמים את כל תת-העץ.
+  void _snap(String entity, String id, Set<String> seen, Map<String, List<Map<String, String>>> acc) {
+    if (!seen.add('$entity/$id')) return;
+    final r0 = byId(entity, id);
+    if (r0 != null) (acc[entity] ??= <Map<String, String>>[]).add(Map<String, String>.from(r0));
+    for (final rel in _rels) {
+      if (rel.parent != entity) continue;
+      for (final r in records(rel.child).where((r) => _pointsAt(r, rel.field, id, rel.multi)).toList()) {
+        final cid = r[idKey] ?? '';
+        if (rel.policy == 1 && !rel.multi) { _snap(rel.child, cid, seen, acc); }
+        else if (seen.add('${rel.child}/$cid')) { (acc[rel.child] ??= <Map<String, String>>[]).add(Map<String, String>.from(r)); }
+      }
+    }
+  }
+  /// צילום כל מה שמחיקת (entity,id) תמחק או תשנה ⇒ JSON להחזר מלא.
+  String snapshotSubtree(String entity, String id) {
+    final acc = <String, List<Map<String, String>>>{};
+    _snap(entity, id, <String>{}, acc);
+    return jsonEncode({'e': entity, 'id': id, 'rows': acc});
+  }
+  /// שחזור תת-עץ מצילום. רשומה שנמחקה חוזרת; רשומה ששרדה מקבלת בחזרה את השדות שנוקו. פורמט-ישן ⇒ false.
+  bool restoreSubtree(String raw) {
+    try {
+      final rows = (jsonDecode(raw) as Map<String, dynamic>)['rows'];
+      if (rows is! Map) return false;
+      rows.forEach((ent, list) {
+        final e = ent.toString();
+        for (final row in (list as List)) {
+          final m = (row as Map).map((k, v) => MapEntry(k.toString(), v.toString()));
+          final id = m[idKey] ?? ''; if (id.isEmpty) continue;
+          final cur = byId(e, id);
+          if (cur == null) { (_rec[e] ??= <Map<String, String>>[]).add(m); } else { m.forEach((k, v) { cur[k] = v; }); }
+        }
+      });
+      notifyListeners();
+      return true;
+    } catch (_) { return false; }
+  }
+
   void restore(String entity, Map<String, String> record) {
     final id = record[idKey] ?? ''; if (id.isEmpty) return;
     final list = _rec[entity] ??= <Map<String, String>>[];
