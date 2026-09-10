@@ -160,6 +160,14 @@ flutter:
           weight: 700
         - asset: assets/fonts/Heebo-ExtraBold.ttf
           weight: 800
+    # G52 · Roboto מקומי: בלעדיו מנוע-Flutter מוריד אותו בריצה מ-fonts.gstatic.com
+    #        (בקשה חיצונית לכל טעינה; ברשת חסומה = 12.5 שנ׳ של מסך-ריק). מקור: material_fonts של ה-SDK.
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
     - family: FrankRuhlLibre
       fonts:
         - asset: assets/fonts/FrankRuhlLibre.ttf
