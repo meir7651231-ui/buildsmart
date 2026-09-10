@@ -5,6 +5,7 @@ import '../dart-ui-bs/ds/ds_seam.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import 'gen_behaviors.dart';   // G50 · bhTextScale
 import 'gen_balagan_shell.dart';
+import 'gen_balagan_moments.dart';   // G54 · kBalaganModules ⇒ שדות-התצוגה
 import 'gen_app_peruk01_relations.dart' as r_peruk01;
 import 'gen_app_peruk02_relations.dart' as r_peruk02;
 import 'gen_app_peruk04_relations.dart' as r_peruk04;
@@ -20,6 +21,7 @@ void main() {
   r_peruk05.registerAppRelations(appStore);
   r_peruk06.registerAppRelations(appStore);
   r_peruk09.registerAppRelations(appStore);
+  for (final m in kBalaganModules) { appStore.registerDisplay(m.rootSlug, m.descField); }   // G54 · שם-הרשומה = שדה-התיאור של המודול, לא סדר-ההכנסה במפה
   runApp(const GenBalaganMainScreen());
 }
 

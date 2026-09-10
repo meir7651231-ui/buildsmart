@@ -272,6 +272,20 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2028, 2, 29), 'y1'), DateTime(2029, 2, 28));
     expect(balaganRepeatLabel('m2'), 'כל חודשיים');
   });
+  test('G54 · שם-הרשומה = שדה-התיאור, לא סדר-ההכנסה במפה', () {
+    final st = AppStore();
+    // סדר-ההכנסה מציב את הסכום ראשון (כך נכתב טופס-האישור כשהעובדה שזוהתה היא הסכום)
+    final id = st.add('app_tasks_ent1', {'סכום': '350', 'מה': 'לשלם ארנונה'});
+    expect(st.displayOf('app_tasks_ent1', id), '350', reason: 'בלי רישום — הערך-הראשון-במפה');   // מצב-הבסיס: אכן פגום
+    st.registerDisplay('app_tasks_ent1', 'מה');
+    expect(st.displayOf('app_tasks_ent1', id), 'לשלם ארנונה');
+    // שדה-תצוגה ריק ⇒ נפילה-רכה לראשון-הלא-ריק, לא מחרוזת ריקה
+    final id2 = st.add('app_tasks_ent1', {'סכום': '90'});
+    expect(st.displayOf('app_tasks_ent1', id2), '90');
+    // כל מודול של בלגן רשום עם שדה-התיאור שלו
+    expect(kBalaganModules.every((m) => m.descField.isNotEmpty), isTrue);
+  });
+
   test('G51 · אמון: החזר-מחיקה מחזיר את תת-העץ (אב+בנות) · דגלי-אחסון נקיים בלידה', () {
     final st = AppStore();
     st.registerRelation('c_ent', 'אב', 'p_ent', 1);   // מפל: מחיקת-אב מוחקת בנות

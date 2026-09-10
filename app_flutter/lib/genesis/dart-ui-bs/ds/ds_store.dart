@@ -154,8 +154,15 @@ class AppStore extends ChangeNotifier {
     return null;
   }
 
-  // "שם" רשומה = הערך-הראשון-הלא-ריק שאינו מטא (לתצוגת מפתח-זר ולבורר-קשר).
-  String _display(Map<String, String> r) {
+  // G54 · שדה-התצוגה של הישות. בלעדיו «שם» הרשומה היה **הערך-הראשון בסדר-ההכנסה** —
+  //   ומשימה שנשמרה עם סכום לפני תיאור נקראה «350» בכל המסכים. הסדר של המפה אינו סמנטיקה.
+  final Map<String, String> _disp = {};
+  void registerDisplay(String entity, String field) { if (field.trim().isNotEmpty) _disp[entity] = field.trim(); }
+
+  // "שם" רשומה = שדה-התצוגה הרשום; אין רשום/ריק ⇒ הערך-הראשון-הלא-ריק שאינו מטא.
+  String _display(String entity, Map<String, String> r) {
+    final d = _disp[entity];
+    if (d != null && (r[d] ?? '').trim().isNotEmpty) return r[d]!.trim();
     for (final e in r.entries) {
       if (e.key == idKey || e.key == stageKey || e.key.startsWith('__')) continue;   // מטא (__at · __doc · __note) אינו שם-תצוגה
       if (e.value.trim().isNotEmpty) return e.value.trim();
@@ -168,7 +175,7 @@ class AppStore extends ChangeNotifier {
     final out = <MapEntry<String, String>>[];
     for (final r in records(entity)) {
       final id = r[idKey] ?? '';
-      if (id.isNotEmpty) out.add(MapEntry(id, _display(r)));
+      if (id.isNotEmpty) out.add(MapEntry(id, _display(entity, r)));
     }
     return out;
   }
@@ -177,7 +184,7 @@ class AppStore extends ChangeNotifier {
   String displayOf(String entity, String id) {
     if (id.isEmpty) return '';
     final r = byId(entity, id);
-    return r == null ? '' : _display(r);
+    return r == null ? '' : _display(entity, r);
   }
 
   // קשר-רבים: מחרוזת-מזהים מופרדת-פסיק ⇒ שמות-התצוגה מצורפים (', ').

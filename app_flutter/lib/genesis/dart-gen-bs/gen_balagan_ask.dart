@@ -80,8 +80,9 @@ Widget balaganOpen(int index, Map<String, String> initial) {
 }
 
 class GenBalaganAskScreen extends StatefulWidget {
-  const GenBalaganAskScreen({this.initialText = '', super.key});
+  const GenBalaganAskScreen({this.initialText = '', this.autoPhoto = false, super.key});
   final String initialText;   // שיתוף (share_target ?text=) / הדבקה ⇒ נכנס לשדה ומזוהה מיד
+  final bool autoPhoto;   // G54 · §7 «צלם מסמך»: נכנסים ישר למצלמה, בלי לחפש את הכפתור בתוך המסך
   @override
   State<GenBalaganAskScreen> createState() => _GenBalaganAskScreenState();
 }
@@ -89,7 +90,7 @@ class GenBalaganAskScreen extends StatefulWidget {
 class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   final _c = TextEditingController();
   @override
-  void initState() { super.initState(); if (widget.initialText.trim().isNotEmpty) { _c.text = widget.initialText.trim(); _note = gen_balagan_ask_c0; WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _go(); }); } }   // הגיע משיתוף ⇒ אפס-הקשות עד טופס-האישור
+  void initState() { super.initState(); if (widget.autoPhoto) { WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _photo(); }); } if (widget.initialText.trim().isNotEmpty) { _c.text = widget.initialText.trim(); _note = gen_balagan_ask_c0; WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _go(); }); } }   // הגיע משיתוף ⇒ אפס-הקשות עד טופס-האישור
   Future<void> _voice() async {   // «דבר»: זיהוי-דיבור של הדפדפן (he-IL) ⇒ השדה ⇒ זיהוי — אפס-הקלדה; לא נתמך/לא שמע ⇒ הודעה כנה
     if (!voiceSupported) { setState(() => _note = gen_balagan_ask_c1); return; }
     setState(() { _busy = true; _note = gen_balagan_ask_c2; });
