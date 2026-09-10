@@ -149,7 +149,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> {
   static String _iso(DateTime d) => d.toIso8601String().substring(0, 10);
   /// ב׳-פז · כל הבאיחור ⇒ מחר (לא בשבת), שורת-יומן לכל תיק עם group אחד ⇒ «החזר» אחד מחזיר את כולם
   void _snoozeAll(List<DsTodayItem> overdue, DateTime today) {
-    final g = 'g' + DateTime.now().microsecondsSinceEpoch.toString(); var d = _dayPlus(today, 1); if (_wd(d) == 6) d = _dayPlus(d, 1);
+    final g = 'g' + DateTime.now().microsecondsSinceEpoch.toString(); final d = bhDate(bhSoftShift(bhPlusDays(_isoD(today), 1), false));   // G53 · הזזת-שבת דרך החלקיק (bhSoftShift), לא `== 6` ביד — הכרעה-30
     for (final it in overdue) { final ms = kBalaganModules.where((mm) => mm.title == it.module); if (ms.isEmpty || it.field.isEmpty || bhDaysSince(_isoD(it.due), _isoD(today)) < 0) continue;   /* ב׳-קה · מועד שעוד לפנינו לא זז */ final slug = ms.first.rootSlug; final r = appStore.byId(slug, it.rid); if (r == null) continue; appStore.logAction('auto', gen_balagan_home_c27 + ' · ' + it.title, entity: slug, rid: it.rid, field: it.field, prev: r[it.field] ?? '', group: g); appStore.update(slug, it.rid, {it.field: _iso(d)}); }
   }
   void _openItem(BuildContext context, DsTodayItem it) { final ms = kBalaganModules.where((m) => m.title == it.module); if (ms.isEmpty || it.rid.isEmpty) return; Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => balaganOpenRoot(ms.first.rootSlug, it.rid))); }   // ב׳-לט · הקשה על השורה ⇒ התיק
