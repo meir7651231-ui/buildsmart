@@ -44,6 +44,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/services.dart';
 import '../dart-ui-bs/ds/ds_voice.dart';
 import '../dart-ui-bs/ds/ds_notify.dart';   // G55 · התראת-דפדפן (אפס-שרת)
+import '../dart-ui-bs/ds/ds_cloud.dart';   // G59 · cloudPutDue
 import 'package:url_launcher/url_launcher.dart';
 
 typedef _Items = List<DsTodayItem> Function(DateTime today, {required int dayDelta});
@@ -176,6 +177,28 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
     } catch (_) {}
   }
   void _autopilotAll() { for (final m in _mods) { m.autopilot(); } }
+  // G59 · מועדים לענן (הכרעה-31ב): מה ש«היום» כבר מחשב ל-14 הימים הקרובים ⇒ שורות-דחיפה.
+  //   **אפס לוגיקה חדשה** — אותו מנוע, רק מועתק החוצה כדי שהשרת ישלח כשהאפליקציה סגורה.
+  //   בלי חשבון-ענן: יוצא מיד.
+  Future<void> _pushDue(DateTime today) async {
+    if (cloudUid().isEmpty) return;
+    final hour = (int.tryParse(appStore.setting('digestHour', '8')) ?? 8).clamp(0, 23);
+    String safe(String s) => s.replaceAll(RegExp(r'[^A-Za-z0-9֐-׿]'), '');
+    final rows = <Map<String, String>>[];
+    final seen = <String>{};
+    for (var d = 0; d <= 14; d++) {
+      for (final m in _mods) {
+        for (final it in m.items(today, dayDelta: d)) {
+          if (it.rid.isEmpty || it.field.isEmpty) continue;
+          final id = it.rid + '-' + safe(it.field);
+          if (!seen.add(id)) continue;
+          final at = DateTime(it.due.year, it.due.month, it.due.day, hour);
+          rows.add({'id': id, 'at': at.toIso8601String(), 'title': it.title, 'body': it.module, 'rid': it.rid});
+        }
+      }
+    }
+    await cloudPutDue(rows);
+  }
   // «הגיע» — שקע-המייל (טוקן-הלקוח, חוק-6): פעם בפתיחה; כל מכתב שטרם הוכרע ⇒ זיהוי-הרגע ⇒ הצעה. בלי טוקן ⇒ כלום. כשל ⇒ שורה אחת כנה.
   List<DsMailItem> _mail = const []; bool _mailTried = false; String _mailNote = '';
   Future<void> _fetchMail() async {
@@ -263,7 +286,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
     return out;
   }
   @override
-  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); WidgetsBinding.instance.addPostFrameCallback((_) { _autopilotAll(); _fetchMail(); balaganCloudSync(); }); appStore.addListener(_onStore); }   // G58 · פתיחה ⇒ משיכה+מיזוג+דחיפה (אפס רשת בלי קונפיג)
+  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); WidgetsBinding.instance.addPostFrameCallback((_) { _autopilotAll(); _fetchMail(); balaganCloudSync().then((_) => _pushDue(_day(DateTime.now()))); }); appStore.addListener(_onStore); }   // G58 · פתיחה ⇒ משיכה+מיזוג+דחיפה (אפס רשת בלי קונפיג)
   void _onStore() { WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _autopilotAll(); }); }
   // G55 · חוזרים למסך אחרי שעות ⇒ המייל נטען מחדש והיום מחושב מחדש. בלי זה «פעם בפתיחה»
   //   פירושו «פעם בחיים» באפליקציה מותקנת שאף פעם לא נסגרת.
@@ -272,7 +295,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
     if (state != AppLifecycleState.resumed) return;
     _mailTried = false;
     _fetchMail();
-    balaganCloudSync().then((_) { if (mounted) setState(() {}); });   // G58 · חזרה למסך ⇒ מה שנכתב במכשיר אחר מגיע לכאן
+    balaganCloudSync().then((_) { _pushDue(_day(DateTime.now())); if (mounted) setState(() {}); });   // G58 · חזרה למסך ⇒ מה שנכתב במכשיר אחר מגיע לכאן · G59 · והמועדים מתעדכנים בענן
     if (mounted) setState(() {});
   }
   @override

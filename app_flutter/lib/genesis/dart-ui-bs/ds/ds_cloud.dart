@@ -18,7 +18,9 @@ class DsCloudState {
   final String note, uid;
 }
 
-const String kCloudApp = 'balagan-cloud';
+// G59 · **אפליקציית-ברירת-המחדל** ולא אפליקציה-בשם: `FirebaseMessaging` חושף רק `instance`
+//   (ברירת-מחדל), ובלי זה אי-אפשר לקבל טוקן-דחיפה. לאפליקציה-מחוללת אין ממילא אתחול אחר,
+//   אז אין התנגשות — וזה בדיוק מה שמאפשר התראה כשהאפליקציה סגורה.
 
 /// קונפיג-האתר של Firebase כפי שהבעלים מדביק. חסר שדה ⇒ null (לא מנחשים).
 FirebaseOptions? cloudOptions(String raw) {
@@ -48,9 +50,7 @@ Future<FirebaseApp?> cloudInit(String rawConfig) async {
   if (o == null) return null;
   if (_app != null) return _app;
   try {
-    _app = Firebase.apps.any((a) => a.name == kCloudApp)
-        ? Firebase.app(kCloudApp)
-        : await Firebase.initializeApp(name: kCloudApp, options: o);
+    _app = Firebase.apps.isNotEmpty ? Firebase.app() : await Firebase.initializeApp(options: o);
     return _app;
   } catch (_) {
     return null;
@@ -119,6 +119,40 @@ Future<bool> cloudPush(String json) async {
     final m = Map<String, dynamic>.from(jsonDecode(json) as Map);
     m['at'] = DateTime.now().toIso8601String();
     await d.set(m);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/// G59 · רישום טוקן-המכשיר: `users/{uid}/push/{token}`. השרת קורא משם ושולח כשהאפליקציה סגורה.
+Future<bool> cloudPutToken(String token) async {
+  final uid = cloudUid();
+  if (_app == null || uid.isEmpty || token.trim().isEmpty) return false;
+  try {
+    await FirebaseFirestore.instanceFor(app: _app!).doc('users/$uid/push/${token.trim()}').set({'at': DateTime.now().toIso8601String()});
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+/// G59 · מועדים שהלקוח כבר חישב (הכרעה-31ב — השרת טיפש). מחליף את הרשימה הקודמת:
+/// מה שכבר נשלח נשאר מסומן אצל השרת, ומה שנעלם מהחישוב פשוט לא ייכתב מחדש.
+/// `rows` = [{id, at (ISO), title, body, rid}] — אפס לוגיקה כאן, רק העברה.
+Future<bool> cloudPutDue(List<Map<String, String>> rows) async {
+  final uid = cloudUid();
+  if (_app == null || uid.isEmpty) return false;
+  try {
+    final db = FirebaseFirestore.instanceFor(app: _app!);
+    final col = db.collection('users/$uid/due');
+    final batch = db.batch();
+    for (final r in rows.take(50)) {
+      final id = (r['id'] ?? '').trim();
+      if (id.isEmpty) continue;
+      batch.set(col.doc(id), {'at': r['at'] ?? '', 'title': r['title'] ?? '', 'body': r['body'] ?? '', 'rid': r['rid'] ?? ''}, SetOptions(merge: true));
+    }
+    await batch.commit();
     return true;
   } catch (_) {
     return false;
