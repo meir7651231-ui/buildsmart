@@ -8,7 +8,7 @@ import 'gen_balagan_confirm.dart';
 import 'gen_balagan_home.dart';
 import 'gen_balagan_moments.dart';
 import 'gen_app_calendar_ent1.dart';
-import 'gen_app_tasks_ent2.dart';
+import 'gen_app_tasks_ent1.dart';
 import 'gen_app_peruk01_ent1.dart';
 import 'gen_app_peruk02_ent1.dart';
 import 'gen_app_peruk03_ent1.dart';
@@ -46,7 +46,7 @@ import 'package:image_picker/image_picker.dart';
 Widget balaganOpen(int index, Map<String, String> initial) {
   switch (index) {
     case 0: return GenAppCalendarEnt1Screen(initial: initial);
-    case 1: return GenAppTasksEnt2Screen(initial: initial);
+    case 1: return GenAppTasksEnt1Screen(initial: initial);
     case 2: return GenAppPeruk01Ent1Screen(initial: initial);
     case 3: return GenAppPeruk02Ent1Screen(initial: initial);
     case 4: return GenAppPeruk03Ent1Screen(initial: initial);

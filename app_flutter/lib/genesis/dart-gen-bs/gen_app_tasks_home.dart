@@ -46,7 +46,7 @@ class GenAppTasksHomeScreenToday {
   /// ב׳-מא · תאריך כמו שאומרים אותו: היום · מחר · אתמול · יום שלישי 8.9 (עד שבוע) · 15.9 · 3.10.2027 (שנה אחרת)
   static String _dayLabel(DateTime d, DateTime today) { final p = bhDayLabelParts(_iso(d), _iso(today)); switch (p[0]) { case 'today': return gen_app_tasks_home_c8; case 'tomorrow': return gen_app_tasks_home_c9; case 'yesterday': return gen_app_tasks_home_c10; case 'weekday': return gen_app_tasks_home_c11.replaceAll('{day}', gen_app_tasks_home_c12.split(',')[int.parse(p[1])]) + ' ' + p[2]; default: return p[2]; } }   // G34ב · שכבת-ההרכבה מחזירה חלקים; כאן רק מונחים
   static String _remKey(String rid, String field) => 'rem:$rid:$field';
-  static List<Map<String, String>> open() => appStore.records('app_tasks_ent2').where((r) => appStore.stageOf('app_tasks_ent2', r[AppStore.idKey] ?? '') < 1).toList();
+  static List<Map<String, String>> open() => appStore.records('app_tasks_ent1').where((r) => appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '') < 1).toList();
 
   static DsTodayItem _mk(String title, String sub, String rid, String field, DateTime d, bool hard, bool overdue, DateTime today, [String time = '', bool rep = false, String phone = '', String money = '']) {
     final acts = <String>[...(overdue ? [gen_app_tasks_home_c13, gen_app_tasks_home_c14, gen_app_tasks_home_c15, gen_app_tasks_home_c16] : (d == today ? [gen_app_tasks_home_c17, gen_app_tasks_home_c18] : [gen_app_tasks_home_c19, gen_app_tasks_home_c20, gen_app_tasks_home_c21])), if (phone.isNotEmpty) gen_app_tasks_home_c22];   /* ב׳-לח · תיק עם טלפון ⇒ «התקשר» מהשורה, הקשה אחת */   // P4 · ביום-ההכרעה אין דחייה · «ליומן» = קישור-יומן, אפס-מפתח
@@ -56,36 +56,36 @@ class GenAppTasksHomeScreenToday {
     final a = acts[i.clamp(0, acts.length - 1)];
     final due = today == null ? due0 : (_parse(bhDueBase(_iso(due0), _iso(today))) ?? due0);   /* G34ב · bhDueBase · ב׳-פו · «דחה למחר» מבאיחור = מחר (לא יום-אחרי-המועד-שעבר, שנשאר באיחור) */
     if (a == gen_app_tasks_home_c23) {
-      final r0 = appStore.byId('app_tasks_ent2', rid); final rep = (r0 == null ? '' : (r0['__repeat'] ?? '')).trim();
+      final r0 = appStore.byId('app_tasks_ent1', rid); final rep = (r0 == null ? '' : (r0['__repeat'] ?? '')).trim();
       final prevStage = r0 == null ? '' : (r0[AppStore.stageKey] ?? '0');
-      appStore.advance('app_tasks_ent2', rid, 2);
+      appStore.advance('app_tasks_ent1', rid, 2);
       appStore.decide('ign:$rid:$field', 'no');   // השורה של התאריך הזה טופלה — לא חוזרת מחר כ«באיחור»
-      appStore.logAction('done', gen_app_tasks_home_c24.replaceAll('{what}', field + ' · ' + appStore.displayOf('app_tasks_ent2', rid)), entity: 'app_tasks_ent2', rid: rid, field: field, prev: prevStage);   // «עשיתי» + החזר (השורה חוזרת, השלב חוזר)
+      appStore.logAction('done', gen_app_tasks_home_c24.replaceAll('{what}', field + ' · ' + appStore.displayOf('app_tasks_ent1', rid)), entity: 'app_tasks_ent1', rid: rid, field: field, prev: prevStage);   // «עשיתי» + החזר (השורה חוזרת, השלב חוזר)
       if (r0 != null && rep.isNotEmpty) {   // ↻ רגע חוזר: «סיים» יוצר את הבא לבד (המועד-הבא בשדה שנסגר), עם החזר
         final next = <String, String>{for (final e in r0.entries) if (!e.key.startsWith('__') || e.key == '__repeat' || e.key == '__note') e.key: e.value};
         next[field] = _iso(nextRepeat(due0, rep)); next['__stage'] = '0';
-        final nid = appStore.add('app_tasks_ent2', next);
-        appStore.logAction('add', gen_app_tasks_home_c25.replaceAll('{title}', appStore.displayOf('app_tasks_ent2', nid) + ' · ' + next[field]!), entity: 'app_tasks_ent2', rid: nid);
+        final nid = appStore.add('app_tasks_ent1', next);
+        appStore.logAction('add', gen_app_tasks_home_c25.replaceAll('{title}', appStore.displayOf('app_tasks_ent1', nid) + ' · ' + next[field]!), entity: 'app_tasks_ent1', rid: nid);
       }
     }
-    else if (a == gen_app_tasks_home_c26) { final r = appStore.byId('app_tasks_ent2', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_tasks_ent2', rid, {field: _iso(_shift(_plus(due, 1), false))}); /* «דחה למחר» לא נוחת בשבת (אותו _shift של תזכורת-רכה) */ appStore.logAction('auto', gen_app_tasks_home_c27 + ' · ' + field, entity: 'app_tasks_ent2', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
-    else if (a == gen_app_tasks_home_c28) { final r = appStore.byId('app_tasks_ent2', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_tasks_ent2', rid, {field: _iso(_shift(_plus(due, 7), false))}); appStore.logAction('auto', gen_app_tasks_home_c29 + ' · ' + field, entity: 'app_tasks_ent2', rid: rid, field: field, prev: prev); } }   /* «דחה לשבוע» — נגיעה-ידנית עם החזר, לא בשבת */
+    else if (a == gen_app_tasks_home_c26) { final r = appStore.byId('app_tasks_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_tasks_ent1', rid, {field: _iso(_shift(_plus(due, 1), false))}); /* «דחה למחר» לא נוחת בשבת (אותו _shift של תזכורת-רכה) */ appStore.logAction('auto', gen_app_tasks_home_c27 + ' · ' + field, entity: 'app_tasks_ent1', rid: rid, field: field, prev: prev); } }   // נגיעה-ידנית (P5) — נרשמת עם החזר
+    else if (a == gen_app_tasks_home_c28) { final r = appStore.byId('app_tasks_ent1', rid); if (r != null) { final prev = r[field] ?? ''; appStore.update('app_tasks_ent1', rid, {field: _iso(_shift(_plus(due, 7), false))}); appStore.logAction('auto', gen_app_tasks_home_c29 + ' · ' + field, entity: 'app_tasks_ent1', rid: rid, field: field, prev: prev); } }   /* «דחה לשבוע» — נגיעה-ידנית עם החזר, לא בשבת */
     else if (a == gen_app_tasks_home_c30) {   // «ליומן»: עם שעה ⇒ אירוע בשעתו (אורך = בלוק-ההגדרה); בלי ⇒ יום-שלם
-      final r = appStore.byId('app_tasks_ent2', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due0).replaceAll('-', '');
+      final r = appStore.byId('app_tasks_ent1', rid); final tm = r == null ? '' : _timeOf(r); final d = _iso(due0).replaceAll('-', '');
       String z(DateTime x) => x.toIso8601String().substring(0, 16).replaceAll(RegExp(r'[-:]'), '') + '00';
       final block = (int.tryParse(appStore.setting('blockMin', '30')) ?? 30).clamp(5, 240);
       final dates = tm.isEmpty ? d + '/' + d : () { final a0 = DateTime(due0.year, due0.month, due0.day, int.parse(tm.substring(0, 2)), int.parse(tm.substring(3, 5))); return z(a0) + '/' + z(a0.add(Duration(minutes: block))); }();
-      launchUrl(Uri.parse('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + Uri.encodeComponent(field + ' · ' + appStore.displayOf('app_tasks_ent2', rid)) + '&dates=' + dates), mode: LaunchMode.externalApplication);
+      launchUrl(Uri.parse('https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + Uri.encodeComponent(field + ' · ' + appStore.displayOf('app_tasks_ent1', rid)) + '&dates=' + dates), mode: LaunchMode.externalApplication);
     }
-    else if (a == gen_app_tasks_home_c31) { final r = appStore.byId('app_tasks_ent2', rid); final ph = r == null ? '' : _phoneOf(r); if (ph.isNotEmpty) launchUrl(Uri.parse('tel:' + ph), mode: LaunchMode.externalApplication); }
-    else { appStore.decide('ign:$rid:$field', 'no'); appStore.logAction('decide', gen_app_tasks_home_c32.replaceAll('{what}', field + ' · ' + appStore.displayOf('app_tasks_ent2', rid)), entity: 'app_tasks_ent2', rid: rid, field: 'ign:$rid:$field'); }   /* ב׳-לב · «התעלם» נרשם ביומן ⇒ החזר (kind=decide: field = מפתח-ההכרעה) — שום דבר לא בלתי-הפיך */
+    else if (a == gen_app_tasks_home_c31) { final r = appStore.byId('app_tasks_ent1', rid); final ph = r == null ? '' : _phoneOf(r); if (ph.isNotEmpty) launchUrl(Uri.parse('tel:' + ph), mode: LaunchMode.externalApplication); }
+    else { appStore.decide('ign:$rid:$field', 'no'); appStore.logAction('decide', gen_app_tasks_home_c32.replaceAll('{what}', field + ' · ' + appStore.displayOf('app_tasks_ent1', rid)), entity: 'app_tasks_ent1', rid: rid, field: 'ign:$rid:$field'); }   /* ב׳-לב · «התעלם» נרשם ביומן ⇒ החזר (kind=decide: field = מפתח-ההכרעה) — שום דבר לא בלתי-הפיך */
   }
 
   // P3 · נגזרות-היום: לכל רשומה פתוחה × שדה-תאריך ⇒ באיחור (D < היום) · תזכורת (D − offset == היום/מחר, רק כשאושרה)
   static List<DsTodayItem> items(DateTime today, {required int dayDelta}) {
     final out = <DsTodayItem>[];
     for (final r in open()) {
-      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent2', rid); final tm = _timeOf(r); final rep = (r['__repeat'] ?? '').trim().isNotEmpty; final ph = _phoneOf(r); final mo = _moneyOf(r);
+      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent1', rid); final tm = _timeOf(r); final rep = (r['__repeat'] ?? '').trim().isNotEmpty; final ph = _phoneOf(r); final mo = _moneyOf(r);
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null) continue;
         if (appStore.decision('ign:$rid:${f.label}') == 'no') continue;
@@ -112,17 +112,17 @@ class GenAppTasksHomeScreenToday {
       if (_dates.any((x) => _parse(r[x.label] ?? '') != null)) continue;
       if (appStore.decision('undated:$rid') == 'no') continue;
       final acts = [gen_app_tasks_home_c36, gen_app_tasks_home_c37, gen_app_tasks_home_c38];
-      out.add(DsTodayItem(title: appStore.displayOf('app_tasks_ent2', rid), sub: [f.label, _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
+      out.add(DsTodayItem(title: appStore.displayOf('app_tasks_ent1', rid), sub: [f.label, _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: f.label, due: today, hard: f.hard, overdue: false, module: module, actions: acts, act: (i) => _setDate(rid, f.label, today, acts, i)));
     }
     return out;
   }
   static void _setDate(String rid, String field, DateTime today, List<String> acts, int i) {
     final a = acts[i.clamp(0, acts.length - 1)];
-    if (a == gen_app_tasks_home_c39) { appStore.decide('undated:$rid', 'no'); appStore.logAction('decide', gen_app_tasks_home_c40.replaceAll('{what}', appStore.displayOf('app_tasks_ent2', rid)), entity: 'app_tasks_ent2', rid: rid, field: 'undated:$rid'); return; }
-    final r = appStore.byId('app_tasks_ent2', rid); if (r == null) return;
+    if (a == gen_app_tasks_home_c39) { appStore.decide('undated:$rid', 'no'); appStore.logAction('decide', gen_app_tasks_home_c40.replaceAll('{what}', appStore.displayOf('app_tasks_ent1', rid)), entity: 'app_tasks_ent1', rid: rid, field: 'undated:$rid'); return; }
+    final r = appStore.byId('app_tasks_ent1', rid); if (r == null) return;
     final prev = r[field] ?? '';
-    appStore.update('app_tasks_ent2', rid, {field: _iso(_shift(_plus(today, a == gen_app_tasks_home_c41 ? 7 : 1), false))});   /* «קבע» לא נוחת בשבת */
-    appStore.logAction('auto', a + ' · ' + field, entity: 'app_tasks_ent2', rid: rid, field: field, prev: prev);
+    appStore.update('app_tasks_ent1', rid, {field: _iso(_shift(_plus(today, a == gen_app_tasks_home_c41 ? 7 : 1), false))});   /* «קבע» לא נוחת בשבת */
+    appStore.logAction('auto', a + ' · ' + field, entity: 'app_tasks_ent1', rid: rid, field: field, prev: prev);
   }
 
   // ב׳-ל · נשכחים: תיק פתוח ש«היום» הפסיק לדבר עליו (כל מועד עבר ונדחה-בהתעלם / בלי מועד והתעלמו) ו-14 יום בלי נגיעה — לא נעלם; מוצע: סגור · קבע למחר · התעלם. הכל בהקשה, אפס-אוטומטי
@@ -143,24 +143,24 @@ class GenAppTasksHomeScreenToday {
       if (visible) continue;
       final t = _touched(r, rid); if (t == null) continue; final n = bhDaysSince(_iso(t), _iso(today)); if (n < 14) continue;
       final acts = [gen_app_tasks_home_c42, gen_app_tasks_home_c43, gen_app_tasks_home_c44];
-      out.add(DsTodayItem(title: appStore.displayOf('app_tasks_ent2', rid), sub: [gen_app_tasks_home_c45.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
+      out.add(DsTodayItem(title: appStore.displayOf('app_tasks_ent1', rid), sub: [gen_app_tasks_home_c45.replaceAll('{n}', n.toString()), _moneyOf(r)].where((x) => x.isNotEmpty).join(' · '), rid: rid, field: '', due: t, hard: false, overdue: false, module: module, actions: acts, act: (i) => _staleAct(rid, today, acts, i)));
     }
     out.sort((a, b) => a.due.compareTo(b.due));   // הישן ביותר ראשון
     return out;
   }
   static void _staleAct(String rid, DateTime today, List<String> acts, int i) {
     final a = acts[i.clamp(0, acts.length - 1)];
-    final r = appStore.byId('app_tasks_ent2', rid); if (r == null) return;
+    final r = appStore.byId('app_tasks_ent1', rid); if (r == null) return;
     if (a == gen_app_tasks_home_c46) { final f = _dates.firstWhere((x) => x.hard, orElse: () => _dates.first); appStore.decide('ign:$rid:${f.label}', ''); appStore.decide('undated:$rid', ''); _setDate(rid, f.label, today, [a], 0); return; }   /* המועד החדש חוזר ל«היום» — ההתעלמות הישנה נמחקת */
-    if (a == gen_app_tasks_home_c47) { final prev = r[AppStore.stageKey] ?? '0'; appStore.update('app_tasks_ent2', rid, {AppStore.stageKey: '1'}); appStore.logAction('auto', gen_app_tasks_home_c48.replaceAll('{who}', appStore.displayOf('app_tasks_ent2', rid)), entity: 'app_tasks_ent2', rid: rid, field: AppStore.stageKey, prev: prev); return; }
-    appStore.decide('stale:$rid', 'no'); appStore.logAction('decide', gen_app_tasks_home_c49.replaceAll('{what}', appStore.displayOf('app_tasks_ent2', rid)), entity: 'app_tasks_ent2', rid: rid, field: 'stale:$rid');
+    if (a == gen_app_tasks_home_c47) { final prev = r[AppStore.stageKey] ?? '0'; appStore.update('app_tasks_ent1', rid, {AppStore.stageKey: '1'}); appStore.logAction('auto', gen_app_tasks_home_c48.replaceAll('{who}', appStore.displayOf('app_tasks_ent1', rid)), entity: 'app_tasks_ent1', rid: rid, field: AppStore.stageKey, prev: prev); return; }
+    appStore.decide('stale:$rid', 'no'); appStore.logAction('decide', gen_app_tasks_home_c49.replaceAll('{what}', appStore.displayOf('app_tasks_ent1', rid)), entity: 'app_tasks_ent1', rid: rid, field: 'stale:$rid');
   }
 
   // ב׳-לז · המועדים הקרובים שטרם הוכרעה להם תזכורת — ל«בלגן», שמרכז n כרטיסים לאחד (שאלה אחת, הכרעה אחת, החזר אחד)
   static List<DsTodayItem> remPending(DateTime today) {
     final out = <DsTodayItem>[];
     for (final r in open()) {
-      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent2', rid);
+      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent1', rid);
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
@@ -175,7 +175,7 @@ class GenAppTasksHomeScreenToday {
     final out = <Widget>[];
     String days(List<int> os) => os.map((o) => o == 0 ? gen_app_tasks_home_c50 : o == 1 ? gen_app_tasks_home_c51 : gen_app_tasks_home_c52.replaceAll('{n}', o.toString())).join(' · ');   /* ב׳-מב · «3 ימים לפני · יום לפני · ביום» במקום (−3/−1/−0) · ב׳-צא · רק מה שעוד לפנינו */
     for (final r in open()) {
-      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent2', rid);
+      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent1', rid);
       if (rem) for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today) || d == today) continue;   // היום עצמו כבר ב«היום» — אין מה להציע
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
@@ -190,10 +190,10 @@ class GenAppTasksHomeScreenToday {
     return out;
   }
   /// רשומות שהגיעו לשלב-האחרון ובלי הכרעת-צעד-הבא — ל«בלגן» (שרשרת חוצת-מודולים)
-  static List<Map<String, String>> done() => appStore.records('app_tasks_ent2').where((r) => appStore.stageOf('app_tasks_ent2', r[AppStore.idKey] ?? '') >= 1 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
+  static List<Map<String, String>> done() => appStore.records('app_tasks_ent1').where((r) => appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '') >= 1 && appStore.decision('next:${r[AppStore.idKey] ?? ''}').isEmpty).toList();
 
   // כרטיס-הרשומה (G30): נוסחים · שלח · פתח — ≤2 הקשות
-  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_tasks_home_c0] ?? '')).trim().isEmpty ? gen_app_tasks_home_c57 : (r[gen_app_tasks_home_c0] ?? '')), trailing: Text(const [gen_app_tasks_home_c3, gen_app_tasks_home_c4][appStore.stageOf('app_tasks_ent2', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
+  static Widget card(BuildContext context, Map<String, String> r) => DsSection(title: module + ' · ' + (((r[gen_app_tasks_home_c0] ?? '')).trim().isEmpty ? gen_app_tasks_home_c57 : (r[gen_app_tasks_home_c0] ?? '')), trailing: Text(const [gen_app_tasks_home_c3, gen_app_tasks_home_c4][appStore.stageOf('app_tasks_ent1', r[AppStore.idKey] ?? '').clamp(0, 1)], style: TextStyle(color: DsLook.of(context).muted, fontSize: 13)), children: [
         
         Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [DsChipButton(label: gen_app_tasks_home_c58, onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => GenAppTasksRootScreen(id: r[AppStore.idKey] ?? ''))))])),
       ]);
@@ -203,12 +203,12 @@ class GenAppTasksHomeScreenToday {
     if (appStore.setting('always:rem') != '1') return;
     final today = _day(DateTime.now());
     for (final r in open()) {
-      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent2', rid);
+      final rid = r[AppStore.idKey] ?? ''; final who = appStore.displayOf('app_tasks_ent1', rid);
       for (final f in _dates) {
         final d = _parse(r[f.label] ?? ''); if (d == null || d.isBefore(today)) continue;
         if (appStore.decision(_remKey(rid, f.label)).isNotEmpty) continue;
         appStore.decide(_remKey(rid, f.label), 'ok');
-        appStore.logAction('decide', gen_app_tasks_home_c59.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_tasks_ent2', rid: rid, field: _remKey(rid, f.label));
+        appStore.logAction('decide', gen_app_tasks_home_c59.replaceAll('{field}', f.label).replaceAll('{who}', who), entity: 'app_tasks_ent1', rid: rid, field: _remKey(rid, f.label));
       }
     }
   }
