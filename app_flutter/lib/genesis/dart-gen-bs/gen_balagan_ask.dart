@@ -116,7 +116,7 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
   Future<void> _photo() async {
     final key = appStore.setting('ai.key');
     if (key.isEmpty) { setState(() => _note = gen_balagan_ask_c8); return; }
-    final x = await ImagePicker().pickImage(source: kIsWeb ? ImageSource.gallery : ImageSource.camera, imageQuality: 60, maxWidth: 900);
+    final x = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 60, maxWidth: 900);   // G56 · §7 «צלם מסמך»: בדפדפן-נייד זה פותח את המצלמה (capture); בשולחני נופל לבורר-קבצים — לא מוותרים על המצלמה בכל הפלטפורמות בגלל השולחני
     if (x == null) return;
     setState(() { _busy = true; _note = gen_balagan_ask_c9; });
     final bytes = await x.readAsBytes();
@@ -125,7 +125,17 @@ class _GenBalaganAskScreenState extends State<GenBalaganAskScreen> {
     if (!mounted) return;
     if (r == null) { setState(() { _busy = false; _note = gen_balagan_ask_c10; }); return; }
     final text = (r['_text'] ?? '').trim();
-    setState(() { _busy = false; _note = _doc.isEmpty ? gen_balagan_ask_c11 : gen_balagan_ask_c12; if (text.isNotEmpty) _c.text = text; _extra = {for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value}; });
+    final extra = <String, String>{for (final e in r.entries) if (e.key != '_text' && e.value.trim().isNotEmpty) e.key: e.value};
+    // G56 · מעבר שני: אחרי שהמסמך זוהה — חילוץ מול **השדות האמיתיים של אותו מודול**.
+    //   בלעדיו הצילום מילא שלושה שדות גנריים (תאריך · סכום · שם) וטופס-האישור הגיע כמעט ריק.
+    final hits0 = text.isEmpty ? const <BalaganHit>[] : balaganIdentify(balaganSplit(text).first);
+    if (hits0.isNotEmpty) {
+      final labels = [for (final f in hits0.first.module.fields) f.label];
+      final r2 = await dsAiExtract(apiKey: key, image: bytes, imageMime: x.mimeType ?? 'image/jpeg', fields: labels, model: appStore.setting('ai.model', 'claude-sonnet-5'));
+      if (r2 != null) { for (final e in r2.entries) { if (e.key == '_text') continue; final v = e.value.trim(); if (v.isNotEmpty) extra[e.key] = v; } }
+    }
+    if (!mounted) return;
+    setState(() { _busy = false; _note = _doc.isEmpty ? gen_balagan_ask_c11 : gen_balagan_ask_c12; if (text.isNotEmpty) _c.text = text; _extra = extra; });
     _go();
   }
 

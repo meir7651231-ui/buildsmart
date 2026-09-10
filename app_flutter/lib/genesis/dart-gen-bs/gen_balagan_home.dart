@@ -223,10 +223,10 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
     final out = <Widget>[];
     for (final m in _mail) {
       if (appStore.decision('mail:${m.id}').isNotEmpty) continue;
-      final hits = balaganIdentify(m.subject + ' ' + m.snippet, k: 1); if (hits.isEmpty) continue;
+      final hits = balaganIdentify(m.text, k: 1); if (hits.isEmpty) continue;   // G56 · נושא+גוף, לא שורת-פתיחה
       final mod = hits.first.module;
       out.add(DsApproveCard(question: gen_balagan_home_c39.replaceAll('{subject}', m.subject).replaceAll('{module}', mod.title), source: gen_balagan_home_c40.replaceAll('{from}', m.from).replaceAll('{date}', m.date), okLabel: gen_balagan_home_c41, noLabel: gen_balagan_home_c42,
-        onOk: () { appStore.decide('mail:${m.id}', 'ok'); final facts = balaganFacts(m.subject + ' · ' + m.snippet, mod); Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: mod, facts: facts))); },
+        onOk: () { appStore.decide('mail:${m.id}', 'ok'); final facts = balaganFacts(m.text, mod); Navigator.of(context).push<bool>(MaterialPageRoute<bool>(builder: (_) => GenBalaganConfirmScreen(module: mod, facts: facts))); },
         onNo: () => appStore.decide('mail:${m.id}', 'no')));
     }
     return out;

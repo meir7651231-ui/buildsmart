@@ -4,6 +4,7 @@ import 'package:buildsmart/genesis/dart-gen-bs/gen_app_calendar_home.dart' show 
 import 'dart:convert';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
+import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_mail.dart';   // G56 · dsMailPlain
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_confirm.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_topics.dart';
@@ -272,6 +273,25 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2028, 2, 29), 'y1'), DateTime(2029, 2, 28));
     expect(balaganRepeatLabel('m2'), 'כל חודשיים');
   });
+  test('G56 · גוף-המכתב נקרא מעץ-החלקים (base64url · multipart · html-fallback)', () {
+    // Gmail מקודד base64url (בלי ריפוד, עם -_). «שלום» = D7pdedwsD7o... נבנה מהקידוד עצמו:
+    String enc(String t) => base64Url.encode(utf8.encode(t)).replaceAll('=', '');
+    expect(dsMailPlain({'mimeType': 'text/plain', 'body': {'data': enc('ארנונה 350 ש"ח')}}), 'ארנונה 350 ש"ח');
+    // multipart: החלק הראשון alternative/html, השני plain — ה-plain מנצח
+    final multi = {'mimeType': 'multipart/alternative', 'body': {}, 'parts': [
+      {'mimeType': 'text/html', 'body': {'data': enc('<b>לא זה</b>')}},
+      {'mimeType': 'text/plain', 'body': {'data': enc('זה הגוף')}},
+    ]};
+    expect(dsMailPlain(multi), 'זה הגוף');
+    // רק html ⇒ מנוקה מתגיות
+    expect(dsMailPlain({'mimeType': 'text/html', 'body': {'data': enc('<p>שורה <b>אחת</b></p>')}}).trim(), 'שורה אחת');
+    // אין גוף ⇒ ריק (ולא קריסה)
+    expect(dsMailPlain({'mimeType': 'text/plain', 'body': {}}), '');
+    // הטקסט לזיהוי: נושא+גוף; בלי גוף ⇒ snippet
+    expect(const DsMailItem(id: '1', subject: 'נושא', from: '', date: '', snippet: 'קצר', body: 'ארוך').text, 'נושא\nארוך');
+    expect(const DsMailItem(id: '1', subject: 'נושא', from: '', date: '', snippet: 'קצר').text, 'נושא\nקצר');
+  });
+
   test('G54 · שם-הרשומה = שדה-התיאור, לא סדר-ההכנסה במפה', () {
     final st = AppStore();
     // סדר-ההכנסה מציב את הסכום ראשון (כך נכתב טופס-האישור כשהעובדה שזוהתה היא הסכום)
