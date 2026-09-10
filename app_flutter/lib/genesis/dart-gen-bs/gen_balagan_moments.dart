@@ -1,7 +1,25 @@
 // 🧭 חולל ע"י balagan (G33 · הכרעה-29) — מזהה-הרגע: TF-IDF דטרמיניסטי מ-30 מסמכי-פירוק (כותרת+«הרגע» ×3). אפס-בינה, אפס-מילון. אל תערוך ידנית.
 import 'dart:convert';
 import '../dart-ui-bs/ds/ds_store.dart';
+import '../dart-ui-bs/ds/ds_cloud.dart';   // G58 · החוט לענן (דורמנטי בלי קונפיג)
 import 'gen_behaviors.dart';
+
+// ── G58 · סנכרון: משיכה ⇒ **מיזוג** ⇒ דחיפה. הענן לא מכריע (הכרעה-31ד) —
+//   mergeJson מכבד מצבות-מחיקה ומעדיף את המאוחר לפי __at. בלי קונפיג/כניסה: אפס רשת.
+//   מחזיר קוד-מצב: '' = לא-מוגדר · 'off' = לא-מחובר · 'net' = כשל-רשת · 'ok:N' = מוזגו N.
+String balaganCloudStatus = '';
+Future<String> balaganCloudSync() async {
+  final cfg = appStore.setting('cloud.config');
+  if (cloudOptions(cfg) == null) { balaganCloudStatus = ''; return ''; }
+  if ((await cloudInit(cfg)) == null || cloudUid().isEmpty) { balaganCloudStatus = 'off'; return 'off'; }
+  final remote = await cloudPull();
+  var n = 0;
+  if (remote != null) { final r = appStore.mergeJson(remote); if (r > 0) n = r; }
+  final ok = await cloudPush(appStore.cloudJson());
+  balaganCloudStatus = ok ? 'ok:$n' : 'net';
+  if (ok) appStore.setSetting('cloud.at', DateTime.now().toIso8601String());
+  return balaganCloudStatus;
+}
 class BalaganField { const BalaganField(this.label, this.type, this.required, this.options); final String label, type; final bool required; final List<String> options; }
 class BalaganModule {
   const BalaganModule(this.index, this.ns, this.title, this.moment, this.topic, this.weights, this.dateFields, this.numFields, this.descField, this.longField, this.rootSlug, this.fields, this.stages, this.chain, {this.selfScore = 1, this.layer = '', this.required = 0, this.timeFields = const [], this.phoneFields = const [], this.personFields = const [], this.percentFields = const []});

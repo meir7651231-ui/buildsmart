@@ -263,7 +263,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
     return out;
   }
   @override
-  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); WidgetsBinding.instance.addPostFrameCallback((_) { _autopilotAll(); _fetchMail(); }); appStore.addListener(_onStore); }
+  void initState() { super.initState(); WidgetsBinding.instance.addObserver(this); WidgetsBinding.instance.addPostFrameCallback((_) { _autopilotAll(); _fetchMail(); balaganCloudSync(); }); appStore.addListener(_onStore); }   // G58 · פתיחה ⇒ משיכה+מיזוג+דחיפה (אפס רשת בלי קונפיג)
   void _onStore() { WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _autopilotAll(); }); }
   // G55 · חוזרים למסך אחרי שעות ⇒ המייל נטען מחדש והיום מחושב מחדש. בלי זה «פעם בפתיחה»
   //   פירושו «פעם בחיים» באפליקציה מותקנת שאף פעם לא נסגרת.
@@ -272,6 +272,7 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
     if (state != AppLifecycleState.resumed) return;
     _mailTried = false;
     _fetchMail();
+    balaganCloudSync().then((_) { if (mounted) setState(() {}); });   // G58 · חזרה למסך ⇒ מה שנכתב במכשיר אחר מגיע לכאן
     if (mounted) setState(() {});
   }
   @override

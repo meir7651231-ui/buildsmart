@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_store.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds.dart';
 import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_mail.dart';   // G56 · dsMailPlain
+import 'package:buildsmart/genesis/dart-ui-bs/ds/ds_cloud.dart';   // G58 · cloudOptions
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_home.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_confirm.dart';
 import 'package:buildsmart/genesis/dart-gen-bs/gen_balagan_topics.dart';
@@ -273,6 +274,22 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2028, 2, 29), 'y1'), DateTime(2029, 2, 28));
     expect(balaganRepeatLabel('m2'), 'כל חודשיים');
   });
+  test('G58 · הענן דורמנטי בלי קונפיג · קונפיג חלקי נדחה · המסמך ≡ מה שהכללים מתירים', () async {
+    // קונפיג: רק שלושה שדות הופכים אותו לתקין. חלקי/פגום ⇒ null, ואז אין אתחול ואין רשת.
+    expect(cloudOptions(''), isNull);
+    expect(cloudOptions('לא json'), isNull);
+    expect(cloudOptions('{"apiKey":"a","projectId":"p"}'), isNull, reason: 'בלי appId');
+    final o = cloudOptions('{"apiKey":"a","projectId":"p","appId":"x"}');
+    expect(o, isNotNull);
+    expect(o!.projectId, 'p');
+    // בלי קונפיג הסנכרון חוזר מיד עם '' — לא 'net', לא ניסיון-רשת
+    appStore.setSetting('cloud.config', '');
+    expect(await balaganCloudSync(), '');
+    // המסמך שעולה = בדיוק המפתחות שכללי-הגישה מתירים (server-gen/balagan/firestore.rules)
+    final keys = (jsonDecode(appStore.cloudJson()) as Map).keys.toSet();
+    expect(keys, {'seq', 'role', 'actor', 'rec', 'log', 'decided', 'dead'});
+  });
+
   test('G57 · מיזוג-ענן: מה שנמחק לא קם לתחייה · המאוחר מנצח · מפתחות לא עולים', () {
     final st = AppStore();
     final a = st.add('app_tasks_ent1', {'מה': 'ארנונה', '__at': '2026-09-01T10:00'});
