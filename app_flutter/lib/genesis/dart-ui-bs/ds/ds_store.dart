@@ -93,6 +93,7 @@ class AppStore extends ChangeNotifier {
       _actor = (data['actor'] as String?) ?? '';
       for (final e in (data['log'] as List? ?? const [])) _log.add((e as Map).map((k, v) => MapEntry(k.toString(), v.toString())));
       ((data['decided'] as Map?) ?? const {}).forEach((k, v) => _decided[k.toString()] = v.toString());
+      for (final k in (data['dead'] as List? ?? const [])) _dead.add(k.toString());   // G57 · מצבות שורדות רענון
       ((data['settings'] as Map?) ?? const {}).forEach((k, v) => _settings[k.toString()] = v.toString());
       (data['rec'] as Map<String, dynamic>).forEach((k, v) {
         _rec[k] = (v as List)
@@ -107,7 +108,7 @@ class AppStore extends ChangeNotifier {
   }
 
   /// Backup as text (same JSON as persistence). Restore replaces everything; the previous state is kept once for undo.
-  String exportJson() => jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'settings': _settings});
+  String exportJson() => jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'settings': _settings, 'dead': _dead});
   int importJson(String raw) {
     Map<String, dynamic> data;
     try { data = jsonDecode(raw) as Map<String, dynamic>; } catch (_) { return -1; }
@@ -385,8 +386,62 @@ class AppStore extends ChangeNotifier {
       }
     }
     _rec[entity]?.removeWhere((r) => r[idKey] == id);
+    _tomb('$entity/$id');
     notifyListeners();
     return true;
+  }
+
+  // ── G57 · מצבות-מחיקה + מיזוג-ענן (הכרעה-31ד: הענן הוא העתק, לא מקור) ──
+  //   בלי מצבה, מיזוג עם מכשיר שעוד לא ידע על המחיקה **מחייה** את מה שמחקת.
+  //   זה בדיוק מחלקת-אובדן-הנתונים שנסגרה ב-G51, רק שהפעם היא מגיעה מהרשת.
+  final List<String> _dead = [];   // 'entity/id' — טבעת 500, נשמרת עם המגירה
+  void _tomb(String key) { _dead.remove(key); _dead.insert(0, key); if (_dead.length > 500) _dead.removeRange(500, _dead.length); }
+  List<String> get tombstones => List.unmodifiable(_dead);
+
+  /// מיזוג עותק-מרוחק לתוך המגירה. הכללים, בסדר הזה:
+  ///   1. מה שנמחק כאן (מצבה) לא חוזר לחיים — גם אם הוא קיים שם.
+  ///   2. רשומה שקיימת בשני הצדדים: המאוחרת לפי `__at` מנצחת; שווה/חסר ⇒ המקומית.
+  ///   3. ישות שאינה מוכרת כאן מדולגת (אותו כלל של חוקי-הגישה).
+  ///   4. הגדרות **לא** מגיעות מהענן — הן של המכשיר (גודל-טקסט · מפתחות · קונפיג-הענן עצמו).
+  ///   5. יומן = איחוד לפי מזהה, החדש קודם, חתוך ל-200.
+  /// מחזיר כמה רשומות נכנסו/עודכנו. קלט פגום ⇒ ‎-1 ואפס שינוי.
+  /// מה שעולה לענן — **בלי `settings`** (שם יושבים מפתח-הבינה, טוקן-המייל וקונפיג-הענן עצמו).
+  /// חוק-6: מפתחות נשארים במכשיר. חוקי-הגישה דוחים מסמך שמכיל `settings` — כך שגם לקוח
+  /// פרוץ לא יכול להעלות את צרור-המפתחות. ההגדרות הן ממילא של המכשיר (גודל-טקסט, שעת-תקציר).
+  String cloudJson() => jsonEncode({'seq': _seq, 'role': _role, 'actor': _actor, 'rec': _rec, 'log': _log, 'decided': _decided, 'dead': _dead});
+
+  int mergeJson(String raw) {
+    Map<String, dynamic> data;
+    try { data = jsonDecode(raw) as Map<String, dynamic>; } catch (_) { return -1; }
+    if (data['rec'] is! Map) return -1;
+    final dead = _dead.toSet();
+    var n = 0;
+    (data['rec'] as Map).forEach((ent, list) {
+      final e = ent.toString();
+      if (list is! List) return;
+      for (final row in list) {
+        if (row is! Map) continue;
+        final m = row.map((k, v) => MapEntry(k.toString(), v.toString()));
+        final id = m[idKey] ?? ''; if (id.isEmpty) continue;
+        if (dead.contains('$e/$id')) continue;                     // (1)
+        final cur = byId(e, id);
+        if (cur == null) { (_rec[e] ??= <Map<String, String>>[]).add(m); n++; continue; }
+        final a = (cur['__at'] ?? '').trim(), b = (m['__at'] ?? '').trim();
+        if (b.isNotEmpty && b.compareTo(a) > 0) { cur..clear()..addAll(m); n++; }   // (2)
+      }
+    });
+    for (final row in (data['log'] as List? ?? const [])) {         // (5)
+      if (row is! Map) continue;
+      final m = row.map((k, v) => MapEntry(k.toString(), v.toString()));
+      final id = m['id'] ?? ''; if (id.isEmpty || _log.any((x) => x['id'] == id)) continue;
+      _log.add(m);
+    }
+    _log.sort((x, y) => (y['at'] ?? '').compareTo(x['at'] ?? ''));
+    if (_log.length > 200) _log.removeRange(200, _log.length);
+    for (final k in (data['dead'] as List? ?? const [])) { _tomb(k.toString()); }   // מצבות-הצד-השני מכובדות גם הן
+    for (final k in _dead) { final i = k.indexOf('/'); if (i <= 0) continue; _rec[k.substring(0, i)]?.removeWhere((r) => r[idKey] == k.substring(i + 1)); }
+    notifyListeners();
+    return n;
   }
 }
 

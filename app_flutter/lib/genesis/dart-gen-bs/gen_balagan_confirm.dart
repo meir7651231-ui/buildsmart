@@ -50,7 +50,7 @@ void balaganLearn(BalaganField f, String v) { if (f.type == 'text' && f.options.
 Widget balaganOpenRoot(String entity, String id) {
   switch (entity) {
     case 'app_calendar_ent1': return GenAppCalendarRootScreen(id: id);
-    case 'app_tasks_ent1': return GenAppTasksRootScreen(id: id);
+    case 'app_tasks_ent2': return GenAppTasksRootScreen(id: id);
     case 'app_peruk01_ent1': return GenAppPeruk01RootScreen(id: id);
     case 'app_peruk02_ent1': return GenAppPeruk02RootScreen(id: id);
     case 'app_peruk03_ent1': return GenAppPeruk03RootScreen(id: id);

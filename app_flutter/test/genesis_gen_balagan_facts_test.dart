@@ -273,6 +273,38 @@ void main() {
     expect(GenAppCalendarHomeScreenToday.nextRepeat(DateTime(2028, 2, 29), 'y1'), DateTime(2029, 2, 28));
     expect(balaganRepeatLabel('m2'), 'כל חודשיים');
   });
+  test('G57 · מיזוג-ענן: מה שנמחק לא קם לתחייה · המאוחר מנצח · מפתחות לא עולים', () {
+    final st = AppStore();
+    final a = st.add('app_tasks_ent1', {'מה': 'ארנונה', '__at': '2026-09-01T10:00'});
+    final b = st.add('app_tasks_ent1', {'מה': 'ביטוח', '__at': '2026-09-01T10:00'});
+    st.setSetting('ai.key', 'sk-סוד');
+    // מפתחות אינם חלק ממה שעולה (חוק-6) — וגם לא ה-settings בכלל
+    expect(st.cloudJson().contains('sk-סוד'), isFalse);
+    expect(st.cloudJson().contains('settings'), isFalse);
+    // מחיקה כאן ⇒ מצבה; עותק מרוחק שעוד מכיר אותה לא מחזיר אותה
+    expect(st.removeById('app_tasks_ent1', b), isTrue);
+    expect(st.tombstones.any((k) => k.endsWith('/' + b)), isTrue);
+    final remote = jsonEncode({'rec': {'app_tasks_ent1': [
+      {'__id': a, 'מה': 'ארנונה 350', '__at': '2026-09-05T10:00'},
+      {'__id': b, 'מה': 'ביטוח', '__at': '2026-09-01T10:00'},
+      {'__id': 'z9', 'מה': 'חדש משם', '__at': '2026-09-04T10:00'},
+    ]}, 'log': [], 'dead': []});
+    final n = st.mergeJson(remote);
+    expect(st.byId('app_tasks_ent1', b), isNull, reason: 'מחוק לא קם לתחייה');
+    expect(st.byId('app_tasks_ent1', a)!['מה'], 'ארנונה 350', reason: 'המאוחר מנצח');
+    expect(st.byId('app_tasks_ent1', 'z9'), isNotNull, reason: 'חדש-משם נכנס');
+    expect(n, 2);
+    // מוקדם-משם לא דורס מאוחר-כאן
+    st.mergeJson(jsonEncode({'rec': {'app_tasks_ent1': [{'__id': a, 'מה': 'ישן', '__at': '2026-08-01T10:00'}]}}));
+    expect(st.byId('app_tasks_ent1', a)!['מה'], 'ארנונה 350');
+    // מצבה משם מוחקת גם כאן
+    st.mergeJson(jsonEncode({'rec': {}, 'dead': ['app_tasks_ent1/' + a]}));
+    expect(st.byId('app_tasks_ent1', a), isNull);
+    // ישות לא-מוכרת / קלט פגום
+    expect(st.mergeJson('לא json'), -1);
+    expect(st.mergeJson('{}'), -1);
+  });
+
   test('G56 · גוף-המכתב נקרא מעץ-החלקים (base64url · multipart · html-fallback)', () {
     // Gmail מקודד base64url (בלי ריפוד, עם -_). «שלום» = D7pdedwsD7o... נבנה מהקידוד עצמו:
     String enc(String t) => base64Url.encode(utf8.encode(t)).replaceAll('=', '');
