@@ -4,6 +4,8 @@ import '../dart-ui-bs/ds/ds.dart';
 import '../dart-ui-bs/ds/ds_store.dart';
 import '../dart-ui-bs/ds/ds_field.dart';
 import '../dart-ui-bs/ds/ds_toggle_tile.dart';
+import '../dart-ui-bs/ds/ds_notify.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 class GenBalaganBehaviorScreen extends StatelessWidget {
@@ -19,7 +21,9 @@ class GenBalaganBehaviorScreen extends StatelessWidget {
     DsField(label: gen_balagan_behavior_c8, hint: '12', value: appStore.setting('minSend', '12'), onChanged: (v) => appStore.setSetting('minSend', v)),
     DsField(label: gen_balagan_behavior_c9, hint: '3', value: appStore.setting('minAuto', '3'), onChanged: (v) => appStore.setSetting('minAuto', v)),
     DsField(label: gen_balagan_behavior_c10, hint: '18', value: appStore.setting('eveningHour', '18'), onChanged: (v) => appStore.setSetting('eveningHour', v)),
-    DsToggleTile(label: gen_balagan_behavior_c11, value: appStore.setting('always:rem') == '1' ? 'true' : 'false', onChanged: (v) => appStore.setSetting('always:rem', v == 'true' ? '1' : '')),
-    DsSection(title: gen_balagan_behavior_c12, children: [for (final e in appStore.log) DsLogRow(text: e['what'] ?? '', sub: _short(e['at'] ?? ''), undoLabel: e['undone'] == '1' ? '' : gen_balagan_behavior_c13, onUndo: e['undone'] == '1' ? null : () => appStore.undo(e['id'] ?? ''))]),
+    // G55 · רשות-התראה נדרשת ממחווה של המשתמש — הדפדפן דוחה בקשה בטעינה, ובלי רשות התקציר שותק.
+    if (kIsWeb) DsToggleTile(label: gen_balagan_behavior_c11, value: notifyGranted() ? 'true' : 'false', onChanged: (v) async { if (v == 'true' && !notifyGranted()) { await notifyAsk(); appStore.setSetting('notifyAsked', '1'); } }),
+    DsToggleTile(label: gen_balagan_behavior_c12, value: appStore.setting('always:rem') == '1' ? 'true' : 'false', onChanged: (v) => appStore.setSetting('always:rem', v == 'true' ? '1' : '')),
+    DsSection(title: gen_balagan_behavior_c13, children: [for (final e in appStore.log) DsLogRow(text: e['what'] ?? '', sub: _short(e['at'] ?? ''), undoLabel: e['undone'] == '1' ? '' : gen_balagan_behavior_c14, onUndo: e['undone'] == '1' ? null : () => appStore.undo(e['id'] ?? ''))]),
   ]));
 }
