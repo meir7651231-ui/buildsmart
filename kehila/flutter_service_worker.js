@@ -17,7 +17,7 @@ const RESOURCES = {"firebase-messaging-sw.js": "5301f9cfe0f325a12ccfa0e9553a2b5a
 "canvaskit/skwasm.js.symbols": "80806576fa1056b43dd6d0b445b4b6f7",
 "canvaskit/canvaskit.wasm": "efeeba7dcc952dae57870d4df3111fad",
 "canvaskit/skwasm_st.wasm": "56c3973560dfcbf28ce47cebe40f3206",
-"flutter_bootstrap.js": "1f5ccf6a1e34975d378ada2925a4bdb8",
+"flutter_bootstrap.js": "80de3580f417e0ddec75e6aee16d56d9",
 "assets/NOTICES": "bb800946f725c18c1f1e16f6d1d7cc0c",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "33b7d9392238c04c131b6ce224e13711",
 "assets/AssetManifest.bin": "7b53090e54273a726b1b30eb2b14af0e",
