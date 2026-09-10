@@ -45,6 +45,7 @@ import 'package:flutter/services.dart';
 import '../dart-ui-bs/ds/ds_voice.dart';
 import '../dart-ui-bs/ds/ds_notify.dart';   // G55 · התראת-דפדפן (אפס-שרת)
 import '../dart-ui-bs/ds/ds_cloud.dart';   // G59 · cloudPutDue
+import '../dart-ui-bs/ds/ds_oauth.dart';   // G60 · טוקן-מתחדש
 import 'package:url_launcher/url_launcher.dart';
 
 typedef _Items = List<DsTodayItem> Function(DateTime today, {required int dayDelta});
@@ -203,7 +204,10 @@ class _GenBalaganHomeScreenState extends State<GenBalaganHomeScreen> with Widget
   List<DsMailItem> _mail = const []; bool _mailTried = false; String _mailNote = '';
   Future<void> _fetchMail() async {
     if (_mailTried) return; _mailTried = true;
-    final tok = appStore.setting('mail.token'); if (tok.isEmpty) return;
+    // G60 · קודם טוקן-מתחדש מהשרת (הרענון יושב שם, לא כאן); אין ⇒ טוקן שהודבק ידנית,
+    //   כדי לא לשבור את מי שעובד ככה היום. אין שניהם ⇒ יוצאים בשקט.
+    final tok = (await oauthAccessToken(fnBase: appStore.setting('oauth.fnBase'))) ?? appStore.setting('mail.token');
+    if (tok.isEmpty) return;
     final r = await dsMailRecent(token: tok, query: appStore.setting('mail.query', 'newer_than:7d'));
     if (!mounted) return;
     setState(() { if (r == null) { _mailNote = gen_balagan_home_c31; } else { _mail = r; } });
