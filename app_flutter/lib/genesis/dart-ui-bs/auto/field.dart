@@ -1,7 +1,7 @@
-// 🛗 הורם ע"י מנוע-המדף v2 (shelf-lift) — verbatim מהמקור, אל תערוך ידנית.
+// 🛗 הורם ע"י מנוע-המדף v2 (shelf-lift) — מחובר-לחריץ (retrofit-תפר): קורא skin.* מ-DsSeam.
 // מוצא: screens__budget_screen:_Field (בנייה-חכמה main) · צרור-3
 import 'package:flutter/material.dart';
-import 'bs_tokens.dart';
+import '../ds/ds_seam.dart';
 
 class Field extends StatelessWidget {
   const Field(
@@ -17,27 +17,25 @@ class Field extends StatelessWidget {
   final String? Function(String value)? validator;
 
   @override
-  Widget build(BuildContext context) =>
-      ValueListenableBuilder<TextEditingValue>(
-        valueListenable: controller,
-        builder: (context, value, _) => TextField(
-          controller: controller,
-          keyboardType: number ? TextInputType.number : TextInputType.text,
-          style: const TextStyle(color: _ink),
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(color: _muted),
-            errorText: validator?.call(value.text),
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none),
-          ),
+  Widget build(BuildContext context) {
+    final skin = DsSeam.skinOf(context); // מלוא-העיצוב מהחריץ (חוק-7)
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) => TextField(
+        controller: controller,
+        keyboardType: number ? TextInputType.number : TextInputType.text,
+        style: TextStyle(color: skin.ink),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: skin.mut),
+          errorText: validator?.call(value.text),
+          filled: true,
+          fillColor: skin.raised,
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none),
         ),
-      );
+      ),
+    );
+  }
 }
-
-const _ink = BsTokens.inkLight;
-
-const _muted = Color(0xFF888888);

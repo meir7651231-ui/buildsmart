@@ -10,15 +10,14 @@ import '../dart-ui-bs/auto/company_catalog_import_card.dart';
 import '../dart-ui-bs/auto/empty_section.dart';
 import '../dart-ui-bs/auto/facet_chip.dart';
 import '../dart-ui-bs/auto/facet_row.dart';
+import '../dart-ui-bs/auto/link_btn.dart';
 import '../dart-ui-bs/auto/mini_qty_btn.dart';
-import '../dart-ui-bs/auto/request_composer.dart';
 import '../dart-ui-bs/auto/saved_version_chip.dart';
 import '../dart-ui-bs/auto/section_header.dart';
 import '../dart-ui-bs/auto/sheet_section.dart';
 import '../dart-ui-bs/auto/tree_coming_soon.dart';
 import '../dart-ui-bs/auto/value_chip.dart';
-import '../dart-ui-bs/auto/worker_employer_stock_sheet_stock_row.dart';
-import '../dart-data-bs/auto/screens__worker_employer_stock_sheet_content.dart';
+import '../dart-data-bs/auto/screens__projects_screen_content2.dart';
 import '../dart-data-bs/auto/screens__catalog_screen_content.dart';
 import '../dart-data-bs/auto/screens__catalog_screen_content2.dart';
 
@@ -54,11 +53,10 @@ class GenCombinedTokens {
 }
 
 class GenCombinedComposed extends StatelessWidget {
-  const GenCombinedComposed({required this.onQtyChanged, required this.onSelect, required this.onSend, required this.onTap, required this.onTap2, required this.onToggle, required this.onToggle2, required this.activeMatch, required this.axisChipItems, required this.child, required this.composing, required this.count, required this.emoji, required this.expanded, required this.facetRowItems, required this.icon, required this.isSelected, required this.itemsCtrl, required this.label, required this.location, required this.name, required this.noteCtrl, required this.options, required this.price, required this.qty, required this.savedVersionChipItems, required this.selected, required this.selected2, required this.text, required this.title, required this.value, required this.why, required this.t, super.key});
+  const GenCombinedComposed({required this.onQtyChanged, required this.onSelect, required this.onTap, required this.onTap2, required this.onToggle, required this.onToggle2, required this.activeMatch, required this.axisChipItems, required this.child, required this.count, required this.emoji, required this.expanded, required this.facetRowItems, required this.icon, required this.isSelected, required this.label, required this.name, required this.options, required this.price, required this.qty, required this.savedVersionChipItems, required this.selected, required this.selected2, required this.text, required this.title, required this.value, required this.why, required this.t, super.key});
 
   final ValueChanged<int> onQtyChanged;
   final void Function(String) onSelect;
-  final VoidCallback onSend;
   final VoidCallback onTap;
   final VoidCallback? onTap2;
   final VoidCallback onToggle;
@@ -66,18 +64,14 @@ class GenCombinedComposed extends StatelessWidget {
   final List<String>? activeMatch;
   final List<AxisChipItem> axisChipItems;
   final Widget child;
-  final bool composing;
   final int count;
   final String emoji;
   final bool expanded;
   final List<FacetRowItem> facetRowItems;
   final IconData icon;
   final bool isSelected;
-  final TextEditingController itemsCtrl;
   final String label;
-  final String location;
   final String name;
-  final TextEditingController noteCtrl;
   final List<String> options;
   final int? price;
   final int qty;
@@ -95,26 +89,9 @@ class GenCombinedComposed extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 24),
         children: [
           const SizedBox(height: 8),
-          WorkerEmployerStockSheetStockRow(
-            label: worker_employer_stock_sheet_stock_row_label,
-            label2: worker_employer_stock_sheet_stock_row_label2,
-            location: location,
-            name: name,
-          ),
-          RequestComposer(
-            fallback: request_composer_fallback,
-            fallback2: request_composer_fallback2,
-            fallback3: request_composer_fallback3,
-            hintText: request_composer_hint_text,
-            labelText: request_composer_label_text,
-            hintText2: request_composer_hint_text2,
-            fallback4: request_composer_fallback4,
-            fallback5: request_composer_fallback5,
-            composing: composing,
-            itemsCtrl: itemsCtrl,
-            noteCtrl: noteCtrl,
-            onToggle: onToggle,
-            onSend: onSend,
+          LinkBtn(
+            label: link_btn_label,
+            onTap: onTap,
           ),
           CompanyCatalogImportCard(
             label: company_catalog_import_card_label,

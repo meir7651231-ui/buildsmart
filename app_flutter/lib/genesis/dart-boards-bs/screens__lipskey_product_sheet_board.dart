@@ -1,0 +1,45 @@
+// 🔌 חולל ע"י מחולל-הלוחות (board-gen) — הלוח = המקום-היחיד שנוגע-בחיווט (חוק-3).
+// מקור-החיווט: screens__lipskey_product_sheet.dart (בנייה-חכמה main) · מחווט: 2 · TODO: 3.
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:buildsmart/screens/lipskey_product_sheet.dart';
+import 'package:buildsmart/theme/tokens.dart';
+import 'package:buildsmart/data/product_images.dart';
+import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/data/lipskey_smart_data.dart';
+import 'package:buildsmart/data/lipskey_verified_connections.dart';
+import 'package:buildsmart/data/related_info.dart';
+import 'package:buildsmart/data/score_band.dart';
+import 'package:buildsmart/data/smart_tree.dart';
+import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/features/card_keyboard/hop_stack.dart';
+import 'package:buildsmart/logic/install_kit.dart';
+import 'package:buildsmart/state/catalog_settings.dart';
+import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/widgets/studio/cfg_text.dart';
+import 'package:flutter/services.dart';
+import '../dart-screens-bs/lipskey_product_sheet.g.dart';
+
+class LipskeyProductSheetBoard extends ConsumerStatefulWidget {
+  const LipskeyProductSheetBoard({super.key});
+
+  @override
+  ConsumerState<LipskeyProductSheetBoard> createState() => _LipskeyProductSheetBoardState();
+}
+
+class _LipskeyProductSheetBoardState extends ConsumerState<LipskeyProductSheetBoard> {
+  int _qty = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return LipskeyProductSheetComposed(
+      onChanged: (_) {} /* TODO-לוח */,
+      pickerOptionItems: const [] /* TODO-לוח: List<PickerOptionItem> */,
+      qty: _qty,
+      subtitle: null /* TODO-לוח: String? */,
+      text: 'אין קבוצה',
+      t: LipskeyProductSheetTokens(),
+    );
+  }
+}

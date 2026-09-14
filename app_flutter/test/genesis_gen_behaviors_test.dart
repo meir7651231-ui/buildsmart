@@ -56,6 +56,7 @@ void main() {
     final ics = bhIcs([{'uid': 'u1', 'date': '2026-09-15', 'title': 'ארנונה, 1250'}], 'בלגן', DateTime(2026, 9, 8, 10)); expect(ics.contains('DTSTART;VALUE=DATE:20260915'), isTrue); expect(ics.contains('SUMMARY:ארנונה\\, 1250'), isTrue); expect(ics.endsWith('END:VCALENDAR\r\n'), isTrue);
     expect(bhMedianHm(['16:30', '16:00', '17:00']), '16:30'); expect(bhMedianHm(['16:30']), ''); expect(bhMedianHm(['', 'x', '09:00', '10:00']), '10:00');
     expect(bhMonthEnd('2026-09-08'), '2026-09-30'); expect(bhMonthEnd('2026-12-05'), '2026-12-31'); expect(bhMonthEnd('2028-02-10'), '2028-02-29'); expect(bhMonthEnd('2027-02-01'), '2027-02-28');
+    expect(bhPhoneFmtSafe('0521234567'), '052-1234567'); expect(bhPhoneFmtSafe('0000000000'), ''); expect(bhPhoneFmtSafe('00972521234567'), '052-1234567');
     expect(bhMoney('1,250'), 1250); expect(bhMoney('₪ 8,000'), 8000); expect(bhMoney(''), 0); expect(bhMoney(null), 0); expect(bhMoney('abc'), 0); expect(bhMoney(bhThousands(1650)), 1650);
     expect(bhWeekRange('2026-09-08', 0), ['2026-09-06', '2026-09-12']); expect(bhWeekRange('2026-09-08', 1), ['2026-09-13', '2026-09-19']); expect(bhInRange('2026-09-12', '2026-09-06', '2026-09-12'), true); expect(bhInRange('2026-09-13', '2026-09-06', '2026-09-12'), false); expect(bhInRange('', '2026-09-06', '2026-09-12'), false);
     expect(bhMinutesUntil('2026-09-08T10:05:00', '2026-09-08', '10:30'), 25); expect(bhMinutesUntil('2026-09-08T11:00:00', '2026-09-08', '10:30') < 0, isTrue); expect(bhMinutesUntil('', '2026-09-08', '10:30'), -1);

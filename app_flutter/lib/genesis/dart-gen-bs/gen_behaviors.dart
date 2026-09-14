@@ -67,6 +67,7 @@ String _hm(int m) => (m ~/ 60).toString().padLeft(2, '0') + ':' + (m % 60).toStr
 String bhNormSearch(String s) => normSearch(s, normSearch_T);
 String bhNormName(String s) => normName(s, (t) => normSearch(t, normSearch_T));
 String bhPhoneDigits(String? s) => normPhone(s);
+String bhPhoneFmtSafe(String? s) => ((a0) => formatIsraeliPhone(normPhone(a0)))(s);   // הכרעה-20ב · הרכבה-מוכחת: מציין-מקום ⇒ ריק, אחרת עיצוב
 /// ב׳-צה · שורה של ספרות («1250» · «052-123») = חיפוש; מחזירה את השורה או ריק
 String bhDigitsQuery(String q) { final t = q.trim(); return RegExp(r'^[0-9][0-9,.\- ]*$').hasMatch(t) && bhPhoneDigits(t).length >= 2 ? t : ''; }
 /// ב׳-צז · «איפה X» ⇒ X (rulePrefix)
