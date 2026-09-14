@@ -9,14 +9,13 @@
 // פלט:  WfStage תואם, או null אם המפתח אינו אחד מחמשת המפתחות (הופכי ל-wfStageKey).
 
 /// חמשת שלבי ה-workflow. סדר הוסק מסדר-ה-case בטיוטה (verbatim).
+// G62 · זרימה⇒טבלה: המיפוי חי ב-dart-data/wf_stage_from_key-table.dart (דאטה, לא קוד); אפס-אובדן הוכח בבדיקת-הזהב.
+import '../dart-data/wf_stage_from_key-table.dart';
+
 enum WfStage { intake, prep, ready, dispatch, done }
 
 /// המרת-מפתח→שלב. null עבור מפתח לא-מוכר. verbatim workflow_engine.dart:42-59.
-WfStage? wfStageFromKey(String k) => switch (k) {
-      'intake' => WfStage.intake,
-      'prep' => WfStage.prep,
-      'ready' => WfStage.ready,
-      'dispatch' => WfStage.dispatch,
-      'done' => WfStage.done,
-      _ => null,
-    };
+WfStage? wfStageFromKey(String k) {
+  final v = kWfStageFromKeyTable[k];
+  return v == null ? null : WfStage.values.byName(v);
+}

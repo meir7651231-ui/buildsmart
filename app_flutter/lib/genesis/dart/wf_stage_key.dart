@@ -9,13 +9,10 @@
 // פלט:  מפתח-המחרוזת הקבוע פר-שלב (intake/prep/ready/dispatch/done). מיפוי כולל (exhaustive).
 
 /// חמשת שלבי ה-workflow. סדר הוסק מסדר-ה-case בטיוטה (verbatim).
+// G62 · זרימה⇒טבלה: המיפוי חי ב-dart-data/wf_stage_key-table.dart (דאטה, לא קוד); אפס-אובדן הוכח בבדיקת-הזהב.
+import '../dart-data/wf_stage_key-table.dart';
+
 enum WfStage { intake, prep, ready, dispatch, done }
 
 /// מפתח-המחרוזת הקבוע של שלב. verbatim workflow_engine.dart:34-41.
-String wfStageKey(WfStage s) => switch (s) {
-      WfStage.intake => 'intake',
-      WfStage.prep => 'prep',
-      WfStage.ready => 'ready',
-      WfStage.dispatch => 'dispatch',
-      WfStage.done => 'done',
-    };
+String wfStageKey(WfStage s) => kWfStageKeyTable[s.name]!;

@@ -9,14 +9,10 @@
 // פלט:  String — האמוג'י המתאים (ממופה 1:1).
 
 // טיפוס-שכן-קטן הוטבע inline verbatim (סדר-ה-case, diff_preview.dart).
+// G62 · זרימה⇒טבלה: המיפוי חי ב-dart-data/kind_emoji-table.dart (דאטה, לא קוד); אפס-אובדן הוכח בבדיקת-הזהב.
+import '../dart-data/kind_emoji-table.dart';
+
 enum ConfigOpKind { setText, setEmoji, setHidden, setOrder, setStyle, setAction }
 
 /// Representative emoji per config-op kind. Verbatim of diff_preview.dart:140-150.
-String kindEmoji(ConfigOpKind kind) => switch (kind) {
-      ConfigOpKind.setText => '✏️',
-      ConfigOpKind.setEmoji => '🙂',
-      ConfigOpKind.setHidden => '🙈',
-      ConfigOpKind.setOrder => '↕️',
-      ConfigOpKind.setStyle => '🎨',
-      ConfigOpKind.setAction => '⚙️',
-    };
+String kindEmoji(ConfigOpKind kind) => kKindEmojiTable[kind.name]!;
