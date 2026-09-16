@@ -383,5 +383,363 @@
    "grep -rn -F pure_engine.py /home/user/meir7651231-ui/-ai-chat-server ⇒ new/dart/plug.contract.md:3, new/dart/coupler.contract.md:3",
    "git grep -ln pure_engine (buildsmart)"
   ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/apply_lipskey_enrich.py",
+  "lang": "py",
+  "lines": 123,
+  "does": [
+   {
+    "claim": "מחיל-יחיד דטרמיניסטי: קורא knowledge/_enrich_validated.json ומזריק dims/color/qtyPack/qtyPallet לתוך lib/data/lipskey_catalog.dart, לפי התאמת sku",
+    "evidence": "apply_lipskey_enrich.py:17-18, 30-34, 119"
+   },
+   {
+    "claim": "אידמפוטנטי — שדה שכבר קיים על המוצר נספר כ-skip ולא נדרס, בשני הייצוגים",
+    "evidence": "apply_lipskey_enrich.py:55,60,63,66 (בשורה-אחת) ו-79-82, 89,97,101,105 (בלוק block_has)"
+   },
+   {
+    "claim": "מטפל בשני ייצוגי-מוצר שונים ב-Dart: constructor בשורה-אחת (מוצרי AQUATEC/Qondus) — הזרקה לפני ה-`),` הסוגר; ובלוק רב-שורתי — הזרקה אחרי שורת `page:`",
+    "evidence": "apply_lipskey_enrich.py:49-73 מול 84-109"
+   },
+   {
+    "claim": "ממיר ערכי-Python ל-Dart תקין עם escaping ל-backslash ולגרש",
+    "evidence": "apply_lipskey_enrich.py:20-28"
+   },
+   {
+    "claim": "--dry מדפיס את הספירות ולא כותב",
+    "evidence": "apply_lipskey_enrich.py:16, 116-118"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא ניתן להרצה כרגע — קובץ-הקלט חסר",
+    "evidence": "`ls app_flutter/knowledge/_enrich_validated.json` ⇒ No such file or directory"
+   },
+   {
+    "claim": "לא מאמת דבר — אין בו שער-R8; הוא סומך על כך שהקלט כבר עבר validate (בניגוד ל-fill_attrs_from_fleet.py:254 שבודק שוב)",
+    "evidence": "אין השוואה ל-nameHe בכל 123 השורות; docstring:5-6 מצהיר «the swarm's audit+validate produce the data»"
+   },
+   {
+    "claim": "לא מריץ analyze/test אחרי הכתיבה — כותב Dart ויוצא",
+    "evidence": "apply_lipskey_enrich.py:119-120"
+   },
+   {
+    "claim": "לא גיבוי ולא rollback — כתיבה ישירה על CATALOG (402KB) ב-open(...,'w')",
+    "evidence": "apply_lipskey_enrich.py:119"
+   },
+   {
+    "claim": "לא מקבל נתיבים — CATALOG/PAYLOAD קשיחים ויחסיים ל-cwd (חייב לרוץ מ-app_flutter/)",
+    "evidence": "apply_lipskey_enrich.py:17-18"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. הוזן ביד: app_flutter/WIRING.md:3101 («idempotent, לא דורס») · knowledge/mutation_log.md:1359,1369 מתעד ריצה ובאג שתוקן. הקלט מיוצר ע\"י enrich_from_name.py:14 ו-match_lipskey_pdf.py:7"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F apply_lipskey_enrich.py .` ⇒ רק engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי",
+   "gives": "המחולל של -ai-chat-server פולט Dart מ-`new/dart-gen-bs` דרך `render-module.mjs`/`app-ds.mjs`; אין לו שלב «הזרקת-שדות-לקובץ-Dart-קיים». חיבור היה מחייב שכבת-דאטה שאין. לא ידוע אם קיים מקבילה מחוברת"
+  },
+  "s22": {
+   "score": 1,
+   "why": "הדפוס נכון ומדיד — מחיל-יחיד אידמפוטנטי שסופר applied/skipped ומודפס — אבל הוא לא-רץ (הקלט חסר), לא-מאומת (אין שער-R8 בתוכו) וכפוף לצינור-קטלוג שאין ב--ai-chat-server. לא 0: לא מצאתי מנוע מחובר שמזריק שדות לקובץ-Dart קיים בלי לדרוס; `grep -rn 'idempotent' machtzev/generator/*.mjs` לא נבדק כשווה-ערך, ולכן — לא ידוע אם קיים מקבילה מחוברת"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/apply_lipskey_enrich.py (123 שורות)",
+   "ls -la app_flutter/lib/data/lipskey_catalog.dart ⇒ 402025 bytes · grep -c 'LipskeyCatalogProduct(' ⇒ 924",
+   "ls app_flutter/knowledge/_enrich_validated.json ⇒ No such file or directory",
+   "git grep -n -F apply_lipskey_enrich.py (buildsmart) ⇒ WIRING.md:3101 · mutation_log.md:1359,1369 · enrich_from_name.py:14 · match_lipskey_pdf.py:7",
+   "grep -rn --exclude-dir=.git -F apply_lipskey_enrich.py (-ai-chat-server) ⇒ engine-index.json בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/audit_gates.sh",
+  "lang": "sh",
+  "lines": 148,
+  "does": [
+   {
+    "claim": "מריץ 18 קריאות test_gate ומדפיס PASS/FAIL, exit 1 אם FAIL>0",
+    "evidence": "audit_gates.sh:11-23, 140-148"
+   },
+   {
+    "claim": "בודק בפועל דבר אחד: ששני ה-hooks מסונכרנים — `diff -q .githooks/pre-commit .git/hooks/pre-commit`",
+    "evidence": "audit_gates.sh:110-115"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא בודק את השערים.** הכותרת אומרת «כל שער מקבל באג מיקרוסקופי ובודק שהוא תופס אותו» — בפועל 17 מתוך 18 המקרים מעתיקים את תנאי-השער אל תוך הסקריפט ובודקים את ההעתק. `.githooks/pre-commit` לא מורץ אף פעם",
+    "evidence": "audit_gates.sh:34,38,46,51,56,64,69,74,81,85,89,96,100,104,121,125,129,133,137 — כל אחד `if [[ … ]]` / `grep` מקומי על מחרוזת-בדיקה; אין `git commit`, אין קריאה ל-pre-commit או ל-pre-tool.sh בכל 148 השורות"
+   },
+   {
+    "claim": "לכן שינוי ב-.githooks/pre-commit או ב-.claude/hooks/pre-tool.sh לא יכול להפיל אותו — אין קשר-סיבתי בין הסקריפט לשערים",
+    "evidence": "audit_gates.sh:5-6 נכנס ל-REPO ומעולם לא נוגע בו שוב חוץ מ-110"
+   },
+   {
+    "claim": "9 שערים נטענים, אך רק 1/5/6/7/8/9 נבדקים; ה-«שערים» 2,3,4 אינם מופיעים",
+    "evidence": "כותרות-המקטעים ב-audit_gates.sh:32,43,61,79,94,109"
+   },
+   {
+    "claim": "ההעתקים כבר לא תואמים למקור: audit_gates.sh:129 בודק `push.*(--force|-f )`, בעוד pre-tool.sh:111 בודק גם `--force-with-lease|--force-if-includes|-f$`",
+    "evidence": "audit_gates.sh:129 מול .claude/hooks/pre-tool.sh:111"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — לא ב-.githooks/pre-commit ולא ב-.github/workflows. תיעוד בלבד: knowledge/PROTOCOL_ENFORCEMENT.md:153 · VERIFICATION_PROTOCOL.md:37,278 (L7a) · studio-plan/*.md ×5"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:453,540,601, ושורה 553 מודה במפורש «לא נקראו במלואם»"
+   }
+  ],
+  "connectAt": {
+   "point": "∅",
+   "gives": "יש מקבילה מחוברת טובה יותר — ראה s22"
+  },
+  "s22": {
+   "score": 0,
+   "why": "מקבילה מחוברת וטובה יותר בשם: `machtzev/audit-gates.mjs` (57 שורות), שער `audit-gates` ב-machtzev/police.mjs:170. ההבדל אינו סגנוני אלא קטגורי — audit-gates.mjs פותח worktree זמני (שורה 17), מגדיר בו `core.hooksPath=.githooks` (שורה 21), **מזריע הפרה אמיתית ומריץ `git commit` אמיתי**, והראיה היא הכישלון עם שם-השער בפלט (שורה 2-3). audit_gates.sh בודק העתקים של התנאים, ולכן לא יכול לזהות שהעתק נשאר מאחור — וזה כבר קרה (audit_gates.sh:129 מול pre-tool.sh:111). לפי כלל-האמת שבמשימה, כותרת-קובץ אינה ראיה: כאן היא סותרת את הקוד"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/audit_gates.sh (148 שורות, כולן)",
+   "wc -l + sed -n '1,22p' machtzev/audit-gates.mjs (-ai-chat-server)",
+   "sed -n '120,184p' machtzev/police.mjs ⇒ gate('audit-gates','audit-gates.mjs',…)",
+   "sed -n '1,60p' /home/user/buildsmart/.githooks/pre-commit (‏940 שורות סה\"כ) — audit_gates.sh אינו נקרא ממנו",
+   "git grep -n -F audit_gates.sh (buildsmart) ⇒ knowledge/*.md בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/crop_huliot.py",
+  "lang": "py",
+  "lines": 470,
+  "does": [
+   {
+    "claim": "חיתוך אדפטיבי של 44 עמודי קטלוג Huliot SmartLock לתמונות-מוצר: מזהה את הקו הירוק האופקי שמסמן ראש-בנד (‏≥15% מרוחב-העמוד, g≥130)",
+    "evidence": "crop_huliot.py:12-13, 179-215 (find_green_lines)"
+   },
+   {
+    "claim": "מסיר קווי-כותרת-עמוד עודפים לפי ספירת SECTIONS הצפויה, וכל קו נותר = ראש-בנד; תחתית = הקו הבא או תחתית-העמוד",
+    "evidence": "crop_huliot.py:14-17, 216-235 (band_tops_for)"
+   },
+   {
+    "claim": "בתוך בנד: מוצא בלוקי-תוכן לפי דיו בשורות, מפצל תצלום מדיאגרמה כשהם מודבקים (בלוק יחיד >160px), ומגזים את השוליים",
+    "evidence": "crop_huliot.py:255-300 (row_has_ink/find_content_blocks), 301-311 (trim_block_y), 312-365 (split_photo_and_diagram), 420-432"
+   },
+   {
+    "claim": "מדלג על דיאגרמת-מפרט כשהתיבה לבנה-בעיקרה (בנד בלי דיאגרמת-מידות)",
+    "evidence": "crop_huliot.py:18-20, 236-254 (is_mostly_white), 443-445"
+   },
+   {
+    "claim": "עמוד 27 (AQUA SLIM) חורג מסכימת-הבנדים ולכן מקבל 3 תיבות hand-tuned מפורשות",
+    "evidence": "crop_huliot.py:65-71 (CROPS_27), 465-468"
+   },
+   {
+    "claim": "מנקה crops ישנים לפני ריצה (למעט p27) ⇒ אין שאריות",
+    "evidence": "crop_huliot.py:450-456"
+   },
+   {
+    "claim": "הפלט חי בפועל ומחווט לאפליקציה",
+    "evidence": "`ls assets/huliot_smartlock/pages | wc -l` ⇒ 44 · `ls assets/huliot_smartlock/products | wc -l` ⇒ 159 · הניתוב: lib/data/huliot_smartlock_catalog.dart:49,60,63 (`_huliotImageFor`/`_huliotImageForCrop`)"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא OCR ולא קורא טקסט — פיקסלים בלבד (PIL/ImageStat). שיוך תמונה↔מוצר נעשה בצד-Dart לפי (page, tag)",
+    "evidence": "crop_huliot.py:21 (רק PIL) · 29 («tag letters a,b,c,d map to _huliotImageFor routing»)"
+   },
+   {
+    "claim": "לא גנרי — SECTIONS הוא טבלה ידנית של 31 עמודים, ו-CROPS_27 הוא קואורדינטות קשיחות. קטלוג אחר לא יעבוד",
+    "evidence": "crop_huliot.py:30-63, 65-71"
+   },
+   {
+    "claim": "לא מאמת ויזואלית את מה שחתך — אין contact-sheet ואין assert; כשל שקט אפשרי. זה בדיוק מה שקרה ותועד",
+    "evidence": ".githooks/pre-commit:863-865: «ב-2026-06-02 crop_huliot.py שונה ו\"100% done\" הוצהר על-סמך unit-tests בלבד; visual verify הראה ש-80% מהcrops פגומים»"
+   },
+   {
+    "claim": "השער שנולד מאותו אירוע הוא `warn`, לא `err` — כלומר לא חוסם",
+    "evidence": ".githooks/pre-commit:869-875 (`warn \"113\" …`)"
+   },
+   {
+    "claim": "לא מקבל ארגומנטים — PAGES/OUT קשיחים",
+    "evidence": "crop_huliot.py:23-25 (אין argparse/sys.argv)"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — הרצה ידנית מתועדת: knowledge/HANDOFF_TO_BENZI_HULIOT_P10.md:97 (`python3 scripts/crop_huliot.py`). הפלט נצרך ע\"י lib/data/huliot_smartlock_catalog.dart:49-63. שער 113 ב-.githooks/pre-commit:868 מפעיל אזהרה כשהקובץ משתנה"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F crop_huliot.py .` ⇒ רק engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי (לא ידוע אם קיים מקבילה מחוברת)",
+   "gives": "המחולל מייצר UI ממשפט; חילוץ-assets מ-PDF-תמונתי אינו בצינור. הקישור הקרוב ביותר שקיים הוא `machtzev/tools/site-shot.mjs` — אבל הוא מצלם אתר, לא חותך קטלוג. אין ב--ai-chat-server ספריית-תמונה כלשהי"
+  },
+  "s22": {
+   "score": 2,
+   "why": "המנוע הזה הוא הסיבה שיש 159 תמונות-מוצר אמיתיות באפליקציה במקום placeholders — וזה ישירות «אפליקציה עובדת 100%» של §22, כי מוצר בלי תמונה הוא כרטיס לבן. הוא גם רץ-ומדיד: 44 קלטים ⇒ 159 פלטים, כולם מחווטים דרך huliot_smartlock_catalog.dart:49. לא 3, כי אין לו שום אימות-עצמי (השער היחיד שנולד ממנו הוא warn) ואינו גנרי מעבר לקטלוג אחד. אין מקבילה מחוברת: `grep -rln 'sharp\\|jimp\\|ImageStat\\|from PIL' machtzev/` ⇒ התאמה **אחת**, והיא מחלקת-CSS `.btn.sharp` ב-machtzev/pure/action-family.html:41 — כלומר אפס ספריות-תמונה. היחיד שנוגע בתמונות הוא machtzev/tools/site-shot.mjs (צילום-מסך של אתר בנוי)"
+  },
+  "evidence": [
+   "sed -n '1,70p' + grep -n '^def ' + sed -n '420,470p' app_flutter/scripts/crop_huliot.py (470 שורות; 8 פונקציות)",
+   "ls assets/huliot_smartlock/pages | wc -l ⇒ 44 · ls assets/huliot_smartlock/products | wc -l ⇒ 159",
+   "git grep -n _huliotImageFor -- lib ⇒ lib/data/huliot_smartlock_catalog.dart:49,60,63",
+   "sed -n '855,885p' /home/user/buildsmart/.githooks/pre-commit (שער 113)",
+   "grep -rn --exclude-dir=.git -F crop_huliot.py (-ai-chat-server) ⇒ engine-index.json בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/enrich_from_name.py",
+  "lang": "py",
+  "lines": 85,
+  "does": [
+   {
+    "claim": "מפיק העשרה משם-המוצר עצמו לתוך knowledge/_enrich_validated.json — שני זרמים: dims['מידה'] ו-color",
+    "evidence": "enrich_from_name.py:142-143, 179-205"
+   },
+   {
+    "claim": "6 תבניות-גודל מסודרות (DN.. · 20\"×1/2\" · 1/2\" · 16×16 · 200 מ\"מ · 3\") — הראשונה שמתאימה מנצחת",
+    "evidence": "enrich_from_name.py:157-171"
+   },
+   {
+    "claim": "14 מילות-גימור, ממוינות ארוך-קודם כדי ש-«זהב מוברש» ינצח את «זהב»",
+    "evidence": "enrich_from_name.py:145-147, 173-177"
+   },
+   {
+    "claim": "**מודעות-קטגוריה כשער-אמת**: גימור נקלט רק ב-22 קטגוריות דקורטיביות מפורשות, כי בקטגוריות חומר «נחושת»/«פליז» הוא החומר ולא הגימור",
+    "evidence": "enrich_from_name.py:149-155, 200-202"
+   },
+   {
+    "claim": "לא דורס — מדלג על מוצר שכבר יש לו dims/color",
+    "evidence": "enrich_from_name.py:190-193, 200"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא כותב לקטלוג — רק ל-JSON שמוזן ל-apply_lipskey_enrich.py",
+    "evidence": "enrich_from_name.py:14, 203-205"
+   },
+   {
+    "claim": "לא ממציא — כל ערך הוא תת-מחרוזת מילולית של nameHe (regex על nm בלבד)",
+    "evidence": "enrich_from_name.py:166-177 מקבלות `name` ומחזירות `m.group(0)`/`f` שנמצא בו"
+   },
+   {
+    "claim": "חותך כל מוצר ל-1700 התווים הראשונים — שדה שיושב אחרי זה לא ייבדק (למשל has_dims עלול לחזור False בטעות)",
+    "evidence": "enrich_from_name.py:184"
+   },
+   {
+    "claim": "מזין תמיד dims['תיאור']=nameHe גם כשלא נמצא גודל — כלומר יוצר dims למוצר שאין לו מידה בפועל",
+    "evidence": "enrich_from_name.py:195-198"
+   },
+   {
+    "claim": "לא ניתן להרצה כרגע ללא כתיבה על קובץ-פלט חסר, ולא מקבל נתיבים",
+    "evidence": "enrich_from_name.py:142-143 (קשיח); `ls knowledge/_enrich_validated.json` ⇒ חסר"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. הרצה מתועדת: knowledge/STATUS.md:452 · knowledge/mutation_log.md:1380 («37 dims + 12 color הוחלו»). הפלט נצרך ע\"י apply_lipskey_enrich.py:18"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F enrich_from_name.py .` ⇒ רק engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/entity-terms.mjs:5 (נקודת-ה-`--gate`, שם הוא מדלג כשאין maor-system)",
+   "gives": "`entityterms` הוא אחד משני השערים שלפי knowledge/HANDOFF-2026-09-16.md מדלגים **תמיד** («⚪ אין maor-system»). מקור-המונחים שלו נעלם. enrich_from_name.py מדגים מקור חלופי שכן קיים: 924 שמות-מוצר עבריים ב-lib/data/lipskey_catalog.dart, עם כלל-חילוץ שאינו יכול להמציא (תת-מחרוזת מילולית) ועם **שער-קטגוריה** שמונע את טעות-ההקשר (נחושת=חומר מול נחושת=גימור). זו בדיוק דרישת §19-ד «אוצר-מילים = דאטה, לא מילון-במנוע» שב-entity-terms.mjs:2"
+  },
+  "s22": {
+   "score": 2,
+   "why": "מדגים את כלל-האמת של §20 בצורה שניתן להעתיק: ערך תקף רק אם הוא מילולית במקור, ועוד מגודר לפי הקשר. §22 דורש «אפס-באגים» על משפט-חופשי בעברית, וזיהוי-מונחים-עבריים-ממקור-אמיתי הוא בדיוק החוליה ש-entityterms מדלג עליה היום. לא 3 כי הוא עצמו לא רץ, לא מחובר, וחוסר-הסימטריה שלו (תיאור נכתב גם בלי מידה) הוא פגם ממשי"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/enrich_from_name.py (85 שורות, כולן)",
+   "ls app_flutter/knowledge/_enrich_validated.json ⇒ No such file or directory",
+   "grep -c 'LipskeyCatalogProduct(' app_flutter/lib/data/lipskey_catalog.dart ⇒ 924",
+   "sed -n '1,10p' machtzev/generator/entity-terms.mjs · sed -n '1,60p' knowledge/HANDOFF-2026-09-16.md",
+   "git grep -n -F enrich_from_name.py (buildsmart) ⇒ STATUS.md:452 · mutation_log.md:1380 · apply_lipskey_enrich.py (עקיף)"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/fill_attrs_from_fleet.py",
+  "lang": "py",
+  "lines": 64,
+  "does": [
+   {
+    "claim": "מחיל אטריביוטים שנחל-הסוכנים חילץ (זווית · יציאות · תצורה · מאפיין · ייעוד) מ-knowledge/_fleet_attrs.json אל dims שב-lib/data/lipskey_catalog.dart",
+    "evidence": "fill_attrs_from_fleet.py:221-224, 228-231, 267"
+   },
+   {
+    "claim": "**שער-R8 קשיח בהחלה (defence-in-depth)**: כל ערך נבדק שוב שהוא טוקן מילולי של nameHe של אותו מוצר — כולל נרמול ° — לפני ההזרקה; כלומר גם פלט-סוכן שגוי לא יכול לעבור",
+    "evidence": "fill_attrs_from_fleet.py:252-255"
+   },
+   {
+    "claim": "אידמפוטנטי — מפתח שכבר קיים ב-dims מדולג; מיזוג לתוך dims קיים או יצירת dims חדש לפני page:",
+    "evidence": "fill_attrs_from_fleet.py:247-251, 256-263"
+   },
+   {
+    "claim": "מנמק במפורש למה SKUs של gate-117 **אינם** מוחרגים: בדיקת-ה-parity אוכפת dims פר-מפתח, ולכן מפתח חדש אינו יכול לשבור אותה",
+    "evidence": "fill_attrs_from_fleet.py:232-234; היעד קיים: test/lipskey_pdf_parity_test.dart (46222 bytes)"
+   },
+   {
+    "claim": "מדפיס כמה אטריביוטים הוחלו ועל כמה מוצרים",
+    "evidence": "fill_attrs_from_fleet.py:264-265, 268"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מריץ את בדיקת-ה-parity שהוא מסתמך עליה — ההנמקה בשורות 232-234 מתועדת כ«verified by running the parity suite», אבל הסקריפט עצמו לא מריץ כלום",
+    "evidence": "PARITY מוגדר ב-fill_attrs_from_fleet.py:222 ו**לא בשימוש** בשום מקום אחר בקובץ (grep על `PARITY` ⇒ הופעה אחת)"
+   },
+   {
+    "claim": "לא מחלץ — רק מחיל. החילוץ נעשה ע\"י נחיל-סוכנים שאינו בריפו",
+    "evidence": "fill_attrs_from_fleet.py:210-214 (הקלט הוא תוצר-הנחיל)"
+   },
+   {
+    "claim": "חותך ל-1700 תווים ראשונים של המוצר לצורך קריאת nameHe ו-dims — מוצר ארוך יותר עלול לקבל dims כפול",
+    "evidence": "fill_attrs_from_fleet.py:244-248"
+   },
+   {
+    "claim": "לא --dry ולא גיבוי — כתיבה ישירה",
+    "evidence": "fill_attrs_from_fleet.py:267 (אין sys.argv בקובץ)"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. הרצה מתועדת: knowledge/STATUS.md:354 · knowledge/mutation_log.md:1422 («262→256 הוחלו»). הקלט **קיים בריפו**: `ls app_flutter/knowledge/_fleet_attrs.json` ⇒ קיים — היחיד מבין 4 קובצי-ה-payload"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F fill_attrs_from_fleet.py .` ⇒ רק engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/entity-terms.mjs:5 · ולצדו machtzev/no-fakers-check.mjs:2 (שער `no-fakers`, police.mjs:134)",
+   "gives": "השורות 252-255 הן הביטוי הקומפקטי ביותר שמצאתי לחוק «לעולם לא לזייף דאטה» (§20): **הסוכן מציע, השער בודק מול המקור, והמחלק דוחה בשקט מה שלא עומד**. `no-fakers-check.mjs` עושה את ההפך — הוא אוסר רשימת-שמות (FAKERS) בפלט; הוא לא יודע לוודא שערך *הוא* מהמקור. הכנסת בדיקת-«הערך מופיע מילולית במקור» לצינור-ההחלה של המחולל היא ההרחבה הישירה"
+  },
+  "s22": {
+   "score": 2,
+   "why": "הלב כאן הוא הדפוס, לא הקובץ: שכבת-אימות שנייה שמניחה שהסוכן שלפניה עלול להזות, ולכן מצליבה כל ערך מול המקור לפני כתיבה. §22 דורש «אפס-באגים» מצינור שרובו סוכנים — וזה המנגנון שהופך את זה לאפשרי בלי לסמוך על אף סוכן. לא 3: המנוע עצמו חד-פעמי, לא רץ אוטומטית, ולא מריץ את בדיקת-ה-parity שההנמקה שלו נשענת עליה"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/fill_attrs_from_fleet.py (64 שורות, כולן)",
+   "ls app_flutter/knowledge/_fleet_attrs.json ⇒ קיים · ls -la app_flutter/test/lipskey_pdf_parity_test.dart ⇒ 46222 bytes",
+   "git grep -n -F fill_attrs_from_fleet.py (buildsmart) ⇒ STATUS.md:354 · mutation_log.md:1422",
+   "sed -n '1,10p' machtzev/no-fakers-check.mjs · sed -n '120,184p' machtzev/police.mjs",
+   "grep -rn --exclude-dir=.git -F fill_attrs_from_fleet.py (-ai-chat-server) ⇒ engine-index.json בלבד"
+  ]
  }
 ]
