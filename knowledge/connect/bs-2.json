@@ -1767,6 +1767,10 @@
    {
     "claim": "מדפיס כמה חוקים הוא אוכף ומאיזה manifest, מול איזה base",
     "evidence": "assert-manifest.sh:23"
+   },
+   {
+    "claim": "**רץ בפועל על ה-manifest המחויב, ותפס drift אמיתי**",
+    "evidence": "`bash orchestrator/scripts/assert-manifest.sh app_flutter orchestrator/manifests/buildsmart.conformance.txt` ⇒ «asserting 269 byte-rule(s)» · exit **1** · 253 OK · **16 FAIL** · «BYTE-CHECK FAILED»"
    }
   ],
   "doesNot": [
@@ -1785,6 +1789,18 @@
    {
     "claim": "לא רץ לבד ולא רץ אוטומטית — נקרא רק מ-central-verify.sh (ורק אם הועבר `--assert`) ומ-selftest.sh. אין hook/CI שמעביר את ה-manifest",
     "evidence": "orchestrator/scripts/central-verify.sh:79-83 · `grep -n central-verify .githooks/pre-commit .githooks/pre-push` ⇒ 0 · האינדקס רושם `calledByName: [\"central-verify\",\"selftest\"]`"
+   },
+   {
+    "claim": "**10 מתוך 16 הכשלים הם false-negative של ה-grep הבסיסי שמתחתיו** — המחרוזת קיימת מילולית בקובץ, אבל `grep` (BRE) נכשל עליה כי היא מכילה `[` לא-סגור. סווגתי כל 14 כשלי-ה-should-be-present אחד-אחד: 10 LITERAL-PRESENT, 4 GENUINELY-ABSENT",
+    "evidence": "סקריפט-סיווג שהריץ לכל חוק גם `grep -c <pat>` וגם בדיקת-הכלה מילולית ב-Python ⇒ LITERAL-PRESENT: `const List<VerticalPack> kVerticalPacks = [` · `const List<OrgModuleInfo> kOrgModules = [` · `return c.features['$module.$feature'] == true;` · `String normName(String s) => normSearch(s).replaceAll(RegExp(r'\\s'), '');` · `if (searchOn) ...[` · `if (featEnabled(ref, 'manager', 'scoring')) ...[` · `if (_quality != null && _quality!.flagged > 0) ...[` · `if (featEnabled(ref, 'orders', 'invoicing')) ...[` · `if (featEnabled(ref, 'orders', 'deliveryNote')) ...[` · `bool elementShown(OrgConfig c, String id) => c.features['element.$id'] != false;`"
+   },
+   {
+    "claim": "**שני כשלי-ה-file-missing הם באג-נתיב ב-manifest**, לא ב-app: השורות 318-319 כותבות `.github/workflows/clean-two-links.yml` בעוד ה-BASE הוא app_flutter/, ואילו שורה 129 כן כותבת `../.github/…` נכון",
+    "evidence": "`grep -n clean-two-links orchestrator/manifests/buildsmart.conformance.txt` ⇒ 129 (`../.github/…`) · 318,319 (`.github/…`) · `ls .github/workflows/clean-two-links.yml` ⇒ קיים · `ls app_flutter/.github` ⇒ No such file or directory"
+   },
+   {
+    "claim": "**4 כשלים הם drift אמיתי** — המחרוזת באמת אינה בקובץ",
+    "evidence": "`title: AppBrand.name` ב-lib/main.dart · `OrgSetupWizardScreen.route()` ב-lib/screens/manager_dashboard_screen.dart · `if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),` שם · `String wfNormName(String s) => _normSearch(s).replaceAll(RegExp(r'\\s'), '');` ב-lib/logic/workflow_engine.dart — כולם 0 גם ב-grep -F וגם בבדיקת-הכלה"
    }
   ],
   "callers": [
@@ -1807,7 +1823,7 @@
   },
   "s22": {
    "score": 3,
-   "why": "«ראצ׳ט-מספרים ירוק» הוא בדיוק סוג-ההצלחה ש-§22 לא מקבל — הוא אומר «לא נסוג», לא «נכון». המנוע הזה הופך הצהרת-בייטים לשער, והוא לא כלי-ריק: בריפו מחויבים **269 חוקי-בייטים** על האפליקציה החיה (‏orchestrator/manifests/buildsmart.conformance.txt — למשל `lib/screens/store_screen.dart:::הסל שלי` · `lib/data/personas.dart:::מנהל המערכת`) ועוד **44** בדיקות-חובה. זה המנגנון שהופך את «~270 עלים verbatim» שב-CLAUDE.md מטענה למדידה — בדיוק רצפת-הקבלה של §22. ושני האינווריאנטים שבו הם מה שמונע false-green: **manifest ריק = כשל** (שורה 16) ו**האצלה למקור-אמת יחיד** במקום grep משוכפל (שורה 24). 24 שורות, אפס תלויות. הפער היחיד אינו במנוע אלא בחיווט: אף hook/CI לא מעביר את ה-manifest, ולכן central-verify.sh:82 מדפיס בפועל «conformance NOT enforced this run»"
+   "why": "«ראצ׳ט-מספרים ירוק» הוא בדיוק סוג-ההצלחה ש-§22 לא מקבל — הוא אומר «לא נסוג», לא «נכון». המנוע הזה הופך הצהרת-בייטים לשער, והוא לא כלי-ריק: בריפו מחויבים **269 חוקי-בייטים** על האפליקציה החיה (‏orchestrator/manifests/buildsmart.conformance.txt — למשל `lib/screens/store_screen.dart:::הסל שלי` · `lib/data/personas.dart:::מנהל המערכת`) ועוד **44** בדיקות-חובה. זה המנגנון שהופך את «~270 עלים verbatim» שב-CLAUDE.md מטענה למדידה — בדיוק רצפת-הקבלה של §22. ושני האינווריאנטים שבו הם מה שמונע false-green: **manifest ריק = כשל** (שורה 16) ו**האצלה למקור-אמת יחיד** במקום grep משוכפל (שורה 24). 24 שורות, אפס תלויות. לא 3 היה מפתה, אבל ההרצה שלי מראה את המחיר של אי-החיווט: exit 1 · 253 OK · 16 FAIL, מהם 10 false-negative של ה-grep הבסיסי (המחרוזת קיימת, ה-`[` הלא-סגור מפיל את BRE), 2 באגי-נתיב ב-manifest עצמו (שורות 318-319 בלי `../`), ו-4 drift אמיתי. שער שלא רץ מצטבר לו חוב בשקט; אף hook/CI לא מעביר את ה-manifest, ולכן central-verify.sh:82 מדפיס בפועל «conformance NOT enforced this run». התיקון הוא `grep -F` ב-grep-verify.sh ועוד `../` בשתי שורות — ואז 269/269 הוא יעד מדיד"
   },
   "evidence": [
    "cat -n orchestrator/scripts/assert-manifest.sh (24 שורות, כולן)",
@@ -1816,7 +1832,9 @@
    "cat -n orchestrator/scripts/central-verify.sh ⇒ שורות 79-83",
    "sed -n '86,94p' machtzev/generator/gen-verify.mjs · sed -n '54,59p' machtzev/generator/golden-harness.mjs",
    "node -e 'engine-index.json' ⇒ calledByName: [\"central-verify\",\"selftest\"]",
-   "grep -rn --exclude-dir=.git -F assert-manifest.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:325,366,526"
+   "grep -rn --exclude-dir=.git -F assert-manifest.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:325,366,526",
+   "bash orchestrator/scripts/assert-manifest.sh app_flutter orchestrator/manifests/buildsmart.conformance.txt ⇒ exit 1 · 253 OK · 16 FAIL",
+   "סיווג 14 כשלי-should-be-present ⇒ 10 LITERAL-PRESENT · 4 GENUINELY-ABSENT"
   ]
  },
  {
@@ -2180,6 +2198,10 @@
    {
     "claim": "מנרמל `grep -c` שמחזיר ריק/שגיאה ל-0 במקום לקרוס",
     "evidence": "grep-verify.sh:40, 44 (‏`|| true` ואז `n=${n:-0}`)"
+   },
+   {
+    "claim": "**רץ בפועל** — 4 בדיקות-שפיות ב-selftest, כולן ירוקות",
+    "evidence": "`bash orchestrator/scripts/selftest.sh` ⇒ PASS [grep present] 0 · [grep absent-ok] 0 · [grep should-be-present] 1 · [grep missing-file] 1; selftest.sh:87-92"
    }
   ],
   "doesNot": [
@@ -2188,8 +2210,8 @@
     "evidence": "grep-verify.sh:34 (‏`for chk in \"$@\"`)"
    },
    {
-    "claim": "`grep` בסיסי (BRE), לא `-E` ולא `-F` — דפוס עם `+`/`?`/`|` יתנהג אחרת ממה שסוכן שכתב אותו מצפה",
-    "evidence": "grep-verify.sh:40, 44"
+    "claim": "**`grep` בסיסי (BRE), לא `-E` ולא `-F` — וזה מייצר false-negative אמיתי בייצור.** בהרצה שלי על ה-manifest המחויב, **10 מתוך 16 הכשלים** היו מחרוזות שקיימות מילולית בקובץ ונפלו רק כי הן מכילות `[` לא-סגור (‏`if (searchOn) ...[` · `const List<VerticalPack> kVerticalPacks = [` ועוד 8)",
+    "evidence": "grep-verify.sh:40, 44 · `bash orchestrator/scripts/assert-manifest.sh app_flutter orchestrator/manifests/buildsmart.conformance.txt` ⇒ exit 1 · 253 OK · 16 FAIL · סיווג אחד-אחד ⇒ 10 LITERAL-PRESENT · 4 GENUINELY-ABSENT · 2 באגי-נתיב ב-manifest. התיקון: `grep -F` (או דגל פר-חוק)"
    },
    {
     "claim": "לא תומך ב-`:::` בתוך הדפוס — `pat=\"${chk#*:::}\"` חותך בהיקרות הראשונה",
@@ -2228,14 +2250,16 @@
   },
   "s22": {
    "score": 2,
-   "why": "«בייטים לא פרוזה» הוא חוק-היסוד של הערכה-הזאת, וזה 26 השורות שמממשות אותו. שני האינווריאנטים בו הם מה שמפריד בין אימות אמיתי לתיאטרון: **קובץ-חסר = כשל** (הממצא מה-A/B, שורות 36-38) והדפסת **ספירת-ההופעות** ולא רק ✓. במחולל אין שקול: `grep -rln 'grep-verify' machtzev/ --exclude=engine-index.json` מחזיר רק מסמכים. לא 3, כי הוא פרימיטיב בלי תוכן משלו — התוכן יושב ב-manifests, ולכן הציון 3 ניתן ל-assert-manifest.sh שמחזיק אותם; וכי `grep` בלי `-E`/`-F` הוא מלכודת אמיתית לכותב-הדפוס"
+   "why": "«בייטים לא פרוזה» הוא חוק-היסוד של הערכה-הזאת, וזה 26 השורות שמממשות אותו. שני האינווריאנטים בו הם מה שמפריד בין אימות אמיתי לתיאטרון: **קובץ-חסר = כשל** (הממצא מה-A/B, שורות 36-38) והדפסת **ספירת-ההופעות** ולא רק ✓. במחולל אין שקול: `grep -rln 'grep-verify' machtzev/ --exclude=engine-index.json` מחזיר רק מסמכים. לא 3, כי הוא פרימיטיב בלי תוכן משלו — התוכן יושב ב-manifests, ולכן הציון 3 ניתן ל-assert-manifest.sh שמחזיק אותם; וכי `grep` בלי `-E`/`-F` אינו מלכודת תיאורטית — הרצתי את 269 החוקים המחויבים דרכו וקיבלתי 16 כשלים, מהם **10 מחרוזות שקיימות בקובץ** ונפלו על `[` לא-סגור. שער-בייטים שמדווח «חסר» על מה שקיים הוא בדיוק סוג-האמון ש-§22 לא יכול להרשות"
   },
   "evidence": [
    "cat -n orchestrator/scripts/grep-verify.sh (26 שורות, כולן)",
    "cat -n orchestrator/scripts/assert-manifest.sh:24 (הקורא היחיד בקוד)",
    "ספירת-חוקים ב-orchestrator/manifests/buildsmart.conformance.txt ⇒ 269",
    "grep -rln 'grep-verify' machtzev/ --exclude=engine-index.json ⇒ CURRICULUM-RAW.md · BUILDSMART-PROTOCOL-MAP.md (מסמכים בלבד)",
-   "grep -rn grep-verify /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅"
+   "grep -rn grep-verify /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅",
+   "bash orchestrator/scripts/assert-manifest.sh app_flutter orchestrator/manifests/buildsmart.conformance.txt ⇒ exit 1 · 253 OK · 16 FAIL · מהם 10 LITERAL-PRESENT",
+   "bash orchestrator/scripts/selftest.sh ⇒ 4 בדיקות grep-verify ירוקות (selftest.sh:87-92)"
   ]
  },
  {
@@ -2320,6 +2344,418 @@
    "grep -rln 'עדשה|lens' machtzev/ --include=*.mjs ⇒ 2 · grep -n בהם ⇒ board-gen.mjs:93 · lift-lib.mjs:116 (עדשה-סמנטית, לא קשור)",
    "grep -rn --exclude-dir=.git -F lens-coverage.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:352,369,524",
    "grep -rn lens-coverage /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/registry.sh",
+  "lang": "sh",
+  "lines": 41,
+  "does": [
+   {
+    "claim": "מרשם תת-סוכנים: `open <id> <role> <scope>` · `close <id> <status>` · `assert-none-open` · `list` · `reset`",
+    "evidence": "registry.sh:6-7, 15-40"
+   },
+   {
+    "claim": "**סוכן שדלף = BLOCK קשיח**: `assert-none-open` יוצא 1 ומדפיס כל שורה פתוחה עם id/role/scope — כי נתיב-ביקורת/תיקון שנעלם בשקט הוא חור, לא כשל נראה",
+    "evidence": "registry.sh:2-4, 30-37"
+   },
+   {
+    "claim": "**דוחה התנגשות-id**: `open` על id שכבר OPEN יוצא 2 — שני סוכנים לא יכולים להתחזות לאותו נתיב",
+    "evidence": "registry.sh:18-19"
+   },
+   {
+    "claim": "**דוחה סגירה-ללא-פתיחה**: `close` על id שאין לו שורה OPEN יוצא 2 (מעולם לא נפתח, או כבר נסגר)",
+    "evidence": "registry.sh:25-26"
+   },
+   {
+    "claim": "המצב ב-git-admin dir של ה-worktree, כתיבה אטומית דרך mktemp+mv, JSON תקין דרך jq",
+    "evidence": "registry.sh:4-5, 10-13"
+   },
+   {
+    "claim": "**מאומת בפועל** — 7 בדיקות, כולן ירוקות בריצה שלי",
+    "evidence": "`bash orchestrator/scripts/selftest.sh` ⇒ PASS [reg reset] · [reg open a1] · [reg assert (a1 open)] exit 1 · [reg open dup a1] exit 2 · [reg close a1] · [reg close again] exit 2 · [reg assert (none open)] exit 0; selftest.sh:37-44"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא משגר ולא קוטל סוכנים — רק רושם. סוכן שרץ ולא נרשם כלל אינו נראה למרשם",
+    "evidence": "registry.sh:15-40 — jq/cat/echo בלבד"
+   },
+   {
+    "claim": "**`reset` מוחק את כל ההיסטוריה בלי אזהרה** — כולל שורות OPEN, כלומר הוא עוקף את assert-none-open",
+    "evidence": "registry.sh:39"
+   },
+   {
+    "claim": "לא בודק ש-`role` ו-`scope` חוקיים (למשל מול registry.txt של העדשות) — כל מחרוזת עוברת; `scope` אפילו יכול להיות ריק",
+    "evidence": "registry.sh:17 (בודק רק ש-ID ו-A4 לא ריקים) ו-20-21"
+   },
+   {
+    "claim": "לא מאתר חפיפת-scope בין סוכנים — הכלל «fixers על קבצים דיסיונקטיים» אינו נאכף כאן",
+    "evidence": "registry.sh:20-21 — scope נשמר כמחרוזת חופשית"
+   },
+   {
+    "claim": "אין נעילה (אותה בעיית read-modify-write כמו ckpt.sh); דורש jq בלי בדיקת-קיום",
+    "evidence": "registry.sh:13, 18-28"
+   },
+   {
+    "claim": "לא רץ אוטומטית",
+    "evidence": "`grep -rl registry.sh .githooks/ .github/workflows/` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh:9,37-44",
+    "how": "7 בדיקות על נתונים סינתטיים"
+   },
+   {
+    "who": "buildsmart/orchestrator/PLAYBOOK.md",
+    "how": "שלב 4.3 — «`ckpt` + `registry.sh assert-none-open`» (מצוטט ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:380)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. מצוטט בהערכה: machtzev/CURRICULUM-RAW.md:1257 («ובסוף-הצנרת: registry.sh assert-none-open — שלב-ניקיון שחוסם סיום אם נשאר סוכן-ששוגר-ולא-נקצר») · BUILDSMART-PROTOCOL-MAP.md:371, 380, 524"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs:176-180 — אותו בלוק «פריטי מרשם⇄ריצה» שכבר אוכף זאת על שערים",
+   "gives": "police.mjs כבר מיישם בדיוק את העיקרון הזה, אבל על **שערים**: «שער רשום שלא רץ ולא דווח» (179) · «שער רץ שאינו במרשם» (180) · «שערים דולגו במצב מלא» (177). registry.sh הוא אותו עיקרון על **סוכנים**. הצורך קונקרטי: הצינור של המחולל משגר תת-סוכנים (‏machtzev/wave-partition.mjs ב-STATIC של pins-check.mjs:22), ואין שם ספירת-פתוחים. ההערכה ב-CURRICULUM-RAW.md:1257 כבר מזהה את זה כמנגנון ראוי-לחיקוי"
+  },
+  "s22": {
+   "score": 2,
+   "why": "§22 נשען על נחיל, ונחיל נכשל בשקט כשנתיב אחד לא חוזר — הדוח נראה שלם כי אף אחד לא סופר את מה שלא הגיע. ההידוקים כאן נכונים ומאומתים-בהרצה: התנגשות-id ⇒ 2, סגירה-כפולה ⇒ 2, פתוח-בסיום ⇒ 1. לא 3: `reset` מוחק שורות OPEN ובכך עוקף את השער עצמו, אין אכיפת-דיסיונקטיביות על scope, ואין לו אף קורא-הרצה"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/registry.sh (41 שורות, כולן)",
+   "bash orchestrator/scripts/selftest.sh ⇒ SELFTEST PASS · 49 שורות PASS · מתוכן 7 של registry",
+   "sed -n '176,184p' machtzev/police.mjs · sed -n '1255,1259p' machtzev/CURRICULUM-RAW.md",
+   "grep -rl registry.sh /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/report-lint.sh",
+  "lang": "sh",
+  "lines": 36,
+  "does": [
+   {
+    "claim": "מאמת דוח-ריצה JSON מול חוזה, ב-jq טהור (אין jsonschema בסביבה)",
+    "evidence": "report-lint.sh:43-45, 52-70"
+   },
+   {
+    "claim": "**האינווריאנט המרכזי — «נראה גמור, אינו»**: `status: CLEAN` עם ולו פריט `deferred` אחד = כשל, ו-CLEAN עם discrepancy שאינה `resolved:true` = כשל",
+    "evidence": "report-lint.sh:44-45, 61-64"
+   },
+   {
+    "claim": "`status: FAILED` מחייב `reason` לא-ריק",
+    "evidence": "report-lint.sh:59-60"
+   },
+   {
+    "claim": "כל פריט `deferred` מחייב `reason` לא-ריק — דחייה בלי נימוק אינה דחייה",
+    "evidence": "report-lint.sh:66-68"
+   },
+   {
+    "claim": "status מוגבל ל-CLEAN|PARTIAL|FAILED, ושלושת השדות חייבים להיות מערכים",
+    "evidence": "report-lint.sh:54-58"
+   },
+   {
+    "claim": "מבחין בין קלט-פגום (exit 2 — אין קובץ / לא-JSON) לדוח-לא-תקין (exit 1)",
+    "evidence": "report-lint.sh:49-50 מול 72-76"
+   },
+   {
+    "claim": "בהצלחה מדפיס את הספירות (status · fixed · deferred · discrepancies) — לא רק «OK»",
+    "evidence": "report-lint.sh:77"
+   },
+   {
+    "claim": "**מאומת בפועל** — 8 בדיקות, כולן ירוקות בריצה שלי, כולל שלוש מלכודות-ה-CLEAN",
+    "evidence": "`bash orchestrator/scripts/selftest.sh` ⇒ PASS [lint clean] 0 · [lint clean+deferred] 1 · [lint failed-no-reason] 1 · [lint failed-with-reason] 0 · [lint bad-status] 1 · [lint deferred-no-reason] 1 · [lint clean-unresolved] 1 · [lint not-json] 2; selftest.sh:46-63"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא בודק שהדוח נכון** — רק שהוא עקבי-עם-עצמו. דוח שמצהיר CLEAN עם `fixed:[]` ריק ובלי deferred עובר, גם אם שום דבר לא נבדק",
+    "evidence": "report-lint.sh:52-70 — אין בדיקה ש-fixed לא-ריק ואין הצלבה לקוד"
+   },
+   {
+    "claim": "לא מצליב את הדוח לעולם — אין אימות ש-`fixed` באמת בקבצים (זה תפקיד grep-verify.sh)",
+    "evidence": "כל 36 השורות — jq על קובץ אחד"
+   },
+   {
+    "claim": "לא אוכף שדות נוספים שה-schema מתעד (`run`, חותמות-זמן) — הוא מאמת תת-קבוצה",
+    "evidence": "report-lint.sh:45 מפנה ל-schemas/report.schema.json כ«מתעד את אותה צורה», אך הבדיקות בשורות 54-68 מכסות status/fixed/deferred/discrepancies בלבד"
+   },
+   {
+    "claim": "לא רץ אוטומטית ואין דוח-ריצה מחויב בריפו",
+    "evidence": "`grep -rl report-lint .githooks/ .github/workflows/` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh:9,46-63",
+    "how": "8 בדיקות על 8 דוחות סינתטיים"
+   },
+   {
+    "who": "buildsmart/orchestrator/schemas/report.schema.json",
+    "how": "החוזה שהוא אוכף (מוזכר ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:330)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור: machtzev/BUILDSMART-PROTOCOL-MAP.md:330, 373"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs:181-183 — שורת-הסיכום שמחשבת `ran/skipped/yellow/failed` ומחליטה ירוק/צהוב/אדום",
+   "gives": "המשטרה כבר אוכפת שני כללים מאותה משפחה: «שערים דולגו במצב מלא ⇒ אדום» (177) ו-«צהוב = חוסם» (‏.githooks/pre-push:4 של המחולל). מה שחסר הוא הכלל השלישי, וזה בדיוק report-lint: **דוח שמצהיר CLEAN אינו רשאי לשאת עבודה-נדחית או אי-התאמה לא-פתורה**. במחולל הדבר הקרוב הוא ה-ledger של gen-verify/golden-harness שמדלגים בשקט כשאין buildsmart (‏gen-verify.mjs:22 · golden-harness.mjs:24) — «⚪ מדולג» שנספר כלא-כשל. report-lint.sh הוא הכלי שהופך «דילגתי» ל-`deferred` שחייב `reason` ואוסר עליו להיקרא CLEAN"
+  },
+  "s22": {
+   "score": 2,
+   "why": "§22 היא **רצפת-קבלה**: «אין כמעט». הכשל שמאיים עליה הכי הרבה אינו באג בקוד אלא דוח שאומר «נקי» ומחזיק תחתיו פריטים נדחים — וזה בדיוק מה שנאסר כאן, ב-jq טהור, בלי תלויות, ומאומת ב-8 בדיקות שהרצתי. לא 3: הוא בודק עקביות-פנימית בלבד — דוח ריק ומלוטש עובר; ואין בריפו אף דוח-ריצה שהוא בודק בפועל"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/report-lint.sh (36 שורות, כולן)",
+   "bash orchestrator/scripts/selftest.sh ⇒ SELFTEST PASS · 8 בדיקות report-lint ירוקות (selftest.sh:46-63)",
+   "sed -n '176,184p' machtzev/police.mjs · machtzev/generator/gen-verify.mjs:22 · golden-harness.mjs:24",
+   "grep -rl report-lint /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/required-tests.sh",
+  "lang": "sh",
+  "lines": 28,
+  "does": [
+   {
+    "claim": "אוכף ש**זרימות-בדיקה קריטיות קיימות**: שורת-manifest = נתיב-קובץ-בדיקה, או `נתיב:::תת-מחרוזת-משם-הבדיקה`",
+    "evidence": "required-tests.sh:83-86, 94-103"
+   },
+   {
+    "claim": "**מנמק למה נוכחות מספיקה**: מכיוון ש-central-verify מריץ `flutter test` והסוויטה נכשלת אם בדיקה נופלת, «קיים + סוויטה-ירוקה» ⇒ הזרימה גם רצה וגם עברה",
+    "evidence": "required-tests.sh:79-82"
+   },
+   {
+    "claim": "סוגר את החור «השער מריץ את מה שבמקרה קיים» — שינוי שלא נוגע בזרימה הקריטית לא יכול להשאיר אותה בלי כיסוי",
+    "evidence": "required-tests.sh:81-82"
+   },
+   {
+    "claim": "**manifest ריק נכשל**",
+    "evidence": "required-tests.sh:86, 91-92"
+   },
+   {
+    "claim": "התאמת-שם היא `grep -qF` — **מחרוזת קבועה**, בלי מלכודות-regex",
+    "evidence": "required-tests.sh:99"
+   },
+   {
+    "claim": "ממשיך על כשל ומדווח את כולם; מבחין בין קלט-פגום (exit 2) לכשל-תוכן (exit 1)",
+    "evidence": "required-tests.sh:89-90 מול 93-105"
+   },
+   {
+    "claim": "**רץ בפועל על ה-manifest המחויב ועובר**",
+    "evidence": "`bash orchestrator/scripts/required-tests.sh app_flutter orchestrator/manifests/buildsmart.required-tests.txt` ⇒ exit 0 · 44 שורות OK · «REQUIRED TESTS PRESENT»"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מריץ בדיקות — בודק קיום בלבד; ההנמקה תקפה רק אם מישהו באמת מריץ את הסוויטה",
+    "evidence": "required-tests.sh:79-82; אין `flutter` ב-28 השורות"
+   },
+   {
+    "claim": "**«קיים» אינו «בודק»** — קובץ-בדיקה עם `expect(true, isTrue)` יעבור, ותת-מחרוזת-השם יכולה להימצא בהערה",
+    "evidence": "required-tests.sh:97-99"
+   },
+   {
+    "claim": "לא מגדיר מהן הזרימות הקריטיות — ה-manifest חיצוני",
+    "evidence": "required-tests.sh:88"
+   },
+   {
+    "claim": "ה-manifest המחויב כמעט ואינו משתמש ביכולת-החזקה שלו: מתוך 44 החוקים, רובם המכריע הם נתיב-בלבד ולא `:::`-עם-שם-בדיקה",
+    "evidence": "`grep -vE '^[[:space:]]*(#|$)' orchestrator/manifests/buildsmart.required-tests.txt` ⇒ 44, והשלוש הראשונות (test/orders_engine_test.dart · courier_stage_advance · store_stage_advance) הן נתיב-בלבד"
+   },
+   {
+    "claim": "לא רץ אוטומטית — central-verify.sh קורא לו רק אם הועבר `--required-tests`, ואיש לא מעביר",
+    "evidence": "orchestrator/scripts/central-verify.sh:86-90 · `grep -rl required-tests .githooks/ .github/workflows/` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/central-verify.sh:87",
+    "how": "`\"$HERE/required-tests.sh\" \"$APP\" \"$REQTESTS_MAN\"` — רק כשהועבר `--required-tests`"
+   },
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh:11,111-123",
+    "how": "5 בדיקות סינתטיות, כולן ירוקות בריצה שלי"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור: machtzev/BUILDSMART-PROTOCOL-MAP.md:325, 367"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/gen-verify.mjs:25-29 — הבחירה של קובצי-הבדיקה · ו-golden-harness.mjs:17-19 (מפת TESTS)",
+   "gives": "שני השערים מגלים את מה שיש: gen-verify.mjs:25 סורק `readdirSync(DIR)` ומסנן לפי regex, ו-golden-harness.mjs:19 גוזר שם-בדיקה משם-המודול. אין ביניהם **רשימה מוצהרת** של מה חייב להתקיים — ולכן קובץ-זהב שנמחק פשוט נעלם מהספירה בלי שאף שער יצעק, והראצ׳ט (‏gen-verify.mjs:92) יתפוס זאת רק אם המספר יורד. `if (!screens.length) … process.exit(0)` ב-gen-verify.mjs:29 הוא בדיוק המצב הזה — אפס מסכים = יציאה ירוקה. required-tests.sh הוא ה-manifest שחסר שם, והוא כבר מוכיח את עצמו כאן: 44/44 בהרצה"
+  },
+  "s22": {
+   "score": 2,
+   "why": "«הרצנו את כל הבדיקות שיש» אינו «הזרימות הקריטיות מכוסות» — וההפרש הוא בדיוק מה ש-§22 גובה. זה גם המנוע היחיד מבין 49 שהרצתי על התוכן **המחויב** שלו ועבר במלואו (44/44), כלומר הוא לא כלי-ריק. ההנמקה שבו («נוכחות + סוויטה-ירוקה ⇒ רץ ועבר») נכונה ומוצהרת, וההתאמה היא `grep -qF` — בלי מלכודת-ה-regex שפוגעת ב-grep-verify.sh. לא 3: הוא עדיין בודק קיום ולא תוכן, ה-manifest כמעט לא מנצל את `:::`, ואף hook/CI לא מעביר אותו ל-central-verify"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/required-tests.sh (28 שורות, כולן)",
+   "bash orchestrator/scripts/required-tests.sh app_flutter orchestrator/manifests/buildsmart.required-tests.txt ⇒ exit 0 · 44 OK · REQUIRED TESTS PRESENT",
+   "bash orchestrator/scripts/selftest.sh ⇒ 5 בדיקות required-tests ירוקות (selftest.sh:111-123)",
+   "cat -n machtzev/generator/gen-verify.mjs ⇒ 25-29 · sed -n '17,19p' golden-harness.mjs",
+   "grep -rl required-tests /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/selftest.sh",
+  "lang": "sh",
+  "lines": 127,
+  "does": [
+   {
+    "claim": "בדיקה-עצמית לשכבת-הכלים: מפעיל כל סקריפט על נתונים סינתטיים ומשווה **קוד-יציאה צפוי**, לא פלט",
+    "evidence": "selftest.sh:2, 14-20"
+   },
+   {
+    "claim": "**הרמטי** — `git init` בריפו-חד-פעמי ו-tmpdir, שניהם נמחקים ב-trap EXIT; לא נוגע ב-worktree האמיתי",
+    "evidence": "selftest.sh:3-4, 22-23"
+   },
+   {
+    "claim": "מכסה 8 סקריפטים ב-49 בדיקות: ckpt (9) · registry (7) · report-lint (8) · lens-coverage (3) · diff-coverage (6) · grep-verify (4) · assert-manifest (7) · required-tests (5)",
+    "evidence": "selftest.sh:25-123; ספירה בהרצה: `bash orchestrator/scripts/selftest.sh | grep -c '^PASS'` ⇒ **49**"
+   },
+   {
+    "claim": "**בודק את המקרים השליליים, לא רק החיוביים** — כל שער נבדק גם על הקלט שאמור להפיל אותו, עם קוד-היציאה המדויק: 1 (חסימה) מול 2 (קלט-פגום)",
+    "evidence": "selftest.sh:26 (exit 2) · 28,31 (1) · 32 (2) · 40 (1) · 41,43 (2) · 57-63 · 81-85 · 91-92 · 104-109 · 121-123"
+   },
+   {
+    "claim": "משתמש ב-registry.txt האמיתי של העדשות ובונה ממנו גם מקרה-חסר (‏`head -n -1`) וגם ייצוג-תיקייה",
+    "evidence": "selftest.sh:8, 66-71"
+   },
+   {
+    "claim": "מדגים את מלכודת-ה-lcov בשני הכיוונים: אי-התאמת-קידומת ⇒ 1, ואותו קלט עם strip-prefix ⇒ 0",
+    "evidence": "selftest.sh:82-83"
+   },
+   {
+    "claim": "**רץ ועובר בקונטיינר הזה, עכשיו**",
+    "evidence": "`bash orchestrator/scripts/selftest.sh` ⇒ «SELFTEST PASS (all checks green)», exit 0, 49 PASS · 0 FAIL (‏jq-1.7 קיים)"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא מכסה 4 מתוך 12 סקריפטי-ה-orchestrator**: central-verify.sh · ff-push.sh · wt-setup.sh · selftest.sh עצמו — כלומר השער (‏central-verify) והדחיפה (‏ff-push), שני המסוכנים ביותר, אינם נבדקים",
+    "evidence": "selftest.sh:9-11 מגדיר 8 נתיבים בלבד; `ls orchestrator/scripts/` ⇒ 12 קבצים"
+   },
+   {
+    "claim": "משווה קוד-יציאה בלבד, לא פלט — שער שחוסם מהסיבה **הלא-נכונה** ייחשב PASS",
+    "evidence": "selftest.sh:17-19 (‏`rc -eq exp`; ה-out נשמר ומודפס רק בכשל). זו בדיוק ההבחנה ש--ai-chat-server/machtzev/audit-gates.mjs:2-3 דורש: «חוסם בפועל **ומהסיבה הנכונה** … הראיה = `git commit` שנכשל + **שם-השער** בפלט»"
+   },
+   {
+    "claim": "לא בודק את השערים החיים (‏.githooks/) — רק את כלי-ה-orchestrator",
+    "evidence": "selftest.sh:7-11 — כל הנתיבים תחת orchestrator/scripts"
+   },
+   {
+    "claim": "לא נכשל בהיעדר jq — הוא פשוט יעביר את הכשלים לסקריפטים שמשתמשים בו",
+    "evidence": "selftest.sh:6-23; אין `command -v jq`"
+   },
+   {
+    "claim": "לא רץ אוטומטית — «הרץ לפני commit של שינוי-tooling» היא הנחיה בהערה",
+    "evidence": "selftest.sh:4 · `grep -rl selftest.sh .githooks/ .github/workflows/` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — הנחיה ידנית בכותרת (selftest.sh:4), «חייב להדפיס SELFTEST PASS לפני commit של שינוי-tooling»"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור: machtzev/BUILDSMART-PROTOCOL-MAP.md:376, 540, 609"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs:169-170 — לצד `gate('selftest','police-selftest.mjs')` ו-`gate('audit-gates','audit-gates.mjs')`",
+   "gives": "למחולל **יש** כבר בדיקה-עצמית למשטרה (`police-selftest.mjs`) ולשערי-ה-staging (`audit-gates.mjs`), ושתיהן חזקות מזו: audit-gates.mjs פותח worktree, מזריע הפרה ומריץ `git commit` אמיתי, ודורש את **שם-השער** בפלט (שורות 2-3, 17-21). לכן מה שכדאי להעביר הוא בכיוון ההפוך: להביא את דרישת-«הסיבה-הנכונה» של audit-gates.mjs אל selftest.sh, ואת הכיסוי החסר (‏central-verify · ff-push · wt-setup) — ואז יש לכלי-הנחיל אותה רמת-ראיה שיש לשערי-המחולל"
+  },
+  "s22": {
+   "score": 2,
+   "why": "זו הבדיקה שמונעת מהשערים עצמם להיות שקר — «בודק את הבודקים» — והיא הדבר היחיד מבין 49 שהצלחתי **להריץ במלואו ולראות ירוק** (49/49, SELFTEST PASS). המבנה נכון: הרמטי, קודי-יציאה מדויקים, ובעיקר מקרים-שליליים לצד חיוביים. לא 3 משתי סיבות מדודות: (א) **4 מתוך 12** הסקריפטים אינם נבדקים בכלל, וביניהם central-verify (השער) ו-ff-push (הדחיפה); (ב) השוואת קוד-יציאה בלבד — שער שחוסם מהסיבה הלא-נכונה עובר, וזו בדיוק ההבחנה שהמקבילה המחוברת (audit-gates.mjs:2-3) כן דורשת"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/selftest.sh (127 שורות, כולן)",
+   "bash orchestrator/scripts/selftest.sh ⇒ SELFTEST PASS (all checks green) · exit 0 · grep -c '^PASS' ⇒ 49 · 0 FAIL",
+   "jq --version ⇒ jq-1.7",
+   "ls orchestrator/scripts/ ⇒ 12 קבצים; selftest.sh:9-11 מגדיר 8",
+   "sed -n '1,22p' machtzev/audit-gates.mjs · sed -n '166,172p' machtzev/police.mjs"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/wt-setup.sh",
+  "lang": "sh",
+  "lines": 9,
+  "does": [
+   {
+    "claim": "יוצר worktree **detached** טרי על commit/branch לריצת-צינור אחת",
+    "evidence": "wt-setup.sh:107, 112"
+   },
+   {
+    "claim": "מביא את ה-ref מ-origin לפני היצירה, בלי תגיות",
+    "evidence": "wt-setup.sh:111"
+   },
+   {
+    "claim": "מדפיס את ה-sha הקצר שנוצר בפועל — לא את ה-ref שביקשת; זו הראיה שהצינור כוון לנקודה הנכונה",
+    "evidence": "wt-setup.sh:113"
+   },
+   {
+    "claim": "מדפיס את פקודת-הניקוי המדויקת",
+    "evidence": "wt-setup.sh:114"
+   },
+   {
+    "claim": "`set -euo pipefail` — ה-`worktree add` נכשל בקול",
+    "evidence": "wt-setup.sh:109, 112"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**בולע כשל-fetch** (‏`|| true`) — כלומר ייתכן worktree על ref ישן מהמטמון המקומי, בלי אזהרה. זה בדיוק ההיפך מ-ff-push.sh:68-72, שבמפורש **אינו** בולע כשל-fetch «כדי שרפרנס-מעקב ישן לא יעבור את הבדיקה» — שני סקריפטים באותה תיקייה, שתי החלטות הפוכות",
+    "evidence": "wt-setup.sh:111 מול orchestrator/scripts/ff-push.sh:68-72"
+   },
+   {
+    "claim": "לא מנקה — הניקוי הוא הודעה למפעיל, לא trap",
+    "evidence": "wt-setup.sh:114"
+   },
+   {
+    "claim": "לא מאמת שה-worktree נקי או שה-sha הוא זה שהתבקש",
+    "evidence": "wt-setup.sh:113 מדפיס בלבד; אין השוואה ל-REF"
+   },
+   {
+    "claim": "**אינו נבדק ב-selftest.sh** — אחד מ-4 הסקריפטים שאינם מכוסים",
+    "evidence": "orchestrator/scripts/selftest.sh:9-11 (8 נתיבים, בלי wt-setup)"
+   },
+   {
+    "claim": "לא רץ אוטומטית",
+    "evidence": "`grep -rl wt-setup .githooks/ .github/workflows/` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/PLAYBOOK.md",
+    "how": "שלב 0 של הצינור — «worktree טרי (`wt-setup.sh`)» (מצוטט ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:343)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור: machtzev/BUILDSMART-PROTOCOL-MAP.md:343, 375"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/golden-harness.mjs:28-34 — שם נכתב המראה **לתוך עץ-העבודה החי** של buildsmart",
+   "gives": "זו נקודת-החיבור המשלימה לזו של mutation_verify.sh. golden-harness.mjs:34 עושה `fs.writeFileSync(mirror, r.code)` על `BS/lib/genesis/dart-gen-bs/<module>` — עץ-העבודה האמיתי — ומשחזר ב-`git checkout` (44). worktree detached על ה-sha הנוכחי, כפי ש-wt-setup.sh יוצר בשורה אחת, מייתר את כל הבעיה: הרתמה כותבת בעותק ומוחקת אותו בסוף, ושום עריכה לא-מקומיטת אינה בסיכון. `machtzev/audit-gates.mjs:17` כבר משתמש בדיוק בדפוס הזה (‏`worktree add --detach -q`) בתוך אותו ריפו — כלומר הכלי קיים שם ופשוט לא הוחל על הרתמות"
+  },
+  "s22": {
+   "score": 2,
+   "why": "9 שורות שמסירות מחלקת-כשל שלמה: ריצת-צינור שמלכלכת או הורסת את עץ-העבודה של המפתח. §22 מדבר על צינור אוטומטי, ואוטומציה שרצה בעץ החי היא סיכון-נתונים, לא רק אי-נוחות — ובמחולל זה **קיים היום** ב-golden-harness.mjs:34,44. לא 3: הוא בולע כשל-fetch (סתירה ישירה ל-ff-push.sh:68-72 באותה תיקייה), אינו מנקה אחריו, ואינו נבדק ב-selftest"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/wt-setup.sh (9 שורות, כולן)",
+   "cat -n orchestrator/scripts/ff-push.sh:68-72 (ההחלטה ההפוכה על fetch)",
+   "sed -n '28,45p' machtzev/generator/golden-harness.mjs · sed -n '14,18p' machtzev/audit-gates.mjs",
+   "orchestrator/scripts/selftest.sh:9-11 ⇒ wt-setup אינו ברשימה",
+   "grep -rl wt-setup /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0"
   ]
  }
 ]
