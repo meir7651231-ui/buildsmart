@@ -1509,5 +1509,409 @@
    "grep -rn --exclude-dir=.git -F polish_shot.js (-ai-chat-server) ⇒ 0",
    "git grep -n -F polish_shot.js (buildsmart) ⇒ app_flutter/scripts/polish_shot.sh:35"
   ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/polish_shot.sh",
+  "lang": "sh",
+  "lines": 36,
+  "does": [
+   {
+    "claim": "צינור-צילום מלא: בונה web עם canvaskit מקומי אם חסר ⇒ מגיש את build/web ב-python3 http.server על 8099 ⇒ מריץ polish_shot.js ⇒ הורג את השרת ב-trap",
+    "evidence": "polish_shot.sh:24-36"
+   },
+   {
+    "claim": "**מנמק את הצורה**: gstatic.com (canvaskit + גופנים) חסום במדיניות-הרשת של הסנדבוקס, ולכן חייבים `--no-web-resources-cdn` כדי לצרוף את canvaskit מקומית",
+    "evidence": "polish_shot.sh:4-7, 27"
+   },
+   {
+    "claim": "בונה רק אם חסר — `[ ! -f build/web/canvaskit/canvaskit.js ]` — כלומר זול בהרצה-חוזרת",
+    "evidence": "polish_shot.sh:25-28"
+   },
+   {
+    "claim": "פרמטרי before/after: out.png · waitMs · url-path, עם ברירות-מחדל",
+    "evidence": "polish_shot.sh:9-14, 19-21"
+   },
+   {
+    "claim": "trap על EXIT הורג את שרת-ה-http",
+    "evidence": "polish_shot.sh:31-33"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא ניתן להרצה כאן — מגדיר PATH ל-flutter שאינו קיים בקונטיינר",
+    "evidence": "polish_shot.sh:16 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "**לא בודק שהצילום מוצלח** — כל הוודאות מואצלת ל-polish_shot.js, שרק ממתין זמן קבוע",
+    "evidence": "polish_shot.sh:35-36 מול polish_shot.js:58"
+   },
+   {
+    "claim": "פורט 8099 קשיח — שתי ריצות מקבילות מתנגשות",
+    "evidence": "polish_shot.sh:31, 35"
+   },
+   {
+    "claim": "`sleep 2` קשיח אחרי הפעלת-השרת, בלי בדיקת-מוכנות",
+    "evidence": "polish_shot.sh:34"
+   },
+   {
+    "claim": "**לא משווה לשום דבר** — «before/after» הוא הנחיה בהערה למפעיל, לא יכולת בקוד",
+    "evidence": "polish_shot.sh:14 (הערה) — אין diff/compare ב-36 השורות"
+   },
+   {
+    "claim": "לא מריץ post_build.sh — ולכן מסתמך על `--no-web-resources-cdn` בלבד לפתרון ה-canvaskit",
+    "evidence": "polish_shot.sh:27; `grep -c post_build app_flutter/scripts/polish_shot.sh` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה מקוד — 7 התאמות, כולן knowledge/*.md: ACTION_PLAN.md:67 · POLISH-PLAN-v6.16.md:240 · POLISH.md:14,34 · POLISH_LOG.md:20,23,47. אין hook, CI או סקריפט שמריץ אותו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅",
+   "gives": "יש מקבילה מחוברת טובה יותר — ראה s22"
+  },
+  "s22": {
+   "score": 0,
+   "why": "כפול למקבילה מחוברת: `-ai-chat-server/machtzev/tools/site-shot.mjs` (28 שורות), הנקראת מ-machtzev/generator/ship.mjs:96. היא מבצעת את **אותו** צינור בדיוק — הגשה ב-`python3 -m http.server` (site-shot.mjs:14) · Chromium headless (16) · צילום (25) — ובאותו פתרון-canvaskit: ship.mjs:85,91 בונה עם `--no-web-resources-cdn` ו-site-shot.mjs:4 מצטט את אותו לקח («L69: --no-web-resources-cdn + גופן-מצורף — אחרת האתר-המנותק נראה ריק/חסר-טקסט»). ההפרש הוא לרעת polish_shot.sh: site-shot מוכיחה אתחול (waitForFunction על document.title, שורה 22) ופולטת JSON עם booted/glass/errors (27), בעוד כאן ההמתנה עיוורת. אין גם אף קורא"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/polish_shot.sh (36 שורות, כולן)",
+   "wc -l + sed -n '1,28p' machtzev/tools/site-shot.mjs · sed -n '75,100p' machtzev/generator/ship.mjs",
+   "ls -d /home/user/flutter/bin ⇒ No such file or directory",
+   "git grep -n -F polish_shot.sh (buildsmart) ⇒ 7 התאמות, כולן knowledge/*.md (ACTION_PLAN:67 · POLISH-PLAN-v6.16:240 · POLISH:14,34 · POLISH_LOG:20,23,47) · grep -rn (-ai-chat-server) ⇒ engine-index.json בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/post_build.sh",
+  "lang": "sh",
+  "lines": 63,
+  "does": [
+   {
+    "claim": "מתקן את build/web/flutter_bootstrap.js אחרי כל `flutter build web --release` כך ש-canvaskit ייטען מהתיקייה המצורפת ולא מ-gstatic CDN",
+    "evidence": "post_build.sh:64-66, 94-125"
+   },
+   {
+    "claim": "מזריק `canvasKitBaseUrl: \"canvaskit/\"` בשני מקומות — גם ב-config העליון וגם ב-initializeEngine",
+    "evidence": "post_build.sh:108-119"
+   },
+   {
+    "claim": "אידמפוטנטי — אם התיקון כבר קיים, יוצא 0 בלי לגעת",
+    "evidence": "post_build.sh:86-90"
+   },
+   {
+    "claim": "**fail-loud על שינוי-צורה**: אם בלוק ה-`_flutter.loader.load(...)` הצפוי לא נמצא בדיוק, יוצא 2 עם הודעה «bootstrap shape changed?» — ולא מתקן חלקית",
+    "evidence": "post_build.sh:120-122"
+   },
+   {
+    "claim": "מנמק למה צריך אותו בכל בנייה: flutter מייצר מחדש את flutter_bootstrap.js ומוחק את ההחלפה",
+    "evidence": "post_build.sh:68-69"
+   },
+   {
+    "claim": "בודק שהקובץ קיים לפני שהוא מנסה",
+    "evidence": "post_build.sh:81-84"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**התאמת-מחרוזת מדויקת, לא parse** — ההחלפה היא `s.replace(old,new)` על 8 שורות מדויקות כולל רווחים. כל שינוי ב-Flutter SDK (למשל `useColorEmoji` שיוצא משימוש) מפיל אותו ל-exit 2",
+    "evidence": "post_build.sh:98-107, 120-123"
+   },
+   {
+    "claim": "לא בונה ולא מצלם — רק מתקן קובץ אחד אחרי בנייה שכבר קרתה",
+    "evidence": "post_build.sh:71-74 (usage)"
+   },
+   {
+    "claim": "**פותר בעיה שכבר יש לה פתרון נקי יותר באותו ריפו** — `flutter build web --no-web-resources-cdn` מצרף את canvaskit ומגדיר את ה-base בעצמו, וזה מה ש-polish_shot.sh:27 עושה בפועל",
+    "evidence": "post_build.sh:64-66 מול app_flutter/scripts/polish_shot.sh:25-28"
+   },
+   {
+    "claim": "לא ניתן לאמת כאן — build/web לא קיים ואין flutter",
+    "evidence": "`ls app_flutter/build` ⇒ לא קיים · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "לא מחובר לשום בנייה — 7 האזכורים שלו כולם knowledge/*.md; אין hook, CI או סקריפט שמריץ אותו אחרי build",
+    "evidence": "`git grep -n -F post_build.sh` ⇒ IMPROVEMENTS_PROTOCOL.md:24,34,60,147,205 · VERIFICATION_PROTOCOL.md:33,281 — ואפס ב-.githooks/ וב-.github/workflows/"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה — 7 התאמות, כולן knowledge/*.md: IMPROVEMENTS_PROTOCOL.md:24 (מתעד למה נולד — «LL-03, 12+ חזרות בסשן אחד»), 34,60,147,205 · VERIFICATION_PROTOCOL.md:33 (L4), 281. .githooks/ ו-.github/workflows/ לא מריצים אותו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה יחיד: machtzev/BUILDSMART-PROTOCOL-MAP.md:449 («L4 | build | `flutter build web --release` + `post_build.sh`»)"
+   }
+  ],
+  "connectAt": {
+   "point": "∅",
+   "gives": "יש פתרון מחובר טוב יותר לאותה בעיה — ראה s22"
+  },
+  "s22": {
+   "score": 0,
+   "why": "המנוע פותר בעיה אמיתית (canvaskit מ-gstatic חסום), אבל **הפתרון המחובר לאותה בעיה כבר בשימוש ועדיף**: `machtzev/generator/ship.mjs:85` ו-`:91` בונים עם `flutter build web --release --no-web-resources-cdn`, ו-machtzev/tools/site-shot.mjs:4 מתעד את זה כלקח L69. הדגל של Flutter מצרף את canvaskit **ומגדיר את ה-base בעצמו**, ולכן אין מה לתקן אחרי הבנייה. post_build.sh משיג את אותה תוצאה בהחלפת-מחרוזת שבירה של 8 שורות מדויקות שנשברת בכל שינוי-SDK (post_build.sh:120-122 מודה בכך). גם באותו ריפו הוא כבר עקוף: polish_shot.sh:27 בוחר בדגל, לא בו. מנוע כפול עם פתרון נחות, ובלי אף קורא"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/post_build.sh (63 שורות, כולן)",
+   "sed -n '75,100p' machtzev/generator/ship.mjs ⇒ --no-web-resources-cdn בשורות 85, 91",
+   "sed -n '1,5p' machtzev/tools/site-shot.mjs ⇒ L69",
+   "cat -n app_flutter/scripts/polish_shot.sh:25-28 ⇒ אותו דגל",
+   "git grep -n -F post_build.sh (buildsmart) ⇒ 7, כולן knowledge/*.md · grep -rn -F (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:449 בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/protocol_check.sh",
+  "lang": "sh",
+  "lines": 115,
+  "does": [
+   {
+    "claim": "8 שערים ידניים לפני commit/push: analyze · test · build web · סנכרון-גרסאות home_shell↔STATUS · קיום WIRING.md · אין משטח כהה ב-lib/screens · ענף נכון · אין שינויים לא-שמורים",
+    "evidence": "protocol_check.sh:22-100"
+   },
+   {
+    "claim": "שלושת הראשונים מריצים flutter בפועל ומדווחים ספירת-בדיקות",
+    "evidence": "protocol_check.sh:24, 33-36, 45"
+   },
+   {
+    "claim": "מסכם PASS/FAIL ויוצא 1 אם יש כשל",
+    "evidence": "protocol_check.sh:102-115"
+   },
+   {
+    "claim": "שער-8 הוא warn ולא fail — שינויים לא-שמורים לא חוסמים",
+    "evidence": "protocol_check.sh:96-100 (קורא ל-warn שאינו מגדיל את FAIL)"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא נייד** — `cd /home/user/buildsmart/app_flutter` קשיח בשורה 7. worktree, קלון אחר או הנתיב שב-CLAUDE.md של המחולל (‏/home/user/meir7651231-ui/buildsmart) — כולם יריצו את השערים על העותק הלא-נכון או ייכשלו",
+    "evidence": "protocol_check.sh:7"
+   },
+   {
+    "claim": "**נכשל על כל ענף שאינו claude/whats-happening-LyY9G** — כולל ענף-העבודה הזה",
+    "evidence": "protocol_check.sh:87-91"
+   },
+   {
+    "claim": "**סומך על regex במקום על קוד-יציאה** — שער 1 מחפש «No issues found» בפלט; analyze שנופל על crash או שמדפיס בשפה/פורמט אחר ייחשב כשל-נכון במקרה, ו-`--no-pub` על עץ לא-פתור ייתן הודעה אחרת",
+    "evidence": "protocol_check.sh:24 מול orchestrator/scripts/central-verify.sh:65-68 שבודק גם `aec` וגם ספירת-שורות"
+   },
+   {
+    "claim": "לא מריץ `pub get` ולא `gen_version.sh` — `--no-pub` על worktree טרי ייפול על lib/version.g.dart חסר",
+    "evidence": "protocol_check.sh:24,33,45 (‏--no-pub) מול orchestrator/scripts/central-verify.sh:52, 58-62 שכן עושה את שניהם"
+   },
+   {
+    "claim": "לא מקבל ארגומנטים ואין לו manifest — אין conformance-assertions ואין required-tests",
+    "evidence": "אין `$1`/`shift` ב-115 השורות"
+   },
+   {
+    "claim": "לא ניתן להרצה בקונטיינר הזה",
+    "evidence": "protocol_check.sh:6 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. תיעוד בלבד: knowledge/VERIFICATION_PROTOCOL.md:40,277 · knowledge/studio-plan/05-scale-data-backend.md:373 · studio-plan/detail/051-068.md:290"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:455, 553 («לא נקראו במלואם»), 592"
+   }
+  ],
+  "connectAt": {
+   "point": "∅",
+   "gives": "כפול — ראה s22"
+  },
+  "s22": {
+   "score": 0,
+   "why": "כפול, עם ראיה, לשני מנגנונים שכן רצים: (א) **באותו ריפו** — `orchestrator/scripts/central-verify.sh` (69 שורות) מריץ את אותם analyze/test/build, אבל טוב יותר בכל נקודה שנבדקה: מקבל את נתיב-האפליקציה כארגומנט (שורה 31) במקום cd קשיח, מריץ `pub get` (52) ו-`gen_version.sh` (58-62), סומך על קוד-היציאה **וגם** על ספירת-שגיאות (65-68), ומוסיף manifests של conformance ו-required-tests (79-90). (ב) **השערים החיים** — `.githooks/pre-commit:306,319` מריצים analyze ו-test על כל commit, ו-`.githooks/pre-push:63-66` מריץ build web, כלומר שערים 1-3 של הסקריפט נאכפים ממילא. מה שנשאר ייחודי לו (סנכרון-גרסאות, משטח כהה, ענף) נאכף גם הוא ב-pre-commit (שערים 11/14 ו-1). הוא גם יורה שגיאת-ענף על כל ענף מלבד אחד, ו-cd הקשיח בשורה 7 סותר את נתיב-buildsmart שב-CLAUDE.md של המחולל"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/protocol_check.sh (115 שורות, כולן)",
+   "cat -n orchestrator/scripts/central-verify.sh (68 שורות, כולן)",
+   "grep -n 'flutter analyze|flutter test|flutter build' .githooks/pre-commit .githooks/pre-push ⇒ pre-commit:306,319 · pre-push:63,66",
+   "sed -n '174,186p' .githooks/pre-commit (שערים 11/14 — גרסה) · sed -n '29,36p' (שער-ענף)",
+   "git grep -n -F protocol_check.sh ⇒ VERIFICATION_PROTOCOL.md:40,277 · studio-plan ×2"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/assert-manifest.sh",
+  "lang": "sh",
+  "lines": 24,
+  "does": [
+   {
+    "claim": "מריץ manifest של הצהרות-בייטים: כל שורה `<relpath>:::<regex>` = הקובץ **חייב** להכיל · `<relpath>:::!<regex>` = **אסור** שיכיל",
+    "evidence": "assert-manifest.sh:5-8, 18-22"
+   },
+   {
+    "claim": "**manifest ריק נכשל** — «אין הצהרות» לעולם אינו מעבר שקט",
+    "evidence": "assert-manifest.sh:9, 15-16"
+   },
+   {
+    "claim": "מאחד conformance (מחרוזת-חובה מהמקור) ו-regression (מחרוזת-אסורה שהבאג החזיר) לאותו מנגנון",
+    "evidence": "assert-manifest.sh:2-4, 6-7"
+   },
+   {
+    "claim": "**מאציל את בדיקת-הבייטים ל-grep-verify.sh כמקור-אמת יחיד** — לא מממש grep משלו",
+    "evidence": "assert-manifest.sh:8, 12, 24"
+   },
+   {
+    "claim": "fail-fast על תנאים מוקדמים: base-dir חסר · manifest חסר (exit 2) · שורה בלי `:::` (exit 1)",
+    "evidence": "assert-manifest.sh:11, 13-14, 19"
+   },
+   {
+    "claim": "מדפיס כמה חוקים הוא אוכף ומאיזה manifest, מול איזה base",
+    "evidence": "assert-manifest.sh:23"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מגדיר מה להצהיר — ה-manifest חיצוני לו. (‏שני manifests מחויבים **כן** קיימים: orchestrator/manifests/buildsmart.conformance.txt ⇒ 269 חוקים, מתוכם 11 מסוג `:::!` · buildsmart.required-tests.txt ⇒ 44 · ועוד conformance.example.txt ריק-מחוקים)",
+    "evidence": "`for f in orchestrator/manifests/*.txt; do wc -l; grep -vcE '^[[:space:]]*(#|$)'; grep -c ':::!'; done` ⇒ 429/269/11 · 76/44/0 · 10/0/0"
+   },
+   {
+    "claim": "לא מבחין בין conformance ל-regression בדיווח — שניהם נכנסים לאותו מערך args ועוברים ל-grep-verify.sh יחד",
+    "evidence": "assert-manifest.sh:17-24"
+   },
+   {
+    "claim": "לא מאמת שה-regex תקין, ולא מאפשר `:::` בתוך התבנית — `pat=\"${ln#*:::}\"` חותך בהיקרות הראשונה",
+    "evidence": "assert-manifest.sh:20"
+   },
+   {
+    "claim": "לא רץ לבד ולא רץ אוטומטית — נקרא רק מ-central-verify.sh (ורק אם הועבר `--assert`) ומ-selftest.sh. אין hook/CI שמעביר את ה-manifest",
+    "evidence": "orchestrator/scripts/central-verify.sh:79-83 · `grep -n central-verify .githooks/pre-commit .githooks/pre-push` ⇒ 0 · האינדקס רושם `calledByName: [\"central-verify\",\"selftest\"]`"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/central-verify.sh:80",
+    "how": "`\"$HERE/assert-manifest.sh\" \"$APP\" \"$ASSERT_MAN\" || { echo \"GATE FAIL: conformance assertions\"; exit 1; }` — רק כשהועבר `--assert`"
+   },
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh",
+    "how": "נבדק על נתונים סינתטיים (לפי calledByName באינדקס ולפי selftest.sh)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:325, 366, 526"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/gen-verify.mjs:86-93 ו-golden-harness.mjs:54-59 (בלוקי-ה-`if (gate)`)",
+   "gives": "שני השערים האלה אוכפים **ראצ׳ט-מספרים בלבד** — `rendered`/`atoms` ו-`regenerated`/`tests` שלא יורדים. מספר שלא יורד אינו אומר שהמחרוזת הנכונה במקום הנכון. assert-manifest.sh מוסיף את הממד החסר: קובץ-manifest שמצהיר «המחרוזת X חייבת להימצא ב-Y» ו-«המחרוזת Z אסורה», עם שני אינווריאנטים שאין להם מקבילה שם — **manifest ריק = כשל** (שורה 16) ו**האצלה למקור-אמת יחיד** (שורה 24). הכניסה הטבעית: אחרי `flutter test` ב-gen-verify.mjs:67, על `path.join(BS,'lib/genesis/dart-gen-bs')`"
+  },
+  "s22": {
+   "score": 3,
+   "why": "«ראצ׳ט-מספרים ירוק» הוא בדיוק סוג-ההצלחה ש-§22 לא מקבל — הוא אומר «לא נסוג», לא «נכון». המנוע הזה הופך הצהרת-בייטים לשער, והוא לא כלי-ריק: בריפו מחויבים **269 חוקי-בייטים** על האפליקציה החיה (‏orchestrator/manifests/buildsmart.conformance.txt — למשל `lib/screens/store_screen.dart:::הסל שלי` · `lib/data/personas.dart:::מנהל המערכת`) ועוד **44** בדיקות-חובה. זה המנגנון שהופך את «~270 עלים verbatim» שב-CLAUDE.md מטענה למדידה — בדיוק רצפת-הקבלה של §22. ושני האינווריאנטים שבו הם מה שמונע false-green: **manifest ריק = כשל** (שורה 16) ו**האצלה למקור-אמת יחיד** במקום grep משוכפל (שורה 24). 24 שורות, אפס תלויות. הפער היחיד אינו במנוע אלא בחיווט: אף hook/CI לא מעביר את ה-manifest, ולכן central-verify.sh:82 מדפיס בפועל «conformance NOT enforced this run»"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/assert-manifest.sh (24 שורות, כולן)",
+   "ls -la orchestrator/manifests/ ⇒ buildsmart.conformance.txt 29359B · buildsmart.required-tests.txt 4789B · conformance.example.txt 698B",
+   "ספירת-חוקים: 269 (‏11 מסוג absent) ו-44 · 3 שורות-דגימה מכל manifest",
+   "cat -n orchestrator/scripts/central-verify.sh ⇒ שורות 79-83",
+   "sed -n '86,94p' machtzev/generator/gen-verify.mjs · sed -n '54,59p' machtzev/generator/golden-harness.mjs",
+   "node -e 'engine-index.json' ⇒ calledByName: [\"central-verify\",\"selftest\"]",
+   "grep -rn --exclude-dir=.git -F assert-manifest.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:325,366,526"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/central-verify.sh",
+  "lang": "sh",
+  "lines": 68,
+  "does": [
+   {
+    "claim": "השער: מחזיר 0 רק אם analyze נקי · test עובר · build מצליח — במפורש כמתאם-פר-סטאק (‏Flutter היום), עם הוראה להחליף את שלושת הבלוקים לסטאק אחר",
+    "evidence": "central-verify.sh:26-29, 64-76"
+   },
+   {
+    "claim": "**מדפיס טביעת-אצבע של היעד** — נתיב · HEAD קצר · שם-החבילה מ-pubspec — כדי שהאורקסטרייטור יוכל לוודא שהשער כוון ל-worktree שבו התיקונים הוחלו (מלכודת scope-targeting של ה-red-team)",
+    "evidence": "central-verify.sh:43-49"
+   },
+   {
+    "claim": "מריץ `flutter pub get` וחוסם אם נכשל, כי analyze/test על תלויות לא-פתורות הם מדידה של מצב שגוי",
+    "evidence": "central-verify.sh:51-52"
+   },
+   {
+    "claim": "**מריץ scripts/gen_version.sh אם קיים** — כי lib/version.g.dart הוא gitignored ובלעדיו analyze נופל על worktree טרי (לקח #72); מותנה-קיום כדי להישאר no-op בפרויקט אחר",
+    "evidence": "central-verify.sh:54-62"
+   },
+   {
+    "claim": "**סומך גם על קוד-היציאה וגם על ספירת-שורות-שגיאה** של analyze — לא על regex לבד — ומדפיס את שניהם",
+    "evidence": "central-verify.sh:65-68"
+   },
+   {
+    "claim": "שני שערים אופציונליים דרך manifests: `--assert` (assert-manifest.sh) ו-`--required-tests` (required-tests.sh)",
+    "evidence": "central-verify.sh:31-39, 78-90"
+   },
+   {
+    "claim": "**כשלא הועבר manifest — אומר את זה בקול**: «conformance NOT enforced this run (manual discipline only)»",
+    "evidence": "central-verify.sh:82, 89"
+   },
+   {
+    "claim": "שורת-הסיום מונה בדיוק מה נאכף בריצה הזו ואל מה כוון",
+    "evidence": "central-verify.sh:92"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**אינו מוכיח נכונות** — ההצהרה המפורשת של הפרוטוקול: «ירוק = עקביות, לא הוכחת-נכונות»",
+    "evidence": "-ai-chat-server/machtzev/BUILDSMART-PROTOCOL-MAP.md:343 (שלב 5)"
+   },
+   {
+    "claim": "לא מריץ `dart format` — ולכן L0 בסולם-האימות לא מכוסה ע\"י אף שער",
+    "evidence": "-ai-chat-server/machtzev/BUILDSMART-PROTOCOL-MAP.md:567 («L0 בסולם דורש גם `dart format`, שאף שער לא מריץ»); אין `format` ב-68 השורות"
+   },
+   {
+    "claim": "`--no-fatal-warnings` — אזהרות לא מפילות. עקבי עם שער 31, אך זו החלטה, לא ברירת-מחדל",
+    "evidence": "central-verify.sh:65 · BUILDSMART-PROTOCOL-MAP.md:567"
+   },
+   {
+    "claim": "**ה-manifests אופציונליים** — ושני ה-manifests המחויבים (‏269 + 44 חוקים) אינם מועברים לו ע\"י שום hook/CI. כלומר בברירת-מחדל הוא רץ בלי conformance ובלי required-tests, ומדפיס על כך אזהרה",
+    "evidence": "central-verify.sh:79, 86 (‏`if [ -n \"$…\" ]`) ו-82, 89 · `grep -c central-verify .githooks/pre-commit .githooks/pre-push` ⇒ 0 · 0 · ls orchestrator/manifests/ ⇒ שני ה-manifests קיימים"
+   },
+   {
+    "claim": "מגדיר PATH ל-/home/user/flutter/bin בכוח — ולכן לא ניתן להרצה בקונטיינר הזה",
+    "evidence": "central-verify.sh:41 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "אין hook או CI שמריץ אותו — הוא מנוע-נחיל שמופעל ידנית/ע\"י אורקסטרייטור",
+    "evidence": "`grep -n central-verify .githooks/pre-commit .githooks/pre-push` ⇒ ∅"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/CLAUDE.md (חוק-על #0)",
+    "how": "«מפקח + `orchestrator/scripts/central-verify.sh` (השער)» — ההגדרה הפורמלית של סיום-הנחיל"
+   },
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh",
+    "how": "נבדק על נתונים סינתטיים"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. מתועד היטב: machtzev/BUILDSMART-PROTOCOL-MAP.md:42, 324 («§8.2 — השער של הנחיל (68 שורות)»), 343, 365, 507, 528, 567, 604"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/gen-verify.mjs:66-67 · golden-harness.mjs:37-38 — ממש לפני ה-`spawnSync(FLUTTER,['test',…],{cwd:BS})`",
+   "gives": "שני השערים האלה מריצים `flutter test` **בתוך buildsmart** ומניחים שהעץ שם מוכן. הם לא מריצים `pub get`, לא מייצרים את lib/version.g.dart, ולא מדפיסים את מי הם בודקים. central-verify.sh:52 ו-58-62 עושים בדיוק את שני הראשונים, ו-43-49 את השלישי. הבדיקה המדידה: `grep -n 'pub get\\|gen_version' machtzev/generator/ship.mjs` ⇒ **∅** — כלומר גם ship.mjs, שמריץ analyze+test+build בתוך buildsmart (שורות 63,68,85), אינו עושה זאת. בעץ טרי זה מתבטא ב-«Target of URI hasn't been generated: version.g.dart», שהוא בדיוק לקח #72 ש-central-verify.sh:56 מתעד"
+  },
+  "s22": {
+   "score": 3,
+   "why": "זהו השער שהפרוטוקול של buildsmart מגדיר כסיום-הנחיל, והוא נבנה מתוך תקיפות-red-team — כל אחד מששת ההידוקים בו הוא תיקון של דרך ספציפית שבה שער ירוק משקר: יעד-שגוי (טביעת-אצבע, 49) · תלויות-לא-פתורות (52) · קוד-מחולל-חסר (58-62) · אמון-ב-regex-בלבד (65-68) · הצהרות-שלא-נאכפו-בשקט (82,89) · כותרת-שלא-אומרת-מה-נאכף (92). §22 דורש «רצפת-קבלה, אין כמעט» — וזה המנוע היחיד מבין 49 שמנסח מה נאכף **וגם** מה לא נאכף בריצה הזו. ומעשית: שלושת השערים של המחולל שנוגעים ב-buildsmart (genverify · goldenharness · appgen) חסרים בדיוק את ההכנה שהוא מבצע"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/central-verify.sh (68 שורות, כולן)",
+   "cat -n machtzev/generator/gen-verify.mjs ⇒ 12, 22, 66-67 · sed -n '1,59p' golden-harness.mjs ⇒ 14, 24, 37-38",
+   "grep -n 'version.g.dart|gen_version|pub get' machtzev/generator/ship.mjs ⇒ ∅",
+   "sed -n '157,159p' machtzev/police.mjs ⇒ goldenharness · genverify · appgen",
+   "grep -rn --exclude-dir=.git -F central-verify.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:42,324,343,365,507,528,567,604",
+   "grep -n central-verify /home/user/buildsmart/.githooks/pre-commit .githooks/pre-push ⇒ ∅"
+  ]
  }
 ]
