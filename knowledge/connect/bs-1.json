@@ -2286,5 +2286,496 @@
       "functions/src/studio.ts:114-166 + :421-459 (ארבע הליבות הנבדקות)",
       "grep -c '^export function' functions/src/studio.ts ⇒ 4"
     ]
+  },
+  {
+    "file": "rules_test/approval.test.js",
+    "lang": "js",
+    "lines": 265,
+    "does": [
+      {
+        "claim": "‏**17** טענות `it()` בשלוש חטיבות מול אמולטור-Firestore אמיתי, טעונות מ-`../firestore.rules`: «הזמנה דורשת אדם מאושר» · «ממתין יכול לדבר, סשן לא» · «ספרייה קריאה לאנשים, לא לסשנים»",
+        "evidence": "rules_test/approval.test.js:95, :181, :244; `grep -c 'it(' rules_test/approval.test.js` ⇒ 17"
+      },
+      {
+        "claim": "מקבע את שער-האישור: חשבון `pending` **לא** מזמין · חשבון `suspended` **לא** · האורח-האנונימי של הקטלוג **לא** — שלושתם מסומנים «THE BUG» כלומר נכתבו אחרי תקלה אמיתית",
+        "evidence": "rules_test/approval.test.js:103, :112, :119"
+      },
+      {
+        "claim": "מכסה שני מקרי-קצה שהם בדיוק «היעדר ≠ אישור»: `users` doc **חסר** אינו אישור (`fromWire(null)` אסור שייקרא active), ו-doc **בלי שדה status** נופל ל-pending ולא ל-approved",
+        "evidence": "rules_test/approval.test.js:127, :135"
+      },
+      {
+        "claim": "מפריד במפורש אישור מבעלות: «approval is not a substitute for ownership — active ≠ order in another name»",
+        "evidence": "rules_test/approval.test.js:143"
+      },
+      {
+        "claim": "מקבע התנהגות-מנהל: מנהל יוצר הזמנות באמצע-הצינור בלי users doc משלו, אבל **לא** בשלב שמחוץ לצינור",
+        "evidence": "rules_test/approval.test.js:151, :167"
+      },
+      {
+        "claim": "מקבע שאדם-ממתין **כן** יכול לפתוח שרשור ולכתוב בו — «this is how they ask \"when?\"» — בעוד שהאנונימי לא, וש«חברות היא עדיין הגדר האמיתית: מקורב-פעיל מבחוץ לא כותב»",
+        "evidence": "rules_test/approval.test.js:184, :195, :207, :216, :228"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא רץ מול הפרויקט החי — «Runs ONLY against the Firestore emulator, never the live project»",
+        "evidence": "rules_test/README.md:4-7"
+      },
+      {
+        "claim": "לא משתמש ב-mocha/jest — `node --test` מובנה בלבד",
+        "evidence": "rules_test/README.md:3-5; rules_test/users.test.js:28 (`import {…} from 'node:test'`)"
+      },
+      {
+        "claim": "לא בודק את ה-callables — רק את הכללים. מה שה-Admin SDK עוקף אינו נבדק כאן.",
+        "evidence": "כל הקובץ עובד דרך `@firebase/rules-unit-testing` contexts; ה-seeding משתמש ב-`withSecurityRulesDisabled` כדלת-אחורית בלבד (users.test.js:20-21)"
+      },
+      {
+        "claim": "לא ניתן להרצה בלי Java — האמולטור הוא JAR, ודורש גם הורדת-רשת ראשונה",
+        "evidence": "rules_test/README.md:22-24"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator` בתוך rules_test/",
+        "how": "‏= `firebase emulators:exec --only firestore --project demo-buildsmart \"npm test\"` (rules_test/README.md:27-30)"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/server.mjs` ⇒ `server-gen/balagan/rules.test.mjs`. **למחולל כבר יש** מחולל-כללים ובדיקת-אמולטור מחוללת — ו-`server.mjs` **מחובר** (‏`engine-index.mjs machtzev/generator/server.mjs` ⇒ «נקרא-בשם: regen»).",
+      "gives": "המילון החסר. ‏`server-gen/balagan/firestore.rules` (36 שורות) מממש מודל **מגירה-פרטית חד-דיירית**: «אדם רואה וכותב רק את תת-העץ שלו. אין קריאה חוצה-משתמשים, בשום נתיב», וכל השאר `allow read, write: if false`. ‏`rules.test.mjs` שלו מריץ **15** טענות. ‏approval.test.js מוסיף את מה שלמודל הזה אין שפה עבורו: **מצב-חשבון כשער** (pending/suspended/anonymous), ו«היעדר ≠ אישור». משפט-בעברית כמו «רק לקוח מאושר מזמין» אינו ניתן לביטוי היום בשום כלל שהמחולל פולט."
+    },
+    "s22": {
+      "score": 2,
+      "why": "יש מקבילה מחוברת (`server.mjs`), ולכן לא 3 — אבל היא **עושה פחות**: מודל חד-דיירי מול שער-מצב-חשבון. לא 0 בדיוק מאותה סיבה: המקבילה אינה «עושה את אותו הדבר טוב יותר», היא לא עושה את זה בכלל. הפער רלוונטי ל-§22 כי «אפליקציה עובדת 100%» ממשפט שמזכיר אישור-לקוח מחייבת את השער הזה."
+    },
+    "evidence": [
+      "grep -n \"it('\" rules_test/approval.test.js (17 טענות, כותרותיהן מצוטטות)",
+      "head -30 rules_test/README.md",
+      "cat server-gen/balagan/firestore.rules (36 שורות) · head -40 server-gen/balagan/rules.test.mjs (15 טענות)",
+      "node machtzev/census/engine-index.mjs machtzev/generator/server.mjs ⇒ «נקרא-בשם: regen»",
+      "grep -n 'token|role|claim' server-gen/balagan/firestore.rules ⇒ אפס שימוש ב-request.auth.token (ראה רשומה 32)"
+    ]
+  },
+  {
+    "file": "rules_test/chat.test.js",
+    "lang": "js",
+    "lines": 321,
+    "does": [
+      {
+        "claim": "‏**18** טענות על חברות-בשרשור: `chatThreads` נשלטים ע\"י `participantUids` (A9), ו-`chatMessages` ממודרים לפי ה-thread-האב",
+        "evidence": "rules_test/chat.test.js:82, :213; `grep -c 'it(' rules_test/chat.test.js` ⇒ 18"
+      },
+      {
+        "claim": "מקבע שהמפתח הוא **uid ולא תפקיד-תצוגה**: «a display ROLE in participants never gates — only participantUids does»",
+        "evidence": "rules_test/chat.test.js:105"
+      },
+      {
+        "claim": "מקבע ששרשור-לגאסי בלי `participantUids` **אינו תואם לאף uid** — «forward-ready inert», כלומר דאטה ישן נכשל-סגור ולא נפתח-לכול",
+        "evidence": "rules_test/chat.test.js:117"
+      },
+      {
+        "claim": "אוסר זיוף-מחבר בשני כיוונים: יצירה חייבת לכלול את עצמך ב-participantUids, ו-`fromUid == auth.uid` בהודעה",
+        "evidence": "rules_test/chat.test.js:127, :137, :250"
+      },
+      {
+        "claim": "**מקפיא את רשימת-המשתתפים** — גיוס/סילוק בעדכון נדחה, בעוד שרענון `lastMsg` מותר למשתתף",
+        "evidence": "rules_test/chat.test.js:146, :160"
+      },
+      {
+        "claim": "מכסה ענף-קצה עדין (branch b): משתמש בעל **תפקיד-משתתף** רשאי לחתום שרשור **ריק** וכולל-עצמו; עובד שאינו כזה — לא; וחתימה בלי לכלול-עצמך — לא",
+        "evidence": "rules_test/chat.test.js:173, :185, :198"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא בודק תוכן-הודעות, הצפנה או מחיקה — רק גישה",
+        "evidence": "שמות שתי החטיבות (:82, :213) ו-17 מתוך 18 הטענות עוסקות ב-read/create/update"
+      },
+      {
+        "claim": "לא בודק האזנה לכל-האוסף כאן — לפי README זה מכוסה ב-S4.1 («arrayContains query allowed, full-collection listen denied»), ואינו בין 18 הטענות שספרתי בקובץ הזה",
+        "evidence": "rules_test/README.md שורת chat מול `grep -n \"it('\" rules_test/chat.test.js`"
+      },
+      {
+        "claim": "לא בודק את הטריגר `onChatMessageCreated` (push.ts) — הכללים בלבד",
+        "evidence": "הקובץ מייבא רק rules-unit-testing + firebase/firestore"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator`",
+        "how": "rules_test/README.md:27-30"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/server.mjs` — אותו יעד כמו רשומה 31. המודל המחולל הוא `match /users/{uid}/…  allow read: if mine(uid)` — **מסלול-בעלים יחיד**.",
+      "gives": "‏**חברות-במערך כמפתח-גישה.** אין ב-36 שורות הכללים המחוללות שום `in`/`arrayContains` ושום מסמך שנגיש ליותר מ-uid אחד. שרשור-שיחה הוא הישות הרב-משתתפית הפשוטה ביותר שקיימת, ומשפט כמו «קבלן וספק מתכתבים על ההזמנה» אינו ניתן לביטוי היום. שלוש התבניות הניידות: (א) חברות לפי מערך-uid-ים · (ב) **הקפאת** המערך בעדכון (אחרת כל חבר מגייס את עצמו לכל מקום) · (ג) `fromUid==auth.uid` נגד זיוף-מחבר."
+    },
+    "s22": {
+      "score": 2,
+      "why": "כמו רשומה 31: המקבילה המחוברת קיימת אך חד-דיירית. הפער נמדד מדויק: `grep -n 'arrayContains|hasAny| in |token|role|claim' server-gen/balagan/firestore.rules` ⇒ 3 התאמות בלבד, וכולן **לא** מה שנראה — `role` הוא שם-שדה ברשימה-לבנה (:11) · `in` הוא בדיקת-מפתח באובייקט (:12) · `token` הוא wildcard בנתיב (:21). **אפס שימוש ב-`request.auth.token`** בכל הקובץ. אבל זו הצעת-הרחבה למחולל-הכללים, לא אטום מוכן ⇒ לא 3. לא 0: המקבילה עושה פחות."
+    },
+    "evidence": [
+      "grep -n \"it('\" rules_test/chat.test.js (18 טענות)",
+      "grep -n 'arrayContains|hasAny| in |token|role|claim' server-gen/balagan/firestore.rules ⇒ :11 (שם-שדה) · :12 (מפתח-אובייקט) · :21 (wildcard) — אפס request.auth.token",
+      "rules_test/README.md (טבלת-הכיסוי, שורת chat)"
+    ]
+  },
+  {
+    "file": "rules_test/inventory.test.js",
+    "lang": "js",
+    "lines": 206,
+    "does": [
+      {
+        "claim": "‏**11** טענות בשתי חטיבות: «חנות כותבת **רק** את השורות שלה (U3.2.3 ⭐ launch-blocker)» ו«עריכת מסמך-חנות ממודרת-לבעלים (U3.2.2)»",
+        "evidence": "rules_test/inventory.test.js:73, :158; `grep -c 'it(' rules_test/inventory.test.js` ⇒ 11"
+      },
+      {
+        "claim": "מקבע את הפרימיטיב המרכזי — **שדה-במסמך חייב להיות שווה ל-claim של הקורא**: חנות-A יוצרת שורה ש-`storeId` שלה == ה-claim; ⭐ חנות-A **לא** כותבת שורה מתויגת חנות-B; ולא מעדכנת שורה קיימת של B",
+        "evidence": "rules_test/inventory.test.js:74, :85, :96"
+      },
+      {
+        "claim": "מקבע fail-closed על claim חסר: חנות **בלי** `storeId` claim לא כותבת **שום** מלאי",
+        "evidence": "rules_test/inventory.test.js:110"
+      },
+      {
+        "claim": "מפריד תפקידים: קבלן לא כותב מלאי כלל; מנהל כותב את המלאי של **כל** חנות (god-role); וכל משתמש-מחובר **קורא** מלאי (ההשוואה בין חנויות)",
+        "evidence": "rules_test/inventory.test.js:121, :132, :143"
+      },
+      {
+        "claim": "מקפיא בעלות: בעלים מעדכן את מסמך-החנות שלו (`ownerUid == uid`), **אינו** יכול להעביר בעלות (`ownerUid` קפוא), ואינו עורך מסמך של חנות אחרת; מנהל כן מעביר בעלות",
+        "evidence": "rules_test/inventory.test.js:166, :175, :189, :198"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא בודק את ה-callable שמטביע את `storeId` — הוא ב-`functions/src/index.ts:96-103` (`setRole` עם storeId) ואינו נבדק כאן",
+        "evidence": "rules_test/inventory.test.js משתמש ב-`authenticatedContext(uid, claims)` כדי **לזייף** את ה-claim, ולא מייצר אותו"
+      },
+      {
+        "claim": "לא בודק כמויות, מחירים או עקביות-מלאי — גישה בלבד",
+        "evidence": "שמות 11 הטענות — כולן read/write/update"
+      },
+      {
+        "claim": "לא בודק מחיקה של שורת-מלאי — אין `it()` על delete",
+        "evidence": "`grep -n \"it('\" rules_test/inventory.test.js` ⇒ 11 טענות, אף אחת delete"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator`",
+        "how": "rules_test/README.md:27-30"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/server.mjs:serverOf/emitServer` — מחולל-הכללים. הוא כבר יודע לגזור **רשימת-ישויות מהספק** (`function known()` ב-firestore.rules המחולל מונה 36 ישויות: `app_peruk01_ent1`…), ולדחות ישות שלא הוכרזה.",
+      "gives": "**הפרימיטיב שחסר בדיוק שם: `שדה-במסמך == claim-של-הקורא`.** המחולל כבר גוזר ישויות מהספק; מה שאין לו הוא מושג של **דייר**. ‏`inventory.test.js` הוא המפרט המינימלי של הפרימיטיב, ב-11 טענות שכולן מתורגמות אחת-לאחת לכלל: create/update דורשים `request.resource.data.<tenantField> == request.auth.token.<tenantClaim>` · claim חסר ⇒ דחייה · תפקיד-על עוקף · קריאה פתוחה. משפט כמו «כל ספק מנהל את המלאי שלו» הוא בדיוק הצורה הזו, והוא נופל היום ל-`allow read, write: if false`."
+    },
+    "s22": {
+      "score": 3,
+      "why": "זה המקרה החזק ביותר מבין השבעה. המחולל **כבר** מחולל כללים ובודק אותם באמולטור (מחובר דרך regen), וכבר גוזר ישויות מהספק — כלומר התשתית קיימת והפער הוא פרימיטיב יחיד וברור. הטענה מסומנת בריפו עצמו «⭐ launch-blocker», ו-11 טענות מספקות מפרט-קבלה מוכן. לא 0: המקבילה המחוברת חסרה `request.auth.token` לחלוטין (נמדד ברשומה 32)."
+    },
+    "evidence": [
+      "grep -n \"it('\" rules_test/inventory.test.js (11 טענות)",
+      "cat server-gen/balagan/firestore.rules — `function known()` (36 ישויות נגזרות-ספק) + היעדר request.auth.token",
+      "node machtzev/census/engine-index.mjs machtzev/generator/server.mjs ⇒ «2 ייצואים (serverOf, emitServer) · נקרא-בשם: regen»",
+      "functions/src/index.ts:96-103 (איפה ה-claim נוצר)"
+    ]
+  },
+  {
+    "file": "rules_test/orders.test.js",
+    "lang": "js",
+    "lines": 457,
+    "does": [
+      {
+        "claim": "הקובץ הגדול ברשימה שלי מבין הכללים: **28** טענות בארבע חטיבות — בעלות-לפי-`contractorUid` · יצירה-כבולה-ל-uid · `customers` (קריאת-מנהל-או-בעלים, כתיבת-מנהל) · A4 «תפיסה-בקידום-הראשון + בריכה משותפת (no-steal)»",
+        "evidence": "rules_test/orders.test.js:88, :144, :241, :302; `grep -c 'it(' rules_test/orders.test.js` ⇒ 28"
+      },
+      {
+        "claim": "מקבע את ההבחנה uid-מול-שם-תצוגה בשלוש טענות נפרדות: קבלן קורא את שלו · נדחה מזו של אחר · «a NAME in contractorUid never matches a uid — owner-unmatched (backward tolerance)»",
+        "evidence": "rules_test/orders.test.js:89, :99, :110"
+      },
+      {
+        "claim": "מקבע התנהגות-לגאסי: הזמנה **בלי** `contractorUid` היא owner-unmatched אך קריאה-למנהל — כלומר דאטה ישן לא נפתח לכול, אבל גם לא הולך לאיבוד",
+        "evidence": "rules_test/orders.test.js:121"
+      },
+      {
+        "claim": "מקבע את התלות באישור בתוך הכללים: «the SAME contractor is denied the moment approval is withdrawn»",
+        "evidence": "rules_test/orders.test.js:170"
+      },
+      {
+        "claim": "סוגר את וקטור-הזיוף המדויק שהופיע גם ב-`functions/src/credit.ts`: «a create that puts the NAME field (contractorId) == uid but a foreign contractorUid is STILL denied»",
+        "evidence": "rules_test/orders.test.js:196"
+      },
+      {
+        "claim": "מקבע את חוקיות-השלב ביצירה: קבלן **רק** בשלב-הראש · מנהל בכל שלב חוקי · מנהל **לא** בשלב מזויף",
+        "evidence": "rules_test/orders.test.js:209, :219, :229"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא בודק את `advanceOrderStage` ואת טריגר-ה-revert — אלה `functions/src/orders.ts`, והם עוקפים כללים דרך Admin SDK",
+        "evidence": "functions/src/orders.ts:5-7 (טריגרים ללא הקשר-אימות) מול היקף הקובץ הזה"
+      },
+      {
+        "claim": "לא בודק את חישוב-הסכומים או את `sum` — גישה בלבד",
+        "evidence": "28 כותרות-הטענות: כולן read/create/update/stage"
+      },
+      {
+        "claim": "לא בודק מחיקת-הזמנה",
+        "evidence": "`grep -n \"it('\" rules_test/orders.test.js` ⇒ אין טענת-delete"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator`",
+        "how": "rules_test/README.md:27-30"
+      },
+      {
+        "who": "האינדקס רושם calledByName של `index.ts` = orders.test",
+        "how": "‏אזכור-שם; הקובץ הזה בודק את `firestore.rules`, לא את `functions/src/index.ts`. ראה דפוס 2 ב-NOTES."
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/server.mjs` (מחולל-הכללים, מחובר דרך regen) — ובמקביל `machtzev/generator/hamtzaa.mjs`.",
+      "gives": "שתי תרומות נפרדות. (א) **לכללים:** דפוס «בעלות-לפי-uid, לא לפי שם» + «רשומת-לגאסי בלי מפתח-בעלות = לא-תואמת-אף-אחד, לא פתוחה-לכול». (ב) **לגלאי-ההמצאה:** שורה :196 היא אותו באג בדיוק ש-`functions/src/credit.ts:57-70` מתעד — שדה-תצוגה שהקורא שולט בו שימש כזהות. שני מקרים בלתי-תלויים באותו ריפו, אחד בכללים ואחד ב-callable ⇒ זו **מחלקת-באג**, לא תקלה. הכלל הנייד: «אל תשווה זהות מול שדה שהנבדק יכול לכתוב»."
+    },
+    "s22": {
+      "score": 2,
+      "why": "מפרט-קבלה עשיר (28 טענות) שרובו קשור-דומיין-הזמנות, אבל שתי התבניות הכלליות שלו (בעלות-לפי-uid · לגאסי-נכשל-סגור) ניידות. לא 3 כמו inventory: שם הפער הוא פרימיטיב יחיד וברור; כאן זו זרימת-עסק שלמה. לא 0: אין מקבילה — המודל המחולל הוא מסלול-בעלים-יחיד."
+    },
+    "evidence": [
+      "grep -n \"it('\" rules_test/orders.test.js (28 טענות)",
+      "functions/src/credit.ts:57-70 (אותה מחלקת-באג, מסלול אחר)",
+      "cat server-gen/balagan/firestore.rules",
+      "head -30 machtzev/generator/hamtzaa.mjs"
+    ]
+  },
+  {
+    "file": "rules_test/org_config.test.js",
+    "lang": "js",
+    "lines": 189,
+    "does": [
+      {
+        "claim": "‏**10** טענות על חוזה אחד: `orgConfigLive/current` — «הבעלים מפרסם / כולם קוראים», מוצמד ל-`/firestore.rules`",
+        "evidence": "rules_test/org_config.test.js:1-3, :130, :167; `grep -c 'it(' rules_test/org_config.test.js` ⇒ 10"
+      },
+      {
+        "claim": "מצטט את הכלל הנבדק בגוף-הקובץ: `allow read: if true` · `allow write: if isOwnerEmail()` כאשר `isOwnerEmail()` משווה `request.auth.token.get('email','')` לאימייל יחיד",
+        "evidence": "rules_test/org_config.test.js:11-19"
+      },
+      {
+        "claim": "**הטענה נושאת-המשקל**: מנהל עם אימייל שגוי **עדיין** לא מפרסם, ואדמין עם אימייל שגוי **עדיין** לא — «the gate is the email, not a role»",
+        "evidence": "rules_test/org_config.test.js:143, :149"
+      },
+      {
+        "claim": "מקבע שהקריאה דורשת **כלום**: מבקר לא-מאומת · אנונימי (מסלול-הרינדור-שלפני-ההתחברות) · מחובר-לא-בעלים · והבעלים — כולם קוראים",
+        "evidence": "rules_test/org_config.test.js:174, :178, :182, :186"
+      },
+      {
+        "claim": "מתעד **איך** נזרק claim-האימייל בבדיקה: הארגומנט השני של `authenticatedContext(uid,claims)` הוא הטוקן-המפוענח כולו, ומוכיח זאת בהצלבה מול `approval.test.js` שמעביר שם `{firebase:{sign_in_provider:'anonymous'}}`",
+        "evidence": "rules_test/org_config.test.js:32-41"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא בודק את **תוכן** ה-orgConfig — רק מי כותב ומי קורא. הסכמה עצמה אינה מקובעת כאן.",
+        "evidence": "10 כותרות-הטענות — כולן publish/read"
+      },
+      {
+        "claim": "לא בודק את אשף-ההגדרה שכותב (`org_config_sink_firebase.dart`) — רק את הכלל",
+        "evidence": "rules_test/org_config.test.js:20-21"
+      },
+      {
+        "claim": "לא מטפל בריבוי-ארגונים — `orgConfigLive/current` הוא מסמך יחיד, ו-`setOrg.ts` (רשומה 25) מצביע על אותה מגבלה בצד ה-claim",
+        "evidence": "rules_test/org_config.test.js:12 (`match /orgConfigLive/{docId}`) + functions/src/setOrg.ts:36-38"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator`",
+        "how": "rules_test/README.md:27-30"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "פריט **6** ב-`knowledge/HANDOFF-2026-09-16.md` — «0 מונחי-שדה בריפו (102 ישות · 46 ניווט · 0 שדה)». הצד השני של אותה בעיה: `orgConfigLive` הוא **מנגנון-המינוח הניתן-להגדרה** של BuildSmart, והוא מה ש-`app_flutter/lib/logic/workflow_engine.dart:60-66` צורך דרך `termOf(cfg,'workflow.stage.X',fallback)` · `termOf(cfg,'nav.workflow','מעקב טיפול')` · `termOf(cfg,'entity.wfItem','פריט')`.",
+      "gives": "מודל-מינוח **חי ונבדק** עם שלוש תכונות שהמחולל חסר: (א) מרחב-שמות היררכי מדויק — `workflow.stage.*` · `nav.*` · `entity.*`, שהוא בדיוק הפילוח ש-`vertical-packs.mjs` מציג (74 entity · 46 nav · **0 field**); (ב) **ברירת-מחדל לכל מונח**, כך שארגון שלא הגדיר עדיין מרנדר — התרופה ל«Family נותן שדה אחד במקום 25»; (ג) חוזה-פרסום מוכח: בעלים-אחד כותב, **כולם** קוראים כולל לפני-התחברות. ⚠️ שקיפות: `workflow_engine.dart` אינו ברשימת-40 שלי ונקרא כראיה בלבד."
+    },
+    "s22": {
+      "score": 2,
+      "why": "נוגע בפריט-חוב מדורג (6) מזווית שלא מופיעה ב-HANDOFF: שם המסלול המוצע הוא `ops-particles.mjs` (נגזר מטיפוס), וכאן יש מודל **נגזר-מארגון** עם fallback — משלים, לא מתחרה. לא 3: 10 הטענות הן על הכלל, לא על המינוח, ולכן זו הפניה למנגנון ולא מפרט מוכן. לא 0: `server-gen/balagan/firestore.rules` אינו מכיל שום מסמך ציבורי-לקריאה (`allow read` שלו תמיד `mine(uid)`), ואין במחולל מנגנון-מינוח עם fallback."
+    },
+    "evidence": [
+      "sed -n '1,40p' rules_test/org_config.test.js · grep -n \"it('\" (10 טענות)",
+      "sed -n '60,72p' app_flutter/lib/logic/workflow_engine.dart (termOf · שלושה מרחבי-שם + fallback) — ראיה בלבד, לא ממופה",
+      "grep -oE '\"[a-z]+\\.[a-z]+\"\\s*:' new/atoms/vertical-packs.mjs | cut -d. -f1 | sort | uniq -c ⇒ 74 entity · 46 nav · 0 field",
+      "cat server-gen/balagan/firestore.rules — כל allow read הוא mine(uid)"
+    ]
+  },
+  {
+    "file": "rules_test/studio.test.js",
+    "lang": "js",
+    "lines": 434,
+    "does": [
+      {
+        "claim": "‏**31** טענות — הכי הרבה מבין השבעה — בחמש חטיבות: `studioConfig` (קריאה-למחובר, כתיבה `if false`) · `studioConfigSnapshots` (v<N> בלתי-משתנה, draft ממודר-לבעלים) · `studioConfigApprovals` (דו-בקרה) · `_publishRate` (Admin-SDK בלבד) · ומסמך-מוצר ציבורי",
+        "evidence": "rules_test/studio.test.js:99, :134, :203, :227, :239; `grep -c 'it(' rules_test/studio.test.js` ⇒ 31"
+      },
+      {
+        "claim": "מקבע «callable-only»: **אף אחד** לא כותב `studioConfig/published` מלקוח — מנהל נדחה, **והבעלים נדחה גם הוא**",
+        "evidence": "rules_test/studio.test.js:119, :125"
+      },
+      {
+        "claim": "מקבע אי-שינויות: תצלום `v<N>` שפורסם נקרא ע\"י כל מחובר, וכתיבת מנהל/בעלים עליו **נדחית** — מה שהופך את ה-revert להיפוך-מצביע בטוח תמיד",
+        "evidence": "rules_test/studio.test.js:135, :140; ההקבלה: functions/src/studio.ts:56-60"
+      },
+      {
+        "claim": "מקבע ש-`_publishRate` סגור אפילו לבעליו: «a client (even a manager) can neither read nor reset its own rate window» — כלומר מגביל-הקצב אינו ניתן לאיפוס-עצמי",
+        "evidence": "rules_test/studio.test.js:228"
+      },
+      {
+        "claim": "מקבע שער-קריאה אחיד: גם `publishAllow` קריא-למחובר «uniform gate — whole-collection listen», ושלקוח **לא-מאומת** נדחה מהמצביע",
+        "evidence": "rules_test/studio.test.js:106, :113"
+      },
+      {
+        "claim": "מקבע מידור-טיוטות: לא-בעלים אינו קורא טיוטה של אחר · **מנהל כן** (טיוטה היא manager-scoped) · לא-בעלים אינו כותב טיוטה של אחר",
+        "evidence": "rules_test/studio.test.js:162, :169, :176"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא בודק את `publishConfig`/`revertIllegalConfigWrite` — אלה `functions/src/studio.ts`, ו-`functions/test/studio.test.js` בודק את הליבות הטהורות שלהם. שלושת הקבצים מכסים שלוש שכבות שונות של אותו פיצ׳ר.",
+        "evidence": "rules_test/studio.test.js:99 מול functions/test/studio.test.ts:4-8"
+      },
+      {
+        "claim": "לא בודק את ה-CAS — הגרסה וה-`expectedBaseVersion` אינם עניין של כללים",
+        "evidence": "31 כותרות-הטענות — אין אזכור version/CAS"
+      },
+      {
+        "claim": "לא בודק את דגל-ההיתר כשער-כתיבה — רק שהוא **קריא**; האכיפה היא בטרנזקציה של ה-callable",
+        "evidence": "rules_test/studio.test.js:106 מול functions/src/studio.ts:125-132"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator`",
+        "how": "rules_test/README.md:27-30"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/server.mjs` — ובמיוחד הדפוס שכבר קיים שם חלקית: `match /users/{uid}/secret/{id} { allow read, write: if false; }` עם ההערה «**הלקוח לא קורא ולא כותב כאן, נקודה** — רק הפונקציות (admin) נוגעות».",
+      "gives": "**הכללה של דפוס שהמחולל כבר המציא פעם אחת.** ‏`server.mjs` כבר יודע לפלוט נתיב-`if false`-לגמרי עבור טוקן-רענון. ‏studio.test.js מראה שזו משפחה שלמה בת שלושה סוגים, לא מקרה יחיד: (א) **callable-only** — קריאה מותרת, כתיבה `if false`, גם לבעלים (המצביע); (ב) **בלתי-משתנה** — יצירה מהשרת, כתיבה-חוזרת אסורה לכולם (`v<N>`); (ג) **חשבונאות-שרת** — לא-קריא ולא-כתיב אפילו לנבדק (`_publishRate`). שלושתם נגזרים מ**תפקיד-המסמך בצינור**, לא משמו — כלומר בדיוק הקריטריון של `ops-particles.mjs` («נגזרים מטיפוס, לא משם»)."
+    },
+    "s22": {
+      "score": 2,
+      "why": "מרחיב מנגנון **קיים ומחובר** (`server.mjs` כבר פולט `if false` נקודתי) לשלוש קטגוריות כלליות, עם 31 טענות כמפרט. לא 3: זו הכללה של דפוס-אבטחה ולא פרימיטיב חסר כמו ב-inventory, ופרסום-תצורה אינו החסם ב-§22 היום. לא 0: המקבילה המחוברת מכסה מקרה אחד מתוך שלושה."
+    },
+    "evidence": [
+      "grep -n \"it('\" rules_test/studio.test.js (31 טענות)",
+      "cat server-gen/balagan/firestore.rules — `match /users/{uid}/secret/{id} {allow read, write: if false;}` + ההערה",
+      "functions/src/studio.ts:35-60 (מודל-האחסון שהכללים מגנים עליו)",
+      "knowledge/HANDOFF-2026-09-16.md פריט 6 (ops-particles «נגזרים מטיפוס, לא משם»)"
+    ]
+  },
+  {
+    "file": "rules_test/users.test.js",
+    "lang": "js",
+    "lines": 261,
+    "does": [
+      {
+        "claim": "‏**22** טענות בארבע חטיבות על `users/{uid}`: קריאה (עצמי-או-אדמין) · יצירה-עצמית (מראה + pending בלבד) · עדכון-עצמי (שדות-סמכות קפואים) · מחיקה (עצמי-או-אדמין)",
+        "evidence": "rules_test/users.test.js:84, :103, :169, :220; `grep -c 'it(' rules_test/users.test.js` ⇒ 22"
+      },
+      {
+        "claim": "מקבע «הכול-באישור»: יצירה-עצמית רשאית לשאת `status:'pending'` (או כלום ⇒ ברירת pending), ו**נדחית** אם היא נושאת `role`/`roles`/`storeUid`/`orgId`, או status שאינו pending — «a user can NOT self-create as 'active'»",
+        "evidence": "rules_test/users.test.js:9-13"
+      },
+      {
+        "claim": "מקבע את **הקפאת שדות-הסמכות** בעדכון: `role`/`roles`/`storeUid`/`orgId`/`status` נדחים לעצמי, ואדמין עוקף. זו בדיוק רשימת-ההקפאה ש-`functions/src/credit.ts:60-62` ו-`setOrg.ts:11-17` ו-`setEmployer.ts:17-22` מסתמכים עליה.",
+        "evidence": "rules_test/users.test.js:14-16"
+      },
+      {
+        "claim": "מקבע **תאימות-לאחור מפורשת**: כתיבת-מראה-הפרופיל הקיימת {displayName,phone,email,profession,address,businessId} עדיין עוברת ביצירה ובעדכון — «proving the new blocks never break today's client»",
+        "evidence": "rules_test/users.test.js:17-19"
+      },
+      {
+        "claim": "מתעד את דלת-הזריעה: `withSecurityRulesDisabled` משמש כדי לשתול מצב שלקוח כבול-כללים לא יכול היה ליצור בעצמו",
+        "evidence": "rules_test/users.test.js:20-22"
+      },
+      {
+        "claim": "מגדיר צורות-claim מפורשות המשקפות את מה ש-`setRole` כותב: `asManager()={role:'manager'}` · `asAdmin()={admin:true}`",
+        "evidence": "rules_test/users.test.js:46-49"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "**לא בודק ש-`displayName` אינו ניתן-לכתיבה-עצמית — כי הוא כן.** זו הבחירה המודעת שאפשרה את החור ב-`credit.ts`: רשימת-ההקפאה היא role/roles/storeUid/orgId/status ו«nothing else».",
+        "evidence": "rules_test/users.test.js:13-16 (רשימת-ההקפאה) + functions/src/credit.ts:60-62 (ההסבר למה זה היה חור)"
+      },
+      {
+        "claim": "לא בודק את `employerId` — שדה שנוסף לרשימת-ההקפאה לפי `functions/src/setEmployer.ts:17-19`, אך אינו מופיע בכותרת-הכיסוי של הקובץ הזה",
+        "evidence": "rules_test/users.test.js:8-19 (הכיסוי המוצהר) מול functions/src/setEmployer.ts:17-19"
+      },
+      {
+        "claim": "לא בודק את הטריגר `onUserDocWritten` שמסנכרן את הספרייה",
+        "evidence": "הקובץ מייבא רק rules-unit-testing + firebase/firestore (users.test.js:30-42)"
+      },
+      {
+        "claim": "לא רץ מול הפרויקט החי",
+        "evidence": "rules_test/users.test.js:3-4"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏`npm run test:emulator`",
+        "how": "rules_test/README.md:27-30"
+      },
+      {
+        "who": "האינדקס רושם calledByName = `inventory.test`",
+        "how": "‏אזכור-שם בין קבצי-החבילה (הרתמה משותפת «Same harness as orders.test.js», users.test.js:4-5). לא קריאה."
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/server.mjs` — שם כבר קיים אב-טיפוס של הרעיון: `stateOk(d)` מוודא `d.keys().hasOnly([...])`, כלומר **רשימה-לבנה של שדות** במסמך.",
+      "gives": "המשלים המדויק: ‏`hasOnly` מגביל **אילו שדות קיימים**; מה שחסר הוא **אילו שדות מותר לשנות** (‏`request.resource.data.X == resource.data.X`). ‏users.test.js הוא מפרט-הקבלה של הרעיון הזה ב-22 טענות, כולל השילוב שהוא הלב: «שדה-סמכות קפוא ללקוח, נכתב רק ע\"י callable, ואדמין עוקף». ⚠️ **ואזהרה שנקנתה ביוקר, שאסור להעביר בלי הלקח שלה:** `displayName` הושאר כתיב-עצמית **במכוון**, ובדיוק זה אפשר את החור ב-`credit.ts` (שדה שהקורא שולט בו שימש כזהות). כלומר רשימת-ההקפאה אינה מספיקה לבדה — צריך גם כלל שאומר «אל תשווה זהות מול שדה שאינו קפוא»."
+    },
+    "s22": {
+      "score": 2,
+      "why": "מרחיב מנגנון קיים ומחובר (`stateOk`/`hasOnly` ב-server.mjs) מ«אילו שדות» ל«אילו שדות בני-שינוי» — הרחבה ממוקדת עם מפרט בן 22 טענות. לא 3: זו תוספת לכלל קיים, לא פרימיטיב חסר כמו ב-inventory. לא 0: `hasOnly` אינו עושה את זה טוב יותר — הוא עושה חצי אחר."
+    },
+    "evidence": [
+      "sed -n '1,60p' rules_test/users.test.js · grep -n \"it('\" (22 טענות)",
+      "cat server-gen/balagan/firestore.rules — `function stateOk(d) { return d.keys().hasOnly([...]) }` :10-13",
+      "functions/src/credit.ts:60-62 (למה displayName הכתיב-עצמית היה חור)",
+      "functions/src/setEmployer.ts:17-19 (employerId נוסף לרשימת-ההקפאה)"
+    ]
   }
 ]

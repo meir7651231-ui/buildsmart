@@ -234,3 +234,55 @@ $ ls functions/src/ | grep -i orgcore   # ⇒ ריק
 (בשם) או ראיה שהמנוע מת/כפול. לא מצאתי אף מקרה כזה: בכל בדיקה שעשיתי
 (`ask-claude` · `wf_*` · `is-valid-slug` · אטומי-shard/presence · resend/nodemailer)
 המקבילה המחוברת או **חסרה** או **עושה פחות**.
+
+## דפוס 6 — למחולל **כן** יש מחולל-כללים, והוא מחובר. הפער הוא מודל, לא היעדר.
+
+זו התיקון החשוב ביותר להנחה שקל היה לעשות («אין למחולל אבטחה»). יש:
+
+```bash
+$ find /home/user/meir7651231-ui/-ai-chat-server -name "*.rules" -not -path "*/node_modules/*"
+./server-gen/balagan/firestore.rules
+$ node machtzev/census/engine-index.mjs machtzev/generator/server.mjs
+🔧 עושה: 2 ייצואים (serverOf, emitServer) · כותב 1
+🔌 מחובר: 1 מייבאים (server-gate.mjs) · נקרא-בשם: regen,server-gate,...
+```
+
+‏«נקרא-בשם: **regen**» ⇒ לפי `connected()` (‏`engine-index.mjs:328-330`) זה **מנוע מחובר**.
+הוא פולט `firestore.rules` (36 שורות) **וגם** `rules.test.mjs` שמריץ **15** טענות
+מול אמולטור. כלומר הקומה קיימת ורצה.
+
+**המודל שהוא פולט — חד-דיירי:**
+> «כלל אחד: אדם רואה וכותב **רק** את תת-העץ שלו. אין קריאה חוצה-משתמשים, בשום נתיב.»
+> — `server-gen/balagan/firestore.rules:3`
+
+```bash
+$ grep -n 'arrayContains|hasAny| in |token|role|claim' server-gen/balagan/firestore.rules
+11:  ...hasOnly(['seq', 'role', 'actor', ...])      # 'role' = שם-שדה ברשימה-לבנה
+12:  ... (!('rec' in d) || ...)                      # 'in' = בדיקת-מפתח באובייקט
+21:  match /users/{uid}/push/{token} {               # 'token' = wildcard בנתיב
+```
+
+⇒ **אפס שימוש ב-`request.auth.token`** בכל הקובץ. אין claims, אין תפקידים, אין
+חברות-חוצת-משתמשים. כל מה שאינו `users/{uid}/…` נופל ל-`allow read, write: if false`.
+
+**מה ש-7 קבצי `rules_test` מוסיפים — נמדד:**
+
+```bash
+$ cd rules_test && for f in *.test.js; do printf "%s it()=%s\n" "$f" "$(grep -c 'it(' $f)"; done
+approval.test.js it()=17   chat.test.js it()=18   inventory.test.js it()=11
+orders.test.js it()=28     org_config.test.js it()=10
+studio.test.js it()=31     users.test.js it()=22
+```
+
+**‏137 טענות** מול אמולטור אמיתי, וכולן על מה שהמודל החד-דיירי לא יכול לבטא:
+מצב-חשבון כשער · חברות-במערך-uid-ים · **שדה-במסמך == claim-של-הקורא** ·
+בעלות-לפי-uid-לא-לפי-שם · שדות-סמכות-קפואים · מסמכי-callable-only/בלתי-משתנים.
+
+⇒ לכן ניקוד ה-§22 של השבעה הוא **2**, לא 3 — יש מקבילה מחוברת — למעט
+`rules_test/inventory.test.js` שקיבל **3**: שם הפער הוא **פרימיטיב יחיד** (דייר),
+התשתית לגזור ישויות מהספק כבר קיימת (`function known()` מונה 36 ישויות נגזרות),
+והריפו עצמו מסמן את הטענה «⭐ launch-blocker».
+
+**סייג לאמת:** לא הרצתי את `rules.test.mjs` של המחולל ולא את
+`npm run test:emulator` של buildsmart — אין Java בקונטיינר ואסור לי לבנות.
+כל המספרים כאן הם **ספירת-קוד** (`grep -c 'it('` · קריאת הקובץ המחולל), לא ריצה.
