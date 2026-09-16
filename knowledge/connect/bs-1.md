@@ -4,7 +4,7 @@
 > רשימת-המקור: `machtzev/generator/engine-index.json` בענף `claude/mizug` של `-ai-chat-server` (40 מנועים).
 > HEAD-ים ופקודות: `knowledge/connect/NOTES-bs-1.md`.
 
-**מופו: 10/40**
+**מופו: 15/40**
 
 | # | קובץ | שורות | עושה (תמצית) | לא עושה (תמצית) | קוראים | איפה לחבר | §22 |
 |---|------|-------|--------------|------------------|--------|-----------|-----|
@@ -18,6 +18,11 @@
 | 8 | `functions/src/audit.ts` | 64 | מייצא פונקציה אחת, `writeAudit(entry)`, שמוסיפה רשומת-ביקורת אחת לאוסף `auditLog` עם `FieldValue.serverTimestamp()` | לא **קורא** את auditLog ולא מספק שאילתה/דוח — אין API-קריאה בקובץ כלל | ‏10 מודולים באותו ריפו · האינדקס רושם גם `📄 INVENTORY-EMPIRE-RAW-MATERIAL-2026-08-31.md` · -ai-chat-server | ‏`knowledge/assets/yeshiva-bench/audit_block.py` — הקובץ שה-HANDOFF (סעיף 3.5) מתאר כקובע «הדיווח הוא טענה, לא עובדה». זו נקודת-המפגש הרעיונית: המחולל | **1** |
 | 9 | `functions/src/claude.ts` | 166 | ‏callable `askClaude({prompt,system?,model?,maxTokens?})` — פרוקסי-שרת מאומת ל-Anthropic API; מפתח-ה-API יושב **רק** ב-Secret Manager (`ANTHROPIC_API_ | **לא בונה פרומפטים ולא מעגן דאטה** — «GROUNDING IS THE CALLER'S JOB ... This proxy is deliberately generic + dumb». האחריות שהמודל «יחשוב מעל אמת ולא  | functions/src/index.ts · ‏`ClaudeGateway` באפליקציית-ה-Flutter · -ai-chat-server | ‏`new/atoms/ask-claude.mjs` + `new/atoms/ask-claude-strings.mjs` — היציאה-ל-LLM היחידה של המחולל, שנחצבה מ-`maor/src/lib/ai.ts:61-87`. היא **קוראת ל-A | **3** |
 | 10 | `functions/src/common.ts` | 75 | מקבע את אזור-הפריסה היחיד `REGION="me-west1"` (תל-אביב), תואם למיקום-Firestore ול-`kAuthFunctionsRegion` באפליקציה; כל פונקציה בקוד-בייס חייבת להעביר  | לא מאמת כלום ולא זורק — אין `HttpsError` בקובץ; הוא מחזיר עובדות (רשימת-תפקידים, בוליאני-בעלות), וההחלטה נשארת אצל הקורא | ‏17 מודולים באותו ריפו · -ai-chat-server | ‏`machtzev/generator/hamtzaa.mjs` (גלאי-ההמצאות, פריט 4 ב-HANDOFF: «51 המצאות במסלול-הפירוקים», נעול ב-ratchet) — לא כקוד להעתיק, אלא כ**דפוס-שער חסר* | **1** |
+| 11 | `functions/src/credit.ts` | 142 | ‏callable `computeCredit({name?})` — מחזיר {ok,name,creditLimit,used,balance,pct,orderCount} כאשר תקרת-האשראי **נקראת** מ-`customers/{name}.creditLimi | **לא מייבא יותר את `contractorCredit`** — ההסרה מתועדת במפורש כהחלטה: «a fabricated number returned from here arrived wearing the server's authority» | functions/src/index.ts:201 · מסך-הלקוח `credit_explain_screen` · -ai-chat-server | ‏`machtzev/generator/hamtzaa.mjs` — גלאי-ההמצאה. החוק שהוא אוכף (ראש-הקובץ): «כל שדה בספק חייב מקור בקלט. אין מקור = המצאה = אדום». הוא בודק **שדות בס | **3** |
+| 12 | `functions/src/creditCore.ts` | 148 | ‏`dartStringHashCode(s)` — שכפול-מדויק של `String.hashCode` של **Dart VM**: Jenkins one-at-a-time מעל יחידות-UTF-16, כל החשבון mod 2^32, גימור ומסכה ל | **מודול טהור — אפס ייבוא**. אין Firebase, אין רשת, אין I/O; זו הסיבה המוצהרת שאפשר להריץ אותו offline מ-selftest | functions/src/credit.ts:36 · functions/src/selftest.ts · functions/test/credit.test.ts · -ai-chat-server | ‏`new/atoms/` (דרך promote-auto) עבור `dartStringHashCode` — וזו הנקודה המעניינת: המחולל **פולט Dart** (‏`new/dart-gen-bs`, `gen/site.mjs:37` ⇒ `flutt | **2** |
+| 13 | `functions/src/deleteAccount.ts` | 649 | שני callables: `deleteAccount` (מחיקה-עצמית — הקורא יכול למחוק **רק** את עצמו, אין ארגומנט-uid) ו-`deleteUser` (מנהל/אדמין מוחק אחר לפי uid) | **לא מוחק מסמכים רב-משתתפים** — הזמנות · chatThreads/chatMessages · customers · projects · tasks נשמרים במכוון, «each belongs to a transaction/convers | functions/src/index.ts:197 · ‏`app_flutter/lib/state/auth_state.dart` — `deleteAccount()` · -ai-chat-server | ∅ למחולל עצמו. הקובץ קשור-Firestore לחלוטין ואין לו חלק טהור בר-חציבה. הנקודה היחידה בעלת-ערך היא רעיונית: ה**דפוס** «רשימה-ידנית של יעדי-מחיקה ⇒ שער  | **1** |
+| 14 | `functions/src/directory.ts` | 130 | מגדיר אוסף-שני מינימלי `directory/{uid} = {role, displayName, status, updatedAt}` — «המינימום הדרוש כדי לפנות למישהו». בלי טלפון, בלי אימייל. | לא ניתן-לכתיבה מהלקוח — «writable only from here». ‏role בפרט חייב לבוא מה-claims, אחרת הספרייה הייתה דרך **לטעון** תפקיד ע"י הצהרה עליו | functions/src/index.ts:209 · functions/src/approveUsers.ts:146 · functions/src/reviewRoleRequest.ts · -ai-chat | ‏`new/atoms/` עבור `pickName(a,b,c)` — טהורה, arity=3, אפס-דומיין: «בחר את הראשון שקיים, ואם אין — גזור מהאימייל». | **1** |
+| 15 | `functions/src/index.ts` | 227 | **נקודת-הכניסה היחידה** של כל חבילת-הפונקציות: קורא ל-`initializeApp()` בגוף-המודול (:28) ומייצא-מחדש 18 פונקציות מ-13 מודולים | **אינו מיובא ע"י אף אחד** — `importedBy=[]` באינדקס; זו נקודת-הכניסה, לא ספרייה. הכיוון תמיד ממנו החוצה. | ‏Firebase CLI / Cloud Functions runtime · functions/src/selftest.ts · functions/test/orders.test.ts · -ai-chat | ‏`machtzev/census/engine-index.mjs:311-333` — הגדרת `GEN_ENTRY` ו-`connected()`. ‏GEN_ENTRY מונה 6 נקודות-כניסה של המחולל, ו«מחובר» = נגיש טרנזיטיבית  | **1** |
 
 ## פירוט מלא
 
@@ -427,4 +432,229 @@
 - `cat -n functions/src/common.ts (75 שורות, נקראו במלואן)`
 - `engine-index.json: importedBy = 17 מודולים + studio.test.ts`
 - `knowledge/HANDOFF-2026-09-16.md פריט 4 (hamtzaa.mjs --ratchet --list)`
+
+### 11. `functions/src/credit.ts` · ts · 142 שורות · §22 = **3**
+
+**1 · מה הוא עושה**
+- ‏callable `computeCredit({name?})` — מחזיר {ok,name,creditLimit,used,balance,pct,orderCount} כאשר תקרת-האשראי **נקראת** מ-`customers/{name}.creditLimit` ולעולם לא נגזרת  
+  *ראיה:* functions/src/credit.ts:42, :95-96, :141
+- מקבע היקף לפי **uid** ולא לפי שם עבור מי שאינו מנהל: `creditScopeFor` מחזיר byUid, השם שנשלח **נזרק** ולא מאומת, והשאילתה היא `orders.where("contractorUid","==",scopeUid)`  
+  *ראיה:* functions/src/credit.ts:71-77, :105-107
+- מתעד את החור שנסגר, עם מנגנון מלא: `users` update rule מקפיא רק role/roles/storeUid/orgId/status ⇒ `displayName` הוא **כתיב-עצמית מעצם התכנון**; קבלן כתב את שמו המדויק של עמית למסמכו, וההשוואה עברה — «השער שאל שאלה שהתוקף בעצמו עונה עליה»  
+  *ראיה:* functions/src/credit.ts:57-70, :17-24
+- מקפל `used` מהשדה `sum` השמור (סה"כ כולל מע"מ+משלוח+פריטים-קבועים) ונופל ל-`orderSum(lines)` רק למסמכי-לגאסי חסרי-sum, כי סכום-השורות **מקטין** את החוב  
+  *ראיה:* functions/src/credit.ts:109-119
+- גוזר balance ו-pct verbatim מהמסך (‏manager_dashboard_screen.dart:1331-1334,1736-1741) עם clamp כפול, ו-pct=0 כשהתקרה 0 (הימנעות מחלוקה-באפס)  
+  *ראיה:* functions/src/credit.ts:123-129
+- כותב רשומת-ביקורת לכל חישוב  
+  *ראיה:* functions/src/credit.ts:130-140, :24
+
+**2 · מה הוא לא עושה**
+- **לא מייבא יותר את `contractorCredit`** — ההסרה מתועדת במפורש כהחלטה: «a fabricated number returned from here arrived wearing the server's authority»  
+  *ראיה:* functions/src/credit.ts:31-35 (הערה במקום הייבוא) + :36 שמייבא רק creditScopeFor/orderSum/readCreditLimit
+- לא כותב את `creditLimit` — קריאה בלבד; הקביעה היא של מנהל דרך `customers/{name}`  
+  *ראיה:* functions/src/credit.ts:95 `.get()` בלבד
+- לא מעמיד-דף ולא מגביל את שאילתת-ההזמנות — `.get()` על כל התאמות; קבלן עם עשרות-אלפי הזמנות יקרוס/יתייקר  
+  *ראיה:* functions/src/credit.ts:105-107 — אין limit()/startAfter
+- לא מגביל-קצב ולא אוכף App Check  
+  *ראיה:* `grep -n 'RateLimit\|appCheck' functions/src/credit.ts` ⇒ ריק
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:201** — `export { computeCredit } from "./credit";`
+- **מסך-הלקוח `credit_explain_screen`** — מוזכר ב-credit.ts:11-12 כמי שמציג את התוצאה תחת הכותרת «the REAL credit figures» ומזין יועץ
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/generator/hamtzaa.mjs` — גלאי-ההמצאה. החוק שהוא אוכף (ראש-הקובץ): «כל שדה בספק חייב מקור בקלט. אין מקור = המצאה = אדום». הוא בודק **שדות בספק**; `credit.ts` מתעד את הציר המשלים — **ערך בזמן-ריצה** שאין לו מקור.
+- *מה זה נותן:* הרחבת-שער. ‏hamtzaa היה עובר בשקט על `creditLimit`: השדה היה בספק, היה לו מקור — רק ה**ערך** היה hash-של-שם. ‏credit.ts מוסיף את הכלל החסר בשתי שורות מדידות: «תקרה **נקראת**, לא נגזרת» ו-«0 = לא-רשומה, וקריאה מדורדרת חייבת להיראות מדורדרת» (‏creditCore.ts:132-143). זה בדיוק הכרעה-27 של המחולל («מה שאין לו מקור ⇒ ∅ מדווח, לא ניחוש») — אבל על ערכים, ועם ראיה מפרודקשן למה זה משנה.
+
+**5 · §22 = 3** — §20 חרוט: «לעולם לא לזייף דאטה», ופריט 4 ב-HANDOFF מונה 51 המצאות נעולות-ב-ratchet. ‏credit.ts הוא תיק-מקרה מתועד שבו המצאה עברה שער, קיבלה סמכות-שרת, ונמסרה ליועץ שמחליט על אישור-הזמנה. הוא מראה מחלקת-המצאה ש-hamtzaa **לא תופס** היום. לא 0: hamtzaa הוא המקבילה המחוברת, אבל הוא בודק ציר אחר — לא «עושה את אותו הדבר טוב יותר».
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,50p' + '50,142p' functions/src/credit.ts (נקרא במלואו)`
+- `head -20 machtzev/generator/hamtzaa.mjs — «כל שדה בספק חייב מקור בקלט»`
+- `knowledge/HANDOFF-2026-09-16.md פריט 4 + §2 (הכרעה-27)`
+- `functions/src/creditCore.ts:132-148 (readCreditLimit + ההסבר)`
+
+### 12. `functions/src/creditCore.ts` · ts · 148 שורות · §22 = **2**
+
+**1 · מה הוא עושה**
+- ‏`dartStringHashCode(s)` — שכפול-מדויק של `String.hashCode` של **Dart VM**: Jenkins one-at-a-time מעל יחידות-UTF-16, כל החשבון mod 2^32, גימור ומסכה ל-30 ביט, ו-0⇒1  
+  *ראיה:* functions/src/creditCore.ts:34-50
+- ‏`contractorCredit(name)` — פורט verbatim של הפונקציה מ-`app_flutter/lib/logic/manager_dashboard.dart`: hash של השם לתוך הרצועה 30,000–120,000 ₪, מעוגל כלפי-מטה ל-₪100  
+  *ראיה:* functions/src/creditCore.ts:11-19 (המקור המצוטט), :52-64
+- ‏`CREDIT_PROBE` — 9 שורות אמת-קרקע שנלכדו מ-Dart VM 3.7.2: [שם, hashCode, credit], כולל עברית, מחרוזת ריקה, ואימוג׳י («🦺 עובד» ⇒ 8297365 ⇒ 47200). ‏selftest.ts מאשר אותן.  
+  *ראיה:* functions/src/creditCore.ts:84-99
+- ‏`orderSum(lines)` — סכום סמכותי של הזמנה מתוך `line.price` בלבד, **בלי** כפל ב-qty (כי הלקוח כבר חותם price=lineTotal, ו-qty הוא אינפורמטיבי); סובלני ללא-מערך ולערכים לא-סופיים  
+  *ראיה:* functions/src/creditCore.ts:66-82
+- ‏`creditScopeFor({callerUid,isManager})` — הליבה **הטהורה** של ההחלטה-הביטחונית: מנהל ⇒ שאילתה-לפי-שם, אחר ⇒ נעילה-לפי-uid  
+  *ראיה:* functions/src/creditCore.ts:101-130
+- ‏`readCreditLimit(stored)` — תקרה **נקראת, לא נגזרת**: מספר סופי חיובי ⇒ מעוגל, כל השאר ⇒ 0, ו-0 פירושו «לא רשומה» (‏לא «₪0», שהיא טענה-שקרית אחרת)  
+  *ראיה:* functions/src/creditCore.ts:132-148
+
+**2 · מה הוא לא עושה**
+- **מודול טהור — אפס ייבוא**. אין Firebase, אין רשת, אין I/O; זו הסיבה המוצהרת שאפשר להריץ אותו offline מ-selftest  
+  *ראיה:* functions/src/creditCore.ts:3; `grep -c '^import' functions/src/creditCore.ts` ⇒ 0
+- `contractorCredit` **אינו** משמש יותר לתקרה הסמכותית — הוא נשאר «for the local/demo derivation, which is what it was always for». ‏credit.ts הסיר את הייבוא במפורש.  
+  *ראיה:* functions/src/creditCore.ts:29-31 + functions/src/credit.ts:31-35
+- ה-hash **אינו יציב חוצה-פלטפורמות** — מוצהר: dart2js (‏Flutter web) ממסך ל-29 ביט לסיבוב ומחזיר ערכים **שונים**. הפורט תקף לנייטיב iOS/Android בלבד.  
+  *ראיה:* functions/src/creditCore.ts:27-31
+- לא מאמת ולא זורק — אין HttpsError ואין throw; כל הפונקציות מחזירות ערך  
+  *ראיה:* `grep -c 'throw' functions/src/creditCore.ts` ⇒ 0
+
+**3 · מי קורא לו היום**
+- **functions/src/credit.ts:36** — מייבא creditScopeFor · orderSum · readCreditLimit (**לא** contractorCredit)
+- **functions/src/selftest.ts** — מאשר את CREDIT_PROBE offline (creditCore.ts:87)
+- **functions/test/credit.test.ts** — בדיקת-יחידה
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` (דרך promote-auto) עבור `dartStringHashCode` — וזו הנקודה המעניינת: המחולל **פולט Dart** (‏`new/dart-gen-bs`, `gen/site.mjs:37` ⇒ `flutter build web`) אבל כל הלוגיקה שלו רצה ב-JS. אין לו דרך לחשב `String.hashCode` של Dart מ-JS.
+- *מה זה נותן:* ‏`grep -rn 'hashCode|FinalizeHash|CombineHashes' --include=*.mjs new/ machtzev/ gen/` ⇒ ההתאמה היחידה היא `machtzev/extract/functions.mjs:14`, שם `hashCode` מופיע ברשימת-**שלילה** של שמות שאינם-אטום. כלומר: אין למחולל פורט של hash-של-Dart. ‏`dartStringHashCode` הוא 13 שורות, טהור, בעל-אמת-קרקע (‏9 שורות CREDIT_PROBE מ-dart 3.7.2), ומאפשר לצד-ה-JS להסכים עם ה-Dart המחולל על כל מפתח/דלי/מיון שנגזר מ-hash — בלי להריץ Dart.
+
+**5 · §22 = 2** — שני נכסים אמיתיים: (א) `dartStringHashCode` — יכולת שאין למחולל, מאומתת-בייט מול dart run; (ב) `readCreditLimit` + ההסבר שלו הם ניסוח-מדויק של הכרעה-27 («מה שאין לו מקור ⇒ ∅»), שעליו נשען הניקוד 3 של `credit.ts`. לא 3 בעצמו: אלה כלים, לא חסם ב-HANDOFF. לא 0: אין מקבילה מחוברת (הראיה למעלה), והמודול חי ונבדק.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `cat -n functions/src/creditCore.ts (148 שורות, נקראו במלואן)`
+- `grep -c '^import' functions/src/creditCore.ts ⇒ 0 · grep -c 'throw' ⇒ 0`
+- `grep -rn 'hashCode|dartStringHashCode|FinalizeHash|CombineHashes' --include=*.mjs new/ machtzev/ gen/ בריפו-המחולל ⇒ התאמה אחת בלבד: machtzev/extract/functions.mjs:14 (רשימת-שלילה)`
+- `functions/src/credit.ts:36 — מה נותר מיובא ומה לא`
+
+### 13. `functions/src/deleteAccount.ts` · ts · 649 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- שני callables: `deleteAccount` (מחיקה-עצמית — הקורא יכול למחוק **רק** את עצמו, אין ארגומנט-uid) ו-`deleteUser` (מנהל/אדמין מוחק אחר לפי uid)  
+  *ראיה:* functions/src/deleteAccount.ts:544-560, :576-585
+- ‏`eraseUserCompletely(uid,{actorUid,actorRole})` — המחיקה המשותפת; מונה **29** מסמכים ממופתחי-uid במפורש (‏users · diag · roleRequests · _claudeRate · _publishRate · carts · savedProjects · notifSettings · appSettings · catalogSettings · chatSettings · storeSettings · rewards · draftQuotes · comparisonSets · savedCustomers · workerAttendance/Certs/Trainings/Forms/Profiles · courierAttendance/Certs/Forms/Profiles/Clock · workerNotifs · storeProfiles · storeCerts)  
+  *ראיה:* functions/src/deleteAccount.ts:395-543; `sed -n '395,543p' … | grep -c 'db().collection('` ⇒ 29
+- ‏`purgeMultiPartyReferences(uid)` — מנקה את **ההפניה** ל-uid ממסמכים רב-משתתפים ומשאיר את המסמך לצדדים האחרים; מעומד-בדפים (batch 400, תקרת 25 סבבים לשדה) ומחזיר ספירה-פר-יעד לביקורת  
+  *ראיה:* functions/src/deleteAccount.ts:36-40, :41-70 (batchSize=400 · maxRounds=25)
+- תומך בשני סוגי-שדה בסריקה: שוויון (`field == uid`) ומערך-חברות (`array-contains`, עבור `participantUids` של שיחות)  
+  *ראיה:* functions/src/deleteAccount.ts:49-50, :61-63
+- מטהר גם דאטת-מודיעין/טלמטריה על הנושא: `purgeIntelForSubject` (actorStitch · intelEvents · analyticsEvents · presence) ו-`purgeOwnedVacationRequests`  
+  *ראיה:* functions/src/deleteAccount.ts:162-170, :212-225, :280, :311, :350, :371
+- מוחק את רשומת-ה-Auth דרך Admin SDK, כך שאין צורך בהתחברות-טרייה (בניגוד ל-`user.delete()` בצד-הלקוח), ורושם ביקורת  
+  *ראיה:* functions/src/deleteAccount.ts:14-17 (הצהרת-הכוונה) + הייבוא `getAuth` :27
+- ‏`deleteUser` מוגן בארבעה שערים **חובה**: manager/admin בלבד (וניסיון-דחוי נרשם בביקורת) · uid לא-ריק · לא-ה-uid-של-הקורא · **הבעלים לעולם אינו נמחק** (‏owner-guard לפי אימייל מאומת)  
+  *ראיה:* functions/src/deleteAccount.ts:568-575 (התיעוד) + :596-614 (mayApproveUsers + writeAudit של הדחייה) + הייבוא `isOwnerEmail` :34
+
+**2 · מה הוא לא עושה**
+- **לא מוחק מסמכים רב-משתתפים** — הזמנות · chatThreads/chatMessages · customers · projects · tasks נשמרים במכוון, «each belongs to a transaction/conversation other users still see»  
+  *ראיה:* functions/src/deleteAccount.ts:19-24
+- לא מאנונימיז את ה-uid מתוך מסמכים משותפים מעבר לניתוק-הקישור — מוצהר כ«a separate, heavier follow-up (functions/README TODO), not done here»  
+  *ראיה:* functions/src/deleteAccount.ts:22-24
+- לא טרנזקציוני — best-effort פר-שדה; «a failure on one field never aborts the rest», ולכן מחיקה-חלקית אפשרית ומדווחת בספירות בלבד  
+  *ראיה:* functions/src/deleteAccount.ts:38-40
+- אינו טריגר — מוסבר במפורש למה לא `auth.user().onDelete`: ‏Firebase Auth חסר טריגר-רקע ב-gen2, ומסלול-gen1 היה מפיל את כל פריסת-ה-gen2 ב-403  
+  *ראיה:* functions/src/deleteAccount.ts:5-11
+- רשימת-ה-29 היא **ידנית** — אין גילוי-אוסף דינמי, ולכן אוסף-חדש ממופתח-uid ייעלם מהמחיקה בשקט עד שמישהו יוסיף שורה  
+  *ראיה:* functions/src/deleteAccount.ts:407-477 — מערך ליטרלי של db().collection(...).doc(uid)
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:197** — `export { deleteAccount, deleteUser } from "./deleteAccount";`
+- **‏`app_flutter/lib/state/auth_state.dart` — `deleteAccount()`** — קורא ל-callable ואז מתנתק מקומית (deleteAccount.ts:13-14)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ∅ למחולל עצמו. הקובץ קשור-Firestore לחלוטין ואין לו חלק טהור בר-חציבה. הנקודה היחידה בעלת-ערך היא רעיונית: ה**דפוס** «רשימה-ידנית של יעדי-מחיקה ⇒ שער שמוודא שכל אוסף ממופתח-uid נמצא ברשימה» — סוג-השער ש-`machtzev/police.mjs` מנהל (57 שערים).
+- *מה זה נותן:* לא ידוע אם קיים מקבילה מחוברת. אם המחולל אי-פעם יפלוט אפליקציה עם דרישת-GDPR, זו הרשימה-המלאה-ביותר בריפו (29 אוספים + 2 מסלולי-טיהור) — אבל היא **דאטה-דומיין** של BuildSmart, ו-§20 אוסר מילון-דומייני במחולל. ⇒ אין מה לחבר.
+
+**5 · §22 = 1** — 649 שורות של דומיין-Firestore ספציפי, אפס חלק נייד, אפס נגיעה בפריטי-HANDOFF. לא 0 בלבד משום שאין מקבילה מחוברת והמנוע חי בפרודקשן ומוגן היטב — אבל זה המנוע הכי-פחות-חביר לחיבור מבין 13 שמופו עד כה.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,45p' + '540,600p' functions/src/deleteAccount.ts`
+- `grep -n '^export|^async function|collection(' functions/src/deleteAccount.ts`
+- `sed -n '395,543p' functions/src/deleteAccount.ts | grep -c 'db().collection(' ⇒ 29`
+- `sed -n '45,62p' functions/src/deleteAccount.ts ⇒ batchSize=400 · maxRounds=25`
+
+### 14. `functions/src/directory.ts` · ts · 130 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- מגדיר אוסף-שני מינימלי `directory/{uid} = {role, displayName, status, updatedAt}` — «המינימום הדרוש כדי לפנות למישהו». בלי טלפון, בלי אימייל.  
+  *ראיה:* functions/src/directory.ts:15-21
+- ‏`syncDirectoryEntry(uid)` — merge-write של השורה מהמקורות הסמכותיים; merge כדי ש-`lastSeenAt` שהלקוח חותם לנוכחות לא יידרס  
+  *ראיה:* functions/src/directory.ts:80-111
+- ‏`onUserDocWritten` — טריגר `onDocumentWritten` על `users/{uid}` (ולא onCreate, כי שם משתנה ו-status מתהפך); מחיקת-המשתמש מוחקת את השורה כך שחשבון-מחוק מפסיק להיות בר-פנייה  
+  *ראיה:* functions/src/directory.ts:113-129
+- קורא את ה-role **מ-custom claims** דרך `getAuth().getUser(uid)` — קריאת-Auth **אחת** לשם ולתפקיד גם יחד, «a second round trip would only be a way for the two to disagree»  
+  *ראיה:* functions/src/directory.ts:40-62
+- ‏`pickName(authName,typedName,email)` — סדר-עדיפות טהור: שם-ספק (Google) ⇒ שם-שהוקלד (הרשמה-בטלפון) ⇒ החלק שלפני ה-@ באימייל; אף פעם לא ריק, «a list of unnamed rows is a list nobody can pick a person out of»  
+  *ראיה:* functions/src/directory.ts:64-79
+- מתעד את הבאג שהוליד אותו: הלקוח קרא את כל אוסף `users` כדי לפתור uid-ים לפי תפקיד, הכללים דחו (בצדק — שם יש טלפונים ואימיילים), הלקוח «דורדר בחן» לחתימת-השולח-בלבד ⇒ **היפוך מדויק ושקט של הפיצ׳ר**: כל שרשור הפך פרטי למי שכתב בו ראשון. זה נראה עובד רק לבעלים, כי הוא admin.  
+  *ראיה:* functions/src/directory.ts:3-13
+
+**2 · מה הוא לא עושה**
+- לא ניתן-לכתיבה מהלקוח — «writable only from here». ‏role בפרט חייב לבוא מה-claims, אחרת הספרייה הייתה דרך **לטעון** תפקיד ע"י הצהרה עליו  
+  *ראיה:* functions/src/directory.ts:20-26
+- לא מחזיק טלפון/אימייל — האימייל נקרא רק כדי לגזור שם-תצוגה ואינו נשמר  
+  *ראיה:* functions/src/directory.ts:19-20 + :96-104 (השדות הנכתבים בפועל: role, displayName, status, updatedAt)
+- לא יוצר שורה למשתמש-אנונימי — יוצא מוקדם כש-`users/{uid}` אינו קיים  
+  *ראיה:* functions/src/directory.ts:88 `if (!userSnap.exists) return;`
+- כשל-קריאת-Auth **לא מפיל** — מחזיר ברירות (role='contractor', שם ריק) ורושם warning; כלומר תפקיד שגוי עדיף בעיניו על שורה חסרה  
+  *ראיה:* functions/src/directory.ts:55-61
+- לא מטפל ב-`lastSeenAt` בעצמו — רק מגן עליו דרך merge; הכתיבה היא של הלקוח  
+  *ראיה:* functions/src/directory.ts:84-85
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:209** — `export { onUserDocWritten } from "./directory";`
+- **functions/src/approveUsers.ts:146 · functions/src/reviewRoleRequest.ts** — קוראים ל-`syncDirectoryEntry(uid)` מיד אחרי שינוי-status/תפקיד, כדי לא לחכות לכתיבה-לא-קשורה הבאה (directory.ts:82-84)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` עבור `pickName(a,b,c)` — טהורה, arity=3, אפס-דומיין: «בחר את הראשון שקיים, ואם אין — גזור מהאימייל».
+- *מה זה נותן:* אטום אחד קטן. הערך הגדול יותר אינו קוד אלא **תיק-מקרה**: «דירוג-חן בצד-הלקוח שהופך פיצ׳ר על פיו בשקט». ה-HANDOFF מדגיש את אותו לקח במילים אחרות («ירוק-חלול · L27» ב-hamtzaa.mjs:17-18: לעולם לא לדווח 0-המצאות על כלי שלא רץ). ‏directory.ts הוא אותו כשל בשכבת-הרשאות: **הצלחה-לכאורה כי הבודק היה admin**. לא ידוע אם קיים שער-מחובר שתופס «נתיב-כשל שמצליח רק למפעיל-המורשה».
+
+**5 · §22 = 1** — אטום-שם אחד, ותיק-מקרה מאלף אך לא-נייד. אינו נוגע בפריטי-החוב. לא 0: אין מקבילה מחוברת, והמנוע חי ומחובר לשלושה מסלולים באפליקציה.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `cat -n functions/src/directory.ts :1-130 (נקרא במלואו בשני חלקים)`
+- `engine-index.json: importedBy = [approveUsers.ts, index.ts, reviewRoleRequest.ts]`
+- `head -20 machtzev/generator/hamtzaa.mjs (L27 «ירוק-חלול»)`
+
+### 15. `functions/src/index.ts` · ts · 227 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- **נקודת-הכניסה היחידה** של כל חבילת-הפונקציות: קורא ל-`initializeApp()` בגוף-המודול (:28) ומייצא-מחדש 18 פונקציות מ-13 מודולים  
+  *ראיה:* functions/src/index.ts:28, :197-227
+- מממש את `setRole` — «THE ONLY WAY A ROLE IS WRITTEN». תפקידים חיים כ-custom claims של Firebase Auth, **לעולם לא כשדה-Firestore שהלקוח יכול לכתוב**; אישורי-Admin-SDK קיימים כאן בלבד  
+  *ראיה:* functions/src/index.ts:4-9, :45
+- חוזה-הקורא: `{uid,role}` או `{uid,roles:[]}` למרובה-תפקידים, והקורא חייב לשאת `admin:true`; ניסיון-דחוי **נרשם בביקורת** עם reason='admin-claim-required' לפני ה-permission-denied  
+  *ראיה:* functions/src/index.ts:12-15, :59-71
+- מסנן מול `VALID_ROLES=['contractor','manager','store','courier','worker']` — אותה רשימה שהלקוח מסנן מולה (‏lib/data/personas.dart), כך שתפקיד מחוץ-לרשימה נדחה בשני הצדדים  
+  *ראיה:* functions/src/index.ts:29-32, :81-92
+- מאמת טענת-`storeId` אופציונלית מול קיום החנות בפועל, כדי ש-claim לא יצביע על חנות שאינה קיימת  
+  *ראיה:* functions/src/index.ts:96-103
+- מתעד בהערת-בלוק ארוכה את מפת-כל-הפונקציות לפי מספר-ספק (‏S8.1–S8.4 · S7.2 · S1.8 · #6 · P5.56/57/66) — מפת-השרת היחידה בקוד  
+  *ראיה:* functions/src/index.ts:160-195
+- מקבע את הערת-סדר-הטעינה: הייבוא-מחדש **מורם מעל** `initializeApp()`, ולכן כל מודול חייב לפתור שירותי-Admin-SDK עצלות בתוך ה-handler  
+  *ראיה:* functions/src/index.ts:162-166
+
+**2 · מה הוא לא עושה**
+- **אינו מיובא ע"י אף אחד** — `importedBy=[]` באינדקס; זו נקודת-הכניסה, לא ספרייה. הכיוון תמיד ממנו החוצה.  
+  *ראיה:* engine-index.json רשומת index.ts: importedBy=[]
+- מקשיח את האזור **ידנית** ב-`setRole` (`{region:"me-west1"}` מחרוזת-ליטרל) במקום להשתמש ב-`REGION` שהוא עצמו מייבא מ-common — ‏SSOT כפול בקובץ אחד  
+  *ראיה:* functions/src/index.ts:45 מול functions/src/common.ts:17
+- לא מגדיר `setGlobalOptions` — כל פונקציה נושאת את האזור שלה בנפרד  
+  *ראיה:* `grep -n 'setGlobalOptions' functions/src/index.ts` ⇒ ריק
+- לא מגביל-קצב ולא אוכף App Check על `setRole` — ההגנה היחידה היא claim-ה-admin  
+  *ראיה:* functions/src/index.ts:59-71 — הבדיקה היחידה לפני הביצוע
+- ‏`rollupAnalyticsDaily`/`rollupPresenceSummary` מיוצאים אך דורשים הפעלת Cloud Scheduler API — מתועד כתנאי-פריסה, לא כקוד  
+  *ראיה:* functions/src/index.ts:221-226
+
+**3 · מי קורא לו היום**
+- **‏Firebase CLI / Cloud Functions runtime** — `firebase deploy --only functions` טוען את `index.ts` כ-entrypoint
+- **functions/src/selftest.ts · functions/test/orders.test.ts** — `calledByName` באינדקס — אזכור-בשם, אומת: אלה הפניות-בשם למודול, לא ייבוא
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/census/engine-index.mjs:311-333` — הגדרת `GEN_ENTRY` ו-`connected()`. ‏GEN_ENTRY מונה 6 נקודות-כניסה של המחולל, ו«מחובר» = נגיש טרנזיטיבית מהן (או הרצה-בשם מ-regen/ship).
+- *מה זה נותן:* המקבילה המבנית: `index.ts` הוא בדיוק «נקודת-כניסה» במובן הזה — `importedBy=[]`, והכול מגיע ממנו. אם ריפו-buildsmart ייכנס אי-פעם לחישוב-קישוריות של המחולל, `index.ts` הוא השורש שממנו לגזור את 22 מודולי-functions. ⚠️ אבל: `GEN_ENTRY` נועד למחולל, ו-`connected()` מודד קישוריות **למחולל**. הוספת index.ts שם הייתה משנה את המשמעות של «57 מחוברים». ⇒ זו הערה למי שיחשב, לא הצעת-חיבור.
+
+**5 · §22 = 1** — מנוע-חיווט של פרויקט אחר. אין בו לוגיקה ניידת — ההערות הן הנכס, והן BuildSmart-ספציפיות. לא 0: אין מקבילה מחוברת, והוא השורש שבלעדיו 21 מנועי-functions ברשימה שלי אינם מובנים.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,45p' + '160,200p' functions/src/index.ts · grep '^export|onCall|initializeApp'`
+- `sed -n '45,160p' functions/src/index.ts | grep 'VALID_ROLES|HttpsError|admin|storeId'`
+- `sed -n '300,345p' machtzev/census/engine-index.mjs (GEN_ENTRY + connected())`
+- `engine-index.json: index.ts importedBy=[] · calledByName=['selftest.ts','orders.test']`
 
