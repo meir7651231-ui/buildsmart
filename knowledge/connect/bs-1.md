@@ -4,7 +4,7 @@
 > רשימת-המקור: `machtzev/generator/engine-index.json` בענף `claude/mizug` של `-ai-chat-server` (40 מנועים).
 > HEAD-ים ופקודות: `knowledge/connect/NOTES-bs-1.md`.
 
-**מופו: 15/40**
+**מופו: 20/40**
 
 | # | קובץ | שורות | עושה (תמצית) | לא עושה (תמצית) | קוראים | איפה לחבר | §22 |
 |---|------|-------|--------------|------------------|--------|-----------|-----|
@@ -23,6 +23,11 @@
 | 13 | `functions/src/deleteAccount.ts` | 649 | שני callables: `deleteAccount` (מחיקה-עצמית — הקורא יכול למחוק **רק** את עצמו, אין ארגומנט-uid) ו-`deleteUser` (מנהל/אדמין מוחק אחר לפי uid) | **לא מוחק מסמכים רב-משתתפים** — הזמנות · chatThreads/chatMessages · customers · projects · tasks נשמרים במכוון, «each belongs to a transaction/convers | functions/src/index.ts:197 · ‏`app_flutter/lib/state/auth_state.dart` — `deleteAccount()` · -ai-chat-server | ∅ למחולל עצמו. הקובץ קשור-Firestore לחלוטין ואין לו חלק טהור בר-חציבה. הנקודה היחידה בעלת-ערך היא רעיונית: ה**דפוס** «רשימה-ידנית של יעדי-מחיקה ⇒ שער  | **1** |
 | 14 | `functions/src/directory.ts` | 130 | מגדיר אוסף-שני מינימלי `directory/{uid} = {role, displayName, status, updatedAt}` — «המינימום הדרוש כדי לפנות למישהו». בלי טלפון, בלי אימייל. | לא ניתן-לכתיבה מהלקוח — «writable only from here». ‏role בפרט חייב לבוא מה-claims, אחרת הספרייה הייתה דרך **לטעון** תפקיד ע"י הצהרה עליו | functions/src/index.ts:209 · functions/src/approveUsers.ts:146 · functions/src/reviewRoleRequest.ts · -ai-chat | ‏`new/atoms/` עבור `pickName(a,b,c)` — טהורה, arity=3, אפס-דומיין: «בחר את הראשון שקיים, ואם אין — גזור מהאימייל». | **1** |
 | 15 | `functions/src/index.ts` | 227 | **נקודת-הכניסה היחידה** של כל חבילת-הפונקציות: קורא ל-`initializeApp()` בגוף-המודול (:28) ומייצא-מחדש 18 פונקציות מ-13 מודולים | **אינו מיובא ע"י אף אחד** — `importedBy=[]` באינדקס; זו נקודת-הכניסה, לא ספרייה. הכיוון תמיד ממנו החוצה. | ‏Firebase CLI / Cloud Functions runtime · functions/src/selftest.ts · functions/test/orders.test.ts · -ai-chat | ‏`machtzev/census/engine-index.mjs:311-333` — הגדרת `GEN_ENTRY` ו-`connected()`. ‏GEN_ENTRY מונה 6 נקודות-כניסה של המחולל, ו«מחובר» = נגיש טרנזיטיבית  | **1** |
+| 16 | `functions/src/orderEmail.ts` | 198 | ‏טריגר `onOrderCreatedEmail` על יצירת `orders/{orderId}` ששולח מייל-אישור HTML בעברית-RTL דרך Resend — ללקוח (כשיש אימייל בהזמנה) ו**תמיד** עותק לבעלי | לא נכשל כשאין אימייל-לקוח — «degrade, don't fail»: נשלח רק עותק-הבעלים | functions/src/index.ts:199 · ‏SSOT: `knowledge/DIRECTIVE-order-confirmation-email.md` · -ai-chat-server | ‏`new/atoms/` עבור `esc` · `fmtDate` · `looksLikeEmail` (טהורות, arity≤2). וחשוב יותר: `machtzev/generator/` — המחולל פולט **מסכי-Flutter** ואין לו שו | **1** |
+| 17 | `functions/src/orderFlow.ts` | 102 | מגדיר את שרשרת-ששת-השלבים הקנונית `ORDER_FLOW = new → preparing → ready → pickup → transit → delivered`, verbatim מ-`app_flutter/lib/logic/manager_das | **מודול טהור — אפס ייבוא.** אין Firebase, אין I/O; מוצהר כדי ש-selftest יריץ אותו offline | functions/src/orders.ts:36-41 · functions/src/push.ts:30 · functions/src/selftest.ts · -ai-chat-server | ‏`new/dart/wf_*` — עשרה אטומי-Dart (‏wf_next_stage · wf_stage_index · wf_action_visible · wf_advance_label · wf_active · wf_stage_key · wf_stage_from_ | **3** |
+| 18 | `functions/src/orders.ts` | 206 | אוכף מעבר-שלב בשתי שכבות, **שתיהן נדרשות**: callable `advanceOrderStage({orderId})` כנתיב-הכתיבה המאושר, וטריגר `revertIllegalOrderStageWrite` כהגנה-ב | הטריגר **אינו** אוכף תפקידים — «Role enforcement for legal direct writes remains S5 rules' job (no auth context here) — this trigger guards the CHAIN» | functions/src/index.ts:198 · functions/src/orderFlow.ts · -ai-chat-server | ‏`machtzev/generator/app-from-sentences.mjs` — המסלול משפט⇒אפליקציה. הוא מייצר רכזת-ניווט ומודולי-מסך (`app-from-sentences.mjs:3`), ועם `--test` גם בד | **2** |
+| 19 | `functions/src/push.ts` | 218 | שלושה טריגרים של התראות-FCM: `onOrderStageChanged` (‏onDocumentUpdated orders/{id}) · `onChatMessageCreated` (‏onDocumentCreated chatMessages/{id}) ·  | לא מייצר טוקנים ולא מנהל הרשמה — קורא `users/{uid}.fcmToken` שהלקוח כתב (S6.1) | functions/src/index.ts:203-207 · functions/src/reviewRoleRequest.ts · -ai-chat-server | ∅ למחולל. אין לו שכבת-התראות ואין FCM. הנקודה היחידה הקרובה היא `ORDER_STAGE_LABEL_HE`/`ROLE_TITLE_HE` — מחרוזות-עברית-verbatim, שנוגעות בפריט 6 ב-HAN | **1** |
+| 20 | `functions/src/r2.ts` | 157 | ‏callable `getUploadUrl` שמנפיק URL חתום-מראש ל-PUT מול דלי Cloudflare R2, דרך `@aws-sdk/client-s3` + `s3-request-presigner` (‏R2 מדבר S3 API) | לא מעלה ולא נוגע בבתים — רק חותם URL; ההעלאה עצמה היא בין הלקוח ל-R2 | functions/src/index.ts:208 · ‏משטחי S7.2 באפליקציה (‏POD · תמונות לפני/אחרי) · -ai-chat-server | ‏`new/atoms/` עבור `sanitizeFileName(name,ext)` — טהורה, arity=2, אפס-דומיין, ומטפלת בשלושה וקטורים אמיתיים בבת-אחת (‏path traversal דרך `/` ו-`\`, תו | **1** |
 
 ## פירוט מלא
 
@@ -657,4 +662,227 @@
 - `sed -n '45,160p' functions/src/index.ts | grep 'VALID_ROLES|HttpsError|admin|storeId'`
 - `sed -n '300,345p' machtzev/census/engine-index.mjs (GEN_ENTRY + connected())`
 - `engine-index.json: index.ts importedBy=[] · calledByName=['selftest.ts','orders.test']`
+
+### 16. `functions/src/orderEmail.ts` · ts · 198 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- ‏טריגר `onOrderCreatedEmail` על יצירת `orders/{orderId}` ששולח מייל-אישור HTML בעברית-RTL דרך Resend — ללקוח (כשיש אימייל בהזמנה) ו**תמיד** עותק לבעלים  
+  *ראיה:* functions/src/orderEmail.ts:3-5, :146-153, :170-172
+- שער-כפול כבוי-כברירת-מחדל: `ORDER_EMAIL` (‏defineString, ברירה "") חייב להיות "true" **וגם** `RESEND_API_KEY` חייב להיות מוגדר; חסר אחד ⇒ הטריגר חוזר מיד, בלי שליחה ובלי זריקה — פריסה בלי מפתח היא no-op בטוח  
+  *ראיה:* functions/src/orderEmail.ts:7-13, :22-25, :155-158
+- ‏`buildOrderEmailHtml(args)` — בונה-HTML **טהור (testable)** עם orderId · שם-לקוח · תאריך · שורות · סכום · טלפון  
+  *ראיה:* functions/src/orderEmail.ts:65-70
+- שלוש עזר-פונקציות טהורות: `esc(v)` (‏escape ל-& < > ") · `fmtDate(iso)` (dd/mm/yyyy ישראלי **בלי תלות-locale**, ומחזיר "" לתאריך לא-תקין) · `looksLikeEmail(s)`  
+  *ראיה:* functions/src/orderEmail.ts:40-61
+- מתייג את שורת-איש-הקשר נכון: `looksLikeEmail` קובע «אימייל» מול «טלפון», כדי שכתובת לא תסומן בטעות כטלפון  
+  *ראיה:* functions/src/orderEmail.ts:58-59
+- שולח מדומיין **מאומת** (‏DKIM+SPF על buildsmart-il.com) כדי שהאישור יגיע לכל לקוח; ה-from הוא const-בקוד במכוון, כי `defineString` עם ברירת-מחדל עדיין מדווח «no value» ומפיל `firebase deploy --non-interactive`  
+  *ראיה:* functions/src/orderEmail.ts:27-34
+- מוגבל ב-`maxInstances:10` ו-`timeoutSeconds:30`  
+  *ראיה:* functions/src/orderEmail.ts:151-152
+
+**2 · מה הוא לא עושה**
+- לא נכשל כשאין אימייל-לקוח — «degrade, don't fail»: נשלח רק עותק-הבעלים  
+  *ראיה:* functions/src/orderEmail.ts:12-13, :168-172
+- לא שולח על שינוי-שלב — רק על **יצירה** (`onDocumentCreated`). התראות-שלב הן של push.ts.  
+  *ראיה:* functions/src/orderEmail.ts:146-149
+- לא מנסה-שוב ולא מתעד ביקורת — אין `writeAudit` ואין תור-שליחה; כשל-Resend נשאר ב-logger בלבד  
+  *ראיה:* רשימת-הייבוא :15-19 — אין ./audit
+- לא מונע כפילות — טריגר-Firestore יכול לרוץ יותר מפעם אחת (at-least-once) ואין מפתח-אידמפוטנטיות  
+  *ראיה:* functions/src/orderEmail.ts:153-166 — אין בדיקת-emailSent/דגל במסמך
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:199** — `export { onOrderCreatedEmail } from "./orderEmail";`
+- **‏SSOT: `knowledge/DIRECTIVE-order-confirmation-email.md`** — ההנחיה שהקובץ מממש (orderEmail.ts:1)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` עבור `esc` · `fmtDate` · `looksLikeEmail` (טהורות, arity≤2). וחשוב יותר: `machtzev/generator/` — המחולל פולט **מסכי-Flutter** ואין לו שום פולט-HTML-לאימייל.
+- *מה זה נותן:* ‏`buildOrderEmailHtml` הוא תבנית-RTL-עברית מוכחת-משלוח (דומיין מאומת, נבדק בפרודקשן) לערוץ שהמחולל לא מכסה כלל. אזהרה: הוא קשור-דומיין (שורות-הזמנה, סכום, מע"מ) ולכן אינו אטום — מה שנייד הוא ה**שלד**: RTL + escape + פורמט-תאריך-ישראלי-בלי-locale. ‏`fmtDate` בפרט פותר מלכודת אמיתית: `toLocaleDateString` תלוי-סביבה ושובר דטרמיניזם, וה-HANDOFF מדגיש דטרמיניזם כשער (`app-from-sentences.mjs:5` --gate «הרכזת+המודולים ≡ טריים»).
+
+**5 · §22 = 1** — אימות-הזמנה אינו על מסלול משפט⇒אפליקציה ואינו נמדד בשום שער. שלושה אטומים זעירים + תבנית-RTL. לא 0: אין במחולל מקבילה מחוברת לפליטת-HTML-לאימייל (`grep -rln 'resend\|sendgrid\|nodemailer' --include=*.mjs` בריפו-המחולל ⇒ ∅).
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,40p' + '40,70p' + '146,198p' functions/src/orderEmail.ts`
+- `grep -n '^export|^function|onDocument|defineSecret' functions/src/orderEmail.ts`
+- `grep -rln 'resend|sendgrid|nodemailer' --include=*.mjs בריפו-המחולל ⇒ ∅`
+
+### 17. `functions/src/orderFlow.ts` · ts · 102 שורות · §22 = **3**
+
+**1 · מה הוא עושה**
+- מגדיר את שרשרת-ששת-השלבים הקנונית `ORDER_FLOW = new → preparing → ready → pickup → transit → delivered`, verbatim מ-`app_flutter/lib/logic/manager_dashboard.dart kManagerOrderFlow` (‏@legacy index.html:16943 `ORDER_FLOW`)  
+  *ראיה:* functions/src/orderFlow.ts:6-8, :27-35
+- מחזיק תוויות-עברית verbatim לכל שלב (‏התקבלה · בהכנה · מוכן לאיסוף · נאסף · בדרך לאתר · נמסר ✓) ממקור מצוטט `supplier_data.dart kOrderStageLabel`  
+  *ראיה:* functions/src/orderFlow.ts:9-10, :39-47
+- ‏`TRANSITION_OWNER` — **מי מקדם מה**: new>preparing · preparing>ready · ready>pickup ⇒ `store`; pickup>transit · transit>delivered ⇒ `courier`. שלב-המסירה «מסור לשליח» (ready>pickup) הוכרע לטובת החנות, כי בקוד השליח no-op על `ready`.  
+  *ראיה:* functions/src/orderFlow.ts:11-20, :76-83
+- חמש פונקציות-הכרעה **טהורות**: `isOrderStage` · `stageIndex` (‏-1 ללא-ידוע) · `nextStage` (null ב-delivered) · `isLegalStep(from,to)` (**רק** צעד-אחד-קדימה) · `rolesAllowedFor(from,to)` ⇒ [owner,'manager','admin'] או [] · `roleMayStep(roles,from,to)`  
+  *ראיה:* functions/src/orderFlow.ts:49-102
+- מתעד הכרעת-מקור מפורשת: הקוד ב-`sys_orders.dart` הוא הסמכות, וכותרת-הקובץ שלו **מיושנת** — דוגמה לכלל «כותרת-קובץ היא דיווח-עצמי, לא ראיה»  
+  *ראיה:* functions/src/orderFlow.ts:11-12
+
+**2 · מה הוא לא עושה**
+- **מודול טהור — אפס ייבוא.** אין Firebase, אין I/O; מוצהר כדי ש-selftest יריץ אותו offline  
+  *ראיה:* functions/src/orderFlow.ts:3; `grep -c '^import' functions/src/orderFlow.ts` ⇒ 0
+- לא מתיר צעד-אחורה ולא «god-step» של מנהל לשלב שרירותי — `isLegalStep` דורש `b === a+1` בדיוק. קפיצה-שרירותית אינה מוצעת בצד-השרת.  
+  *ראיה:* functions/src/orderFlow.ts:70-74, :22-24
+- לא בודק מי הקורא ולא נוגע במסמכים — הוא עונה «האם מותר», לא «בצע». האכיפה היא ב-orders.ts.  
+  *ראיה:* כל 102 השורות: אין db/auth/throw
+- לא מטפל בביטול/החזרה/שגיאה — אין שלב terminal מלבד `delivered`  
+  *ראיה:* functions/src/orderFlow.ts:28-34 — שישה שלבים, אין cancelled/failed
+
+**3 · מי קורא לו היום**
+- **functions/src/orders.ts:36-41** — מייבא isLegalStep · isOrderStage · nextStage · rolesAllowedFor — הליבה של שתי שכבות-האכיפה
+- **functions/src/push.ts:30** — מייבא isLegalStep · isOrderStage · ORDER_STAGE_LABEL_HE לתוכן ההתראה
+- **functions/src/selftest.ts** — מריץ אותו offline
+- **-ai-chat-server** — ∅ בקוד — אבל ראה «איפה לחבר»: יש שם 10 אטומי-`wf_*` שנחצבו מ-buildsmart, ואף אחד מהם אינו זה.
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/dart/wf_*` — עשרה אטומי-Dart (‏wf_next_stage · wf_stage_index · wf_action_visible · wf_advance_label · wf_active · wf_stage_key · wf_stage_from_key · wf_stage_label · wf_daily_rows · wf_units_total) שנחצבו מ-`buildsmart/app_flutter/lib/logic/workflow_engine.dart`. הם מכסים **קידום-שלב**; הם **לא** מכסים **מי-רשאי-לקדם**.
+- *מה זה נותן:* שכבת-ההרשאה החסרה. מדדתי: `grep -ln 'role|Role|owner|Owner' new/dart/wf_*.dart` ⇒ **∅** — אפס לוגיקת-תפקיד בכל עשרת האטומים. משמעות ל-§22: משפט-בעברית שמתאר תפקידים («החנות מכינה, השליח מוביל») יפיק היום מכונת-מצבים שמקדמת, אבל שכל אחד יכול לקדם בה הכול. ‏`TRANSITION_OWNER` + `rolesAllowedFor` + `roleMayStep` הם בדיוק 3 האטומים שסוגרים את הפער — טהורים, arity≤3, ובלי מילון-דומייני (התפקידים הם ארגומנט, לא קבוע-מוטבע).
+
+**5 · §22 = 3** — §22 היא «אפליקציה עובדת 100%». אפליקציה שבה שליח יכול לסמן «בהכנה» אינה עובדת. זה הפער היחיד שמצאתי שבו למחולל **יש** את הנושא (10 אטומי-wf חצובים מ-buildsmart עצמו) ו**חסר** לו בדיוק הממד הזה, עם ראיית-grep. לא 0: המקבילה המחוברת (wf_next_stage) עושה פחות, לא יותר.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `cat -n functions/src/orderFlow.ts (102 שורות, נקראו במלואן) · grep -c '^import' ⇒ 0`
+- `ls new/dart/ | grep '^wf_' ⇒ 10 אטומים × 3 קבצים (contract/dart/test)`
+- `grep -ln 'role|Role|owner|Owner' new/dart/wf_*.dart ⇒ ∅`
+- `cat new/dart/wf_next_stage.contract.md · cat new/dart/wf_action_visible.dart`
+- `אימות-המקור: sed -n '22,30p' app_flutter/lib/logic/workflow_engine.dart ⇒ `enum WfStage {intake,prep,ready,dispatch,done}` + kWfStages באותו סדר — כלומר ההשערה של המחולל («הסדר הוסק מסדר-ה-case») **נכונה**. ראה NOTES, דפוס 4.`
+
+### 18. `functions/src/orders.ts` · ts · 206 שורות · §22 = **2**
+
+**1 · מה הוא עושה**
+- אוכף מעבר-שלב בשתי שכבות, **שתיהן נדרשות**: callable `advanceOrderStage({orderId})` כנתיב-הכתיבה המאושר, וטריגר `revertIllegalOrderStageWrite` כהגנה-בעומק לכתיבות-ישירות  
+  *ראיה:* functions/src/orders.ts:2-25, :50, :145
+- מנמק למה החלוקה הזו הכרחית: טריגרי-Firestore **אינם נושאים הקשר-אימות**, ולכן בדיקת-תפקיד אפשרית רק היכן שה-ID-token נוכח — ב-callable  
+  *ראיה:* functions/src/orders.ts:5-7, :16-17
+- ה-callable רץ בתוך טרנזקציה: קורא את ההזמנה, גוזר `nextStage`, מוודא `rolesAllowedFor` מול claims-הקורא, וחותם `stageBy` (uid) · `stageRole` (התפקיד שהעניק) · `stageAt` (ISO)  
+  *ראיה:* functions/src/orders.ts:64-107 (התאמות בתוך :50-145: runTransaction · rolesAllowedFor :91 · stageBy/stageRole/stageAt :104-106)
+- ‏**כל** הענקה ו**כל** דחייה נכתבות ל-auditLog — גם מסלול-השגיאה תופס `HttpsError` וכותב רשומת-דחייה לפני שהוא זורק שוב  
+  *ראיה:* functions/src/orders.ts:8-9, :111-121, :123-134
+- הטריגר מחזיר כל שינוי-שלב שאינו צעד-אחד-קדימה לשלב הקודם, בטרנזקציה, ומשחזר גם את stageBy/stageRole/stageAt הקודמים (או מוחק אותם אם לא היו)  
+  *ראיה:* functions/src/orders.ts:167-182
+- שלושה מגני-תקינות בטריגר: (א) יציאה כש-stage לא השתנה · (ב) **מגן-לולאה** — `stageGuard` שהשתנה מסמן שהעדכון עצמו הוא ה-revert ⇒ דילוג · (ג) מגן-דריסה — אם `snap.stage !== toStage` כתיבה חדשה יותר גברה, לא נוגעים  
+  *ראיה:* functions/src/orders.ts:154-160, :168-170
+
+**2 · מה הוא לא עושה**
+- הטריגר **אינו** אוכף תפקידים — «Role enforcement for legal direct writes remains S5 rules' job (no auth context here) — this trigger guards the CHAIN». צעד-חוקי שנכתב ישירות ע"י מי שאינו בעליו יעבור כאן.  
+  *ראיה:* functions/src/orders.ts:16-18, :164-166
+- לא מאפשר «god-step» של מנהל לשלב שרירותי ולא כתיבות-אחורה של `resetToSeed` — שתיהן **מוחזרות** כשהן כתיבה-ישירה. מתועד כתוצאה מקובלת.  
+  *ראיה:* functions/src/orders.ts:21-25
+- לא יוצר ולא מוחק הזמנות — נוגע אך ורק בשדות-השלב  
+  *ראיה:* functions/src/orders.ts:104-106 ו-:172-181 — כל הכתיבות הן stage/stageBy/stageRole/stageAt/stageGuard
+- לא שולח התראה — ההתראה היא של `push.ts` (טריגר נפרד על אותו מסמך)  
+  *ראיה:* רשימת-הייבוא :28-41 — אין messaging/push
+- אינו אידמפוטנטי-מוגן מול ריצה-כפולה של הטריגר מעבר ל-stageGuard; אין מפתח-אירוע מתמיד  
+  *ראיה:* functions/src/orders.ts:157-160 — ההשוואה היא על תוכן ה-guard, לא על event.id שנשמר
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:198** — `export { advanceOrderStage, revertIllegalOrderStageWrite } from "./orders";`
+- **functions/src/orderFlow.ts** — **לא קורא** — הכיוון הפוך: orders.ts מייבא ממנו (isLegalStep · isOrderStage · nextStage · rolesAllowedFor)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/generator/app-from-sentences.mjs` — המסלול משפט⇒אפליקציה. הוא מייצר רכזת-ניווט ומודולי-מסך (`app-from-sentences.mjs:3`), ועם `--test` גם בדיקת-ניווט מחוללת ל-buildsmart.
+- *מה זה נותן:* **דפוס האכיפה הדו-שכבתית**, לא הקוד. הטענה המרכזית של orders.ts — «טריגר אינו נושא אימות ⇒ בדיקת-תפקיד רק ב-callable ⇒ ולכן צריך גם שומר-שרשרת בטריגר» — היא תבנית-ארכיטקטורה שכל אפליקציה מחוללת עם מצבים ותפקידים תזדקק לה. כיום המחולל פולט מסכים; מודל-הכתיבה-המאובטח אינו במסלול. ⚠️ זו הצעה-ארכיטקטורה, לא אטום: אפס שורות בקובץ הזה ניתנות להעברה כמות-שהן (הכול Firestore). לא ידוע אם קיים מנוע-מחובר שמייצר שכבת-כתיבה מאובטחת.
+
+**5 · §22 = 2** — הדפוס חשוב ל-§22 (אפליקציה שמאפשרת כתיבה-ישירה שוברת-שרשרת אינה «עובדת»), אבל הוא רעיוני ולא נייד, והמחולל עדיין לא הגיע לשכבת-הכתיבה. לא 3: אין כאן אטום או תיקון-בר-ביצוע, בניגוד ל-orderFlow.ts שהוא זוג-האח שלו. לא 0: אין מקבילה מחוברת.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,45p' functions/src/orders.ts · grep '^export|onCall|onDocument|writeAudit'`
+- `sed -n '50,145p' functions/src/orders.ts | grep 'transaction|stageBy|rolesAllowedFor|HttpsError'`
+- `sed -n '145,207p' functions/src/orders.ts (הטריגר במלואו)`
+- `sed -n '1,5p' machtzev/generator/app-from-sentences.mjs`
+
+### 19. `functions/src/push.ts` · ts · 218 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- שלושה טריגרים של התראות-FCM: `onOrderStageChanged` (‏onDocumentUpdated orders/{id}) · `onChatMessageCreated` (‏onDocumentCreated chatMessages/{id}) · `onUserActivated` (‏onDocumentUpdated)  
+  *ראיה:* functions/src/push.ts:98, :143, :198
+- ‏`sendToUsers(...)` — שולח לכל טוקן דרך `sendEach`, מדלג על uid לא-ידוע/בלי-טוקן, ו**גוזם** טוקנים ש-FCM מדווח כלא-רשומים מתוך מסמך-המשתמש  
+  *ראיה:* functions/src/push.ts:42-44, :45, :68
+- משתמש בתווית-השלב **verbatim** מ-`ORDER_STAGE_LABEL_HE` (‏supplier_data.dart) לגוף ההתראה, ובתארי-פרסונה verbatim `ROLE_TITLE_HE` (‏personas.dart: קבלן · מנהל המערכת · …)  
+  *ראיה:* functions/src/push.ts:8-9, :30, :32-35
+- מודיע למשתתפי-ההזמנה (contractorId/storeId/courierId) **פחות** מי שביצע את הפעולה, לפי החותמת `stageBy` שה-callable הטביע  
+  *ראיה:* functions/src/push.ts:5-8
+- מתעלם מכתיבות לא-חוקיות ומ-revert: מייבא `isLegalStep`/`isOrderStage` ומדלג כש-`stageGuard` השתנה — כלומר ה-revert של orders.ts לא מייצר התראת-שווא  
+  *ראיה:* functions/src/push.ts:10, :30
+- בהתראת-צ׳אט: כותרת בעברית עם displayName של השולח, ובהיעדרו נופל לתואר-הפרסונה בעברית; גוף = תצוגה-מקדימה של הטקסט  
+  *ראיה:* functions/src/push.ts:12-15
+
+**2 · מה הוא לא עושה**
+- לא מייצר טוקנים ולא מנהל הרשמה — קורא `users/{uid}.fcmToken` שהלקוח כתב (S6.1)  
+  *ראיה:* functions/src/push.ts:17-18
+- מדלג **בשקט** על מזהים שאין להם `users/{uid}` — למשל שמות-תצוגה של seed-לגאסי. משתתף אמיתי עם מסמך חסר לא יקבל התראה ואיש לא יידע.  
+  *ראיה:* functions/src/push.ts:5-7 («silently skipped»)
+- לא כותב ביקורת — `writeAudit` אינו מיובא  
+  *ראיה:* רשימת-הייבוא :21-30 — firestore · messaging · functions · common · orderFlow בלבד
+- לא מגביל-קצב ולא מקבץ — כל שינוי-שלב חוקי הוא משלוח; אין חלון-צבירה  
+  *ראיה:* `grep -n 'RateLimit\|debounce\|batch' functions/src/push.ts` ⇒ ריק
+- לא תומך בהעדפות-שקט/ערוצים — הקובץ אינו קורא את `notifSettings` (אוסף שקיים ונמחק ב-deleteAccount.ts:424)  
+  *ראיה:* `grep -n 'notifSettings' functions/src/push.ts` ⇒ ריק, מול functions/src/deleteAccount.ts:424
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:203-207** — בלוק-ייצוא של שלושת הטריגרים
+- **functions/src/reviewRoleRequest.ts** — מייבא מ-push (engine-index.json importedBy)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ∅ למחולל. אין לו שכבת-התראות ואין FCM. הנקודה היחידה הקרובה היא `ORDER_STAGE_LABEL_HE`/`ROLE_TITLE_HE` — מחרוזות-עברית-verbatim, שנוגעות בפריט 6 ב-HANDOFF («0 מונחי-שדה»).
+- *מה זה נותן:* לא ידוע אם קיים מקבילה מחוברת. ⚠️ **אזהרה כנה נגד החיבור:** אלה **מונחי-דומיין של BuildSmart**, ו-§20 אוסר מפורשות «מילון-דומייני» במחולל. ה-HANDOFF עצמו מציע את המסלול-העוקף הנכון — `ops-particles.mjs`, «נגזרים מ**טיפוס**, לא משם». ⇒ אין כאן מה לחבר; יש כאן מה **לא** לחבר, וזו מסקנה בפני-עצמה.
+
+**5 · §22 = 1** — התראות אינן על מסלול משפט⇒אפליקציה ואינן נמדדות בשום שער. אין בקובץ חלק טהור-נייד. לא 0: אין מקבילה מחוברת והמנוע חי; אבל הערכו למחולל קרוב לאפס, והנכס היחיד שלו (מחרוזות-עברית) נאסר במפורש ע"י §20.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,35p' functions/src/push.ts · grep '^export|^function|onDocument|sendEach|getMessaging'`
+- `functions/src/push.ts:30 — הייבוא מ-orderFlow`
+- `knowledge/HANDOFF-2026-09-16.md פריט 6 + §2 (§20 «אפס מילון-דומייני»)`
+- `functions/src/deleteAccount.ts:424 — קיום אוסף notifSettings`
+
+### 20. `functions/src/r2.ts` · ts · 157 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- ‏callable `getUploadUrl` שמנפיק URL חתום-מראש ל-PUT מול דלי Cloudflare R2, דרך `@aws-sdk/client-s3` + `s3-request-presigner` (‏R2 מדבר S3 API)  
+  *ראיה:* functions/src/r2.ts:2-3, :21-22, :94, :131-134
+- **מפתח-האובייקט בבעלות-השרת**: `{kind}/{uid}/{ts}-{sanitized-name}` — הלקוח לעולם לא בוחר נתיב (אין traversal ואין דריסה חוצת-משתמשים), רק סוג-העלאה ו-contentType של תמונה  
+  *ראיה:* functions/src/r2.ts:15-18
+- ‏`sanitizeFileName(name,ext)` — משאיר basename בטוח בלבד: חותך אחרי `/` ואחרי `\`, מחליף כל תו שאינו `A-Za-z0-9._-` במקף, מסיר נקודות/מקפים מובילים, חותך ל-80 תווים, וריק ⇒ `upload.<ext>`  
+  *ראיה:* functions/src/r2.ts:54-63
+- ‏allowlist כפול: `UPLOAD_KINDS=['pod','before-after']` (שני משטחי-S7.2) ומפת `CONTENT_TYPES` של טיפוסי-תמונה מותרים ⇒ סיומת  
+  *ראיה:* functions/src/r2.ts:34-47, :49-52
+- אפס-אישורים-בקוד: R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY מ-Secret Manager, R2_ACCOUNT_ID/R2_BUCKET כ-string params; לקוח-S3 **עצל ומטומן**, כי params/secrets קריאים רק בזמן-ריצה  
+  *ראיה:* functions/src/r2.ts:4-14, :29-32, :65-86
+- נכשל בבירור כשהתצורה חסרה — `failed-precondition` עם הודעה שמפנה ל-README, במקום לחתום URL לחשבון ריק  
+  *ראיה:* functions/src/r2.ts:68-73
+- כל URL שמונפק נרשם ב-auditLog  
+  *ראיה:* functions/src/r2.ts:19, :26 (הייבוא של writeAudit)
+
+**2 · מה הוא לא עושה**
+- לא מעלה ולא נוגע בבתים — רק חותם URL; ההעלאה עצמה היא בין הלקוח ל-R2  
+  *ראיה:* functions/src/r2.ts:131-134 — getSignedUrl בלבד, אין PutObject מבוצע
+- לא מאמת שהתוכן שהועלה באמת תמונה — ה-contentType מוצהר ע"י הלקוח ומאושר מול allowlist, אבל אין בדיקת-magic-bytes אחרי ההעלאה  
+  *ראיה:* functions/src/r2.ts:113-120 — האימות היחיד הוא מול CONTENT_TYPES
+- לא מגביל גודל-קובץ — אין `ContentLength`/תנאי-policy בפקודה החתומה  
+  *ראיה:* functions/src/r2.ts:133 `new PutObjectCommand({Bucket,Key,ContentType})` — שלושה שדות בלבד
+- לא בודק תפקיד — מייבא `callerRoles` אך ההרשאה היא «מחובר» בלבד; התפקיד משמש לרשומת-הביקורת  
+  *ראיה:* functions/src/r2.ts:27 (הייבוא) מול :97-99 (הבדיקה היחידה: request.auth)
+- לא מוחק ולא מנפיק URL לקריאה — PUT בלבד  
+  *ראיה:* `grep -n 'GetObject\|DeleteObject' functions/src/r2.ts` ⇒ ריק
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:208** — `export { getUploadUrl } from "./r2";`
+- **‏משטחי S7.2 באפליקציה (‏POD · תמונות לפני/אחרי)** — מתועד ב-r2.ts:16-18 כצרכן היחיד
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` עבור `sanitizeFileName(name,ext)` — טהורה, arity=2, אפס-דומיין, ומטפלת בשלושה וקטורים אמיתיים בבת-אחת (‏path traversal דרך `/` ו-`\`, תווים-לא-בטוחים, ושם ריק).
+- *מה זה נותן:* אטום-חיטוי-שם-קובץ. בדקתי מה כבר קיים: `ls new/atoms/*.mjs | grep -iE 'sanitiz|slug|safe.*name|filename'` ⇒ 5 אטומים, **כולם org-slug** (`is-valid-slug` · `org-slug-from-url` · `find-member-org-slugs` + גרסאות-strings). `is-valid-slug.mjs` כולו `/^[a-z0-9-]{2,40}$/.test(slug)` — **מאמת**, לא **מחטא**, ולא נוגע ב-path traversal. ⇒ אין מקבילה מחוברת לחיטוי-שם-קובץ; `sanitizeFileName` מכסה שלושה וקטורים שאף אחד מה-5 לא נוגע בהם.
+
+**5 · §22 = 1** — העלאת-קבצים אינה על מסלול משפט⇒אפליקציה. אטום אחד שימושי אך קטן, ושאר הקובץ הוא חיווט-R2 שאינו נייד. לא 0: 5 אטומי-הסלאג הקיימים מאמתים ולא מחטאים (ראיה למעלה), ולכן אין מקבילה מחוברת שעושה את זה טוב יותר.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,40p' + '49,93p' functions/src/r2.ts · grep '^export|^function|defineSecret|getSignedUrl'`
+- `ls new/atoms/*.mjs | grep -iE 'sanitiz|slug|safe.*name|filename' ⇒ 5 אטומים, כולם org-slug · cat new/atoms/is-valid-slug.mjs ⇒ regex-אימות בלבד`
+- `app/scripts/extract-catalog.mjs:68 (ה-slug הקיים ב-buildsmart, למטרה אחרת)`
 

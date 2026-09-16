@@ -144,3 +144,50 @@ $ export PATH="/home/user/flutter/bin:$PATH" && git commit … && git push -u or
 
 ⚠️ `commit-msg` מזהיר «לא בפורמט conventional commits» — **אזהרה, לא חסימה** (ה-push עבר).
 מהקומיט השני ואילך: `docs:`.
+
+## דפוס 4 — המחולל **כבר** חצב מ-buildsmart, ובדקתי אותו מול המקור
+
+‏`ls new/dart/ | grep '^wf_'` ⇒ **10 אטומי-Dart** (‏wf_next_stage · wf_stage_index ·
+wf_stage_key · wf_stage_from_key · wf_stage_label · wf_advance_label ·
+wf_action_visible · wf_active · wf_daily_rows · wf_units_total), כל אחד עם
+`.contract.md` + `.dart` + `_test.dart`. המקור המוצהר בכולם:
+`buildsmart/app_flutter/lib/logic/workflow_engine.dart`.
+
+**‏`wf_next_stage.contract.md` מצהיר:** «קובץ-המקור **אינו נגיש** בעץ buildsmart —
+הטיוטה במחצב היא מקור-האמת, דיבר-2», ולכן `kWfStages` «**חסר בטיוטה**. הוטבע
+כ-`_kWfStages` בסדר `intake·prep·ready·dispatch·done`» על-סמך היסק מסדר-ה-case.
+
+**בדקתי את ההיסק מול המקור האמיתי אצלי:**
+
+```bash
+$ ls -la app_flutter/lib/logic/workflow_engine.dart   # ⇒ קיים, 11,969 בתים
+$ sed -n '22,30p' app_flutter/lib/logic/workflow_engine.dart
+enum WfStage { intake, prep, ready, dispatch, done }
+const List<WfStage> kWfStages = [
+  WfStage.intake, WfStage.prep, WfStage.ready, WfStage.dispatch, WfStage.done,
+];
+```
+
+⇒ **ההיסק של המחולל נכון בדיוק.** הסדר זהה, ו-`kWfStages` קיים במקור (הוא לא היה
+«חסר» — הוא היה **בלתי-נגיש**). זה בדיוק הבאג שה-`CLAUDE.md` של המחולל מתאר:
+«3 שערים דילגו שנים כי חיפשו בנתיב הלא-נכון». הקובץ נגיש; הקלון היה במקום אחר.
+
+**מה שכן חסר — ונמדד:**
+
+```bash
+$ grep -ln 'role\|Role\|owner\|Owner' new/dart/wf_*.dart   # ⇒ ∅
+```
+
+אפס לוגיקת-תפקיד בכל עשרת האטומים. ו-`workflow_engine.dart` הוא workflow **גנרי
+בן 5 שלבים** (‏intake·prep·ready·dispatch·done, עם `termOf(cfg,…)` להתאמה-לארגון) —
+**לא** שרשרת-מימוש-ההזמנה. השרשרת האמיתית היא בת **6** שלבים,
+`new→preparing→ready→pickup→transit→delivered`, ויושבת ב-`kManagerOrderFlow`
+(‏`app_flutter/lib/logic/manager_dashboard.dart`, נצרכת ב-
+`app_flutter/lib/data/repositories/orders_firebase.dart:39`) — ומפורטת בצד-השרת
+ב-`functions/src/orderFlow.ts`, **עם** `TRANSITION_OWNER` (מי מקדם מה).
+
+⇒ זה מה שהופך את `functions/src/orderFlow.ts` ל-§22 = 3. ראה רשומה 17.
+
+⚠️ `workflow_engine.dart` ו-`manager_dashboard.dart` **אינם ברשימת-40 שלי** (הם
+`app_flutter/lib`, שהאינדקס מחריג במפורש: `engine-index.mjs:82` «קוד-אפליקציה
+(6,752 dart), לא מנועים»). נקראו כ**ראיה** בלבד ולא מופו.
