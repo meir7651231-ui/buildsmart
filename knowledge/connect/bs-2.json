@@ -1913,5 +1913,413 @@
    "grep -rn --exclude-dir=.git -F central-verify.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:42,324,343,365,507,528,567,604",
    "grep -n central-verify /home/user/buildsmart/.githooks/pre-commit .githooks/pre-push ⇒ ∅"
   ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/ckpt.sh",
+  "lang": "sh",
+  "lines": 24,
+  "does": [
+   {
+    "claim": "checkpoint עמיד לריצת-נחיל עם 6 פקודות: init · set · get · phase · guard · show",
+    "evidence": "ckpt.sh:4-5, 16-23"
+   },
+   {
+    "claim": "**המצב חי ב-git-admin dir של ה-worktree** (`$(git rev-parse --absolute-git-dir)/orchestrator-state/checkpoint.json`) — שורד את ה-worktree ולעולם לא מופיע ב-`git diff`",
+    "evidence": "ckpt.sh:2-3, 10-11"
+   },
+   {
+    "claim": "**כתיבה אטומית** — mktemp באותה תיקייה ואז `mv -f`, כך שקריסה באמצע לא משאירה checkpoint חלקי",
+    "evidence": "ckpt.sh:14"
+   },
+   {
+    "claim": "**סדר-פאזות אכיף**: ORDER קבוע בן 10 שלבים, ו-`guard <phase>` יוצא 1 אם הפאזה הנוכחית מוקדמת מהנדרשת — שלב מאוחר לא יכול לרוץ לפני שהמוקדם הושלם",
+    "evidence": "ckpt.sh:6-7, 12-13, 21"
+   },
+   {
+    "claim": "כל ערך עובר דרך jq — JSON תקין מובטח, ופאזה לא-מוכרת נדחית ב-exit 2",
+    "evidence": "ckpt.sh:17-20"
+   },
+   {
+    "claim": "שומר את הפאזה הקודמת (`prev`) וחותמת-זמן UTC בכל מעבר",
+    "evidence": "ckpt.sh:20"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מריץ ולא מחליט — רק זוכר. אין בו לוגיקה שמפעילה את השלב הבא",
+    "evidence": "ckpt.sh:16-23 — כל ענף הוא jq/cat/echo"
+   },
+   {
+    "claim": "**לא מונע דילוג קדימה** — `phase` מקבל כל שם חוקי ללא בדיקת-רצף; רק `guard` בודק, והוא צריך להיקרא במפורש",
+    "evidence": "ckpt.sh:20 מול 21"
+   },
+   {
+    "claim": "אין נעילה — שני תהליכים במקביל יכולים לדרוס זה את ה-checkpoint של זה (ה-`mv` אטומי, הרצף read-modify-write אינו)",
+    "evidence": "ckpt.sh:14, 18, 20 (‏jq קורא מ-$CK וכותב דרך wr)"
+   },
+   {
+    "claim": "דורש jq — אין fallback ואין בדיקת-קיום",
+    "evidence": "ckpt.sh:17-22; אין `command -v jq`"
+   },
+   {
+    "claim": "לא רץ אוטומטית — אין hook/CI שקורא לו",
+    "evidence": "`grep -rn ckpt.sh .githooks/ .github/workflows/` ⇒ ∅"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh",
+    "how": "נבדק על נתונים סינתטיים (‏calledByName באינדקס: [\"selftest\"])"
+   },
+   {
+    "who": "buildsmart/orchestrator/PLAYBOOK.md",
+    "how": "צינור השלב-4.3 — «`ckpt` + `registry.sh assert-none-open`» (מצוטט ב--ai-chat-server/machtzev/BUILDSMART-PROTOCOL-MAP.md:380)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור יחיד: machtzev/BUILDSMART-PROTOCOL-MAP.md:372"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/ship.mjs — סביב שלבי 1-6 (השורות 61-140), ו-machtzev/generator/regen.mjs",
+   "gives": "ל-ship.mjs יש צינור בן 6 שלבים שמסתיים ב-commit+push לשני ריפואים (ship.mjs:115-140), ו**אין לו שום מצב עמיד**: כשל בשלב 4 (בנייה) אחרי שהמראה כבר נכתבה (שלב 2) מחייב הרצה-מחדש מההתחלה, ואין דרך לדעת איפה זה נעצר. `grep -rln 'checkpoint|resume' machtzev/**/*.mjs` ⇒ קובץ **אחד**, machtzev/generator/balagan.mjs:1335, וגם הוא `AppLifecycleState.resumed` בתוך Dart מחולל — כלומר **אפס** מנגנון-checkpoint במחולל. ckpt.sh נותן בדיוק את זה ב-24 שורות, בלי לכלוך ב-`git diff` (כי המצב ב-git-admin dir)"
+  },
+  "s22": {
+   "score": 2,
+   "why": "§22 מדבר על צינור שמריץ בנייה-ובדיקה-ופריסה בלחיצה אחת; צינור כזה **חייב** להיות ניתן לחידוש, אחרת כל כשל-ביניים עולה ריצה מלאה ומזמין את השקר «המשכתי מאיפה שהייתי» בלי ראיה. שתי ההחלטות כאן נכונות ונדירות: מצב ב-git-admin dir (לא מלכלך diff, שורד worktree) וכתיבה אטומית. לא 3: `guard` תלוי-משמעת (צריך לקרוא לו), אין נעילה, ואין לו אף קורא-הרצה בשני הריפואים"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/ckpt.sh (24 שורות, כולן)",
+   "grep -rln 'checkpoint|resume' machtzev/*.mjs machtzev/**/*.mjs ⇒ machtzev/generator/balagan.mjs בלבד · grep -n שם ⇒ שורה 1335 = AppLifecycleState.resumed",
+   "sed -n '61,140p' machtzev/generator/ship.mjs (‏6 שלבים, אפס checkpoint)",
+   "grep -rn ckpt.sh /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅",
+   "grep -rn --exclude-dir=.git -F ckpt.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:372, 380"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/diff-coverage.sh",
+  "lang": "sh",
+  "lines": 48,
+  "does": [
+   {
+    "claim": "שער-כיסוי-לפי-דיף: כל קובץ-מקור **ששונה** חייב להופיע בדוח ה-lcov",
+    "evidence": "diff-coverage.sh:2, 42-48"
+   },
+   {
+    "claim": "**הורג את ה-false-green של T2**: חפיפת-אפס בין נתיבי-lcov לנתיבי-git (שניהם לא-ריקים, ואף נתיב לא משותף) היא BLOCK קשיח — כי זו אי-התאמת-קידומת ולא כיסוי אמיתי",
+    "evidence": "diff-coverage.sh:3-6, 32-40"
+   },
+   {
+    "claim": "מנרמל שני הצדדים לאותה צורה: מסיר `./` ו-`/` מובילים, מסיר strip-prefix (עם escape ל-regex), משאיר .dart בלבד, ומוציא קובצי-בדיקה",
+    "evidence": "diff-coverage.sh:14-23"
+   },
+   {
+    "claim": "שלוש הודעות-חסימה מובחנות: «אין SF: בכלל» · «חפיפת-אפס» (עם דוגמה משני הצדדים ועם ההוראה לתקן) · «קבצים ששונו וחסרים בכיסוי» (עם רשימה)",
+    "evidence": "diff-coverage.sh:30, 34-39, 43-46"
+   },
+   {
+    "claim": "יוצא 0 בחן כשאין קבצי-מקור ששונו",
+    "evidence": "diff-coverage.sh:27-28"
+   },
+   {
+    "claim": "fail-fast על קלטים חסרים (exit 2)",
+    "evidence": "diff-coverage.sh:11-12"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**בודק נוכחות בדוח, לא אחוז-כיסוי** — קובץ עם 0% שורות-מכוסות אבל עם רשומת SF: עובר",
+    "evidence": "diff-coverage.sh:24 (רק `^SF:`) — אין קריאה של DA:/LH:/LF:"
+   },
+   {
+    "claim": "לא מייצר את ה-lcov ולא מריץ בדיקות — מקבל קובץ מוכן",
+    "evidence": "diff-coverage.sh:7-10"
+   },
+   {
+    "claim": "ספציפי ל-Dart — `grep -E '\\.dart$'` קשיח בנרמול",
+    "evidence": "diff-coverage.sh:22"
+   },
+   {
+    "claim": "לא מחשב את רשימת-ה-changed בעצמו — הקורא חייב לספק אותה, ולכן «מה נחשב שינוי» אינו נאכף כאן",
+    "evidence": "diff-coverage.sh:7, 10, 25"
+   },
+   {
+    "claim": "לא רץ אוטומטית",
+    "evidence": "`grep -rn diff-coverage .githooks/ .github/workflows/` ⇒ ∅"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh",
+    "how": "נבדק על נתונים סינתטיים (‏calledByName: [\"selftest\"])"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור יחיד: machtzev/BUILDSMART-PROTOCOL-MAP.md:370"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs:132 — לצד `gate('coverage','coverage-gate.mjs')`, כשער נפרד לפי-דיף",
+   "gives": "**במחולל אין כיסוי-שורות בכלל.** `grep -rn 'lcov' machtzev/ --exclude=engine-index.json` ⇒ **0 התאמות**. השער `coverage` הקיים (machtzev/coverage-gate.mjs:2-5) הוא מחגר על **צירי-יכולת** — «לבנים-ברות-מילוי · מנועים-ברי-הרצה · מהות-עברית · תאומי-דאטה» — ולא על קוד שנגעו בו. כלומר: אפשר לשנות קובץ-מקור במחולל, שהוא לא ייבדק בשום בדיקה, וכל השערים יישארו ירוקים. diff-coverage.sh סוגר בדיוק את זה, ובעיקר מביא איתו את השיעור היקר — שחפיפת-אפס אסור שתיקרא כמעבר"
+  },
+  "s22": {
+   "score": 2,
+   "why": "§22 היא «רצפת-קבלה, אפס-באגים», ושער-כיסוי שמשקר הוא הדרך השקטה ביותר להפר אותה — הוא מייצר ירוק בלי שנבדק דבר. ההידוק המרכזי כאן (חפיפת-אפס = BLOCK) הוא ממצא-red-team אמיתי ובר-העברה לכל שער-הצטלבות, לא רק לכיסוי. לא 3: הוא בודק **נוכחות** ולא אחוז, אין לו קורא-הרצה, ובמחולל אין בכלל צינור-lcov שיזין אותו — כלומר החיבור דורש קודם להפיק כיסוי"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/diff-coverage.sh (48 שורות, כולן)",
+   "grep -rn 'lcov' machtzev/ --exclude=engine-index.json ⇒ 0 התאמות",
+   "sed -n '1,12p' machtzev/coverage-gate.mjs ⇒ מחגר על צירי-יכולת, לא כיסוי-שורות",
+   "sed -n '120,184p' machtzev/police.mjs ⇒ gate('coverage','coverage-gate.mjs') בשורה 132",
+   "grep -rn diff-coverage /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/ff-push.sh",
+  "lang": "sh",
+  "lines": 39,
+  "does": [
+   {
+    "claim": "דוחף fast-forward בלבד, עם ארבעה ארגומנטים מפורשים: worktree · repo · branch · **ה-sha שהקורא מצפה שיהיה ב-origin**",
+    "evidence": "ff-push.sh:52-57"
+   },
+   {
+    "claim": "**מסרב לענף המוגן/ברירת-המחדל בלי שום override** — main/master וגם ה-DEFAULT שנקרא דינמית מ-refs/remotes/origin/HEAD",
+    "evidence": "ff-push.sh:59-66"
+   },
+   {
+    "claim": "**מנמק למה אין override**: ה-red-team הראה שסוכן עם shell פשוט יגדיר `ALLOW_PROTECTED=1`; משתנה-סביבה על אותו מארח אינו שומר. השער האמיתי הוא branch-protection מחוץ למארח",
+    "evidence": "ff-push.sh:53-55"
+   },
+   {
+    "claim": "**לא בולע כשל-fetch** — fetch שנכשל מבטל את הדחיפה, כדי שרפרנס-מעקב ישן לא יעבור את הבדיקה",
+    "evidence": "ff-push.sh:68-72"
+   },
+   {
+    "claim": "משווה sha **מלאים**, אחרי `rev-parse` על ה-BASE — כך שגם קצר וגם מלא עובדים, ובלי התאמת-קידומת מקרית",
+    "evidence": "ff-push.sh:73-78"
+   },
+   {
+    "claim": "מסרב אם origin התקדם מעבר לבסיס הצפוי, ומדפיס את שני ה-sha",
+    "evidence": "ff-push.sh:79-82"
+   },
+   {
+    "claim": "retry עם נסיגה מעריכית 0/2/4/8/16 שניות",
+    "evidence": "ff-push.sh:83-86"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מריץ שום שער לפני הדחיפה — הוא מניח ש-central-verify כבר עבר",
+    "evidence": "אין קריאה ל-central-verify/בדיקה ב-39 השורות"
+   },
+   {
+    "claim": "לא בודק את תוכן ה-commit (trailer, חתימה, הודעה)",
+    "evidence": "ff-push.sh:85 — `git push origin HEAD:$BRANCH` ותו לא"
+   },
+   {
+    "claim": "**אינו מגן בפועל אם הסוכן פשוט לא קורא לו** — זהו סקריפט, לא hook; לעומת זאת ‏.githooks/pre-push בשני הריפואים כן רץ על כל push",
+    "evidence": "`grep -rn ff-push .githooks/ .github/workflows/` ⇒ ∅"
+   },
+   {
+    "claim": "ה-`sleep` שב-retry ייחסם ע\"י ה-pre-tool של המחולל אם יורץ שם מתוך Bash של סוכן",
+    "evidence": "ff-push.sh:84 מול -ai-chat-server/.claude/hooks/pre-tool.sh:105 («sleep/polling (T3) — הארנס מעיר אותך»)"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/PLAYBOOK.md",
+    "how": "שלב 4.2 בצינור — «`ff-push.sh` רק ב\"תדחוף\"» (מצוטט ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:380)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:374, 380, 525"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/ship.mjs:140 — `pushWith(BS, branchOf(BS))`, הדחיפה לתוך buildsmart",
+   "gives": "ship.mjs דוחף לשני ריפואים (‏ship.mjs:126-140) אחרי שהוא כבר בנה וקימט. הוא **לא** מקבל sha-בסיס-צפוי ולא בודק שה-origin לא התקדם — הוא בודק רק `status -sb | includes('ahead')` (שורה 140). החוזה של ff-push.sh («הקורא מצהיר מה הוא ראה ב-origin, ואם זה השתנה — עצור») הוא התוספת שחסרה שם, והיא בדיוק מה שמונע דריסה של סשן מקביל"
+  },
+  "s22": {
+   "score": 1,
+   "why": "יש מקבילה **מחוברת** וחזקה יותר לרוב מה שהוא עושה: `-ai-chat-server/.githooks/pre-push` (76 שורות), שרץ על **כל** push ולא רק כשקוראים לו, וחוסם main/master/production, מחיקת-ref ולא-fast-forward, ובנוסף מריץ ראצ׳ט-כיוון ומשטרה **מלאה** על worktree detached של ה-sha הנדחף. לא 0, כי שני דברים אצל ff-push.sh אינם שם: (א) חוזה ה-sha-בסיס-הצפוי — pre-push יודע רק אם זה fast-forward, לא אם origin זז מאז שהקורא בדק; (ב) סירוב **קטגורי** ל-main בלי פתח-מילוט, מול ה-`Allow: push-main` trailer שכן קיים ב-.githooks/pre-push:17-19 של המחולל. ההנמקה ב-ff-push.sh:53-55 (מדוע env-bypass אינו שומר) היא הטענה שעומדת מאחורי זה"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/ff-push.sh (39 שורות, כולן)",
+   "sed -n '1,20p' /home/user/meir7651231-ui/-ai-chat-server/.githooks/pre-push (76 שורות)",
+   "sed -n '115,141p' machtzev/generator/ship.mjs ⇒ שורה 140 pushWith",
+   "sed -n '100,110p' -ai-chat-server/.claude/hooks/pre-tool.sh ⇒ שורה 105 חוסמת sleep",
+   "grep -rn ff-push /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/grep-verify.sh",
+  "lang": "sh",
+  "lines": 26,
+  "does": [
+   {
+    "claim": "מאמת **בייטים ולא את הפרוזה של הסוכן**: כל ארגומנט הוא `file:::regex` (חייב להופיע ≥1) או `file:::!regex` (חייב להופיע 0), ויציאה ≠0 אם משהו נכשל",
+    "evidence": "grep-verify.sh:26-31, 33-50"
+   },
+   {
+    "claim": "מיועד במפורש לרגע שבו צי-תיקון חוזר ומצהיר «כבר תוקן» / «אין צורך בשינוי»",
+    "evidence": "grep-verify.sh:26-27"
+   },
+   {
+    "claim": "**קובץ חסר = FAIL, לא מעבר שקט** — ובדיוק מסומן מאיפה זה נלמד: ה-A/B של ה-bootstrap גילה שבדיקת-absent הדפיסה «OK» על קובץ שאינו קיים",
+    "evidence": "grep-verify.sh:36-38"
+   },
+   {
+    "claim": "מדפיס לכל בדיקה שורה עם התוצאה **וגם עם מספר-ההופעות** (‏`OK present x3` / `FAIL should-be-absent (x2)`) — כלומר הראיה גלויה, לא רק ירוק/אדום",
+    "evidence": "grep-verify.sh:41-46"
+   },
+   {
+    "claim": "ממשיך לסוף ומדווח על כל הכשלים, לא עוצר בראשון",
+    "evidence": "grep-verify.sh:33-34, 38 (‏`continue`), 49-50"
+   },
+   {
+    "claim": "מנרמל `grep -c` שמחזיר ריק/שגיאה ל-0 במקום לקרוס",
+    "evidence": "grep-verify.sh:40, 44 (‏`|| true` ואז `n=${n:-0}`)"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מוצא את התיקונים ולא יודע מה לבדוק — הדפוסים מגיעים מהקורא (או מ-manifest דרך assert-manifest.sh)",
+    "evidence": "grep-verify.sh:34 (‏`for chk in \"$@\"`)"
+   },
+   {
+    "claim": "`grep` בסיסי (BRE), לא `-E` ולא `-F` — דפוס עם `+`/`?`/`|` יתנהג אחרת ממה שסוכן שכתב אותו מצפה",
+    "evidence": "grep-verify.sh:40, 44"
+   },
+   {
+    "claim": "לא תומך ב-`:::` בתוך הדפוס — `pat=\"${chk#*:::}\"` חותך בהיקרות הראשונה",
+    "evidence": "grep-verify.sh:35"
+   },
+   {
+    "claim": "בודק שורה-בקובץ, לא הקשר — «המחרוזת קיימת» אינו «היא במקום הנכון ובקוד חי ולא בהערה»",
+    "evidence": "grep-verify.sh:40, 44"
+   },
+   {
+    "claim": "לא רץ אוטומטית",
+    "evidence": "`grep -rn grep-verify .githooks/ .github/workflows/` ⇒ ∅"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/assert-manifest.sh:24",
+    "how": "`\"$HERE/grep-verify.sh\" \"${args[@]}\"` — כל 269 חוקי-ה-manifest עוברים דרכו"
+   },
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh",
+    "how": "נבדק על נתונים סינתטיים (‏calledByName: [\"assert-manifest\",\"selftest\"])"
+   },
+   {
+    "who": "buildsmart/orchestrator/PLAYBOOK.md",
+    "how": "שלב 4b «Byte-verify» ושלב 3.1 בצינור (מצוטט ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:343, 380)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:343, 368, 526 («בייטים לא פרוזה»)"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/gen-verify.mjs:77-85 (בניית ה-report) — כשלב שני אחרי ספירת-האטומים",
+   "gives": "gen-verify.mjs מוכיח ש**משהו** רונדר וסופר מחלקות-אטום, אבל לא שמחרוזת מסוימת נמצאת במקום מסוים. זו בדיוק ההבחנה בין «המסך לא קרס» ל«המסך מציג את מה שהמשפט ביקש». grep-verify.sh היא הפרימיטיב ל-31 מילים בעברית שאמורות להופיע במסך מחולל. בריפו הזה הוא כבר משמש כמקור-אמת-יחיד ל-269 חוקים דרך assert-manifest.sh:24 — זהו הדפוס להעביר"
+  },
+  "s22": {
+   "score": 2,
+   "why": "«בייטים לא פרוזה» הוא חוק-היסוד של הערכה-הזאת, וזה 26 השורות שמממשות אותו. שני האינווריאנטים בו הם מה שמפריד בין אימות אמיתי לתיאטרון: **קובץ-חסר = כשל** (הממצא מה-A/B, שורות 36-38) והדפסת **ספירת-ההופעות** ולא רק ✓. במחולל אין שקול: `grep -rln 'grep-verify' machtzev/ --exclude=engine-index.json` מחזיר רק מסמכים. לא 3, כי הוא פרימיטיב בלי תוכן משלו — התוכן יושב ב-manifests, ולכן הציון 3 ניתן ל-assert-manifest.sh שמחזיק אותם; וכי `grep` בלי `-E`/`-F` הוא מלכודת אמיתית לכותב-הדפוס"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/grep-verify.sh (26 שורות, כולן)",
+   "cat -n orchestrator/scripts/assert-manifest.sh:24 (הקורא היחיד בקוד)",
+   "ספירת-חוקים ב-orchestrator/manifests/buildsmart.conformance.txt ⇒ 269",
+   "grep -rln 'grep-verify' machtzev/ --exclude=engine-index.json ⇒ CURRICULUM-RAW.md · BUILDSMART-PROTOCOL-MAP.md (מסמכים בלבד)",
+   "grep -rn grep-verify /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅"
+  ]
+ },
+ {
+  "file": "buildsmart/orchestrator/scripts/lens-coverage.sh",
+  "lang": "sh",
+  "lines": 26,
+  "does": [
+   {
+    "claim": "שער-כיסוי-עדשות: כל עדשת-ביקורת **נדרשת** חייבת לחזור מהצי, אחרת BLOCK עם רשימת-החסרות",
+    "evidence": "lens-coverage.sh:52-54, 70-75"
+   },
+   {
+    "claim": "מנסח את החור שהוא סוגר: «הרצנו 9 מתוך 10 עדשות ואף אחד לא שם לב שה-10 חסרה» — נקודת-מבט חסרה היא חור שקט, לא כשל נראה",
+    "evidence": "lens-coverage.sh:53-54"
+   },
+   {
+    "claim": "שני ייצוגים לרשימת-המוחזרות: תיקייה (מזהה-העדשה = שם-הקובץ בלי הסיומת, *.md/*.json) או קובץ-רשימה (מזהה לשורה)",
+    "evidence": "lens-coverage.sh:55-56, 62-69"
+   },
+   {
+    "claim": "מנרמל את שני הצדדים זהה — מסיר הערות, שורות ריקות וכל רווח, וממיין-ייחודי — ואז `comm -23`",
+    "evidence": "lens-coverage.sh:60-61, 66, 70"
+   },
+   {
+    "claim": "fail-fast על קלט חסר (exit 2), מובחן מ-BLOCK על עדשה חסרה (exit 1)",
+    "evidence": "lens-coverage.sh:59, 68 מול 74"
+   },
+   {
+    "claim": "מדווח כמה עדשות כוסו בהצלחה, לא רק «OK»",
+    "evidence": "lens-coverage.sh:76"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**בודק שהעדשה חזרה, לא שהיא נסרקה** — קובץ ריק בשם הנכון עובר את השער",
+    "evidence": "lens-coverage.sh:63-64 — `find -type f` לפי שם בלבד, בלי בדיקת-גודל/תוכן"
+   },
+   {
+    "claim": "לא מגדיר מהן העדשות הנדרשות — הרשימה חיצונית: `orchestrator/lenses/registry.txt` (‏10 מזהים), והקורא רשאי להעביר תת-קבוצה ממנה",
+    "evidence": "lens-coverage.sh:58 (‏`REQ=\"${1:?required lenses file}\"`) · orchestrator/lenses/registry.txt:1-3 (ההסבר) ו-4-13 (10 המזהים)"
+   },
+   {
+    "claim": "לא מריץ את הצי ולא מוודא שהוא שוגר — רק סופר מה חזר",
+    "evidence": "26 השורות כולן"
+   },
+   {
+    "claim": "לא מזהה עדשה שחזרה ואינה ברשימת-הנדרשות (‏`comm -23` בלבד, בכיוון אחד)",
+    "evidence": "lens-coverage.sh:70"
+   },
+   {
+    "claim": "לא רץ אוטומטית — ואף אין hook שבודק שהנחיל בכלל רץ",
+    "evidence": "`grep -rn lens-coverage .githooks/ .github/workflows/` ⇒ ∅ · -ai-chat-server/machtzev/BUILDSMART-PROTOCOL-MAP.md:524: «אין שער-hook שבודק שהנחיל רץ (משמעת בלבד)»"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/orchestrator/scripts/selftest.sh",
+    "how": "נבדק על נתונים סינתטיים (‏calledByName: [\"selftest\"])"
+   },
+   {
+    "who": "buildsmart/CLAUDE.md + orchestrator/PLAYBOOK.md",
+    "how": "חוק-על #0 — 9 תפקידים × 9 עדשות מ-`orchestrator/lenses/registry.txt`; השער מוזכר ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:352, 369, 524"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:352, 369, 524"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs:176-180 — בלוק «פריטי מרשם⇄ריצה» שבסוף",
+   "gives": "**הדפוס כבר קיים שם, על שערים, ולא על עדשות.** police.mjs:178-180 מיישם בדיוק את אותה בדיקה דו-כיוונית: «שער רשום שלא רץ ולא דווח» ו«שער רץ שאינו במרשם», ושורה 177 מוסיפה «שערים דולגו במצב מלא». זו ההוכחה שהעיקרון מקובל על המחולל — ובאמת, lens-coverage.sh הוא אפילו **חלש יותר** ממנו, כי הוא חד-כיווני (‏`comm -23` בלבד) ואינו תופס עדשה שחזרה ואינה במרשם. החיבור: להחיל את בדיקת-המרשם הדו-כיוונית של police.mjs גם על רשימת-עדשות-ביקורת, ולא רק על שערים. במחולל היום אין שום דבר כזה: `grep -rln 'עדשה|lens' machtzev/ --include=*.mjs` ⇒ 2 קבצים, ושניהם «עדשה-סמנטית» על אינטרפולציית-מחרוזות (board-gen.mjs:93 · lift-lib.mjs:116) — לא קשור"
+  },
+  "s22": {
+   "score": 2,
+   "why": "§22 היא «אפס-באגים», וכשהביקורת עצמה חלקית — הבאגים שאף עדשה לא חיפשה פשוט לא קיימים בדוח. זה הכשל השקט ביותר שיש, והמנוע הזה הופך אותו לנראה ב-26 שורות. יש לו גם תוכן מדיד בריפו הזה: `orchestrator/lenses/registry.txt` מונה **10** מזהי-עדשה (‏cross-role · money-numeric · edge-crash · state-leakage · navigation · performance · accessibility-rtl · async-race · data-seed · text-parity — 13 שורות, מהן 3 הערות), וזה השער היחיד שיכול לאכוף שכולן חזרו. (‏CLAUDE.md חוק-על #0 כותב «9 עדשות»; ה-registry מונה 10 — פער-תיעוד, וה-registry הוא הקובץ שהשער קורא.) לא 3: הוא בודק שם-קובץ ולא תוכן (קובץ ריק עובר), הוא חד-כיווני במקום שהמקבילה ב-police.mjs:178-180 דו-כיוונית, ואף אחד לא מריץ אותו"
+  },
+  "evidence": [
+   "cat -n orchestrator/scripts/lens-coverage.sh (26 שורות, כולן)",
+   "cat -n orchestrator/lenses/registry.txt ⇒ 13 שורות, 10 מזהי-עדשה",
+   "grep -n lens-coverage orchestrator/scripts/selftest.sh ⇒ שורות 10, 65",
+   "sed -n '176,184p' machtzev/police.mjs (בדיקת-מרשם דו-כיוונית על שערים)",
+   "grep -rln 'עדשה|lens' machtzev/ --include=*.mjs ⇒ 2 · grep -n בהם ⇒ board-gen.mjs:93 · lift-lib.mjs:116 (עדשה-סמנטית, לא קשור)",
+   "grep -rn --exclude-dir=.git -F lens-coverage.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md:352,369,524",
+   "grep -rn lens-coverage /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ ∅"
+  ]
  }
 ]
