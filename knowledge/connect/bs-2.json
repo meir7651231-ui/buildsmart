@@ -3704,5 +3704,361 @@
    "cat -n machtzev/generator/gen-verify.mjs ⇒ 39-65 · sed -n '207,208p' machtzev/generator/app-from-sentences.mjs",
    "git grep -n -F new_feature.sh (buildsmart) ⇒ ∅ מחוץ לקובץ"
   ]
+ },
+ {
+  "file": "buildsmart/scripts/preflight.sh",
+  "lang": "sh",
+  "lines": 102,
+  "does": [
+   {
+    "claim": "מריץ 9 שערים זולים (bash בלבד, ללא Flutter) לפני commit — ענף · hooksPath · pre-commit executable · שלמות-hook · סנכרון-גרסה · WIRING עודכן · WIRING קיים · אין binaries · אין משטח כהה חדש",
+    "evidence": "preflight.sh:2-4, 37-88"
+   },
+   {
+    "claim": "**מנמק את הכוונה במספרים**: «30 שניות במקום 13 דק'», מתוך לקח #68 — «4 מחזורי Flutter לחינם בגלל שערים 59/81 שנכשלו אחרי»",
+    "evidence": "preflight.sh:4, 12"
+   },
+   {
+    "claim": "**בודק שלמות-hook בהאש** — `sha256sum .githooks/pre-commit` מול `.git/hooks/pre-commit`, וחוסם אם השניים נפרדו (שער 81)",
+    "evidence": "preflight.sh:46-52"
+   },
+   {
+    "claim": "**מייצר את הגרסה ואז משווה** — מריץ gen_version.sh ואז מצליב `version.g.dart` מול STATUS.md (לקח #72)",
+    "evidence": "preflight.sh:54-59"
+   },
+   {
+    "claim": "**מתקן churn של pubspec.lock** — אם השתנה ולא staged, משחזר; אם staged בכוונה, לא נוגע",
+    "evidence": "preflight.sh:74-80"
+   },
+   {
+    "claim": "**מצהיר מה הוא לא**: «לא מחליף את ה-hook. ה-hook יריץ flutter analyze/test/build בנוסף»",
+    "evidence": "preflight.sh:7"
+   },
+   {
+    "claim": "נושא אזהרת-לקח #70 בראש הקובץ: analyze לא תופס import חסר, ולכן אחרי שינוי-טיפוסים צריך `flutter test <file>`",
+    "evidence": "preflight.sh:9-10"
+   },
+   {
+    "claim": "מסכם ומדפיס «בטוח לרוץ git commit» או «$FAIL בעיות», עם exit 1/0",
+    "evidence": "preflight.sh:90-102"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**יוצא 0 מיד על כל ענף שאינו claude/whats-happening-LyY9G** — כלומר על ענף-העבודה הזה הוא לא בודק דבר",
+    "evidence": "preflight.sh:21-26"
+   },
+   {
+    "claim": "לא מריץ analyze/test/build — מוצהר",
+    "evidence": "preflight.sh:7, 99"
+   },
+   {
+    "claim": "**עושה `git checkout pubspec.lock`** — פעולה הרסנית על עץ-העבודה בסקריפט שנקרא «preflight». היא מנומקת (churn), אבל מוחקת שינוי לא-staged בלי לשאול",
+    "evidence": "preflight.sh:79"
+   },
+   {
+    "claim": "בדיקת-שלמות-ה-hook מותנית בקיום `.git/hooks/pre-commit` — אם הקובץ פשוט אינו קיים, השער מדלג ולא מתלונן",
+    "evidence": "preflight.sh:48-52"
+   },
+   {
+    "claim": "**המספר «30 שניות» אינו נמדד** — אין תזמון בקובץ",
+    "evidence": "preflight.sh:4; אין `time`/`date` בקובץ"
+   },
+   {
+    "claim": "שערי-המשטח-הכהה וה-binaries בודקים רק את ה-staged diff — קובץ שנכתב ולא נוסף לא ייבדק",
+    "evidence": "preflight.sh:83, 87"
+   },
+   {
+    "claim": "לא הרצתי אותו — הוא מריץ gen_version.sh (כותב לעץ) ועלול לעשות checkout ל-pubspec.lock",
+    "evidence": "preflight.sh:55, 79; על הענף הזה הוא ממילא היה יוצא 0 בשורה 25"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — 4 אזכורי-תיעוד: knowledge/CARRY_FORWARD.md · knowledge/PROPOSAL_version_friction.md · orchestrator/design/2-knowledge.md · orchestrator/design/5-memory.md. האינדקס רושם לו `calledByName: [\"📄 BUILDSMART-PROTOCOL-MAP.md\"]`"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:493 (T2 — «30 שניות במקום 13 דק'»), 553, 589"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs — המצב `--inc` / `FAST` שכבר קיים שם (police.mjs:176-177 ו-`gate(...,FAST)` ב-157-159, 171-172)",
+   "gives": "**הרעיון כבר קיים במחולל, ובצורה חזקה יותר** — למשטרה יש דירוג-מהירות מובנה (`FAST`, `--inc`, `filesArg()`), ו-.githooks/pre-commit שלה מריץ `police.mjs --inc` בעוד pre-push מריץ מלא. מה ש-preflight.sh מוסיף הוא דווקא ההיפך מהמצופה: **police.mjs:177 קובע ש«שערים דולגו במצב מלא ⇒ אדום»**, ואילו preflight.sh **יוצא 0 בשקט** על ענף שאינו ענף-הפרוטוקול. כלומר הכיוון הנכון להעברה הוא מהמחולל אל buildsmart, לא להפך"
+  },
+  "s22": {
+   "score": 1,
+   "why": "הכוונה נכונה — שערים זולים לפני היקרים, וזה חוסך מחזורי-Flutter אמיתיים (לקח #68). שני ההידוקים הטובים בו הם בדיקת-שלמות-ה-hook ב-sha256 והצלבת version.g.dart↔STATUS. אבל: הוא יוצא 0 בשקט על כל ענף מלבד אחד, אין לו קורא-הרצה, המספר «30 שניות» אינו נמדד, והוא עושה `git checkout` על pubspec.lock. לא 0 — הוא אינו כפול לשום מנוע מחובר; ‏`police.mjs --inc` הוא המקבילה הרעיונית, אבל היא בריפו אחר ועל שערים אחרים לגמרי"
+  },
+  "evidence": [
+   "cat -n scripts/preflight.sh (102 שורות, כולן)",
+   "git grep -l -F preflight.sh ⇒ knowledge/CARRY_FORWARD.md · knowledge/PROPOSAL_version_friction.md · orchestrator/design/2-knowledge.md · orchestrator/design/5-memory.md",
+   "sed -n '155,184p' machtzev/police.mjs (‏FAST · --inc · «שערים דולגו במצב מלא ⇒ אדום» בשורה 177)",
+   "engine-index.json ⇒ calledByName: [\"📄 BUILDSMART-PROTOCOL-MAP.md\"]"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/test_catalog_qa.py",
+  "lang": "py",
+  "lines": 75,
+  "does": [
+   {
+    "claim": "12 בדיקות-יחידה לשני מנועי-הקטלוג: 6 ל-catalog_qa.py ו-4 ל-catalog_import.py ו-2 לדדופ-חוצה-מותג",
+    "evidence": "test_catalog_qa.py:1-2, 4-31, 33-50, 52-66"
+   },
+   {
+    "claim": "**רץ גם בלי pytest** — runner מובנה שסורק את ה-globals, מריץ כל `test_*`, מדפיס ✅/❌ ויוצא 1 אם לא כולן עברו",
+    "evidence": "test_catalog_qa.py:1, 68-75"
+   },
+   {
+    "claim": "**הרצתי — 12/12 עברו**",
+    "evidence": "`python3 scripts/test_catalog_qa.py` ⇒ exit 0 · 12 שורות ✅ · «12/12 עברו»"
+   },
+   {
+    "claim": "**שתי בדיקות רצות מול הדאטה החיה** — `test_parse_nonempty` (‏>700 מוצרים) ו-`test_no_hard_errors` (אפס ERROR ב-run_rules על הקטלוג האמיתי)",
+    "evidence": "test_catalog_qa.py:4-9; עקבי עם ההרצה שלי של `catalog_qa.py audit` ⇒ 923 מוצרים · 0 ERROR"
+   },
+   {
+    "claim": "**בודק את ההבחנה העדינה בין כפילות-אמת לכפילות-מבודלת**: שני מוצרים באותו שם עם גוון שונה ⇒ `dup_name_differentiator` ולא `dup_name_unresolved`; שם וגוון זהים ⇒ `dup_name_unresolved`",
+    "evidence": "test_catalog_qa.py:17-31"
+   },
+   {
+    "claim": "**נועל את מלכודת-הגרש של Dart** — `dart_str(\"ג'קוזי\") == r\"'ג\\'קוזי'\"`, עם הנימוק «גרש בודד חייב לברוח כדי לא לשבור קומפילציית Dart»",
+    "evidence": "test_catalog_qa.py:39-41"
+   },
+   {
+    "claim": "בודק דדופ חוצה-מותג בשני הכיוונים — מותגים שונים ⇒ התאמה אחת; אותו מותג ⇒ אין התאמה",
+    "evidence": "test_catalog_qa.py:52-66"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**`test_parse_nonempty` הוא סף רופף** — `> 700` מול 923 בפועל. ירידה של 200 מוצרים תעבור בשקט; אין ראצ׳ט",
+    "evidence": "test_catalog_qa.py:5 מול הרצת `catalog_qa.py audit` ⇒ 923"
+   },
+   {
+    "claim": "לא בודק WARN/INFO — רק שאין ERROR. 16 ה-WARN ו-324 ה-INFO שמדדתי אינם נוגעים בו",
+    "evidence": "test_catalog_qa.py:7-9"
+   },
+   {
+    "claim": "**לא בודק את truthcheck** — כלומר את החוליה שמשווה למקור-האמת, שהיא זו שמדדתי כ-29% כיסוי",
+    "evidence": "אין `truthcheck` ב-75 השורות"
+   },
+   {
+    "claim": "מכסה 6 מתוך 21 הפקודות של catalog_qa.py; `fix`/`export`/כל פקודות-ה-PDF אינן נבדקות",
+    "evidence": "test_catalog_qa.py:4-31, 52-66 מול catalog_qa.py:607-613"
+   },
+   {
+    "claim": "ה-runner העצמי תופס רק `AssertionError` — חריגה אחרת (ImportError, KeyError) תפיל את כל הריצה בלי דוח",
+    "evidence": "test_catalog_qa.py:73-74"
+   },
+   {
+    "claim": "**`import catalog_qa` תלוי-cwd** — עובד רק כי Python מוסיף את תיקיית-הסקריפט ל-sys.path; ייבוא מחבילה אחרת יישבר",
+    "evidence": "test_catalog_qa.py:2, 34 (אין sys.path manipulation)"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/CATALOG_PROTOCOL.md",
+    "how": "מוזכר כצעד-98 בפרוטוקול-הקטלוג"
+   },
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — `.github/workflows/catalog-qa.yml` מריץ את `catalog_qa.py selftest` ולא את הקובץ הזה. `grep -c test_catalog_qa .github/workflows/catalog-qa.yml` ⇒ 0"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs:170 — לצד `gate('selftest','police-selftest.mjs')`, כדפוס של «בדיקת-כלי רצה עם הכלי»",
+   "gives": "הנקודה כאן היא אחת וממוקדת: **`test_import_dart_escapes_apostrophe` (שורה 41)**. המחולל פולט Dart ממחרוזות-דאטה עבריות, ולכן בדיקה שנועלת את escaping-הגרש (ואת `$` וה-backslash, catalog_import.py:50) היא בדיוק סוג-הבדיקה שמונעת «אפליקציה מחוללת שלא מתקמפלת על שם-מוצר עם גרש». `machtzev/police-selftest.mjs` בודק את המשטרה; אין שקול שבודק את **הפולט**. זו בדיקה בת 3 שורות שאפשר להעתיק כמעט כמות-שהיא"
+  },
+  "s22": {
+   "score": 2,
+   "why": "זו אחת משתי חבילות-הבדיקה מבין 49 שהרצתי בפועל וראיתי ירוקות (12/12), והיא בודקת את שני המנועים שנוגעים בדאטה החיה — כולל שתי בדיקות שרצות מול 923 המוצרים האמיתיים. הבדיקה על escaping-הגרש היא ממוקדת-§22: משפט בעברית שמכיל גרש הוא בדיוק המקום שבו פלט-Dart מחולל נשבר. לא 3: הסף `>700` רופף מול 923 ואין ראצ׳ט, היא אינה נוגעת ב-truthcheck (החוליה שמדדתי כ-29%), מכסה 6 מתוך 21 פקודות, ואף CI לא מריץ אותה"
+  },
+  "evidence": [
+   "cat -n scripts/test_catalog_qa.py (75 שורות, כולן)",
+   "python3 scripts/test_catalog_qa.py ⇒ exit 0 · 12/12 עברו",
+   "python3 scripts/catalog_qa.py audit ⇒ 923 מוצרים · 0 ERROR · 16 WARN · 324 INFO",
+   "grep -c test_catalog_qa .github/workflows/catalog-qa.yml ⇒ 0",
+   "git grep -l -F test_catalog_qa.py ⇒ CATALOG_PROTOCOL.md בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/vercel-build.sh",
+  "lang": "sh",
+  "lines": 41,
+  "does": [
+   {
+    "claim": "סקריפט-הבנייה של Vercel לאפליקציית ה-Flutter web: מתקין Flutter 3.44.0 מה-CDN אם צריך, ואז `flutter pub get` + `flutter build web --release`",
+    "evidence": "vercel-build.sh:104, 107-109, 136-139"
+   },
+   {
+    "claim": "**מטמון לפי קובץ-גרסה ולא לפי הרצת-flutter** — קורא `$FLUTTER_HOME/version` ומשווה למחרוזת הצפויה, «faster than running flutter --version»",
+    "evidence": "vercel-build.sh:114-121"
+   },
+   {
+    "claim": "מוריד ומחלץ ב-pipe ישיר (`curl … | tar xJ`) אחרי `rm -rf` של ההתקנה הישנה — כלומר אין מצב-ביניים של שתי גרסאות",
+    "evidence": "vercel-build.sh:122-127"
+   },
+   {
+    "claim": "מוסיף `safe.directory` ל-git — נדרש כש-Flutter מחולץ כ-root ב-Vercel",
+    "evidence": "vercel-build.sh:129-130"
+   },
+   {
+    "claim": "מדפיס `flutter --version` בפועל לפני הבנייה, ואת רשימת-הפלט אחריה",
+    "evidence": "vercel-build.sh:132-133, 141-143"
+   },
+   {
+    "claim": "`set -euo pipefail` — כל כשל עוצר",
+    "evidence": "vercel-build.sh:105"
+   },
+   {
+    "claim": "**מחובר בפועל** — זהו ה-buildCommand של הפרויקט",
+    "evidence": "`grep -n vercel-build vercel.json` ⇒ שורה 3: `\"buildCommand\": \"bash scripts/vercel-build.sh\"`"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא מריץ analyze ולא test** — פריסת-Vercel עוקפת את שני השערים שה-githooks וה-CI כן מריצים",
+    "evidence": "vercel-build.sh:136-139 — רק pub get + build"
+   },
+   {
+    "claim": "**לא מריץ gen_version.sh** — ולכן על קלון-Vercel טרי, `lib/version.g.dart` (gitignored) לא קיים. זו בדיוק הנפילה שלקח #72 מתאר ושמכוסה ב-orchestrator/scripts/central-verify.sh:54-62 וב-.claude/hooks/session-start.sh:28",
+    "evidence": "`grep -c gen_version scripts/vercel-build.sh` ⇒ **0** · app_flutter/.gitignore רושם את version.g.dart"
+   },
+   {
+    "claim": "לא מאמת את ההורדה — אין sha256 ואין בדיקת-חתימה על ה-tar מה-CDN",
+    "evidence": "vercel-build.sh:126"
+   },
+   {
+    "claim": "**המטמון מבוסס על קובץ ה-version בלבד** — התקנה פגומה שהשאירה את הקובץ תיחשב cache-hit",
+    "evidence": "vercel-build.sh:116-121"
+   },
+   {
+    "claim": "גרסת-Flutter קשיחה (3.44.0) ואינה נקראת מ-pubspec.yaml — סחף בין הסביבות אפשרי בשקט",
+    "evidence": "vercel-build.sh:107 מול app_flutter/pubspec.yaml"
+   },
+   {
+    "claim": "לא ניתן להרצה כאן — דורש רשת ל-storage.googleapis.com",
+    "evidence": "vercel-build.sh:109, 126"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/vercel.json:3",
+    "how": "`\"buildCommand\": \"bash scripts/vercel-build.sh\"` — קורא יחיד, אמיתי"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/ship.mjs:85-93 — מקטע-הבנייה, ו-101-114 — מקטע-הפריסה ל-gh-pages",
+   "gives": "ship.mjs פורס ל-gh-pages **אחרי** שהוא הריץ analyze (63) ו-test (68); vercel-build.sh פורס בלי אף אחד מהם. ההשוואה בין השניים היא הלקח: **צינור-פריסה שאינו מריץ את השערים הוא דלת-אחורית לפרודקשן**. וההפך גם נכון — `--no-web-resources-cdn` שב-ship.mjs:85,91 אינו כאן, ולכן בנייה זו תלויה ב-gstatic. שתי התוספות (שער לפני פריסה · canvaskit מצורף) הן מה שמחבר את שני הצינורות לאותו חוזה"
+  },
+  "s22": {
+   "score": 1,
+   "why": "הוא **מחובר** (‏vercel.json:3) ועושה את עבודתו — התקנה ממוטמעת ובנייה — וזה יותר ממה שרוב 49 יכולים לומר. אבל ביחס ל-§22 «אפס-באגים» הוא דווקא **מחליש**: זהו מסלול-פריסה שמדלג על analyze, על test, ועל gen_version.sh, כלומר הוא יכול להעלות לאוויר בנייה שאף שער לא ראה. הוא גם מוריד tar מרשת בלי אימות-חתימה. לא 0: אין מקבילה מחוברת שבונה ל-Vercel"
+  },
+  "evidence": [
+   "cat -n scripts/vercel-build.sh (41 שורות, כולן)",
+   "grep -n vercel-build vercel.json ⇒ שורה 3 (buildCommand)",
+   "grep -c gen_version scripts/vercel-build.sh ⇒ 0",
+   "sed -n '61,93p' machtzev/generator/ship.mjs (analyze 63 · test 68 · build 85,91)",
+   "cat -n orchestrator/scripts/central-verify.sh ⇒ 54-62 (הלקח שחסר כאן)"
+  ]
+ },
+ {
+  "file": "buildsmart/upload_huliot_r2.py",
+  "lang": "py",
+  "lines": 36,
+  "does": [
+   {
+    "claim": "מעלה את תמונות-המוצר של Huliot SmartLock ל-Cloudflare R2 דרך boto3 בממשק S3",
+    "evidence": "upload_huliot_r2.py:2, 10-16, 26-27"
+   },
+   {
+    "claim": "**אפס סודות בקוד** — ארבעת הפרטים (ACCOUNT_ID · BUCKET · ACCESS_KEY · SECRET_KEY) נקראים מ-`os.environ[...]` בסוגריים-מרובעים, כלומר משתנה חסר מפיל את הסקריפט מיד ב-KeyError במקום להעלות לאן-שהוא בטעות",
+    "evidence": "upload_huliot_r2.py:5-8"
+   },
+   {
+    "claim": "מייצר את ה-key בצורה יציבה מהנתיב היחסי: `huliot_smartlock/products/<name>`, ומגדיר ContentType מפורש",
+    "evidence": "upload_huliot_r2.py:24, 26-27"
+   },
+   {
+    "claim": "**סופר ומדווח כישלונות פרטנית** — ok/fail, רשימת-השמות שנכשלו, ו-exit 1 אם ולו אחד נכשל",
+    "evidence": "upload_huliot_r2.py:22, 30-36"
+   },
+   {
+    "claim": "ממיין את הקבצים לפני ההעלאה — סדר דטרמיניסטי בין ריצות",
+    "evidence": "upload_huliot_r2.py:19"
+   },
+   {
+    "claim": "**הקלט שלו קיים ומספרו תואם לכותרת** — «159 Huliot SmartLock product images»",
+    "evidence": "`ls app_flutter/assets/huliot_smartlock/products/*.jpg | wc -l` ⇒ **159**, בדיוק המספר שבשורה 2; והם התוצר של app_flutter/scripts/crop_huliot.py"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא ניתן להרצה כאן — התלות חסרה",
+    "evidence": "`python3 -c 'import boto3'` ⇒ ModuleNotFoundError: No module named 'boto3'"
+   },
+   {
+    "claim": "**לא אידמפוטנטי-מדעת** — `upload_file` דורס כל אובייקט קיים באותו key, בלי בדיקת-האש ובלי דיווח על «כבר קיים»",
+    "evidence": "upload_huliot_r2.py:26-27 (אין head_object/ETag)"
+   },
+   {
+    "claim": "לא מאמת מה עלה — אין קריאה חוזרת ואין השוואת-גודל/האש אחרי ההעלאה",
+    "evidence": "upload_huliot_r2.py:28-29"
+   },
+   {
+    "claim": "**לא מתאם עם הקוד שצורך את התמונות** — אין קשר בינו ל-`_huliotImageFor` שב-lib/data/huliot_smartlock_catalog.dart:49; שינוי-שם בצד אחד לא ייתפס בצד השני",
+    "evidence": "upload_huliot_r2.py:24 מול app_flutter/lib/data/huliot_smartlock_catalog.dart:49,60,63"
+   },
+   {
+    "claim": "מעלה `*.jpg` בלבד מהתיקייה — פורמט אחר יידלג בשקט",
+    "evidence": "upload_huliot_r2.py:19"
+   },
+   {
+    "claim": "סדרתי, בלי retry ובלי מקבילות — 159 העלאות ברצף",
+    "evidence": "upload_huliot_r2.py:23-32"
+   },
+   {
+    "claim": "**אין לו אף קורא** בשני הריפואים",
+    "evidence": "`git grep -l -F upload_huliot_r2.py -- . ':!knowledge/connect'` ⇒ 0 · `grep -rn --exclude-dir=.git -F upload_huliot_r2.py` ב--ai-chat-server ⇒ 0 מחוץ ל-engine-index.json"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ — אין התאמה כלל, גם לא בתיעוד"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/server-gate.mjs (שער `server`, police.mjs:145) — הצלע «אפס-סודות»",
+   "gives": "‏server-gate.mjs:2-3 כבר אוכף «אף סוד לא דלף לפלט, ו-`settings` אינו במפתחות-המותרים». upload_huliot_r2.py הוא דוגמה נקייה לצד השני של אותו חוק: **ארבעה סודות, כולם `os.environ[...]` בסוגריים-מרובעים** — כלומר חסר ⇒ KeyError מיידי, לא ברירת-מחדל שקטה ולא העלאה ליעד שגוי. זה ההבדל בין `os.environ[...]` ל-`os.environ.get(...)`, והוא הפרש של תקרית-אבטחה. שווה כשורה בחוזה, לא כקוד"
+  },
+  "s22": {
+   "score": 1,
+   "why": "סקריפט-העלאה של 36 שורות שעשה את עבודתו פעם אחת: 159 התמונות קיימות ומספרן תואם לכותרת, והן אלה שמונעות כרטיסי-מוצר ריקים. הוא גם כתוב נכון בנקודה שחשובה — אפס סודות בקוד, fail-fast על env חסר, exit 1 על כל כשל. אבל: אין לו אף קורא בשום מקום (אפילו לא בתיעוד), boto3 לא מותקן, הוא דורס בלי לבדוק, ואינו מאמת מה עלה. לא 0: אין מקבילה מחוברת שמעלה נכסים ל-CDN — `grep -rln 'boto3\\|r2.cloudflarestorage\\|s3' machtzev/` לא הניב אחת"
+  },
+  "evidence": [
+   "cat -n /home/user/buildsmart/upload_huliot_r2.py (36 שורות, כולן)",
+   "ls app_flutter/assets/huliot_smartlock/products/*.jpg | wc -l ⇒ 159 (תואם לכותרת בשורה 2)",
+   "python3 -c 'import boto3' ⇒ ModuleNotFoundError",
+   "git grep -l -F upload_huliot_r2.py ⇒ 0 · grep -rn (-ai-chat-server) ⇒ engine-index.json בלבד",
+   "git grep -n _huliotImageFor -- app_flutter/lib ⇒ huliot_smartlock_catalog.dart:49,60,63",
+   "sed -n '1,10p' machtzev/generator/server-gate.mjs"
+  ]
  }
 ]

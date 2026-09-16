@@ -160,3 +160,96 @@ cd /home/user/meir7651231-ui/-ai-chat-server && for f in <49>; do b=$(basename "
 
 `knowledge/connect/STATUS-bs-2.txt` מחזיק את הספירה הרצה. `bs-2.json` הוא המקור;
 `bs-2.md` נגזר ממנו. שניהם נכתבים מחדש בכל אצווה של 5.
+
+---
+
+# 8 · סיכום — 49/49 מופו
+
+## 8א · פילוח הציונים (נגזר מ-bs-2.json, לא נכתב ביד)
+
+```bash
+node -e 'const j=require("./knowledge/connect/bs-2.json");
+const by={};for(const e of j)by[e.s22.score]=(by[e.s22.score]||0)+1;
+console.log(j.length, JSON.stringify(by));'
+```
+
+⇒ `49 {"0":6,"1":18,"2":20,"3":5}` · ‏31 מנועים עם `connectAt` שאינו ∅.
+
+**ציון 3 (5):** `catalog-3d/pure_engine.py` · `app_flutter/scripts/generate_stuck_regression.sh` ·
+`orchestrator/scripts/assert-manifest.sh` · `orchestrator/scripts/central-verify.sh` · `scripts/gen_version.sh`
+
+**ציון 0 (6) — לכל אחד שם של מקבילה מחוברת או ראיית-כפילות:**
+
+| מנוע | המקבילה המחוברת |
+|---|---|
+| `.claude/hooks/pre-tool.sh` | `-ai-chat-server/.claude/hooks/pre-tool.sh` + שער `pretool` (police.mjs:169) — superset מדוד |
+| `app_flutter/scripts/audit_gates.sh` | `machtzev/audit-gates.mjs` + שער `audit-gates` (police.mjs:170) — מזריע הפרה ומריץ `git commit` אמיתי |
+| `app_flutter/scripts/polish_shot.js` | `machtzev/tools/site-shot.mjs` (נקרא מ-ship.mjs:96) — מוכיחה אתחול, לא ממתינה עיוור |
+| `app_flutter/scripts/polish_shot.sh` | אותו site-shot.mjs — אותו צינור בדיוק |
+| `app_flutter/scripts/post_build.sh` | `flutter build web --no-web-resources-cdn` ב-ship.mjs:85,91 — פותר את אותה בעיה בלי החלפת-מחרוזת שבירה |
+| `app_flutter/scripts/protocol_check.sh` | `orchestrator/scripts/central-verify.sh` (באותו ריפו) + `.githooks/pre-commit:306,319` + `.githooks/pre-push:63,66` |
+
+## 8ב · מה הרצתי בפועל (לא רק קראתי)
+
+| פקודה | תוצאה |
+|---|---|
+| `bash orchestrator/scripts/selftest.sh` | **SELFTEST PASS** · exit 0 · 49 PASS · 0 FAIL |
+| `bash orchestrator/scripts/required-tests.sh app_flutter orchestrator/manifests/buildsmart.required-tests.txt` | exit 0 · **44/44** · REQUIRED TESTS PRESENT |
+| `bash orchestrator/scripts/assert-manifest.sh app_flutter orchestrator/manifests/buildsmart.conformance.txt` | exit **1** · 269 חוקים · **253 OK · 16 FAIL** |
+| `python3 scripts/catalog_qa.py selftest` | exit 0 · **10/10 חוקים יורים** |
+| `python3 scripts/catalog_qa.py audit` | exit 0 · **923 מוצרים** · 0 ERROR · 16 WARN · 324 INFO |
+| `python3 scripts/catalog_qa.py truthcheck` | exit 0 · **כיסוי אימות 29%** · 199 שם · 89 קטגוריה · 647 עודף · 0 חסר |
+| `python3 scripts/catalog_qa.py coverage` | AQUATEC 601 (100%/64%) · ליפסקי 322 (99%/70%) |
+| `python3 scripts/catalog_import.py --bench 50000` | exit 0 · 468.7ms · **106,683 רשומות/שנייה** |
+| `python3 scripts/test_catalog_qa.py` | exit 0 · **12/12 עברו** |
+| סקריפט-יבש על שתי סוויטות-המוטציה | **40/40** מחרוזות-החיפוש עדיין תואמות את הקוד — אפס drift |
+
+## 8ג · שלושת הממצאים החזקים ביותר
+
+### 1 · `assert-manifest` על ה-manifest המחויב נכשל — ורוב הכשלים הם באג בכלי, לא באפליקציה
+
+269 חוקים · 253 OK · 16 FAIL. סיווגתי כל אחד מ-14 כשלי-ה-`should-be-present`:
+
+- **10 = LITERAL-PRESENT** — המחרוזת קיימת מילולית בקובץ, ו-`grep` נכשל עליה כי היא מכילה
+  `[` לא-סגור (‏`if (searchOn) ...[` · `const List<VerticalPack> kVerticalPacks = [` ועוד 8).
+  השורש: `orchestrator/scripts/grep-verify.sh:40,44` משתמש ב-`grep` בסיסי (BRE) בלי `-F`.
+- **4 = drift אמיתי** — `title: AppBrand.name` (lib/main.dart) · `OrgSetupWizardScreen.route()` ·
+  `if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),` ·
+  `String wfNormName(...)` (lib/logic/workflow_engine.dart).
+- **2 כשלי-`file-missing` = באג-נתיב ב-manifest** — שורות 318-319 כותבות
+  `.github/workflows/clean-two-links.yml` בעוד ה-BASE הוא `app_flutter/`; שורה 129 כן כותבת `../.github/…`.
+  הקובץ קיים ב-`.github/workflows/clean-two-links.yml`.
+
+**התיקון: `grep -F` (או דגל פר-חוק) + `../` בשתי שורות ⇒ 269/269 הופך ליעד מדיד.**
+(‏אני לא נוגע בקוד — זה מחוץ למנדט שלי.)
+
+### 2 · שלושת השערים של המחולל שנוגעים ב-buildsmart חסרים את ההכנה שהוא דורש
+
+`machtzev/police.mjs:157-159` רושם `goldenharness` · `genverify` · `appgen`.
+שלושתם מריצים `flutter test` **בתוך** `BUILDSMART/app_flutter` (gen-verify.mjs:67 · golden-harness.mjs:38),
+ואף אחד מהם — וגם לא `ship.mjs` — אינו מריץ `pub get` או `scripts/gen_version.sh`:
+
+```bash
+grep -n 'version.g.dart\|gen_version\|pub get' machtzev/generator/ship.mjs   # ⇒ ∅
+```
+
+`lib/version.g.dart` הוא **gitignored** ונוצר רק מ-`scripts/gen_version.sh`, ו-`home_shell.dart` מייבא אותו.
+בעץ טרי התוצאה היא `Target of URI hasn't been generated` — בדיוק לקח #72,
+ש-`orchestrator/scripts/central-verify.sh:54-62` מתעד ופותר בשתי שורות.
+
+### 3 · `golden-harness.mjs` משחזר ב-`git checkout` בתוך עץ-העבודה החי של buildsmart
+
+`golden-harness.mjs:34` כותב על `BS/lib/genesis/dart-gen-bs/<module>` ושורה 44 משחזרת ב-
+`spawnSync('git',['checkout','--',…],{cwd: BS})`. ההערה בשורה 6 מודה בכך.
+זה בדיוק הבאג ש-`app_flutter/scripts/mutation_verify.sh:2-6` נולד לתקן (דיווח 2026-06-01).
+**הפתרון הנכון אינו הגיבוי שבו אלא הדפוס שכבר קיים באותו ריפו:**
+`machtzev/mutation-dart-check.mjs:77-85` מחליל בעותק-sandbox ולא נוגע בעץ,
+ו-`machtzev/audit-gates.mjs:17` כבר משתמש ב-`worktree add --detach` — בדיוק מה ש-
+`orchestrator/scripts/wt-setup.sh` עושה ב-9 שורות.
+
+## 8ד · דפוס נוסף ששווה לרשום — האינדקס טועה לפעמים
+
+`scripts/bootstrap-studio-pointer.mjs` מסומן באינדקס `isNot: ["לא-רץ-מהשורה","אין-קורא-ידוע"]`,
+אבל `.github/workflows/firebase-deploy.yml:97` מריץ אותו בדיוק כך (`run: node scripts/…`),
+ו-`functions/src/selftest.ts:198` אף מאמת שהצעד לא הוסר מה-workflow.
+מסקנה מעשית: **`calledByName` באינדקס הוא רמז, לא ראיה** — הצלבתי כל אחד מ-49 ב-`git grep` עצמאי.
