@@ -191,3 +191,46 @@ $ grep -ln 'role\|Role\|owner\|Owner' new/dart/wf_*.dart   # ⇒ ∅
 ⚠️ `workflow_engine.dart` ו-`manager_dashboard.dart` **אינם ברשימת-40 שלי** (הם
 `app_flutter/lib`, שהאינדקס מחריג במפורש: `engine-index.mjs:82` «קוד-אפליקציה
 (6,752 dart), לא מנועים»). נקראו כ**ראיה** בלבד ולא מופו.
+
+## דפוס 5 — «ליבה-טהורה + עוטף-I/O» כבר קיים כאן ב-4 מקומות, ולא-אחיד
+
+הריפו מפריד ליבה מ-I/O ב-4 זוגות:
+
+| ליבה טהורה (אפס `import`) | עוטף-Firebase |
+|---|---|
+| `functions/src/creditCore.ts` | `functions/src/credit.ts` |
+| `functions/src/orderFlow.ts` | `functions/src/orders.ts` · `push.ts` |
+| `functions/src/setEmployerCore.ts` | `functions/src/setEmployer.ts` |
+| פונקציות-טהורות בתוך המודול: `approveUsers.mayApproveUsers`/`cleanApproveUids` · `reviewRoleRequest.mayReviewRoleRequest` · `analytics.pickShard/sumShards/dayKey/summarizePresence` | — |
+
+```bash
+$ grep -c '^import' functions/src/creditCore.ts functions/src/orderFlow.ts functions/src/setEmployerCore.ts
+0 · 0 · 0
+```
+
+**ה-counterexample שמלמד את הגבול:** `functions/src/setOrg.ts` הוא כמעט מילה-במילה
+`setEmployer.ts` (‏admin-gate ⇒ ולידציית-תבנית ⇒ העתקת-claims ⇒ `setCustomUserClaims`
+⇒ merge-mirror ⇒ audit) — אבל הוולידציה שלו משובצת ב-handler ואין `setOrgCore.ts`:
+
+```bash
+$ ls functions/src/ | grep -i orgcore   # ⇒ ריק
+```
+
+⇒ מחלץ-אטומים שירוץ כאן יחצוב את `parseSetEmployerInput` ו**יחמיץ** את הלוגיקה
+הזהה ב-`setOrg.ts` — לא כי היא שונה, אלא כי היא לא הופרדה. זה מסביר במספרים את
+`box-drafts/buildsmart-seed/README.md` («מכונת-החוטים חצבה רק את 6 חוטי ה-Preact
+הישן»): המחלץ תופס מה שכבר טהור, לא מה שיכול היה להיות טהור.
+
+## סיכום-ביניים · §22 אחרי 25 מנועים
+
+| ניקוד | כמה | מי |
+|---|---|---|
+| **3** | 4 | `app/scripts/extract-catalog.mjs` · `app/smoke-settings.mjs` · `functions/src/claude.ts` · `functions/src/orderFlow.ts` |
+| **2** | 5 | `functions/src/analytics.ts` · `creditCore.ts` · `orders.ts` · `reviewRoleRequest.ts` · `selftest.ts` |
+| **1** | 16 | כל השאר |
+| **0** | 0 | — |
+
+**אפס ניקודי-0 עד כה, ובכוונה.** ההוראה מתירה 0 רק כשיש מקבילה מחוברת טובה יותר
+(בשם) או ראיה שהמנוע מת/כפול. לא מצאתי אף מקרה כזה: בכל בדיקה שעשיתי
+(`ask-claude` · `wf_*` · `is-valid-slug` · אטומי-shard/presence · resend/nodemailer)
+המקבילה המחוברת או **חסרה** או **עושה פחות**.

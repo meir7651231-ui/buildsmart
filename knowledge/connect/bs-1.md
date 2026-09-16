@@ -4,7 +4,7 @@
 > רשימת-המקור: `machtzev/generator/engine-index.json` בענף `claude/mizug` של `-ai-chat-server` (40 מנועים).
 > HEAD-ים ופקודות: `knowledge/connect/NOTES-bs-1.md`.
 
-**מופו: 20/40**
+**מופו: 25/40**
 
 | # | קובץ | שורות | עושה (תמצית) | לא עושה (תמצית) | קוראים | איפה לחבר | §22 |
 |---|------|-------|--------------|------------------|--------|-----------|-----|
@@ -28,6 +28,11 @@
 | 18 | `functions/src/orders.ts` | 206 | אוכף מעבר-שלב בשתי שכבות, **שתיהן נדרשות**: callable `advanceOrderStage({orderId})` כנתיב-הכתיבה המאושר, וטריגר `revertIllegalOrderStageWrite` כהגנה-ב | הטריגר **אינו** אוכף תפקידים — «Role enforcement for legal direct writes remains S5 rules' job (no auth context here) — this trigger guards the CHAIN» | functions/src/index.ts:198 · functions/src/orderFlow.ts · -ai-chat-server | ‏`machtzev/generator/app-from-sentences.mjs` — המסלול משפט⇒אפליקציה. הוא מייצר רכזת-ניווט ומודולי-מסך (`app-from-sentences.mjs:3`), ועם `--test` גם בד | **2** |
 | 19 | `functions/src/push.ts` | 218 | שלושה טריגרים של התראות-FCM: `onOrderStageChanged` (‏onDocumentUpdated orders/{id}) · `onChatMessageCreated` (‏onDocumentCreated chatMessages/{id}) ·  | לא מייצר טוקנים ולא מנהל הרשמה — קורא `users/{uid}.fcmToken` שהלקוח כתב (S6.1) | functions/src/index.ts:203-207 · functions/src/reviewRoleRequest.ts · -ai-chat-server | ∅ למחולל. אין לו שכבת-התראות ואין FCM. הנקודה היחידה הקרובה היא `ORDER_STAGE_LABEL_HE`/`ROLE_TITLE_HE` — מחרוזות-עברית-verbatim, שנוגעות בפריט 6 ב-HAN | **1** |
 | 20 | `functions/src/r2.ts` | 157 | ‏callable `getUploadUrl` שמנפיק URL חתום-מראש ל-PUT מול דלי Cloudflare R2, דרך `@aws-sdk/client-s3` + `s3-request-presigner` (‏R2 מדבר S3 API) | לא מעלה ולא נוגע בבתים — רק חותם URL; ההעלאה עצמה היא בין הלקוח ל-R2 | functions/src/index.ts:208 · ‏משטחי S7.2 באפליקציה (‏POD · תמונות לפני/אחרי) · -ai-chat-server | ‏`new/atoms/` עבור `sanitizeFileName(name,ext)` — טהורה, arity=2, אפס-דומיין, ומטפלת בשלושה וקטורים אמיתיים בבת-אחת (‏path traversal דרך `/` ו-`\`, תו | **1** |
+| 21 | `functions/src/reviewRoleRequest.ts` | 244 | ‏callable `reviewRoleRequest({uid,decision})` — אישור/דחייה של בקשת-תפקיד שמשתמש כתב ב-`roleRequests/{uid}`; זהו הנתיב **היחיד** שכותב claim-תפקיד מלב | **לעולם אינו מעניק `manager` או `admin`** — רק ארבעת התפקידים התפעוליים (worker/courier/store/contractor) בני-בקשה ובני-הענקה כאן | functions/src/index.ts:203-207 · functions/src/selftest.ts · -ai-chat-server | ‏`new/atoms/` יחד עם `orderFlow.rolesAllowedFor` — שני חצאים של אותו חסר. ‏`orderFlow` עונה «מי רשאי לקדם **מצב**»; `mayReviewRoleRequest` עונה «מי רש | **2** |
+| 22 | `functions/src/selftest.ts` | 232 | רתמת-בדיקה **offline מלאה**: «no Firebase, no emulator, no network». ‏`npm run selftest` ⇒ tsc ⇒ `node lib/selftest.js` | **אינו מיוצא ע"י index.ts ולעולם אינו נפרס כפונקציה** | ‏`npm run selftest` בתוך functions/ · האינדקס רושם calledByName = creditCore.ts · credit.test.ts · studio.test | ‏`machtzev/police.mjs` — מנהל-השערים (57 שערים). ‏`selftest.ts` הוא שער-בזעיר-אנפין עם שלוש תכונות שה-HANDOFF דורש במפורש: (א) **פקודה אחת שמייצרת מספ | **2** |
+| 23 | `functions/src/setEmployer.ts` | 126 | ‏callable `setEmployer({uid,employerUid})` — קובע (או מבטל) את קישור **עובד⇒מעסיק** כ-claim `employerId` + מראה במסמך-המשתמש; admin-בלבד | לא מאמת שה-`employerUid` הוא חשבון קיים או בעל תפקיד contractor — רק שהוא תואם-תבנית ואינו העובד עצמו | functions/src/index.ts:210 · האינדקס רושם calledByName = setEmployerCore.ts · -ai-chat-server | ∅ ישיר. הקובץ הוא עוטף-Firebase טהור; כל מה שנייד בו יושב ב-`setEmployerCore.ts` (רשומה 24). מה שכן שווה-שימת-לב הוא ה**דפוס-הארכיטקטוני** שהוא חולק ע | **1** |
+| 24 | `functions/src/setEmployerCore.ts` | 41 | ‏`parseSetEmployerInput(uid,employerUid)` — פותר מטען-גולמי ל-`{uid,employerValue,revoke}` **או** ל-`{error}` שהעוטף ממפה ל-invalid-argument. אפס I/O. | **מודול טהור — אפס ייבוא**, כדי ש-`test/setEmployer.test.ts` ייבא אותו ב-`ts-node` פשוט. מוצהר כ«the creditCore idiom». | functions/src/setEmployer.ts:36 · functions/test/setEmployer.test.ts · -ai-chat-server | ‏`new/atoms/` דרך promote-auto. הפונקציה טהורה, arity=2, אפס-דומיין, ומחזירה union מפורש של הצלחה-או-שגיאה במקום לזרוק — בדיוק החוזה שאטום צריך. | **1** |
+| 25 | `functions/src/setOrg.ts` | 137 | ‏callable `setOrg({uid,orgId})` — חברות-בארגון כ-claim `orgId` + מראה ב-`users/{uid}.orgId`; admin-בלבד, ו-null/'' מבטל | לא בודק שהארגון קיים בפועל — `ORG_ID_PATTERN` מאמת **צורה**; אין קריאה ל-`orgs/{orgId}`. זה שונה מ-`setRole`, שכן מאמת קיום-חנות ל-claim ה-storeId. | functions/src/index.ts:227 · -ai-chat-server | ∅ ישיר — עוטף-Firebase. הממצא בעל-הערך כאן הוא **השוואתי ולא חיבורי**: `setOrg.ts` ו-`setEmployer.ts` הם אותו קובץ כמעט מילה-במילה (‏admin-gate ⇒ וליד | **1** |
 
 ## פירוט מלא
 
@@ -885,4 +890,214 @@
 - `sed -n '1,40p' + '49,93p' functions/src/r2.ts · grep '^export|^function|defineSecret|getSignedUrl'`
 - `ls new/atoms/*.mjs | grep -iE 'sanitiz|slug|safe.*name|filename' ⇒ 5 אטומים, כולם org-slug · cat new/atoms/is-valid-slug.mjs ⇒ regex-אימות בלבד`
 - `app/scripts/extract-catalog.mjs:68 (ה-slug הקיים ב-buildsmart, למטרה אחרת)`
+
+### 21. `functions/src/reviewRoleRequest.ts` · ts · 244 שורות · §22 = **2**
+
+**1 · מה הוא עושה**
+- ‏callable `reviewRoleRequest({uid,decision})` — אישור/דחייה של בקשת-תפקיד שמשתמש כתב ב-`roleRequests/{uid}`; זהו הנתיב **היחיד** שכותב claim-תפקיד מלבד `setRole` הבוטסטרפי  
+  *ראיה:* functions/src/reviewRoleRequest.ts:1-5, :60
+- אוכף **מטריצת-אישור היררכית ולא admin-בלבד**: worker⇒מאושר ע"י contractor · courier⇒store · store⇒manager · contractor⇒manager · (admin מאשר הכול). «the real operators approve their own tier»  
+  *ראיה:* functions/src/reviewRoleRequest.ts:5-15, :33-40
+- ‏`mayReviewRoleRequest(reviewerRoles,requestedRole)` — בדיקת-הרשאה **טהורה**: admin ⇒ true; אחרת הקורא חייב להחזיק בדיוק את התפקיד שהמטריצה מייעדת; תפקיד לא-מוכר לעולם אינו בר-סקירה  
+  *ראיה:* functions/src/reviewRoleRequest.ts:41-53
+- באישור — ממזג את התפקיד התפעולי **מעל** ה-claims הקיימים של היעד (משמר admin וכו׳), בדיוק כמו setRole  
+  *ראיה:* functions/src/reviewRoleRequest.ts:17-19
+- מרענן את שורת-הספרייה (`syncDirectoryEntry`) ושולח התראה (`sendToUsers`) — שני הצדדים של «המבקש יודע שאושר»  
+  *ראיה:* רשימת-הייבוא :28-30
+- מכיל גם `onUserCreatedQueueApproval` — טריגר `onDocumentCreated` שמכניס משתמש-חדש לתור-האישור  
+  *ראיה:* functions/src/reviewRoleRequest.ts:199
+
+**2 · מה הוא לא עושה**
+- **לעולם אינו מעניק `manager` או `admin`** — רק ארבעת התפקידים התפעוליים (worker/courier/store/contractor) בני-בקשה ובני-הענקה כאן  
+  *ראיה:* functions/src/reviewRoleRequest.ts:19, :31-32, :35-39 (המטריצה מכילה בדיוק 4 מפתחות)
+- לא מאפשר ללקוח לכתוב `roleRequests.status` או claim ישירות — כללי-S5 דוחים; ה-Admin SDK כאן הוא העוקף היחיד  
+  *ראיה:* functions/src/reviewRoleRequest.ts:16-18
+- אינו מונע «מאשר-את-עצמו» באופן מפורש בפונקציה הטהורה — `mayReviewRoleRequest` בודק תפקידים בלבד; מניעת uid==reviewer, אם קיימת, היא ב-handler ולא בליבה  
+  *ראיה:* functions/src/reviewRoleRequest.ts:46-53 — החתימה מקבלת roles ו-requestedRole בלבד, אין uid
+- לא מטפל ב**שלילת** תפקיד — decision הוא 'approve'|'deny' על בקשה; אין מסלול שמסיר claim קיים  
+  *ראיה:* functions/src/reviewRoleRequest.ts:56-58 (ReviewData)
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:203-207** — בלוק-ייצוא (reviewRoleRequest + onUserCreatedQueueApproval)
+- **functions/src/selftest.ts** — מייבא ומאמת את `mayReviewRoleRequest` — 6+ טענות-אישור ו-6 טענות-שלילה (selftest.ts:115-141)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` יחד עם `orderFlow.rolesAllowedFor` — שני חצאים של אותו חסר. ‏`orderFlow` עונה «מי רשאי לקדם **מצב**»; `mayReviewRoleRequest` עונה «מי רשאי להעניק **תפקיד**». המחולל, כפי שנמדד ברשומה 17, אינו מחזיק אף אחד מהשניים (`grep -ln 'role|Role|owner|Owner' new/dart/wf_*.dart` ⇒ ∅).
+- *מה זה נותן:* אטום-מטריצת-אישור טהור, arity=2: «מי מאשר מה» כטבלה + superuser. זו תבנית שחוזרת בכל אפליקציה עם יותר מסוג-משתמש אחד, והיא **נגזרת מטיפוס ולא משם** — כלומר עומדת בדרישת ה-HANDOFF ל-`ops-particles.mjs` («נגזרים מטיפוס, לא משם»): התפקידים הם ארגומנטים, לא מילון-דומייני מוטבע.
+
+**5 · §22 = 2** — משלים את התמונה של רשומה 17 — שכבת-ההרשאה שהמחולל חסר לחלוטין. לא 3 כמו orderFlow: שם יש 10 אטומים חצובים-מ-buildsmart שמראים שהמחולל **כבר עבד על הנושא** והחמיץ את הממד; כאן אין נקודת-עגינה קיימת, ולכן החיבור ספקולטיבי יותר. לא 0: אין מקבילה מחוברת.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,60p' functions/src/reviewRoleRequest.ts · grep '^export|^const|MATRIX|onCall'`
+- `functions/src/selftest.ts:115-141 — הטענות שמאמתות את המטריצה`
+- `grep -ln 'role|Role|owner|Owner' new/dart/wf_*.dart ⇒ ∅`
+- `knowledge/HANDOFF-2026-09-16.md פריט 6 (ops-particles «נגזרים מטיפוס, לא משם»)`
+
+### 22. `functions/src/selftest.ts` · ts · 232 שורות · §22 = **2**
+
+**1 · מה הוא עושה**
+- רתמת-בדיקה **offline מלאה**: «no Firebase, no emulator, no network». ‏`npm run selftest` ⇒ tsc ⇒ `node lib/selftest.js`  
+  *ראיה:* functions/src/selftest.ts:1-3
+- מריץ **74** טענות `check(cond,msg)` על ארבע ליבות טהורות: creditCore · orderFlow · reviewRoleRequest · approveUsers  
+  *ראיה:* `grep -c '^check(\|  check(' functions/src/selftest.ts` ⇒ 74; הייבוא :14-32
+- מאמת את `dartStringHashCode` ו-`contractorCredit` מול **אמת-קרקע שנלכדה מ-Dart VM** (‏CREDIT_PROBE, dart 3.7.2) — שתי טענות לכל אחת מ-9 השורות, ועוד טענת-רצועה (‏30000≤c≤120000 ו-c%100===0)  
+  *ראיה:* functions/src/selftest.ts:45-60
+- בודק **גם שלילות, לא רק חיוב**: קפיצה new→ready לא-חוקית · אחורה pickup→ready לא-חוקית · גלישה delivered→new לא-חוקית · שלב לא-מוכר · `store ✗ pickup→transit` · `courier ✗ ready→pickup` · `contractor/worker ✗ advance` · `orderSum` מתעלם מ-qty (100, לא 500)  
+  *ראיה:* functions/src/selftest.ts:64-99 (השורות מצוטטות מתוך grep)
+- מרחיב מעבר ללוגיקה: קורא את `.github/workflows/firebase-deploy.yml` ומאמת את **סדר-שלבי-הפריסה** לפי `indexOf` — bootstrap ⇒ rules ⇒ indexes ⇒ READY-poll ⇒ functions-מותנה-בהצלחה, ושאין `continue-on-error: true`  
+  *ראיה:* functions/src/selftest.ts:177-215 (iBootstrap/iRules/iIndexes/iReady/iGate + הטענה על continue-on-error)
+- מדפיס פסק-דין אחד `selftest: N/M PASS` ומחזיר exitCode 1 בכשל  
+  *ראיה:* functions/src/selftest.ts:228-232
+
+**2 · מה הוא לא עושה**
+- **אינו מיוצא ע"י index.ts ולעולם אינו נפרס כפונקציה**  
+  *ראיה:* functions/src/selftest.ts:8; engine-index.json: importedBy=[]
+- לא בודק שום קוד שנוגע ב-Firebase — רק את המודולים הטהורים. כל ה-callables, הטריגרים והטרנזקציות אינם מכוסים כאן.  
+  *ראיה:* רשימת-הייבוא :14-32 — creditCore · orderFlow · reviewRoleRequest · approveUsers בלבד
+- לא משתמש בשום framework — אין jest/mocha/vitest; `check()` היא 7 שורות ומונה שני מספרים  
+  *ראיה:* functions/src/selftest.ts:34-43
+- בדיקת-ה-workflow היא **טקסטואלית** (`indexOf` על מחרוזות-כותרת), לא פרסור-YAML — שינוי-ניסוח של שם-שלב ישבור אותה בלי ששום דבר השתנה מהותית  
+  *ראיה:* functions/src/selftest.ts:191-195
+
+**3 · מי קורא לו היום**
+- **‏`npm run selftest` בתוך functions/** — מתועד ב-selftest.ts:2
+- **האינדקס רושם calledByName = creditCore.ts · credit.test.ts · studio.test.ts · 📄 BUILDSMART-PROTOCOL-MAP.md** — ‏אומת: אלה **הפניות-בשם בהערות** (למשל creditCore.ts:25 «see CREDIT_PROBE + selftest.ts»), לא קריאות. ה-📄 הוא אזכור-מסמך. ראה דפוס 2 ב-NOTES.
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/police.mjs` — מנהל-השערים (57 שערים). ‏`selftest.ts` הוא שער-בזעיר-אנפין עם שלוש תכונות שה-HANDOFF דורש במפורש: (א) **פקודה אחת שמייצרת מספר** — «מספר בלי פקודה אינו פריט»; (ב) **fail-loud** עם exitCode; (ג) **אמת-קרקע חיצונית** (CREDIT_PROBE מ-dart run) במקום דיווח-עצמי.
+- *מה זה נותן:* תבנית-שער נטולת-תלויות. שתי תכונות שלה נדירות ושוות-אימוץ: (1) **בדיקת-שלילה שיטתית** — לכל «X מותר» יש «Y אסור»; ‏`hamtzaa.mjs:17-18` מזהיר מ«ירוק-חלול · L27» (לדווח 0-המצאות על כלי שלא רץ), ובדיקות-שלילה הן בדיוק התרופה. (2) **שער על סדר-שלבי-הפריסה** שנקרא מקובץ-ה-CI עצמו — המקבילה במחולל היא `app-from-sentences.mjs:5 --gate` (דטרמיניזם), אבל אין שם שער שמאמת שה**צינור** מסודר נכון. לא ידוע אם קיים שער-מחובר כזה.
+
+**5 · §22 = 2** — אינו מקרב ישירות (אינו על מסלול משפט⇒אפליקציה), אבל הוא תיק-עבודה של «מדידה · לא טענה» — העיקרון שכל `CLAUDE.md` ו-`HANDOFF` של המחולל בנויים עליו — במימוש בן 232 שורות ואפס-תלויות. דפוס בדיקות-השלילה הוא תרומה אמיתית ל-165 המנועים «הלא-ידועים» (פריט 5). לא 3: תבנית, לא תיקון. לא 0: אין מקבילה מחוברת שמאמתת סדר-פריסה.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,55p' + tail -25 functions/src/selftest.ts`
+- `grep -c '^check(|  check(' functions/src/selftest.ts ⇒ 74`
+- `grep -n 'readFileSync|.github|indexOf(' functions/src/selftest.ts ⇒ :184-195`
+- `head -20 machtzev/generator/hamtzaa.mjs (fail-closed · «ירוק-חלול · L27»)`
+
+### 23. `functions/src/setEmployer.ts` · ts · 126 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- ‏callable `setEmployer({uid,employerUid})` — קובע (או מבטל) את קישור **עובד⇒מעסיק** כ-claim `employerId` + מראה במסמך-המשתמש; admin-בלבד  
+  *ראיה:* functions/src/setEmployer.ts:2-3, :23-27, :44
+- מנמק למה זה קיים: ‏HR של עובד (נוכחות/תעודות/חופשות) יכול לעבור לשרת רק אם השרת יודע **מי המעסיק**, כדי שכלל יאמר «העובד כותב את המסמך שלו, ורק המעסיק (או מנהל) קורא». כיום `boardSessionFromAuthSnapshot` משאיר `employerId` ריק «כי אין עדיין claim».  
+  *ראיה:* functions/src/setEmployer.ts:6-11
+- מזיז **רק** את משטח-ה-`employerId` — מעתיק את ה-claims הקיימים וממזג מעליהם, כך ש-role/roles/storeId/orgId/admin נשארים בדיוק כשהיו; זאת בניגוד ל-`setRole` שמחליף את כל המשטח  
+  *ראיה:* functions/src/setEmployer.ts:12-16, :82-100 (claims copy ⇒ delete/set ⇒ setCustomUserClaims)
+- ‏revoke אמיתי בשני הצדדים: מוחק את ה-claim **וגם** מסיר את שדה-המראה דרך `FieldValue.delete()`  
+  *ראיה:* functions/src/setEmployer.ts:95-96, :110
+- מאמת קיום-היעד לפני כתיבה — `not-found` כשהמשתמש אינו קיים, במקום ליצור claim יתום  
+  *ראיה:* functions/src/setEmployer.ts:88
+- **כל** קריאה נרשמת בביקורת, כולל דחייה עם `reason:'admin-claim-required'` — «privilege-escalation trail»  
+  *ראיה:* functions/src/setEmployer.ts:55-69, :114-124
+
+**2 · מה הוא לא עושה**
+- לא מאמת שה-`employerUid` הוא חשבון קיים או בעל תפקיד contractor — רק שהוא תואם-תבנית ואינו העובד עצמו  
+  *ראיה:* functions/src/setEmployerCore.ts:24-39 — הבדיקות היחידות הן UID_PATTERN + trimmed!==uid; אין getUser על המעסיק
+- לא מונע מעגלים או היררכיה עמוקה — A מעסיק את B ו-B מעסיק את A אפשרי  
+  *ראיה:* functions/src/setEmployerCore.ts:35-37 — הבדיקה היחידה היא עצמי-מול-עצמי
+- לא כותב את `firestore.rules` — ההקפאה של `employerId` היא צי-אחות; הקובץ **מסתמך** עליה  
+  *ראיה:* functions/src/setEmployer.ts:17-22
+- אין לו הליבה הטהורה בעצמו — היא ב-setEmployerCore.ts, והוא רק עוטף  
+  *ראיה:* functions/src/setEmployer.ts:36 (הייבוא) — מודל «ליבה+עוטף» זהה ל-creditCore/credit
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:210** — `export { setEmployer } from "./setEmployer";`
+- **האינדקס רושם calledByName = setEmployerCore.ts** — ‏אומת: `setEmployerCore.ts:3` מזכיר «The Firebase-bound wrapper (setEmployer.ts)» **בהערה**. אזכור, לא קריאה — הכיוון הפוך.
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ∅ ישיר. הקובץ הוא עוטף-Firebase טהור; כל מה שנייד בו יושב ב-`setEmployerCore.ts` (רשומה 24). מה שכן שווה-שימת-לב הוא ה**דפוס-הארכיטקטוני** שהוא חולק עם `setOrg.ts` ו-`credit.ts`: «ליבה-טהורה נפרדת + עוטף-I/O», שהוא בדיוק חוזה-האטום של המחולל (‏`machtzev/chisel.mjs` שלב 3: promote-auto על פונקציות טהורות בלבד).
+- *מה זה נותן:* לא ידוע אם קיים מקבילה מחוברת. הערך היחיד הוא הדגמה שהריפו הזה כבר מפריד ליבה מ-I/O ב-4 מקומות — מה שהופך אותו למכרה-אטומים נוח יותר ממה שהמחולל מניח (‏`box-drafts/buildsmart-seed/README.md` מדווח שנחצבו רק 6 חוטים).
+
+**5 · §22 = 1** — עוטף-Firebase בן 126 שורות, אפס קוד נייד (הכול בליבה). לא 0: אין מקבילה מחוברת, והוא חי ומחובר.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,40p' + '41,60p' functions/src/setEmployer.ts`
+- `sed -n '60,126p' functions/src/setEmployer.ts | grep 'admin|HttpsError|setCustomUserClaims|employerId|FieldValue|writeAudit'`
+- `functions/src/setEmployerCore.ts:1-41 (נקרא במלואו)`
+- `box-drafts/buildsmart-seed/README.md`
+
+### 24. `functions/src/setEmployerCore.ts` · ts · 41 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- ‏`parseSetEmployerInput(uid,employerUid)` — פותר מטען-גולמי ל-`{uid,employerValue,revoke}` **או** ל-`{error}` שהעוטף ממפה ל-invalid-argument. אפס I/O.  
+  *ראיה:* functions/src/setEmployerCore.ts:10-41
+- מגדיר `UID_PATTERN=/^[a-zA-Z0-9_-]{1,128}$/` — «צורה בטוחה ל-uid של Firebase: תווים בטוחים למזהה-מסמך, 1–128 — שום דבר שיכול לברוח מנתיב-Firestore או להבריח מבנה לתוך claim»  
+  *ראיה:* functions/src/setEmployerCore.ts:6-8
+- מאחד שלוש צורות-ביטול לאחת: `null` · `''` · שדה-נעדר ⇒ `employerValue=null` ⇒ `revoke:true`  
+  *ראיה:* functions/src/setEmployerCore.ts:23-24, :40
+- אוסר עובד-שהוא-מעסיק-של-עצמו עם הודעה מפורשת  
+  *ראיה:* functions/src/setEmployerCore.ts:35-37
+- מבצע `trim()` לפני האימות, כך שרווחים-מובילים אינם עוקפים את התבנית  
+  *ראיה:* functions/src/setEmployerCore.ts:28-29
+
+**2 · מה הוא לא עושה**
+- **מודול טהור — אפס ייבוא**, כדי ש-`test/setEmployer.test.ts` ייבא אותו ב-`ts-node` פשוט. מוצהר כ«the creditCore idiom».  
+  *ראיה:* functions/src/setEmployerCore.ts:1-3; `grep -c '^import' functions/src/setEmployerCore.ts` ⇒ 0
+- לא בודק קיום — התבנית היא **צורה**, לא אמת. uid תקין-בצורתו של חשבון שאינו קיים עובר כאן ונדחה רק בעוטף (`not-found`)  
+  *ראיה:* functions/src/setEmployerCore.ts:29-34 מול functions/src/setEmployer.ts:88
+- לא מגביל אורך ל-`uid` עצמו — רק ל-`employerUid`. ‏`uid` נבדק כ«מחרוזת לא-ריקה» בלבד, בלי UID_PATTERN.  
+  *ראיה:* functions/src/setEmployerCore.ts:20-22 מול :29
+- לא מונע מעגל-העסקה (A⇄B) ולא עומק-היררכיה  
+  *ראיה:* כל 41 השורות: ההשוואה היחידה היא `trimmed === uid`
+
+**3 · מי קורא לו היום**
+- **functions/src/setEmployer.ts:36** — `import { parseSetEmployerInput } from "./setEmployerCore";`
+- **functions/test/setEmployer.test.ts** — בדיקת-יחידה offline (engine-index.json importedBy)
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` דרך promote-auto. הפונקציה טהורה, arity=2, אפס-דומיין, ומחזירה union מפורש של הצלחה-או-שגיאה במקום לזרוק — בדיוק החוזה שאטום צריך.
+- *מה זה נותן:* אטום «פענוח-קלט-עם-ביטול»: שלוש צורות-ריק ⇒ ביטול · אימות-צורה מול תבנית · איסור זהות-עצמית · trim לפני בדיקה. ‏`UID_PATTERN` עצמו הוא נכס נפרד: המחולל פולט Dart שכותב ל-Firestore דרך `dart-data-bs`, ומזהה שאינו בטוח-לנתיב הוא מחלקת-באג אמיתית שם. ⚠️ **אזהרה כנה:** האטום הזה קטן ודומה ל-`is-valid-slug.mjs` הקיים (‏`/^[a-z0-9-]{2,40}$/`) — לא זהה (‏charset ואורך שונים, ויש לו גם לוגיקת-ביטול), אבל מי שיחבר צריך לבדוק חפיפה לפני שהוא מוסיף אטום שלישי לאותה משפחה.
+
+**5 · §22 = 1** — אטום אחד קטן ונקי, שחלקו כבר מכוסה בקירוב ע"י `is-valid-slug.mjs` המחובר. תרומה אמיתית אך שולית מול פריטי-החוב. לא 0: `is-valid-slug` **מאמת** ואינו מפענח-קלט-עם-ביטול, ולכן אינו «עושה את אותו הדבר טוב יותר».
+
+**6 · ראיה — מה הורץ/נקרא**
+- `cat -n functions/src/setEmployerCore.ts (41 שורות, נקראו במלואן)`
+- `grep -c '^import' functions/src/setEmployerCore.ts ⇒ 0`
+- `cat new/atoms/is-valid-slug.mjs (האטום הקרוב ביותר במחולל)`
+- `functions/src/setEmployer.ts:88 (איפה נבדק הקיום, בניגוד לצורה)`
+
+### 25. `functions/src/setOrg.ts` · ts · 137 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- ‏callable `setOrg({uid,orgId})` — חברות-בארגון כ-claim `orgId` + מראה ב-`users/{uid}.orgId`; admin-בלבד, ו-null/'' מבטל  
+  *ראיה:* functions/src/setOrg.ts:2-3, :18-21, :41
+- מנמק את ההפרדה מ-`setRole`: ‏setRole **מחליף** את כל משטח-ה-claims (role/roles/storeId) בכל קריאה, וחברות-בארגון חייבת **לשרוד** שינוי-תפקיד — ולכן היא מקבלת callable משלה שמזיז רק `orgId`  
+  *ראיה:* functions/src/setOrg.ts:5-9, :92-112
+- מגדיר `ORG_ID_PATTERN=/^[a-zA-Z0-9_-]{1,64}$/` — «שום דבר שיכול לברוח מנתיב-Firestore או להבריח מבנה לתוך claim»  
+  *ראיה:* functions/src/setOrg.ts:30-33
+- מזיז claim ומראה **יחד**: מעתיק claims קיימים, מוחק/קובע `orgId`, `setCustomUserClaims`, ואז merge ל-`users/{uid}` עם `FieldValue.delete()` בביטול  
+  *ראיה:* functions/src/setOrg.ts:92-121
+- מאמת קיום-היעד (`not-found` ל-uid שאינו קיים) ורושם ביקורת על **כל** קריאה, מוענקת או דחויה  
+  *ראיה:* functions/src/setOrg.ts:100, :125-131, :66
+
+**2 · מה הוא לא עושה**
+- לא בודק שהארגון קיים בפועל — `ORG_ID_PATTERN` מאמת **צורה**; אין קריאה ל-`orgs/{orgId}`. זה שונה מ-`setRole`, שכן מאמת קיום-חנות ל-claim ה-storeId.  
+  *ראיה:* functions/src/setOrg.ts:76-84 (בדיקת-התבנית היחידה) מול functions/src/index.ts:96-103 (שם כן נבדק קיום)
+- אין לו ליבה טהורה נפרדת — בניגוד ל-`setEmployer`/`setEmployerCore`, כאן ה-parse משובץ ב-handler ולכן אינו בר-בדיקה-offline ואינו בר-חציבה  
+  *ראיה:* functions/src/setOrg.ts:71-90 — הולידציה inline; אין setOrgCore.ts (`ls functions/src/ | grep -i orgcore` ⇒ ריק)
+- לא כותב את הקפאת-הכללים — מסתמך על `firestore.rules` שמקפיא `orgId` ביצירה ובעדכון  
+  *ראיה:* functions/src/setOrg.ts:11-17
+- לא מטפל בחברות-מרובת-ארגונים — `orgId` יחיד, לא מערך  
+  *ראיה:* functions/src/setOrg.ts:36-38 (SetOrgData: orgId יחיד)
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:227** — `export { setOrg } from "./setOrg";`
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ∅ ישיר — עוטף-Firebase. הממצא בעל-הערך כאן הוא **השוואתי ולא חיבורי**: `setOrg.ts` ו-`setEmployer.ts` הם אותו קובץ כמעט מילה-במילה (‏admin-gate ⇒ ולידציית-תבנית ⇒ העתקת-claims ⇒ setCustomUserClaims ⇒ merge-mirror ⇒ audit), אבל רק אחד מהם הוציא ליבה טהורה.
+- *מה זה נותן:* מדד לחוסן-החציבה. אם מחלץ-אטומים ירוץ על buildsmart, הוא יחצוב את `parseSetEmployerInput` ו**יחמיץ** את הלוגיקה הזהה ב-`setOrg.ts` — לא כי היא שונה, אלא כי היא לא הופרדה. זה מסביר במספרים את `box-drafts/buildsmart-seed/README.md` («נחצבו רק 6 חוטים»): המחלץ תופס מה שכבר טהור, לא מה שיכול היה להיות. ⇒ הערה למי שיריץ את `chisel.mjs`, לא הצעת-חיבור.
+
+**5 · §22 = 1** — עוטף-Firebase בלי חלק נייד, ובלי ליבה טהורה (בניגוד לאחיו). לא 0: אין מקבילה מחוברת והמנוע חי. הערך היחיד הוא התובנה על גבולות-המחלץ, שנרשמה ב-NOTES.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,45p' functions/src/setOrg.ts · grep '^export|^function|ORG_PATTERN|onCall|HttpsError'`
+- `sed -n '86,137p' functions/src/setOrg.ts | grep 'setCustomUserClaims|orgId|FieldValue|writeAudit'`
+- `השוואה מול functions/src/setEmployer.ts:60-126 (אותו רצף-צעדים)`
+- `functions/src/index.ts:96-103 (שם כן מאומת קיום — הניגוד)`
 
