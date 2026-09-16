@@ -1,0 +1,46 @@
+# bs-2 — 49 מנועי-buildsmart מול המחולל
+
+> הרשימה נגזרה מהאינדקס המחויב, לא מהפרומפט:
+> `cd -ai-chat-server && node -e 'const j=require("./machtzev/generator/engine-index.json"); const my=j.engines.filter(e=>e.file.startsWith("buildsmart/") && !/^buildsmart\/(functions\/|rules_test\/|app\/|edge-proxy\/|service-worker\.js|scripts\/seed\/)/.test(e.file)); console.log(my.length)'` ⇒ **49**
+> כל שורה נכתבה אחרי פתיחת-הקובץ וקריאתו. הפירוט המלא (‏does / doesNot / callers / evidence) — `bs-2.json`.
+
+**מופו עד כה: 5/49**
+
+| # | קובץ | שורות | מה עושה (תמצית) | מה **לא** | קוראים היום | איפה לחבר | §22 |
+|---|------|------:|-----------------|-----------|-------------|-----------|:---:|
+| 1 | `.claude/hooks/pre-tool.sh` | 186 | PreToolUse hook: קורא JSON מ-stdin ומחלץ tool_name/command/file_path דרך jq · חוסם (exit 2) עריכת 11 קבצי-הגנה ברשימת PROTECTED_PATHS ל-Edit/Write/NotebookEdit, אלא אם קיים .allow_protocol_edit תקף (≤24h, ≥30 תווים לא-רווח) · חוסם ב-Bash: --no-verify · core.hooksPath inline/config · force-push (כולל refspec +branch) ·  | לא fail-closed בהיעדר jq — אם jq חסר, $tool ריק ⇒ exit 0 בשורה 91 (הכל עובר) · לא מקנן נתיבים (אין realpath) — התאמת-suffix בלבד, ולא מסיר מרכאות; `sed -i '.git''hooks/pre-commit'` לא נבדק · לא מעריך פר-מקטע חוץ מ-cp; שאר הבדיקות רצות על כל | buildsmart/.claude/settings.json:19 · buildsmart/.githooks/pre-commit:163 · buildsmart/.github/workflows/protocol-enforce.yml:99 · -ai-chat-server | ∅ | **0** |
+| 2 | `.claude/hooks/session-start.sh` | 70 | SessionStart hook: מפעיל את שערי-הפרוטוקול בכל סביבה — `git config core.hooksPath .githooks` + chmod +x · ב-remote בלבד (CLAUDE_CODE_REMOTE=true): מוסיף /home/user/flutter/bin ל-PATH ומריץ `flutter pub get --no-example` ב-app_flutter · מריץ `bash $REPO/scripts/gen_version.sh` ליצירת lib/version.g.dart לפני analyze/buil | לא מתקין Dart ולא npm — מסתמך על /home/user/flutter קיים · לא כותב CLAUDE_ENV_FILE — ה-PATH נשאר בתת-התהליך של ה-hook בלבד · לא מגדיר merge.regen.driver, למרות ש-.gitattributes של -ai-chat-server מצפה לכך · לא מריץ שום שער — רק מפעיל hooksP | buildsmart/.claude/settings.json:8 · buildsmart/.claude/hooks/pre-tool.sh:35 · buildsmart/.githooks/pre-commit:670 · -ai-chat-server | -ai-chat-server/.claude/hooks/session-start.sh:41 (בסוף מקטע «3 · typescript vendored», לפני כרטיס-המצב) | **2** |
+| 3 | `app_flutter/knowledge/catalog-3d/master_ratios.py` | 77 | סקריפט חד-פעמי: קורא zipdump/uploads/catalog-dump.json, מסנן ל-9 משפחות PPR של פולירול, ומחלץ אותיות-מידה ב-regex `([A-Za-z][0-9]?)\s*:\s*([\d.]+)` (למעט PN/SDR) · מחשב לכל (תת-משפחה, אות) את החציון של v/d ואת פיזור-החציון, ומסמן clean אם spread<0.04 — עם סף-מינימום n≥4 · כותב construction_ratios.json ומדפיס טבלת-אב ·  | לא ניתן להרצה בריפו הזה — קובץ-הקלט חסר · לא מקבל ארגומנטים ולא ניתן להפנות לקובץ אחר — הנתיב וגם נתיב-הפלט קשיחים ויחסיים ל-cwd · לא מחשב מידות למוצר — פולט יחסים בלבד (ratio/spread/n/clean) · לא משמש שום קוד Dart — construction_ratios.jso | buildsmart · -ai-chat-server | ∅ (לא ידוע אם קיים מקבילה מחוברת) | **1** |
+| 4 | `app_flutter/knowledge/catalog-3d/polyroll_dim_engine.py` | 222 | מנוע דאטה-דריבן: PolyrollDimEngine בונה טבלת (משפחה,סדרה)→{גודל:מידות} מ-catalog-dump.json ומייצר מידות לכל שאילתת (משפחה,גודל) · שלוש דרגות-אמת מפורשות: exact (הגודל קיים בקטלוג) · interp (אינטרפולציה לינארית בין שני גדלים סמוכים) · None עם סיבה 'out-of-range'/'none' — לעולם לא מנחש · PipeBase — שכבת-בסיס (Layer 0) שמ | לא ניתן להרצה בריפו הזה — catalog-dump.json חסר · לא גיאומטריה — הוא לומד מדאטה, ולכן אינו יכול לתת מידה למשפחה/סדרה שלא ראה · לא פורט ל-Dart — בניגוד ל-pure_engine.py · לא כותב קובץ-פלט — מדפיס בלבד · אינטרפולציה לינארית בלבד — ללא הערכת-ש | buildsmart · -ai-chat-server | ∅ (לא ידוע אם קיים מקבילה מחוברת) | **1** |
+| 5 | `app_flutter/knowledge/catalog-3d/pure_engine.py` | 167 | מנוע-אביזרים PP-R טהור: base(od,pn) גוזר OD/wall/ID/B/C/F מ-SDR ומטבלת-ריתוך DIN 8077 — אפס נתוני-קטלוג · 9 משפחות חד-קוטריות ב-ENGINE (מצמד · ברך 90°/45° · טי · מתאם-תבריג · ברז-כדורי · פקק · רוכב · צווארון) + reducer(d1,d2) הדו-קוטרי + mitered_elbow ל-d≥160 דרך elbow_auto · כל אות מגיאומטריה מפורשת: z=R·tan(θ/2) עם R | לא קורא דאטה ולא כותב קובץ — פונקציות טהורות; ה-__main__ קורא קטלוג רק לאימות-דיוק, ורק אם ניתן argv[1] · לא מטפל באומגה ולא ב-EF (ריתוך חשמלי) — שתי משפחות שקיימות בקטלוג ואינן ב-ENGINE · DEPTH מכסה 10 קטרים (20-125) בלבד — base() מחזיר F= | buildsmart/app_flutter/lib/features/fittings/engine/fitting_dims.dart:1 · buildsmart/app_flutter/test/fittings/fitting_engine_golden_test.dart · buildsmart/app_flutter/lib/features/fittings/engine/{mo | -ai-chat-server/new/dart/plug.contract.md:3 + coupler.contract.md:3 (קיים כבר כמקור-חוזה) → ההרחבה: machtzev/generator/gen-verify.mjs:67 / golden-harness.mjs:38, שם רצה `flutter test` בתוך buildsmart | **3** |
+
+## ציוני §22 — הנימוק המלא
+
+### `.claude/hooks/pre-tool.sh` — 0
+
+מקבילה מחוברת וטובה יותר: `-ai-chat-server/.claude/hooks/pre-tool.sh` (116 שורות), מחוברת כשער `pretool` ב-machtzev/police.mjs:169 (`pretool-selftest.mjs`) ונעולה ב-machtzev/pins.sha256:1. היא superset מדוד: fail-closed על jq (שורה 8) · realpath -m (42) · הסרת-מרכאות (54) · הערכה פר-מקטע ;/&&/||/| (67-108) · PROTECTED כ-regex-תיקיות (26-27) · חסימת commit-tree/update-ref/fast-import/replace (79) · cherry-pick (80) · push ל-main/delete-ref (83-90) · GIT_CONFIG_PARAMETERS (61) · find -exec (102) · dd/awk/ex/tee/install/ln (96) · כתיבה דרך node/python -e (97) · sleep/timeout/read -t (105-107) · PRETOOL_SELFTEST (30,64). כל חסימה שב-buildsmart קיימת גם שם. ההבדל היחיד לטובת buildsmart הוא BUILDSMART_EMERGENCY_DISABLE — פתח-מילוט, לא חוזק
+
+### `.claude/hooks/session-start.sh` — 2
+
+שני שערי-§22 שמריצים אפליקציה-מחוללת בפועל (genverify · goldenharness) תלויים ב-buildsmart/app_flutter מוכן-להרצה, ואף אחד מצינורות -ai-chat-server לא מכין אותו: `grep -n 'pub get\|gen_version' machtzev/generator/ship.mjs` ⇒ ∅. הקובץ הזה הוא הרצף היחיד שמתעד ומבצע את ההכנה. 3 לא, כי ההפעלה (core.hooksPath) כבר קיימת ומחוברת ב--ai-chat-server/.claude/hooks/session-start.sh:11-14
+
+**איפה לחבר:** `-ai-chat-server/.claude/hooks/session-start.sh:41 (בסוף מקטע «3 · typescript vendored», לפני כרטיס-המצב)` — הכנת-buildsmart שחסרה שם לגמרי: `BS=${BUILDSMART:-$(realpath ../buildsmart/app_flutter)}; [ -f "$BS/pubspec.yaml" ] && (cd "$BS" && flutter pub get --no-example) && bash "$BS/../scripts/gen_version.sh"`. בלי זה שני השערים שמריצים `flutter test` בתוך buildsmart — gen-verify.mjs:67 ו-golden-harness.mjs:38 — רצים על עץ שלא עבר pub get ובלי lib/version.g.dart (gitignored, נוצר רק מ-gen_version.sh)
+
+### `app_flutter/knowledge/catalog-3d/master_ratios.py` — 1
+
+הוא **ולידטור** של pure_engine.py — היחסים שהוא מדד (D=1.333d · z=R·tan(θ/2)) הם המקור לקבועים שמחושבים ב-fitting_dims.dart הדארטי. כשלעצמו אינו מקרב משפט-בעברית⇒אפליקציה, ואינו רץ. לא 0: אין מקבילה מחוברת שלומדת יחסים-הנדסיים מקטלוג, והפלט שלו (construction_ratios.json) מצוטט כמקור-אמת ב-app_flutter/WIRING.md:190. לא ידוע אם קיים מקבילה מחוברת
+
+**איפה לחבר:** `∅ (לא ידוע אם קיים מקבילה מחוברת)` — מנוע-לימוד-יחסים מדאטה אינו חלק מצינור-המחולל של -ai-chat-server (שעובד על משפט⇒Dart, לא על קטלוג-מוצרים). חיבור אפשרי רק אם יוגדר מקור-קטלוג; אין כזה ב--ai-chat-server (‏`grep -rn --exclude-dir=.git -F catalog-dump .` ⇒ 2 התאמות, שתיהן שדה `reads` של שני המנועים האלה בתוך machtzev/generator/engine-index.json:918,951 — כלומר ∅ מחוץ לאינדקס)
+
+### `app_flutter/knowledge/catalog-3d/polyroll_dim_engine.py` — 1
+
+מנוע-אמת אמיתי עם דירוג-ודאות מפורש, אבל מנותק כפליים: אין לו קלט בריפו ואין לו פורט-Dart. אינו על מסלול משפט⇒אפליקציה. לא 0: אין מקבילה מחוברת שמייצרת מידות-מוצר עם דירוג-ודאות, והוא לא כפול ל-pure_engine.py (זה גיאומטריה טהורה, זה דאטה — שני מסלולים שונים במכוון, INTEGRATION-SPEC.md:189,194). לא ידוע אם קיים מקבילה מחוברת
+
+**איפה לחבר:** `∅ (לא ידוע אם קיים מקבילה מחוברת)` — הדפוס «exact/interp/None-עם-סיבה» הוא בדיוק §20 «לעולם לא לזייף דאטה» + הכרעה-27 «מה שאין לו מקור ⇒ ∅ מדווח». אין ב--ai-chat-server מנוע-מידות-ממדידה; הוא מחולל UI ממשפט. חיבור אפשרי רק כשיוגדר צינור-קטלוג — כרגע אין
+
+### `app_flutter/knowledge/catalog-3d/pure_engine.py` — 3
+
+היחיד מבין 49 שכבר עשה את המסע במלואו: ידע-דומייני ⇒ קוד-טהור ⇒ פורט-Dart חי באפליקציה ⇒ golden ביט-זהה ⇒ מצוטט בחוזי-אטום של הגנסיס עצמו (new/dart/*.contract.md:3). בדיוק הצורה ש-§22 דורש — «אפליקציה עובדת 100%» עם מספר שאפשר להגן עליו. אין לו מקבילה מחוברת: `grep -rn 'SDR\|DIN 8077\|socket_depth' machtzev/` ⇒ ∅
+
+**איפה לחבר:** `-ai-chat-server/new/dart/plug.contract.md:3 + coupler.contract.md:3 (קיים כבר כמקור-חוזה) → ההרחבה: machtzev/generator/gen-verify.mjs:67 / golden-harness.mjs:38, שם רצה `flutter test` בתוך buildsmart` — המנוע הוא ה-oracle היחיד שיש לחוזי-ה-plug/coupler בגנסיס. אם מוסיפים ל-TESTS/ל-live גם את test/fittings/fitting_engine_golden_test.dart, כל הרכבה-מחדש של אטום-אביזר נמדדת מול מספרים שנגזרו מגיאומטריה — לא מול fixture שהמחולל עצמו כתב. זה בדיוק «אפס מילון-דומייני» של §20: הידע ההנדסי בקוד, לא בטבלה
+
