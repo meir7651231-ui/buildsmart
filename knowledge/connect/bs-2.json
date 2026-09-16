@@ -741,5 +741,365 @@
    "sed -n '1,10p' machtzev/no-fakers-check.mjs · sed -n '120,184p' machtzev/police.mjs",
    "grep -rn --exclude-dir=.git -F fill_attrs_from_fleet.py (-ai-chat-server) ⇒ engine-index.json בלבד"
   ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/fill_material_from_name.py",
+  "lang": "py",
+  "lines": 62,
+  "does": [
+   {
+    "claim": "מוסיף dims['חומר'] כשחומר-מבני כתוב מילולית בשם-המוצר — 4 חומרים בלבד: נירוסטה · נחושת · פליז · פלסטיק",
+    "evidence": "fill_material_from_name.py:18, 21-27, 44-54"
+   },
+   {
+    "claim": "**מבחין בין חומר לגימור** — כרום/ברונזה/ניקל נדחים במפורש כי הם color ולא חומר",
+    "evidence": "fill_material_from_name.py:6-7 (הצהרה) + 18 (MATERIALS לא כולל אותם)"
+   },
+   {
+    "claim": "**מבחין בין הגוף לתת-רכיב** — «ציר פלסטיק» (ציר על מושב-אסלה) מדולג, כדי לא לייחס חומר של רכיב-משנה למוצר כולו",
+    "evidence": "fill_material_from_name.py:8-9, 24-25"
+   },
+   {
+    "claim": "מחריג SKUs מוצמדי-gate-117 שנקראים דינמית מקובץ בדיקת-ה-parity",
+    "evidence": "fill_material_from_name.py:17, 32, 44"
+   },
+   {
+    "claim": "אידמפוטנטי וממזג — 'חומר' שכבר קיים מדולג; יצירת dims חדש רק אם אין",
+    "evidence": "fill_material_from_name.py:42-53"
+   },
+   {
+    "claim": "רץ בפועל בעבר, והתוצאה עדיין בקטלוג",
+    "evidence": "`grep -o \"'חומר':\" lib/data/lipskey_catalog.dart | wc -l` ⇒ **64** — תואם בדיוק ל-knowledge/mutation_log.md:1416 «הוחל ל-64 מוצרים»"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מזהה חומרים אחרים — 4 מילים קשיחות. PVC/HDPE/PPR/אלומיניום/קרמיקה לא נתפסים למרות שהם בקטלוג",
+    "evidence": "fill_material_from_name.py:18"
+   },
+   {
+    "claim": "gate117 נקרא ב-regex גס `'(\\d{6,})'` על **כל** קובץ-הבדיקה — כל מספר בן 6+ ספרות במרכאות נחשב SKU-מוצמד, גם אם אינו",
+    "evidence": "fill_material_from_name.py:32"
+   },
+   {
+    "claim": "לא --dry, לא גיבוי, לא מריץ analyze/test אחרי הכתיבה",
+    "evidence": "fill_material_from_name.py:57-58; `grep -c sys.argv` ⇒ 0"
+   },
+   {
+    "claim": "חותך ל-1700 תווים ראשונים לקריאת nameHe/dims",
+    "evidence": "fill_material_from_name.py:39"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. הרצה מתועדת ומדודה: knowledge/STATUS.md:364 · knowledge/mutation_log.md:1416"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F fill_material_from_name.py .` ⇒ 0 מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי",
+   "gives": "הכלל «מילת-חומר בשם ⇒ חומר, אלא אם היא גימור או תת-רכיב» הוא פריט-אוצר-מילים, ושייך לאותה נקודה שנתתי ל-enrich_from_name.py (‏entity-terms.mjs:5). כשלעצמו הוא ספציפי מדי לחבר בנפרד. לא ידוע אם קיים מקבילה מחוברת"
+  },
+  "s22": {
+   "score": 1,
+   "why": "חד-פעמי, כבר הוחל (64 ⇒ מאומת בקטלוג), לא-מחובר, ורשימת-החומרים שלו מכסה 4 מתוך הרבה יותר. התרומה שנשארת היא כלל-הדיסאמביגואציה (חומר≠גימור≠תת-רכיב) — נכון וחשוב, אבל הוא כבר מיוצג בערך של enrich_from_name.py שנשא את נקודת-החיבור. לא 0: אין מקבילה מחוברת שמסווגת חומר-מוצר מטקסט עברי — `grep -rln 'חומר' machtzev/generator/*.mjs` לא הניב מסווג כזה"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/fill_material_from_name.py (62 שורות, כולן)",
+   "grep -o \"'חומר':\" app_flutter/lib/data/lipskey_catalog.dart | wc -l ⇒ 64",
+   "grep -c 'gate117\\|PARITY' app_flutter/scripts/fix_audit_all.py ⇒ 0 (להשוואה — כאן כן יש)",
+   "git grep -n -F fill_material_from_name.py ⇒ STATUS.md:364 · mutation_log.md:1416"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/fill_modes_from_name.py",
+  "lang": "py",
+  "lines": 70,
+  "does": [
+   {
+    "claim": "ממלא מפרט שנשא בשם-המוצר למוצרי-נוי שהקטלוג התמונתי לא נתן להם מידות: dims['מצבים'] (‏`(\\d+)\\s*מצבים`) · dims['אורך'] (קצר/ארוך) · dims['סוג'] (6 טוקנים)",
+    "evidence": "fill_modes_from_name.py:79, 82-95"
+   },
+   {
+    "claim": "**מגביל לעצמו את קהל-היעד**: רק מוצר שאין לו אף מפתח-מפרט אמיתי (‏`real = keys − {תיאור}` ריק) — כלומר לא נוגע במוצר שכבר יש לו דאטה",
+    "evidence": "fill_modes_from_name.py:70, 112-113"
+   },
+   {
+    "claim": "מחריג gate-117 ואידמפוטנטי (מפתח קיים מסונן החוצה)",
+    "evidence": "fill_modes_from_name.py:100, 113, 115"
+   },
+   {
+    "claim": "רץ בפועל; שלושת המפתחות קיימים בקטלוג",
+    "evidence": "`grep -o \"'מצבים':\" lib/data/lipskey_catalog.dart | wc -l` ⇒ 13 · `'אורך':` ⇒ 42 · `'סוג':` ⇒ 33"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מוודא שהטוקן שנמצא שייך למוצר ולא לאביזר נלווה — «ארוך»/«קצר» יכולים לתאר את הצינור ולא את המוצר; אין בדיקת-הקשר כמו ב-fill_material_from_name.py:24",
+    "evidence": "fill_modes_from_name.py:87-90 — התאמת-תת-מחרוזת בלבד"
+   },
+   {
+    "claim": "«יחיד»/«כפול» כטוקני-סוג מתאימים גם למילים בתוך תיאור-פונקציונלי אחר; אין anchor",
+    "evidence": "fill_modes_from_name.py:79, 91-94"
+   },
+   {
+    "claim": "לא --dry, אין גיבוי, אין הרצת-בדיקות",
+    "evidence": "fill_modes_from_name.py:127; `grep -c sys.argv` ⇒ 0"
+   },
+   {
+    "claim": "gate117 באותו regex גס של 6+ ספרות",
+    "evidence": "fill_modes_from_name.py:100"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. מתועד: knowledge/STATUS.md:417 · knowledge/mutation_log.md:1409 («62 מוצרים · מפרט-אמיתי 80%→87%, 802/924»)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי (לא ידוע אם קיים מקבילה מחוברת)",
+   "gives": "הדבר הנכון לחבר כאן אינו הסקריפט אלא **המדד** שהוא הזיז: «מפרט-אמיתי 802/924». זהו ראצ׳ט-כיסוי-דאטה, בדיוק בצורה של gen-verify-baseline.json ב-machtzev/generator/gen-verify.mjs:87-92 — baseline + סירוב-לרדת. כרגע המדד מתועד בפרוזה ב-mutation_log.md:1409 ואין שער שאוכף אותו"
+  },
+  "s22": {
+   "score": 1,
+   "why": "חד-פעמי, הוחל, לא-מחובר, וכלל-החילוץ שלו הוא החלש מבין ארבעת המְמַלאים — התאמת-תת-מחרוזת בלי anchor ובלי בדיקת-הקשר. מה שבאמת שווה כאן הוא המדד (מפרט-אמיתי 87%), שאין לו שער. לא 0: אין מקבילה מחוברת שממלאת מפרט משם-מוצר"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/fill_modes_from_name.py (70 שורות, כולן)",
+   "grep -o \"'מצבים':\" / \"'אורך':\" / \"'סוג':\" app_flutter/lib/data/lipskey_catalog.dart | wc -l ⇒ 13 · 42 · 33",
+   "grep -c 'LipskeyCatalogProduct(' app_flutter/lib/data/lipskey_catalog.dart ⇒ 924",
+   "sed -n '86,94p' machtzev/generator/gen-verify.mjs (דפוס-הראצ׳ט להשוואה)",
+   "git grep -n -F fill_modes_from_name.py ⇒ STATUS.md:417 · mutation_log.md:1409"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/fill_residual_rt.py",
+  "lang": "py",
+  "lines": 80,
+  "does": [
+   {
+    "claim": "מעבר-שאריות: color ממילת-צבע-טהור בשם (8 מילים) + dims['מידה'] מ-6 תבניות-גודל שמעברים קודמים החמיצו (‏1\"-3/4\" · 3/4\" · DN · 1.5\" · ס\"מ · מ\"מ)",
+    "evidence": "fill_residual_rt.py:19-27, 29-40, 59-74"
+   },
+   {
+    "claim": "**מנמק את בטיחות-ה-R8 שלו**: «צבע-טהור לעולם אינו חומר-גוף», ולכן מותר בכל קטגוריה — בניגוד ל-enrich_from_name.py שנאלץ לגדר ל-22 קטגוריות דקורטיביות",
+    "evidence": "fill_residual_rt.py:5-7 מול enrich_from_name.py:149-155"
+   },
+   {
+    "claim": "מידה נכנסת רק למוצר בלי מפתח-מפרט אמיתי; color רק למוצר בלי color",
+    "evidence": "fill_residual_rt.py:54-57, 59, 66"
+   },
+   {
+    "claim": "מחריג gate-117 בשני הזרמים; מדפיס כל שינוי עם ה-SKU והשם",
+    "evidence": "fill_residual_rt.py:44, 59, 64, 66, 74"
+   },
+   {
+    "claim": "רץ בפועל — הקטלוג מכיל היום 242 שדות color ו-446 מפתחות 'מידה'",
+    "evidence": "`grep -o \"color: '\" lib/data/lipskey_catalog.dart | wc -l` ⇒ 242 · `grep -o \"'מידה':\"` ⇒ 446"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מבדיל בין «לבן» כצבע-המוצר ל«לבן» כחלק משם-דגם או מתיאור-אריזה — אין anchor, תת-מחרוזת בלבד",
+    "evidence": "fill_residual_rt.py:36-40"
+   },
+   {
+    "claim": "סדר-התבניות קובע ושקט: `1\"` יתפס ע\"י התבנית הרביעית לפני שהחמישית (`ס\"מ`) תיבדק, גם אם בשם יש שניהם",
+    "evidence": "fill_residual_rt.py:20-27, 30-33 (return על ההתאמה הראשונה)"
+   },
+   {
+    "claim": "לא --dry, אין גיבוי, אין בדיקות",
+    "evidence": "fill_residual_rt.py:76; `grep -c sys.argv` ⇒ 0"
+   },
+   {
+    "claim": "gate117 באותו regex גס",
+    "evidence": "fill_residual_rt.py:44"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. מתועד ומדוד: knowledge/STATUS.md:440 · knowledge/mutation_log.md:1396 («9 מידה + 9 color · מפרט-אמיתי 79%→80% · color 25%→26%»)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי (לא ידוע אם קיים מקבילה מחוברת)",
+   "gives": "הרעיון שכן ניתן להעביר: «כלל שאפשר להוכיח שהוא בטוח-תמיד (צבע-טהור≠חומר) לא צריך גידור-קטגוריה; כלל שלא — כן». זו הבחנה שמפחיתה false-positive בלי לוותר על כיסוי, והיא רלוונטית לכל שער-דאטה במחולל"
+  },
+  "s22": {
+   "score": 1,
+   "why": "מעבר-שאריות חד-פעמי עם רווח קטן ומדוד (‏+1% מפרט · +1% color) שכבר הוחל, ובלי מחובר. ההנמקה על «בטוח-תמיד מול צריך-גידור» היא התרומה הרעיונית, אבל היא כבר נספרה ב-enrich_from_name.py שקיבל 2. לא 0: אין מקבילה מחוברת"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/fill_residual_rt.py (80 שורות, כולן)",
+   "grep -o \"color: '\" app_flutter/lib/data/lipskey_catalog.dart | wc -l ⇒ 242 · grep -o \"'מידה':\" ⇒ 446",
+   "git grep -n -F fill_residual_rt.py ⇒ STATUS.md:440 · mutation_log.md:1396"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/fix_audit_all.py",
+  "lang": "py",
+  "lines": 69,
+  "does": [
+   {
+    "claim": "מחיל 4 טבלאות-תיקון קשיחות פר-SKU על lib/data/lipskey_catalog.dart: 23 טיפו · 3 החלפות-dims · 4 imageFile→null · מילוי-שם אחד",
+    "evidence": "fix_audit_all.py:95-122, 128-147"
+   },
+   {
+    "claim": "**כל עריכה מותנית בכך שהערך-הישן קיים** — אחרת no-op שקט; כלומר הוא לא יכול «לתקן» משהו שכבר שונה",
+    "evidence": "fix_audit_all.py:133, 137, 141, 145 (‏`if old in part` / `if np != part`)"
+   },
+   {
+    "claim": "scoped פר-בלוק-מוצר (split על `LipskeyCatalogProduct(`) — טיפו מוחלף רק בתוך המוצר שלו",
+    "evidence": "fix_audit_all.py:125-128, 147-148"
+   },
+   {
+    "claim": "מדפיס ספירה מול גודל-הטבלה (‏n/len) — כך שהחלה-חלקית נראית",
+    "evidence": "fix_audit_all.py:149"
+   },
+   {
+    "claim": "מתעד בקוד ממצא-שגוי שנסוג: «779096F גרפיטי→גרפיני היה שגוי» — כולל למה",
+    "evidence": "fix_audit_all.py:104-105"
+   },
+   {
+    "claim": "רץ בפועל — הטיפו תוקן",
+    "evidence": "`grep -o חרום lib/data/lipskey_catalog.dart | wc -l` ⇒ **0** · `grep -o חרוט | wc -l` ⇒ **14**"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**אינו בטוח להרצה-חוזרת היום — הוא יסיג את הקטלוג.** IMAGE_NULL מכיל 4 SKUs, אבל רק 2 מהם עדיין null; ל-120011 ול-686366 הוצמדו מאז תמונות, וריצה נוספת תאפס אותן",
+    "evidence": "fix_audit_all.py:121 (‏`IMAGE_NULL = {'196587','120011','186466','686366'}`) מול מדידה בקטלוג: 196587⇒`imageFile: null` · 120011⇒`imageFile: '120311.jpeg'` · 186466⇒`imageFile: null` · 686366⇒`imageFile: '686366.jpeg'`; ובסך-הכל `grep -o 'imageFile: null' | wc -l` ⇒ 2"
+   },
+   {
+    "claim": "ההערה בקוד סותרת את הקוד: «Only these 5 remain nulled» — אבל ב-IMAGE_NULL יש 4 ערכים, ובקטלוג 2",
+    "evidence": "fix_audit_all.py:117-118 מול 121 מול המדידה לעיל"
+   },
+   {
+    "claim": "אין בו גידור gate-117 בקוד — רק הנמקה בכותרת («gate-117 safety: …»)",
+    "evidence": "`grep -c 'gate117\\|PARITY' scripts/fix_audit_all.py` ⇒ **0**; ההצהרה היא fix_audit_all.py:85-86"
+   },
+   {
+    "claim": "TYPOS מחליף את **כל** המופעים בבלוק, כולל nameEn ושדות אחרים — לא רק nameHe/תיאור כפי שהכותרת אומרת",
+    "evidence": "fix_audit_all.py:94 (הערה) מול 134 (‏`part.replace(old,new)` ללא count)"
+   },
+   {
+    "claim": "אין `if __name__` — כל import מפעיל כתיבה לקטלוג",
+    "evidence": "fix_audit_all.py:124-149 ברמת-המודול"
+   },
+   {
+    "claim": "לא --dry ואין גיבוי",
+    "evidence": "fix_audit_all.py:148"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. מתועד: knowledge/STATUS.md:241 · knowledge/mutation_log.md:1433 («23 טיפו · 3 dims · 17 imageFile→null»)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי",
+   "gives": "האינווריאנט היחיד שכן שווה להעביר — «עריכה חלה רק אם הערך-הישן עדיין קיים, אחרת no-op» — הוא בדיוק מה שמונע ממחיל-אוטומטי לדרוס תיקון מאוחר יותר. אבל הקובץ הזה עצמו מדגים למה זה לא מספיק: IMAGE_NULL כותב ערך **חדש** בלי לבדוק את הישן, וזה בדיוק המקום שבו הוא נשבר"
+  },
+  "s22": {
+   "score": 1,
+   "why": "עשה עבודה אמיתית ומדידה (חרום⇒חרוט: 0 מול 14 בקטלוג), אבל היום הוא **חוב**: הרצה-חוזרת מסיגה את הקטלוג בשתי תמונות, הכותרת סותרת את הקוד, ואין לו את גידור-gate-117 שהוא מצהיר עליו. לא 0: אין מנוע מחובר שעושה את זה — אבל הציון נמוך כי מה שנשאר הוא לקח-נגטיבי (איך מחיל-תיקונים נשבר), לא כלי"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/fix_audit_all.py (69 שורות, כולן)",
+   "grep -o חרום|חרוט app_flutter/lib/data/lipskey_catalog.dart | wc -l ⇒ 0 · 14",
+   "grep -o 'imageFile: null' app_flutter/lib/data/lipskey_catalog.dart | wc -l ⇒ 2",
+   "awk -v RS='LipskeyCatalogProduct\\\\(' לכל אחד מ-4 SKUs של IMAGE_NULL ⇒ null · '120311.jpeg' · null · '686366.jpeg'",
+   "grep -c 'gate117\\|PARITY' app_flutter/scripts/fix_audit_all.py ⇒ 0",
+   "git grep -n -F fix_audit_all.py ⇒ STATUS.md:241 · mutation_log.md:1433"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/fix_audit_dims.py",
+  "lang": "py",
+  "lines": 49,
+  "does": [
+   {
+    "claim": "שני תיקונים בלבד, שניהם R8: 2 שגיאות-יחידה (dims['מידה'] ב-ס\"מ כשהשם אומר מ\"מ ⇒ מ\"מ) ו-6 הסרות של 'מידה' משובשת",
+    "evidence": "fix_audit_dims.py:166-167, 178-191"
+   },
+   {
+    "claim": "**כשהערך שנגזר הוא זבל — מוחק את המפתח ולא מנחש.** הנימוק מפורש: הגודל האמיתי עדיין מופיע בשם",
+    "evidence": "fix_audit_dims.py:154-156, 184-191"
+   },
+   {
+    "claim": "תיקון-היחידה מותנה בכך שהמחרוזת הישנה קיימת ב-1700 התווים הראשונים של המוצר — אחרת no-op",
+    "evidence": "fix_audit_dims.py:180-183"
+   },
+   {
+    "claim": "ההסרה מטפלת בשתי עמדות: מפתח באמצע המפה (עם פסיק אחריו) ומפתח אחרון (בלי)",
+    "evidence": "fix_audit_dims.py:186-188"
+   },
+   {
+    "claim": "מצהיר במפורש במה **לא** נגע: טעויות-כתיב-מקור, אי-התאמות-תמונה, ומקרים דו-משמעיים",
+    "evidence": "fix_audit_dims.py:157-158"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "אין גידור gate-117 בקוד כלל (שלא כמו fill_material/fill_modes/fill_residual)",
+    "evidence": "`grep -c 'gate117\\|PARITY' scripts/fix_audit_dims.py` ⇒ **0**"
+   },
+   {
+    "claim": "ההסרה לא מוודאת שהערך שהוסר הוא אכן המשובש — REMOVE_MIDA הוא רשימת-SKUs, וה-regex מוחק את 'מידה' יהיה אשר יהיה; הרצה-חוזרת אחרי מילוי-מחדש תמחק ערך תקין",
+    "evidence": "fix_audit_dims.py:167, 186-188 (אין השוואה לערך צפוי, בניגוד ל-FIX_UNIT ב-180-182)"
+   },
+   {
+    "claim": "לא --dry, אין גיבוי, אין הרצת-בדיקות",
+    "evidence": "fix_audit_dims.py:193; `grep -c sys.argv` ⇒ 0"
+   },
+   {
+    "claim": "6 + 2 SKUs קשיחים — לא מזהה שיבושים חדשים",
+    "evidence": "fix_audit_dims.py:166-167"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. מתועד: knowledge/STATUS.md:252 · knowledge/mutation_log.md:1428"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ בצינור הנוכחי (לא ידוע אם קיים מקבילה מחוברת)",
+   "gives": "הכלל «ערך-נגזר משובש ⇒ מחיקת-המפתח, לא ניחוש» הוא אותו חוק בדיוק שמנוסח ב-polyroll_dim_engine.py:15 («‏None + סיבה. לעולם לא מנחש») וב-§20 «לעולם לא לזייף דאטה». שני מנועים עצמאיים בריפו הגיעו אליו — זו העדות החזקה ביותר שראיתי לכך שהכלל נכון"
+  },
+  "s22": {
+   "score": 1,
+   "why": "הקטן והשמרני מבין המחילים, ועם הכלל הכי נכון — מחיקה במקום ניחוש. אבל: חד-פעמי, 8 SKUs קשיחים, הוחל, לא-מחובר, ובלי גידור-gate-117 בקוד. ההסרה גם לא-אידמפוטנטית-באמת (מוחקת 'מידה' בלי לבדוק שהיא עדיין המשובשת). לא 0: אין מקבילה מחוברת"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/fix_audit_dims.py (49 שורות, כולן)",
+   "grep -c 'gate117\\|PARITY' app_flutter/scripts/fix_audit_dims.py ⇒ 0",
+   "grep -o \"'מידה':\" app_flutter/lib/data/lipskey_catalog.dart | wc -l ⇒ 446",
+   "git grep -n -F fix_audit_dims.py ⇒ STATUS.md:252 · mutation_log.md:1428",
+   "cat -n app_flutter/knowledge/catalog-3d/polyroll_dim_engine.py:15 (הכלל המקביל)"
+  ]
  }
 ]
