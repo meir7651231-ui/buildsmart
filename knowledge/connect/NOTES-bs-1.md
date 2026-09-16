@@ -286,3 +286,72 @@ studio.test.js it()=31     users.test.js it()=22
 **סייג לאמת:** לא הרצתי את `rules.test.mjs` של המחולל ולא את
 `npm run test:emulator` של buildsmart — אין Java בקונטיינר ואסור לי לבנות.
 כל המספרים כאן הם **ספירת-קוד** (`grep -c 'it('` · קריאת הקובץ המחולל), לא ריצה.
+
+## סיכום סופי · 40/40
+
+### אימות-כיסוי (פקודה ⇒ תוצאה)
+
+```bash
+$ node -e 'const idx=require("…/engine-index.json");
+  const want=new Set(idx.engines.filter(e=>/^buildsmart\/(functions\/|rules_test\/|app\/|edge-proxy\/|service-worker\.js|scripts\/seed\/)/.test(e.file)).map(e=>e.file.replace(/^buildsmart\//,"")));
+  const got=new Set(require("./knowledge/connect/bs-1.json").map(r=>r.file)); …'
+want=40 got=40
+missing: none
+extra:   none
+```
+
+```bash
+$ python3 -c "…for r in rows: wc -l r.file  vs  r.lines…"
+mismatches: none          # כל 40 מספרי-השורות ב-JSON שווים ל-wc -l על הדיסק
+```
+
+### פילוח §22
+
+```bash
+$ python3 -c "from collections import Counter; …Counter(r['s22']['score'] for r in rows)"
+§22=3: 6    §22=2: 15    §22=1: 19    §22=0: 0
+```
+
+**ששת ה-3:**
+
+| מנוע | הפער שהוא סוגר | הראיה בצד-המחולל |
+|---|---|---|
+| `app/scripts/extract-catalog.mjs` | מונחי-**שדה** (פריט 6) | `vertical-packs.mjs` ⇒ 74 entity · 46 nav · **0 field** |
+| `app/smoke-settings.mjs` | רצפת-קבלה מעל «מרונדר» (פריט 1) | `gen-verify.mjs:4` — «analyze ירוק ≠ מסך שעובד», ועוצר ב-pump |
+| `functions/src/claude.ts` | מפתח-Anthropic בדפדפן | `new/atoms/ask-claude-strings.mjs:9` — `anthropic-dangerous-direct-browser-access: true` |
+| `functions/src/credit.ts` | המצאת-**ערך** (פריט 4) | `hamtzaa.mjs` בודק שדות-בספק, לא ערכים-בזמן-ריצה |
+| `functions/src/orderFlow.ts` | מי-רשאי-לקדם-מצב | `grep -ln 'role\|owner' new/dart/wf_*.dart` ⇒ **∅** ב-10 אטומים חצובים-מ-buildsmart |
+| `rules_test/inventory.test.js` | `שדה == claim` (דייר) | `server-gen/balagan/firestore.rules` — אפס `request.auth.token` |
+
+### אפס ניקודי-0 — ההנמקה
+
+ההוראה מתירה 0 **רק** כששני תנאים: מקבילה **מחוברת** שעושה את אותו הדבר **טוב יותר**
+(בשם), או ראיה שהמנוע מת/כפול. בדקתי מקבילה בכל מקרה שהיה סביר, ובכל בדיקה
+המקבילה או חסרה או עושה פחות:
+
+| מה חיפשתי | הפקודה | מה נמצא |
+|---|---|---|
+| קריאה ל-LLM | `grep -rln 'anthropic' --include=*.mjs` | `ask-claude*.mjs` — מפתח בדפדפן ⇒ **גרוע יותר** |
+| מכונת-שלבים | `ls new/dart/ \| grep '^wf_'` | 10 אטומים — **בלי** שכבת-תפקידים |
+| חיטוי-שם-קובץ | `ls new/atoms/*.mjs \| grep -iE 'sanitiz\|slug'` | 5 אטומי-org-slug, כולם **מאמתים** ולא מחטאים |
+| מונה-מבוזר / נוכחות | `grep -iE 'shard\|presence\|counter\|rollup'` | ∅ |
+| שליחת-מייל | `grep -rln 'resend\|sendgrid\|nodemailer'` | ∅ |
+| hash של Dart | `grep -rn 'hashCode\|FinalizeHash'` | התאמה אחת, ב**רשימת-שלילה** (`extract/functions.mjs:14`) |
+| כללי-גישה | `find . -name '*.rules'` | **קיים ומחובר** — אך חד-דיירי (דפוס 6) |
+| זריעה / מיגרציה | `find server-gen -type f` | 8 קבצים, אף אחד לא זה |
+| PWA / offline לאתר | `grep -n 'manifest\|workbox' gen/site.mjs` | ∅ |
+
+המקרה היחיד שבו מקבילה מחוברת **עדיפה** הוא `app/vite.config.ts:46-74` (workbox)
+מול `service-worker.js` — אבל היא עדיפה בתוך **buildsmart**, ואינה מחוברת למחולל.
+לכן `service-worker.js` קיבל 1 ולא 0.
+
+### מה לא נעשה — במפורש
+
+- **לא חובר, לא נבנה, לא שונה קוד.** אפס עריכה מחוץ ל-`knowledge/connect/`.
+- **לא הורץ `engine-index.mjs --write`** בריפו-המחולל.
+- **לא הורצו הבדיקות עצמן** — `npm run test:emulator` דורש Java (אין בקונטיינר),
+  `functions/src/selftest.ts` דורש `npm install` ב-functions/, ו-`smoke-settings.mjs`
+  דורש build + http-server. כל ספירת-טענות כאן היא `grep -c`, **לא ריצה**. מי
+  שיצטט את המספרים האלה כ«עברו» — טועה; הם «קיימים בקוד».
+- **לא מופו מנועים מחוץ ל-40.** `workflow_engine.dart` · `manager_dashboard.dart` ·
+  `app/src/lib/*.ts` · `index.html` נקראו כ**ראיה** בלבד ומסומנים ככאלה במקומם.
