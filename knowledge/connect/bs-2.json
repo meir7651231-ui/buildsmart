@@ -3209,5 +3209,500 @@
    "ls app_flutter/test/backend_flag_test.dart ⇒ קיים · find -name '*parity*' ⇒ 8, בלי search_parity_golden_test.dart",
    "git grep -l -F compare_local_vs_flip.sh ⇒ app_flutter/WIRING.md · knowledge/studio-plan/detail/051-068.md (תיעוד בלבד)"
   ]
+ },
+ {
+  "file": "buildsmart/scripts/extract_lipskey.py",
+  "lang": "py",
+  "lines": 411,
+  "does": [
+   {
+    "claim": "מחלץ מוצרים מ-PDF של קטלוג ליפסקי 2024 ב-PyMuPDF (‏fitz), עם 5 אסטרטגיות-חילוץ נפרדות: NO-style blocks · ברכיים · צינורות · טבלה-גנרית · מק\"ט-חשוף",
+    "evidence": "extract_lipskey.py:3-6, 98-129 (extract_no_style), 130-166 (extract_bends), 167-204 (extract_pipes), 205-287 (extract_table_generic), 288-307 (extract_bare_sku)"
+   },
+   {
+    "claim": "**טבלת-קטגוריות מפורשת לפי טווחי-עמודים** — 13 קטגוריות, כל אחת עם שם עברי, אנגלי ואמוג'י; עמוד מחוץ לטווח ⇒ «כללי/General/📦»",
+    "evidence": "extract_lipskey.py:12-32"
+   },
+   {
+    "claim": "מסנן רעש: `is_junk`, ורשימות SKIP_HE/SKIP_EN של מילות-כותרת שאינן שמות-מוצר",
+    "evidence": "extract_lipskey.py:42-49, 52-59"
+   },
+   {
+    "claim": "מחלץ גם כמות-באריזה, כמות-במשטח וצבע ב-regex ייעודי",
+    "evidence": "extract_lipskey.py:36-40"
+   },
+   {
+    "claim": "**דה-דופליקציה בסוף** — מק\"ט שחוזר מוחלף ברשומה העדיפה במקום להיכפל",
+    "evidence": "extract_lipskey.py:383-389"
+   },
+   {
+    "claim": "כותב `scripts/lipskey_catalog.json` עם עטיפה שמצהירה מקור · גרסה · ספק · ספירה, ומדפיס פילוח לפי קטגוריה",
+    "evidence": "extract_lipskey.py:391-411"
+   },
+   {
+    "claim": "הפלט **מחויב בריפו ועקבי**",
+    "evidence": "`ls -la scripts/lipskey_catalog.json` ⇒ 27108 bytes · `json.load` ⇒ source='Lipskey Plumbing Catalog 2024' · version='2024-01' · supplier='ליפסקי ברקן - חרסה סטודיו' · **count=66 = len(products)=66** · מפתחות: sku·name_he·name_en·color·qty_pack·qty_pallet·page·category_he·category_en·category_emoji"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**אינו ניתן לשחזור** — נתיב-ה-PDF קשיח לתיקיית-העלאות של סשן שהסתיים",
+    "evidence": "extract_lipskey.py:9 (‏`/root/.claude/uploads/7b2df638-.../8ce15fca-lipskey_plumbing_catalog2024_s.pdf`) · `ls` על התיקייה ⇒ No such file or directory"
+   },
+   {
+    "claim": "התלות שלו אינה מותקנת בקונטיינר",
+    "evidence": "`python3 -c 'import fitz'` ⇒ ModuleNotFoundError (Traceback)"
+   },
+   {
+    "claim": "**66 מוצרים בלבד** — מול 322 מוצרי-ליפסקי בקטלוג החי. כלומר רוב הקטלוג הגיע ממקור אחר, לא מהמחלץ הזה",
+    "evidence": "scripts/lipskey_catalog.json ⇒ count=66 · `python3 scripts/catalog_qa.py coverage` ⇒ ליפסקי **322**"
+   },
+   {
+    "claim": "לא מקבל ארגומנטים — אין `sys.argv` בשימוש למרות שהוא מיובא",
+    "evidence": "extract_lipskey.py:6 מייבא sys; `grep -n 'sys\\.' extract_lipskey.py` ⇒ אין שימוש ב-argv"
+   },
+   {
+    "claim": "לא מאמת דבר — אין assert, אין השוואה למקור, ואין קוד-יציאה שאינו 0",
+    "evidence": "extract_lipskey.py:391-411 — כותב ומדפיס"
+   },
+   {
+    "claim": "טבלת-הקטגוריות צמודה למספרי-עמודים של מהדורת-2024 — מהדורה חדשה תשייך קטגוריות שגויות בשקט",
+    "evidence": "extract_lipskey.py:12-26"
+   },
+   {
+    "claim": "**מה שהוא עושה בפועל אינו מה שהתוכנית מייעדת לו** — LIPSKEY-INGESTION-PLAN.md:87,92 מתארת אותו כמי ש«מייצר את lipskey_catalog.dart מ-JSON-ביניים», אבל בקוד הוא קורא PDF וכותב JSON. הוא אינו פולט Dart כלל",
+    "evidence": "extract_lipskey.py:309 (‏`fitz.open`) ו-399-402 (‏`json.dump` ל-lipskey_catalog.json) מול app_flutter/knowledge/LIPSKEY-INGESTION-PLAN.md:87,92"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/app_flutter/lib/data/lipskey_catalog.dart:2",
+    "how": "שורת-המקור של הקטלוג החי: «Source: scripts/extract_lipskey.py + scripts/lipskey_catalog.json» — ייחוס, לא קריאה"
+   },
+   {
+    "who": "buildsmart/app_flutter/knowledge/LIPSKEY-INGESTION-PLAN.md:87,92,96",
+    "how": "מוגדר כשלב בצינור-הייבוא: «סקריפט המרה → JSON-ביניים → extract_lipskey.py → lipskey_catalog.dart»"
+   },
+   {
+    "who": "buildsmart (תיעוד נוסף)",
+    "how": "knowledge/port/proto/02-catalog-product-model.md · knowledge/studio-plan/02-domain-vertical-builder.md"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ (לא ידוע אם קיים מקבילה מחוברת)",
+   "gives": "חילוץ מ-PDF אינו בצינור-המחולל, ו-PyMuPDF אינו בתלויות שלו. מה שכן בר-העברה הוא הצורה: **חמש אסטרטגיות-חילוץ נפרדות שרצות על אותו מקור ומתאחדות בדה-דופליקציה** (extract_lipskey.py:98-307, 383-389) — דפוס שמתאים לכל מקור לא-מובנה. אבל בלי מקור ובלי תלות, אין מה לחבר היום"
+  },
+  "s22": {
+   "score": 1,
+   "why": "מנוע-חילוץ רציני (‏411 שורות, 5 אסטרטגיות, דה-דופליקציה) שהפלט שלו מחויב ועקבי (66/66) — אבל **לא ניתן להרצה מחדש**: ה-PDF מצביע לתיקיית-העלאות שנעלמה, ו-fitz לא מותקן. הוא גם כיסה 66 מתוך 322 מוצרי-ליפסקי, כלומר גם בזמנו הוא לא היה המקור העיקרי. הקטלוג החי עדיין מייחס לו את מוצאו (lipskey_catalog.dart:2), אבל התיעוד (LIPSKEY-INGESTION-PLAN.md:87) מתאר תפקיד אחר ממה שבקוד. לא 0: אין מקבילה מחוברת שמחלצת מ-PDF — `grep -rln 'pdf' machtzev/ --include=*.mjs` ⇒ קובץ **אחד**, machtzev/census.mjs, וגם הוא רק מזכיר pdf בספירה ואינו מחלץ"
+  },
+  "evidence": [
+   "sed -n '1,45p' + grep -n '^def ' + sed -n '385,411p' scripts/extract_lipskey.py (411 שורות · 11 פונקציות)",
+   "ls -la scripts/lipskey_catalog.json ⇒ 27108B · json.load ⇒ count=66, len=66",
+   "ls /root/.claude/uploads/7b2df638-… ⇒ No such file or directory",
+   "python3 -c 'import fitz' ⇒ Traceback (ModuleNotFoundError)",
+   "python3 scripts/catalog_qa.py coverage ⇒ ליפסקי 322 מוצרים",
+   "git grep -n -F extract_lipskey.py ⇒ ∅ מחוץ לקובץ",
+   "grep -n extract_lipskey app_flutter/lib/data/lipskey_catalog.dart ⇒ שורה 2 · knowledge/LIPSKEY-INGESTION-PLAN.md:87,92,96",
+   "grep -rln 'pdf' machtzev/ --include=*.mjs ⇒ machtzev/census.mjs בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/gen_version.sh",
+  "lang": "sh",
+  "lines": 42,
+  "does": [
+   {
+    "claim": "**נקודת-הייצור היחידה** של app_flutter/lib/version.g.dart, מ-git + knowledge/STATUS.md",
+    "evidence": "gen_version.sh:2-3, 35-42"
+   },
+   {
+    "claim": "פולט 3 קבועים: `kVersionLabel` מ-STATUS.md (‏`vX.YY`), `kBuild` = `count.shortSHA`, ו-`kReleaseNote` ריק",
+    "evidence": "gen_version.sh:21, 28-33, 39-41"
+   },
+   {
+    "claim": "**guard ל-LABEL ריק** — STATUS.md בלי תווית ⇒ exit 1, לא drift שקט",
+    "evidence": "gen_version.sh:8, 22-25"
+   },
+   {
+    "claim": "**guard ל-shallow clone** — ב-CI עם fetch-depth:1 ה-`rev-list --count` מחזיר 1 בשקט, ולכן COUNT מאופס ל-0 וה-SHA הוא שנושא את הייחודיות",
+    "evidence": "gen_version.sh:9, 27-33"
+   },
+   {
+    "claim": "**שורש-הריפו נגזר מ-BASH_SOURCE ולא מ-git** — כי כש-GIT_DIR מוגדר ע\"י hook, `rev-parse --show-toplevel` מחזיר את ה-cwd, וב-worktree מקושר זה הכפיל את הנתיב והפיל את הסקריפט תחת `set -e`",
+    "evidence": "gen_version.sh:13-19"
+   },
+   {
+    "claim": "מזהיר בפלט עצמו ש-`kBuild` לא-דטרמיניסטי בין מכונות, ולכן אסור לקשור אותו ל-asset-URL או cache-key",
+    "evidence": "gen_version.sh:38"
+   },
+   {
+    "claim": "מצהיר בראש הקובץ המחולל «DO NOT EDIT, DO NOT COMMIT» והקובץ gitignored",
+    "evidence": "gen_version.sh:5, 36-37"
+   },
+   {
+    "claim": "מתעד שהוא מאחד הכרעות של 6 סוכנים (P0 · לקח #72)",
+    "evidence": "gen_version.sh:6-10"
+   },
+   {
+    "claim": "**הכי-מחובר מבין 49 — 26 קבצים מפנים אליו**, ובהם 13 workflows של CI, שני githooks, central-verify, preflight, ה-.gitignore ובדיקה ייעודית",
+    "evidence": "`git grep -l -F gen_version.sh` ⇒ .claude/hooks/session-start.sh · .githooks/pre-commit · .githooks/pre-push · 13 קבצי .github/workflows/*.yml (android-emulator-test · android-google-test · android-package · android-test-build · catalog-qa · clean-two-links · deploy · firebase-hosting · firebase-preview-backend · protocol-enforce · web-deploy · wizard-preview) · app_flutter/.gitignore · orchestrator/scripts/central-verify.sh · scripts/preflight.sh · app_flutter/test/version_g_test.dart + 6 מסמכי-ידע"
+   },
+   {
+    "claim": "**החוזה שלו נעול בבדיקה** — app_flutter/test/version_g_test.dart אוכף ש-`kVersionLabel` מתאים ל-`^v\\d+\\.\\d+$`, כדי שטקסט-חופשי בגרסה לא ישבור מסכים (הבאג המקורי: «free-text in the version string rendered on every screen broke 10 journey tests»)",
+    "evidence": "app_flutter/test/version_g_test.dart:1-12"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מקבל ארגומנטים ולא ניתן להפנות לאפליקציה אחרת — `cd \"$REPO_ROOT/app_flutter\"` קשיח",
+    "evidence": "gen_version.sh:19"
+   },
+   {
+    "claim": "לא מאמת שהתווית ב-STATUS.md תואמת למשהו (למשל ל-home_shell.dart) — זה תפקידם של שערים 11/14 ב-.githooks/pre-commit ושל protocol_check.sh:51-60",
+    "evidence": "gen_version.sh:21-25"
+   },
+   {
+    "claim": "**לוקח את ההתאמה הראשונה** של `vX.YY` ב-STATUS.md — אם הקובץ מזכיר גרסה ישנה קודם, זו שתיכנס",
+    "evidence": "gen_version.sh:21 (‏`| head -1`)"
+   },
+   {
+    "claim": "`kReleaseNote` תמיד ריק — שדה מחולל שאינו נגזר מכלום",
+    "evidence": "gen_version.sh:41"
+   },
+   {
+    "claim": "לא הרצתי אותו — בכוונה, כדי לא לייצר קובץ בעץ-העבודה (הוא כותב app_flutter/lib/version.g.dart). הבדיקה שכן עשיתי היא קריאת-הקוד והצלבת-הקוראים",
+    "evidence": "החלטה שלי · app_flutter/.gitignore רושם את version.g.dart"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/.claude/hooks/session-start.sh:28",
+    "how": "`bash \"$REPO/scripts/gen_version.sh\"` לפני analyze/build ב-remote"
+   },
+   {
+    "who": "buildsmart/.githooks/pre-commit (שער 11) ו-.githooks/pre-push",
+    "how": "«gen_version.sh הצליח (version.g.dart)» 🛑 — מצוטט ב-machtzev/BUILDSMART-PROTOCOL-MAP.md:84, 116"
+   },
+   {
+    "who": "buildsmart/orchestrator/scripts/central-verify.sh:58-62",
+    "how": "מותנה-קיום, אחרי `pub get` ולפני analyze"
+   },
+   {
+    "who": "buildsmart/scripts/preflight.sh",
+    "how": "חלק מבדיקות-הקדם הזולות"
+   },
+   {
+    "who": "buildsmart/.github/workflows/ ×13",
+    "how": "android-emulator-test · android-google-test · android-package · android-test-build · catalog-qa · clean-two-links · deploy · firebase-hosting · firebase-preview-backend · protocol-enforce · web-deploy · wizard-preview"
+   },
+   {
+    "who": "buildsmart/app_flutter/test/version_g_test.dart",
+    "how": "נועל את החוזה של הפלט (regex על kVersionLabel)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. מתועד: machtzev/BUILDSMART-PROTOCOL-MAP.md:84, 116, 259, 282, 289, 325"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/gen-verify.mjs:66-67 · golden-harness.mjs:37-38 · ship.mjs:62-68 — לפני כל `flutter analyze/test/build` שרץ בתוך buildsmart",
+   "gives": "**זהו הפער הקונקרטי ביותר שמצאתי בין המחולל ל-buildsmart.** `lib/version.g.dart` הוא gitignored ונוצר רק מהסקריפט הזה; `lib/screens/home_shell.dart` מייבא אותו. שלושת המקומות שבהם המחולל מריץ Flutter בתוך buildsmart אינם מייצרים אותו: `grep -n 'version.g.dart\\|gen_version\\|pub get' machtzev/generator/ship.mjs` ⇒ **∅**, וכך גם ב-gen-verify.mjs וב-golden-harness.mjs. בעץ טרי (בדיוק המצב של קלון-CI) התוצאה היא «Target of URI hasn't been generated: version.g.dart» — וזה מה ש-central-verify.sh:54-57 מתעד במפורש כלקח #72. שתי שורות בכל אחד מהשלושה סוגרות את זה"
+  },
+  "s22": {
+   "score": 3,
+   "why": "זה לא מנוע «נחמד שיהיה» — זו **חוליה חסרה בשרשרת שהמחולל מריץ בפועל**. §22 דורש «משפט ⇒ אפליקציה עובדת», והמחולל בונה ובודק את האפליקציה בתוך buildsmart בשלושה מקומות; בכל השלושה, על עץ טרי, הקומפילציה תיפול על קובץ-קוד-מחולל שאיש לא ייצר. הסקריפט עצמו כתוב היטב ומכיל שלושה תיקוני-אמת שנלמדו בדם: LABEL ריק ⇒ כשל ולא drift · shallow-clone ⇒ נפילה ל-SHA · שורש מ-BASH_SOURCE ולא מ-git (כי GIT_DIR של hook שבר worktree מקושר). הוא גם המנוע היחיד מבין 49 שהאינדקס עצמו רושם לו 3 קוראים אמיתיים בשם"
+  },
+  "evidence": [
+   "cat -n scripts/gen_version.sh (42 שורות, כולן)",
+   "grep -n 'version.g.dart|gen_version|pub get' machtzev/generator/ship.mjs ⇒ ∅",
+   "cat -n machtzev/generator/gen-verify.mjs ⇒ 66-67 · sed -n '37,38p' golden-harness.mjs",
+   "cat -n orchestrator/scripts/central-verify.sh ⇒ 54-62",
+   "grep -n gen_version .claude/hooks/session-start.sh ⇒ שורה 28",
+   "engine-index.json ⇒ calledByName: [\"session-start\",\"central-verify\",\"preflight\",\"📄 BUILDSMART-PROTOCOL-MAP.md\"]",
+   "git grep -l -F gen_version.sh ⇒ 26 קבצים (13 workflows · 2 githooks · session-start · central-verify · preflight · .gitignore · version_g_test.dart · 6 מסמכים)",
+   "head -12 app_flutter/test/version_g_test.dart"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/mutation_hard_test.py",
+  "lang": "py",
+  "lines": 205,
+  "does": [
+   {
+    "claim": "20 מוטציות **קשות** על 4 קובצי-עזר של הבדיקות (isolation_validator · wiring_contract_helper · state_machine_fixture · dial_test_helper), עם ההצהרה שחלקן תוכננו לחמוק — «finding them means we need more tests»",
+    "evidence": "mutation_hard_test.py:3-4, 18-23, 41-163"
+   },
+   {
+    "claim": "כל מוטציה היא החלפת-מחרוזת מילולית אחת (‏`replace(find, repl, 1)`), עם תיאור שמסביר את הפרצה — למשל «while→if: /* */ שני באותה שורה חומק» · «אין \\\\b: `noshowDialog(` היה עובר»",
+    "evidence": "mutation_hard_test.py:44-50, 175"
+   },
+   {
+    "claim": "**שחזור ב-finally מ-snapshot בזיכרון** שנלקח לפני הלולאה — לא `git checkout`",
+    "evidence": "mutation_hard_test.py:167, 172, 185-186"
+   },
+   {
+    "claim": "מבחין בין SLIPPED (חור-בדיקות) ל-SKIP (מחרוזת-החיפוש כבר לא בקובץ), וסופר את שלושתם בנפרד",
+    "evidence": "mutation_hard_test.py:173-176, 195-200"
+   },
+   {
+    "claim": "יוצא 1 אם ולו מוטציה אחת חמקה",
+    "evidence": "mutation_hard_test.py:6, 205"
+   },
+   {
+    "claim": "**בדקתי שהוא עדיין מסונכרן עם הקוד** — כל 20 מחרוזות-החיפוש עדיין קיימות בקבצי-היעד, כלומר אפס SKIP-בגלל-drift",
+    "evidence": "סקריפט-יבש שטען את `MUTATIONS` בלי הרצת-flutter ובדק הכלה בכל קובץ-יעד ⇒ «mutation_hard_test: 20 mutations · find-string present **20** · MISSING(=SKIP) **0**»"
+   },
+   {
+    "claim": "**לולאת-משוב סגורה ומתועדת**: המוטציות שחמקו הפכו לבדיקות. `app_flutter/test/helpers/infra_gap_test.dart` נכתב במפורש מולו — «Each test is labelled with the mutation it catches» — וכל בדיקה בו נושאת הערה עם המוטציה שהיא סוגרת",
+    "evidence": "app_flutter/test/helpers/infra_gap_test.dart:2 («mutation_hard_test.py. Each test is labelled with the mutation it catches») · 20, 48, 65, 85, 120 (‏«Catches mutation: …»)"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא ניתן להרצה כאן** — FLUTTER קשיח ל-`/home/user/flutter/bin/flutter` שאינו קיים",
+    "evidence": "mutation_hard_test.py:24 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "**עדיין כותב לעץ-העבודה החי** — `write(path, mutated)` על הקובץ האמיתי. ה-`finally` מכסה חריגות ו-Ctrl-C, אבל **לא** SIGTERM/SIGKILL; מול זה, mutation_verify.sh:165 כן מתקין `trap … EXIT INT TERM`, ו--ai-chat-server/machtzev/mutation-dart-check.mjs:77-85 בכלל מחליל ב-sandbox ולא נוגע בעץ",
+    "evidence": "mutation_hard_test.py:172, 185-186 מול app_flutter/scripts/mutation_verify.sh:165 ומול machtzev/mutation-dart-check.mjs:77-85"
+   },
+   {
+    "claim": "**עריכה לא-מקומיטת באחד מ-4 הקבצים תאבד** אם התהליך ייהרג — ה-snapshot נלקח בזיכרון לפני הלולאה ונכתב חזרה, כלומר גם שינוי שנעשה **במהלך** הריצה יידרס",
+    "evidence": "mutation_hard_test.py:167"
+   },
+   {
+    "claim": "מריץ `flutter test test/helpers/` בלבד — מוטציה שנתפסת ע\"י בדיקה מחוץ לתיקייה הזו תיחשב SLIPPED",
+    "evidence": "mutation_hard_test.py:32-37"
+   },
+   {
+    "claim": "מוטציה אחת בכל פעם, סדרתית, כל אחת עם ריצת-סוויטה מלאה — 20 ריצות",
+    "evidence": "mutation_hard_test.py:171-186"
+   },
+   {
+    "claim": "אין לו baseline ואין ראצ׳ט — «כמה חמקו» אינו נשמר בין ריצות",
+    "evidence": "mutation_hard_test.py:188-205 — מדפיס בלבד"
+   },
+   {
+    "claim": "לא רץ אוטומטית — אף hook/CI לא מפעיל אותו, ולכן הלולאה «מוטציה חמקה ⇒ בדיקה חדשה» נסגרת ידנית בלבד",
+    "evidence": "`grep -rl mutation_hard .githooks/ .github/workflows/` ⇒ 0"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/app_flutter/test/helpers/infra_gap_test.dart:2",
+    "how": "בדיקת-Dart שנכתבה כדי לסגור את החורים שהמוטציות-הקשות חשפו; כל `test` מסומן במוטציה שהוא תופס (שורות 20, 48, 65, 85, 120)"
+   },
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — אין hook/CI שמריץ אותו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/mutation-dart-check.mjs:41-50 (מחוללי-המוטציה type-preserving) — כתוספת של **מוטציות-כתובות-ביד**",
+   "gives": "‏`mutation-dart-check.mjs` מחליל אוטומטית לפי טיפוס (‏int⇒0 · String⇒'' · bool⇒false …). זה תופס בדיקות **חלולות**, אבל לא פרצות-לוגיקה עדינות: `while`⇒`if`, `startsWith`⇒`contains`, גבול-מילה חסר. mutation_hard_test.py הוא בדיוק ההשלמה — 20 מוטציות כתובות-ביד שכל אחת מתעדת פרצה ספציפית, וחלקן **מתוכננות לחמוק** כדי לחשוף חור. הצירוף (אוטומטי לרוחב + ידני לעומק) הוא מה שמחזיק את L11 של הפרוטוקול"
+  },
+  "s22": {
+   "score": 2,
+   "why": "«הבדיקות עוברות» חסר-משמעות בלי «הבדיקות תופסות», ו-20 מוטציות עדינות שמתעדות כל אחת פרצה מוגדרת הן הצורה החזקה של הטענה הזו. יש לו שתי ראיות מדודות: (א) בדקתי ש-**20/20** מחרוזות-החיפוש עדיין תואמות את הקוד — הסוויטה חיה ולא נרקבה; (ב) **הלולאה נסגרה בפועל** — `app_flutter/test/helpers/infra_gap_test.dart` נכתב מולו, וכל בדיקה בו מסומנת במוטציה שהיא תופסת (שורות 2, 20, 48, 65, 85, 120). זה בדיוק «חור-כיסוי ⇒ בדיקה חדשה» שהוא מה ש-§22 «אפס-באגים» דורש. לא 3: הוא כותב על עץ-העבודה החי בלי trap לאותות, ה-FLUTTER שלו קשיח, אין baseline/ראצ׳ט, ואף אחד לא מריץ אותו — והמקבילה המחוברת (`mutation-dart`, police.mjs:171) כבר עושה את הווריאנט הרחב-ואוטומטי בצורה בטוחה יותר"
+  },
+  "evidence": [
+   "sed -n '1,50p' + sed -n '160,205p' scripts/mutation_hard_test.py (205 שורות · 20 מוטציות · 4 קובצי-יעד)",
+   "סקריפט-יבש (טעינת MUTATIONS בלי flutter) ⇒ 20 mutations · find-string present 20 · MISSING 0",
+   "ls -la app_flutter/test/helpers/{isolation_validator,wiring_contract_helper,state_machine_fixture,dial_test_helper}.dart ⇒ 4 קיימים",
+   "ls -d /home/user/flutter/bin ⇒ No such file or directory",
+   "sed -n '1,10p' + grep -n 'writeFileSync|copyFileSync' machtzev/mutation-dart-check.mjs ⇒ 77-85",
+   "grep -rl mutation_hard /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0",
+   "grep -n 'mutation' app_flutter/test/helpers/infra_gap_test.dart ⇒ 2, 20, 48, 65, 85, 120"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/mutation_test.py",
+  "lang": "py",
+  "lines": 222,
+  "does": [
+   {
+    "claim": "מזריק 20 באגים לשלושה קובצי-עזר של הבדיקות (isolation_validator · wiring_contract_helper · state_machine_fixture) ומוודא שהסוויטה תופסת כל אחד",
+    "evidence": "mutation_test.py:3-4, 20-22, 48-183"
+   },
+   {
+    "claim": "כל מוטציה היא (מספר, תיאור, קובץ, מחרוזת-חיפוש, מחרוזת-החלפה) עם הצהרה מפורשת ש-find הוא **מילולי ולא regex**",
+    "evidence": "mutation_test.py:45-47, 194"
+   },
+   {
+    "claim": "התיאורים מתעדים פרצות אמיתיות — למשל «`contains('import')` במקום `startsWith('import ')`» ו«פסי-הערה חסומים: inBlock לעולם לא true»",
+    "evidence": "mutation_test.py:51-58"
+   },
+   {
+    "claim": "**שחזור ב-finally מ-snapshot בזיכרון**, עם ההערה המפורשת `# always revert`",
+    "evidence": "mutation_test.py:187, 196, 205-206"
+   },
+   {
+    "claim": "מדלג (SKIP) על מוטציה שמחרוזת-החיפוש שלה כבר לא בקובץ, במקום לקרוס",
+    "evidence": "mutation_test.py:190-193"
+   },
+   {
+    "claim": "יוצא 0 רק אם **כל** 20 נתפסו",
+    "evidence": "mutation_test.py:6, 222"
+   },
+   {
+    "claim": "**בדקתי שהוא עדיין מסונכרן** — כל 20 מחרוזות-החיפוש עדיין בקבצים",
+    "evidence": "סקריפט-יבש ⇒ «mutation_test: 20 mutations · find-string present **20** · MISSING(=SKIP) **0**»"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא ניתן להרצה כאן** — FLUTTER קשיח ל-`/home/user/flutter/bin/flutter`",
+    "evidence": "mutation_test.py:25 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "**כותב לעץ-העבודה החי בלי trap לאותות** — בדיוק כמו mutation_hard_test.py",
+    "evidence": "mutation_test.py:196, 205-206; אין `signal`/`atexit` ב-222 השורות"
+   },
+   {
+    "claim": "**זהה כמעט-לחלוטין ל-mutation_hard_test.py** בכל מה שאינו טבלת-המוטציות: אותם read/write/tests_fail, אותו BASE/os.chdir, אותו FLUTTER קשיח, אותו מבנה-לולאה ואותו דוח. שני עותקים של אותו רץ, בלי מודול משותף",
+    "evidence": "mutation_test.py:20-46, 185-222 מול mutation_hard_test.py:18-38, 165-205"
+   },
+   {
+    "claim": "מכסה 3 קבצים ולא 4 — `dial_test_helper.dart` אינו בו (הוא רק ב-mutation_hard_test.py)",
+    "evidence": "mutation_test.py:20-22 מול mutation_hard_test.py:20-23"
+   },
+   {
+    "claim": "מריץ `flutter test test/helpers/` בלבד",
+    "evidence": "mutation_test.py:36-42"
+   },
+   {
+    "claim": "אין baseline ואין ראצ׳ט; לא רץ אוטומטית",
+    "evidence": "mutation_test.py:208-222 · `grep -rl mutation_test .githooks/ .github/workflows/` ⇒ 0"
+   },
+   {
+    "claim": "**לאחיו יש לולאת-משוב ולו אין** — mutation_hard_test.py זכה לבדיקה ייעודית שנכתבה מולו (app_flutter/test/helpers/infra_gap_test.dart:2), ואילו ל-mutation_test.py אין אף קובץ שמפנה אליו",
+    "evidence": "`git grep -l -F mutation_test.py -- . ':!knowledge/connect'` ⇒ 0 · `git grep -l -F mutation_hard_test.py` ⇒ app_flutter/test/helpers/infra_gap_test.dart"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ — `git grep -n -F mutation_test.py -- . ':!knowledge/connect'` ⇒ אין התאמה מחוץ לקובץ עצמו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ — מה שיש לחבר כבר נספר ב-mutation_hard_test.py",
+   "gives": "שני הקבצים חולקים את אותו רץ ואותו רעיון; נקודת-החיבור למחולל (‏machtzev/mutation-dart-check.mjs:41-50, כתוספת ידנית למחלילים האוטומטיים) זהה. מה שהזוג הזה מוסיף כשלעצמו הוא דווקא **הראיה לחוב**: אותו קוד-רץ מועתק בשני קבצים, וזו בדיוק מחלקת-הכפילות שהמחולל נועד לחסל"
+  },
+  "s22": {
+   "score": 1,
+   "why": "התוכן טוב — 20 מוטציות עם תיאורים מדויקים, שחזור ב-finally, ו-20/20 עדיין מסונכרנות עם הקוד (בדקתי). אבל כמנוע הוא **חצי-כפול** ל-mutation_hard_test.py: אותו read/write/tests_fail, אותו BASE, אותו FLUTTER קשיח, אותו מבנה-דוח — שני עותקים בלי מודול משותף, וההבדל היחיד המהותי הוא טבלת-המוטציות ו-DTH. הוא גם לא רץ כאן, לא רץ אוטומטית בשום מקום, וכותב לעץ החי בלי trap. לא 0: המקבילה המחוברת (`mutation-dart`) מחלילה type-preserving ולא בודקת את הפרצות הספציפיות האלה, ולכן הוא אינו מיותר — רק כפול-בחלקו מול אחיו שבאותה תיקייה"
+  },
+  "evidence": [
+   "sed -n '1,60p' + sed -n '185,222p' scripts/mutation_test.py (222 שורות · 20 מוטציות · 3 קובצי-יעד)",
+   "סקריפט-יבש ⇒ 20 mutations · find-string present 20 · MISSING 0",
+   "השוואת mutation_test.py:20-46,185-222 מול mutation_hard_test.py:18-38,165-205 (רץ זהה)",
+   "ls -d /home/user/flutter/bin ⇒ No such file or directory",
+   "grep -rl mutation_test /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0",
+   "git grep -l -F mutation_test.py ⇒ ∅ (לעומת mutation_hard_test.py שיש לו את infra_gap_test.dart)"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/new_feature.sh",
+  "lang": "sh",
+  "lines": 113,
+  "does": [
+   {
+    "claim": "scaffold לפיצ'ר חדש לפי «כלל 2 — בידוד»: יוצר `lib/features/<name>/{model,helper,widget}.dart` + `test/features/<name>_test.dart`",
+    "evidence": "new_feature.sh:44-46, 57-61, 64-131"
+   },
+   {
+    "claim": "**כל תבנית נושאת את כללי-השכבה שלה כהערה**: model = data classes + enums בלבד, בלי UI/BuildContext/import מ-screens · helper = פונקציות טהורות, בלי BuildContext/ref/side-effects · widget = DialRow/DialColumn בלבד, בלי Scaffold/Navigator/showDialog",
+    "evidence": "new_feature.sh:65-67, 74-76, 84-86, 91-92"
+   },
+   {
+    "claim": "**הבדיקה המחוללת אינה placeholder בלבד** — היא יורשת `FeatureIsolationTestBase` ומצהירה את שלושת קובצי-הפיצ'ר, כלומר בדיקת-הבידוד רצה אוטומטית מהרגע הראשון",
+    "evidence": "new_feature.sh:105, 109-122"
+   },
+   {
+    "claim": "**דורש מקור-פרוטו לפני קוד** — כל תבנית פותחת ב-`// מקור: proto [L????] — חובה למלא לפני קוד!`",
+    "evidence": "new_feature.sh:66, 75, 85"
+   },
+   {
+    "claim": "מדפיס checklist בן 10 צעדים בסדר אכיף: model ⇒ helper ⇒ unit tests ⇒ test ירוק ⇒ widget ⇒ analyze ⇒ analyze ⇒ כל הסוויטה ⇒ **חיבור ל-shell רק אחרי 1-8 ירוקים** ⇒ commit",
+    "evidence": "new_feature.sh:142-153"
+   },
+   {
+    "claim": "מסיים בהוראת-אימות-verbatim מול הלגאסי",
+    "evidence": "new_feature.sh:155"
+   },
+   {
+    "claim": "דורש שם-פיצ'ר ומדפיס שימוש אם חסר",
+    "evidence": "new_feature.sh:50-55"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**דורס בלי לשאול** — `cat >` על ארבעת הקבצים בלי בדיקת-קיום. הרצה חוזרת על שם קיים מוחקת פיצ'ר שנכתב",
+    "evidence": "new_feature.sh:64, 73, 83, 98; אין `[ -e ]` ואין `-i` ב-113 השורות"
+   },
+   {
+    "claim": "לא מוודא שהשם חוקי — רווח, `/` או תו לא-חוקי ייכנסו לנתיב ולשם-המחלקה",
+    "evidence": "new_feature.sh:50, 57-58"
+   },
+   {
+    "claim": "**`chmod +x` על קובץ Dart** — חסר-משמעות ומעיד שהשורה הועתקה מתבנית אחרת",
+    "evidence": "new_feature.sh:133"
+   },
+   {
+    "claim": "לא מריץ analyze/test אחרי היצירה — ה-checklist הוא הוראה לאדם",
+    "evidence": "new_feature.sh:135-155"
+   },
+   {
+    "claim": "לא רושם את הפיצ'ר ב-WIRING.md, למרות ששער 24 ב-.githooks/pre-commit:254-256 יחסום commit של קוד בלי עדכון-WIRING",
+    "evidence": "new_feature.sh:135-155 מול .githooks/pre-commit:254-256"
+   },
+   {
+    "claim": "ה-`proto [L????]` נשאר כמציין-מיקום — אין שער שמוודא שהוא מולא",
+    "evidence": "new_feature.sh:66, 75, 85"
+   },
+   {
+    "claim": "לא רץ אוטומטית ואין לו קורא",
+    "evidence": "`git grep -n -F new_feature.sh -- . ':!knowledge/connect'` ⇒ אין התאמה מחוץ לקובץ עצמו"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ — אין התאמה מחוץ לקובץ עצמו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/app-from-sentences.mjs:207-208 ו-gen-verify.mjs:39-65 — שם נכתבת הבדיקה המחוללת לצד המודול המחולל",
+   "gives": "המחולל **כבר** מחולל בדיקה לצד כל פלט (gen-verify.mjs:39-65 כותב `test/genesis_gen_verify_test.dart`; app-from-sentences.mjs:207-208 בונה בדיקת-ניווט). מה ש-new_feature.sh מוסיף הוא הרובד השני: **בדיקת-בידוד שיורשת בסיס ומצהירה את קובצי-היחידה** (new_feature.sh:109-119), כלומר הבדיקה אוכפת את **גבולות-השכבה** ולא רק שהמסך נרנדר. עבור §20 «אטומים נקיים ללא דאטה» ו-§19-ד, זו בדיוק האכיפה שחסרה: `machtzev/purity/purity-data.mjs` בודק טוהר-דאטה בסריקה חיצונית, בעוד כאן הבדיקה נולדת יחד עם היחידה ונוסעת איתה"
+  },
+  "s22": {
+   "score": 1,
+   "why": "הרעיון נכון — יחידה נולדת עם בדיקת-הבידוד שלה ועם כללי-השכבה כתובים בתוכה — וזה בדיוק מה ש-§22 צריך כשמחולל מייצר עשרות יחידות. אבל כמנוע הוא חלש: **דורס ארבעה קבצים בלי לשאול**, לא מאמת את השם, לא מריץ כלום, לא מעדכן WIRING (מה שיפיל את שער 24 ב-commit), משאיר `proto [L????]` בלי שער שיאכוף מילוי, ויש בו `chmod +x` על קובץ Dart. אין לו אף קורא. לא 0: אין מקבילה מחוברת שמחוללת יחידה **עם בדיקת-גבולות-שכבה** — המחולל מחולל בדיקות-רנדר, לא בדיקות-בידוד"
+  },
+  "evidence": [
+   "cat -n scripts/new_feature.sh (113 שורות, כולן)",
+   "ls app_flutter/test/helpers/feature_isolation_test_base.dart (הבסיס שהתבנית יורשת)",
+   "sed -n '254,257p' /home/user/buildsmart/.githooks/pre-commit (שער 24 — WIRING)",
+   "cat -n machtzev/generator/gen-verify.mjs ⇒ 39-65 · sed -n '207,208p' machtzev/generator/app-from-sentences.mjs",
+   "git grep -n -F new_feature.sh (buildsmart) ⇒ ∅ מחוץ לקובץ"
+  ]
  }
 ]
