@@ -1101,5 +1101,413 @@
    "git grep -n -F fix_audit_dims.py ⇒ STATUS.md:252 · mutation_log.md:1428",
    "cat -n app_flutter/knowledge/catalog-3d/polyroll_dim_engine.py:15 (הכלל המקביל)"
   ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/generate_stuck_regression.sh",
+  "lang": "sh",
+  "lines": 129,
+  "does": [
+   {
+    "claim": "מייצר את app_flutter/test/stuck_regression_test.dart מתוך knowledge/stuck_log.md — כל שורת `ANTIPATTERN:` הופכת ל-test שרץ לנצח",
+    "evidence": "generate_stuck_regression.sh:2-3, 11-13, 20, 38-127"
+   },
+   {
+    "claim": "**שני יעדי-סריקה**: `ANTIPATTERN:` סורק את lib/ (Dart) · `ANTIPATTERN[hook]:` סורק את ../.githooks/pre-commit (bash) — כי 17 מתוך 31 האנטי-פטרנים היו hook-bash וסרקו lib/ לחינם",
+    "evidence": "generate_stuck_regression.sh:5-9, 59-65, 76-121"
+   },
+   {
+    "claim": "מנקה escape ל-Dart בסדר קריטי (`\\` ⇒ `\\\\` ואז `$` ואז `'`) כדי שתבנית שמתחילה/נגמרת בגרש לא תשבור את קומפילציית כל הסוויטה",
+    "evidence": "generate_stuck_regression.sh:67-74"
+   },
+   {
+    "claim": "בבדיקת-ה-hook מתעלם משורות-הערה — כדי שתיעוד-התיקון ב-pre-commit לא ייספר כחזרת-הבאג",
+    "evidence": "generate_stuck_regression.sh:89-90"
+   },
+   {
+    "claim": "נופל בחן: אין stuck_log ⇒ exit 0; אין ANTIPATTERN ⇒ test ריק תקין; ה-hook לא קיים ⇒ הבדיקה מדלגת בלי לשבור",
+    "evidence": "generate_stuck_regression.sh:15-17, 22-35, 80-84"
+   },
+   {
+    "claim": "**מחובר בפועל בתוך buildsmart** — שער 104 מריץ אותו ומוסיף את התוצאה ל-commit; שער 111 חוסם אם מספר ה-ANTIPATTERN ≠ מספר ה-tests או אם יש מספור כפול",
+    "evidence": ".githooks/pre-commit:755-762 (שער 104) · 766-774 (שער 111)"
+   },
+   {
+    "claim": "התוצר חי ומעודכן",
+    "evidence": "`ls -la app_flutter/test/stuck_regression_test.dart` ⇒ 105684 bytes · `grep -c '^ANTIPATTERN' app_flutter/knowledge/stuck_log.md` ⇒ **122**, מתוכם `^ANTIPATTERN\\[hook\\]` ⇒ **16**"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא מאמת שה-regex תקין — תבנית שגויה תיווצר כ-RegExp שנכשל בזמן-ריצה, לא בזמן-יצירה",
+    "evidence": "generate_stuck_regression.sh:86, 103 — הזרקת מחרוזת ישירה ל-`RegExp('…')`"
+   },
+   {
+    "claim": "לא בודק כפילות-תוכן — המספור (#N) הוא סידורי לפי סדר-השורות, ולכן הוספת ANTIPATTERN באמצע הקובץ מזיזה את כל המספרים שאחריו",
+    "evidence": "generate_stuck_regression.sh:52, 56 (‏LINE_NUM סידורי) — הגנת-הכפילות היא בשער 111 החיצוני, לא כאן"
+   },
+   {
+    "claim": "סורק שורה-שורה — אנטי-פטרן שמשתרע על שתי שורות לא ייתפס",
+    "evidence": "generate_stuck_regression.sh:88-91, 109-113"
+   },
+   {
+    "claim": "לא מבטיח שהבדיקה תרוץ מהתיקייה הנכונה — בדיקת-ה-hook משתמשת בנתיב יחסי `../.githooks/pre-commit` ומדלגת בשקט אם לא נמצא",
+    "evidence": "generate_stuck_regression.sh:80-84"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/.githooks/pre-commit:758",
+    "how": "שער 104 — `bash \"$REPO_ROOT/app_flutter/scripts/generate_stuck_regression.sh\"` כשה-stuck_log משתנה, ואז `git add` לתוצר"
+   },
+   {
+    "who": "buildsmart/.githooks/pre-commit:773-774",
+    "how": "שער 111 — `err` אם ספירת-ANTIPATTERN ≠ ספירת-tests, עם ההנחיה «הרץ scripts/generate_stuck_regression.sh»"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה בלבד: machtzev/BUILDSMART-PROTOCOL-MAP.md:229, 448, 553 («לא נקראו במלואם»), 598"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/police.mjs — כשער חדש לצד `learn` (שורה 168), הניזון מ-machtzev/LEARNINGS.md · ולצדו machtzev/learn-check.mjs",
+   "gives": "המחולל מחזיק LEARNINGS.md ו-`learn`-gate, אבל הלקח שם נשאר **טקסט**. המנגנון כאן הופך לקח לשער-מכונה: שורה במסמך ⇒ בדיקה מחוללת ⇒ שער שחוסם אם הספירות לא תואמות (שער 111). זה הופך «לא לחזור על הטעות» ממשמעת לאכיפה — וזה בדיוק מה ש-machtzev/BULDSMART-PROTOCOL-MAP.md:524 מודה שחסר לנחיל («אין שער-hook שבודק שהנחיל רץ — משמעת בלבד»). 122 אנטי-פטרנים חיים הם ההוכחה שהדפוס מתרחב"
+  },
+  "s22": {
+   "score": 3,
+   "why": "המנוע היחיד מבין 49 שהוא **שער-חי-ומחובר בתוך buildsmart** עם לולאת-משוב סגורה: מסמך ⇒ מחולל ⇒ בדיקות ⇒ שער שחוסם חוסר-סנכרון. זו בדיוק צורת ה-§22 «אפס-באגים»: באג שתועד פעם אחת לא יכול לחזור בשקט. גם מדיד: 122 אנטי-פטרנים · 105KB בדיקות מחוללות · שני שערים (104, 111). אין לו מקבילה מחוברת ב--ai-chat-server: `learn-check.mjs` הוא שער על **מסמך-הלקחים**, לא מחולל-בדיקות ממנו"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/generate_stuck_regression.sh (129 שורות, כולן)",
+   "grep -c '^ANTIPATTERN' app_flutter/knowledge/stuck_log.md ⇒ 122 · '^ANTIPATTERN\\[hook\\]' ⇒ 16",
+   "ls -la app_flutter/test/stuck_regression_test.dart ⇒ 105684 bytes",
+   "grep -n 'stuck_regression|generate_stuck' /home/user/buildsmart/.githooks/pre-commit ⇒ 755-762 (104) · 766-774 (111)",
+   "sed -n '120,184p' machtzev/police.mjs ⇒ gate('learn','learn-check.mjs') · אין שער-מחולל-בדיקות-מלקחים",
+   "grep -rn -F generate_stuck_regression.sh (-ai-chat-server) ⇒ BUILDSMART-PROTOCOL-MAP.md בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/harvest_lipski_site.py",
+  "lang": "py",
+  "lines": 56,
+  "does": [
+   {
+    "claim": "קוצר את אתר-היצרן הרשמי lipski.co.il: קורא את product-sitemap.xml, נכנס לכל עמוד-מוצר, ומחלץ sku · שם · תמונה ראשית",
+    "evidence": "harvest_lipski_site.py:2-3, 22-46"
+   },
+   {
+    "claim": "שלוש אסטרטגיות-SKU בסדר יורד של אמינות (schema JSON · span.sku · og retailer_item_id), והראשונה שמחזירה ערך לא-ריק ולא-'N/A' מנצחת",
+    "evidence": "harvest_lipski_site.py:30-37"
+   },
+   {
+    "claim": "משתמש ב-curl עם User-Agent של דפדפן — כי Cloudflare חוסם את ה-UA של urllib",
+    "evidence": "harvest_lipski_site.py:4, 10, 13-18"
+   },
+   {
+    "claim": "read-only מוצהר — לא נוגע בקטלוג; כותב רק knowledge/_lipski_site.json",
+    "evidence": "harvest_lipski_site.py:4, 49-50"
+   },
+   {
+    "claim": "מדווח שתי ספירות: סה\"כ נקצר, וכמה מהם עם sku+image (כלומר שמישים להצלבה)",
+    "evidence": "harvest_lipski_site.py:51-52"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא ניתן לאמת כאן — קובץ-הפלט אינו בריפו",
+    "evidence": "`ls app_flutter/knowledge/_lipski_site.json` ⇒ No such file or directory"
+   },
+   {
+    "claim": "לא מטפל בכשל-רשת — `curl` בולע כל חריגה ומחזיר מחרוזת ריקה, והלולאה פשוט `continue`. sitemap ריק ⇒ «product URLs: 0» ופלט ריק, בלי קוד-יציאה שגוי",
+    "evidence": "harvest_lipski_site.py:13-18, 22-24, 28-29"
+   },
+   {
+    "claim": "לא מוריד את התמונות — רק את ה-URL",
+    "evidence": "harvest_lipski_site.py:38-41, 46"
+   },
+   {
+    "claim": "לא מצליב מול הקטלוג — זה תפקידו של שלב אחר",
+    "evidence": "אין קריאה ל-lipskey_catalog.dart ב-56 השורות"
+   },
+   {
+    "claim": "לא rate-limit ולא retry — 30 שניות timeout פר-עמוד, סדרתי",
+    "evidence": "harvest_lipski_site.py:15-16, 26-27"
+   },
+   {
+    "claim": "מסתמך על שלוש תבניות-HTML קשיחות; שינוי-תבנית באתר שובר אותו בשקט (sku=None ⇒ הרשומה עדיין נכתבת)",
+    "evidence": "harvest_lipski_site.py:32-34, 46"
+   },
+   {
+    "claim": "**שלוש תבניות-ה-SKU שלו לא עבדו בפועל.** בריצה האמיתית ה-SKU חולץ מ**שם-קובץ-התמונה**, כי ה-theme של lipski.co.il אינו חושף SKU ב-meta — כלומר הפלט השמיש נוצר בדרך שאינה בקוד הזה",
+    "evidence": "app_flutter/knowledge/mutation_log.md:1482 («מק\"ט חולץ משם-קובץ-התמונה — theme לא חושף SKU ב-meta»; 84 התאמות) מול harvest_lipski_site.py:32-37"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. הרצה מתועדת: knowledge/STATUS.md:195 («קצר 186 דפי-מוצר») · knowledge/mutation_log.md:1482 (84 התאמות-SKU) · מוזכר כ-tooling-קיים ב-knowledge/studio-plan/05-scale-data-backend.md:319"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "∅ (לא ידוע אם קיים מקבילה מחוברת)",
+   "gives": "השגת-דאטה מרשת אינה בצינור-המחולל. הדבר היחיד ב--ai-chat-server שיוצא לרשת הוא הורדת-Dart ב-.claude/hooks/session-start.sh:26-27. חיבור היה דורש מדיניות-רשת ומטמון שאינם קיימים"
+  },
+  "s22": {
+   "score": 1,
+   "why": "מנוע-השגה כשר בכוונתו — מקור-אמת חיצוני ורשמי (אתר-היצרן) במקום ניחוש, וזה §20 «לעולם לא לזייף דאטה». אבל הקוד עצמו לא מספק: הפלט לא בריפו, אין קורא-הרצה, הוא נכשל בשקט, **ושלוש תבניות-ה-SKU שבו לא עבדו בפועל** (mutation_log.md:1482). לא 0: אין מקבילה מחוברת שמביאה דאטת-מוצר ממקור-יצרן — `grep -rln 'curl\\|fetch(' machtzev/generator/*.mjs` ⇒ קובץ **אחד**, machtzev/generator/server.mjs:174,189, ושם זה `fetch` ל-oauth2.googleapis.com לטוקן, לא השגת-דאטה"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/harvest_lipski_site.py (56 שורות, כולן)",
+   "ls app_flutter/knowledge/_lipski_site.json ⇒ No such file or directory",
+   "git grep -n -F harvest_lipski_site.py (buildsmart) ⇒ STATUS.md:195 · mutation_log.md:1482 · studio-plan/05-scale-data-backend.md:319",
+   "grep -rln 'curl|fetch(' machtzev/generator/*.mjs ⇒ machtzev/generator/server.mjs בלבד (שורות 174,189 = oauth token)",
+   "grep -rn --exclude-dir=.git -F harvest_lipski_site.py (-ai-chat-server) ⇒ engine-index.json בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/match_lipskey_pdf.py",
+  "lang": "py",
+  "lines": 115,
+  "does": [
+   {
+    "claim": "מצליב את חילוץ-ה-PDF המאומת של הנחיל (knowledge/_pdf_extracted.json) מול 924 ה-SKUs שבקטלוג החי, ופולט רק מה שמותר להחיל",
+    "evidence": "match_lipskey_pdf.py:60-63, 86-89, 154-155"
+   },
+   {
+    "claim": "**דוחה קריאות לא-בטוחות**: כל מוצר עם `confidence == 'low'` מדולג ונספר בנפרד",
+    "evidence": "match_lipskey_pdf.py:116-118"
+   },
+   {
+    "claim": "**לא ממציא ולא מוסיף מוצרים**: SKU שקיים ב-PDF ואינו בקטלוג נאסף ל-new_skus ו**מודפס להכרעת-משתמש** — לא נכתב",
+    "evidence": "match_lipskey_pdf.py:64-65, 119-121, 163-167"
+   },
+   {
+    "claim": "**לא דורס את nameHe** (שמזין את מפרק-הצ'יפים); שם-ה-PDF מקופל ל-dims['תיאור'] רק כשאין תיאור",
+    "evidence": "match_lipskey_pdf.py:67-68, 134-136"
+   },
+   {
+    "claim": "מחלץ qtyPack/qtyPallet **החוצה** מ-dims לשדות-ה-int המדרגה-ראשונה של הקטלוג, ותמיד pop כדי שמוצר רב-שורות לא ידליף אותם ל-dims",
+    "evidence": "match_lipskey_pdf.py:77-79, 124-133"
+   },
+   {
+    "claim": "מכבד את הצמדת gate-117 על color — SKU מוצמד לא יקבל color מה-PDF",
+    "evidence": "match_lipskey_pdf.py:90-96, 145"
+   },
+   {
+    "claim": "לא מחיל כפול — סורק מראש מי כבר יש לו color/dims/pack/pallet",
+    "evidence": "match_lipskey_pdf.py:97-108, 143-149"
+   },
+   {
+    "claim": "ממזג אזכורים מרובי-עמודים של אותו SKU לרשומה אחת",
+    "evidence": "match_lipskey_pdf.py:110, 122, 137-139"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא ניתן להרצה כאן — קובץ-הקלט חסר",
+    "evidence": "`ls app_flutter/knowledge/_pdf_extracted.json` ⇒ No such file or directory"
+   },
+   {
+    "claim": "לא כותב לקטלוג — רק ל-JSON שמוזן ל-apply_lipskey_enrich.py",
+    "evidence": "match_lipskey_pdf.py:62-63, 154-155"
+   },
+   {
+    "claim": "לא מחלץ מה-PDF — החילוץ נעשה ע\"י נחיל שאינו בריפו",
+    "evidence": "match_lipskey_pdf.py:58-60"
+   },
+   {
+    "claim": "gate117 כאן נקרא ב-regex `'(\\d{6})'` — בדיוק 6 ספרות, בעוד fill_material_from_name.py:32 משתמש ב-`\\d{6,}`. שתי הגדרות שונות לאותה קבוצה באותו ריפו",
+    "evidence": "match_lipskey_pdf.py:94 מול app_flutter/scripts/fill_material_from_name.py:32"
+   },
+   {
+    "claim": "gate117 מגן על color בלבד — dims ו-qty נכתבים גם ל-SKU מוצמד",
+    "evidence": "match_lipskey_pdf.py:143-149 (רק שורה 145 בודקת gate117)"
+   },
+   {
+    "claim": "לא מאמת ש-`confidence` בכלל קיים — מוצר בלי השדה נחשב לא-low ועובר",
+    "evidence": "match_lipskey_pdf.py:116 (`p.get('confidence') == 'low'`)"
+   },
+   {
+    "claim": "חותך ל-1700 תווים ראשונים בסריקת-הקיים",
+    "evidence": "match_lipskey_pdf.py:101"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית. מתועד: app_flutter/WIRING.md:3101 («ממפה qty→qtyPack/qtyPallet ומחריג color ל-SKUs מוצמדי-gate-117 — מונע התנגשות»). הפלט נצרך ע\"י apply_lipskey_enrich.py:18"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/gen-verify.mjs:88-92 ו-golden-harness.mjs:54-58 (בלוקי-ה-`if (gate)`), כדפוס שחסר שם",
+   "gives": "שני השערים האלה מסכמים כ«N/M» וחוסמים על נסיגה — אבל **אין להם ערוץ ל«נמצא משהו שאני לא בטוח בו, הכרעת-בעלים»**. match_lipskey_pdf.py:163-167 מדגים בדיוק את זה: שלוש קטגוריות פלט — הוחל · דולג-כי-לא-בטוח · **מועמד-להכרעת-אדם**. זו הצורה שהכרעה-27 דורשת («מה שאין לו מקור ⇒ ∅ מדווח, לא ניחוש») ו-§20 («אין-יחיד ⇒ שלב»), והיא ניתנת להוספה לכל שער-ראצ׳ט במחולל בלי לשנות את הראצ׳ט"
+  },
+  "s22": {
+   "score": 2,
+   "why": "זהו שער-הכניסה של דאטה חיצונית לתוך האפליקציה, והוא מיישם ארבעה כללי-§20 בו-זמנית: דילוג-על-ספק, אי-דריסה של שדה-מפתח, כיבוד-הצמדה קיימת, והעברת-החלטה לאדם במקום ניחוש. §22 נופל בדיוק כאן — דאטה שגויה בקטלוג = מסך שגוי. לא 3: הוא לא רץ (קלט חסר), לא מחובר, ושתי הגדרות gate-117 סותרות בין הקבצים (‏`\\d{6}` מול `\\d{6,}`) — פער-עקביות אמיתי"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/match_lipskey_pdf.py (115 שורות, כולן)",
+   "ls app_flutter/knowledge/_pdf_extracted.json ⇒ No such file or directory",
+   "grep -c 'LipskeyCatalogProduct(' app_flutter/lib/data/lipskey_catalog.dart ⇒ 924",
+   "git grep -n -F match_lipskey_pdf.py ⇒ WIRING.md:3101 · apply_lipskey_enrich.py (עקיף)",
+   "sed -n '86,94p' machtzev/generator/gen-verify.mjs · sed -n '54,59p' machtzev/generator/golden-harness.mjs"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/mutation_verify.sh",
+  "lang": "sh",
+  "lines": 72,
+  "does": [
+   {
+    "claim": "אימות-מוטציה בששה שלבים: גיבוי byte-exact ⇒ הזרקת sed ⇒ test חייב להיות אדום ⇒ שחזור מהגיבוי ⇒ test חייב להיות ירוק ⇒ רישום אוטומטי ל-knowledge/mutation_log.md",
+    "evidence": "mutation_verify.sh:143-144, 161-201"
+   },
+   {
+    "claim": "**משחזר מ-backup ולא מ-`git checkout`** — כדי שעריכות לא-מקומיטות באותו קובץ ישרדו. זה הבאג שהסקריפט נולד לתקן",
+    "evidence": "mutation_verify.sh:133-135, 162-165, 181-182"
+   },
+   {
+    "claim": "trap על EXIT/INT/TERM — גם קריסה או Ctrl-C משחזרים ומנקים",
+    "evidence": "mutation_verify.sh:145, 165"
+   },
+   {
+    "claim": "תופס מוטציה-ריקה: אם ה-sed לא שינה בית, יוצא 1 עם אזהרה במקום לדווח «נתפס»",
+    "evidence": "mutation_verify.sh:169-172 (`cmp -s`)"
+   },
+   {
+    "claim": "תופס גם את הכיוון ההפוך — אם אחרי השחזור הבדיקה עדיין אדומה, זו שגיאת-שחזור ולא חור-כיסוי",
+    "evidence": "mutation_verify.sh:185-188"
+   },
+   {
+    "claim": "בודק תנאים מוקדמים: 3 ארגומנטים · flutter ב-PATH · הקובץ קיים",
+    "evidence": "mutation_verify.sh:148-159"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**עדיין נוגע בעץ-העבודה החי.** המוטציה מוזרקת בקובץ המקורי (‏`sed -i`), לא בעותק-sandbox; אם התהליך נהרג ב-SIGKILL, ה-trap לא רץ והקובץ נשאר מוטנטי",
+    "evidence": "mutation_verify.sh:168 מול הדפוס ב--ai-chat-server/machtzev/mutation-dart-check.mjs:77-85 (העתקת אטום+בדיקה ל-tmpdir והרצה שם)"
+   },
+   {
+    "claim": "מריץ מוטציה אחת שהמשתמש מספק — אינו סורק ואינו דוגם; אין baseline ואין ראצ׳ט",
+    "evidence": "mutation_verify.sh:138, 152 (‏3 ארגומנטים קשיחים); אין קובץ-baseline בקובץ"
+   },
+   {
+    "claim": "**רושם רק הצלחות.** בכשל (מוטציה לא נתפסה) הוא יוצא 1 לפני שלב-הרישום — כלומר mutation_log.md מכיל את המוטציות שעברו בלבד",
+    "evidence": "mutation_verify.sh:175-178 (exit 1) מול 191-200 (הרישום)"
+   },
+   {
+    "claim": "נכשל כאן מיידית — flutter לא מותקן בקונטיינר",
+    "evidence": "mutation_verify.sh:157 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "לא מריץ את כל הסוויטה — רק `flutter test <filter>`, ולכן «אדום» יכול לנבוע מסיבה אחרת",
+    "evidence": "mutation_verify.sh:175, 185"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה אוטומטית — אינו נקרא מ-.githooks/pre-commit. מתועד כדרישת-פרוטוקול: knowledge/VERIFICATION_PROTOCOL.md (L3) והשערים 43-44 ב-.githooks/pre-commit:386-392 דורשים **רישום** ב-mutation_log.md, לא הרצה של הסקריפט (`grep -c mutation_verify .githooks/pre-commit` ⇒ 0)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ הרצה. אזכור-פרוזה: machtzev/BUILDSMART-PROTOCOL-MAP.md:447 («**לא** `git checkout`»), 527, 553, 595"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/golden-harness.mjs:34 + 44 — הכתיבה על המראה והשחזור שאחריה",
+   "gives": "**שם יושב בדיוק הבאג שהסקריפט הזה תיעד.** golden-harness.mjs:34 דורס `lib/genesis/dart-gen-bs/<module>` **בעץ-העבודה החי של buildsmart**, ושורה 44 משחזר ב-`spawnSync('git',['checkout','--',…],{cwd:BS})`. כל עריכה לא-מקומיטת בקובץ-המראה נמחקת. ההערה בראש הקובץ (golden-harness.mjs:6) אפילו מודה «ב-buildsmart רק `checkout -- <file>` לשחזור קובץ שהרתמה עצמה דרסה» — כלומר זה ידוע ולא נפתר. התיקון הנכון אינו הגיבוי שכאן אלא הדפוס שכבר קיים באותו ריפו: machtzev/mutation-dart-check.mjs:77-85 — להעתיק לעותק-sandbox ולא לגעת בעץ כלל"
+  },
+  "s22": {
+   "score": 2,
+   "why": "הערך שלו אינו המנגנון — המנגנון שלו (backup+restore, `sed -i` על הקובץ החי) **נחות** מהמקבילה המחוברת `machtzev/mutation-dart-check.mjs` (שער `mutation-dart`, police.mjs:171), שמחלילה בעותק-sandbox ולא נוגעת בעץ. הערך הוא שהוא מתעד תקרית-אמת מ-2026-06-01 ושם אצבע על כשל **חי ולא-מתוקן** בשער מחובר: golden-harness.mjs:44. §22 דורש «אפס-באגים», ואובדן-עבודה שקט ברתמה הוא באג-על. לא 0, כי המקבילה המחוברת אינה מכסה את buildsmart ואינה מגנה על כתיבת-המראה; לא 3, כי המנוע עצמו לא רץ כאן (אין flutter) ואין לו קורא"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/mutation_verify.sh (72 שורות, כולן)",
+   "sed -n '1,59p' machtzev/generator/golden-harness.mjs ⇒ שורות 6, 34, 44",
+   "sed -n '1,10p' + grep -n 'writeFileSync|copyFileSync' machtzev/mutation-dart-check.mjs ⇒ 77, 78, 85",
+   "sed -n '120,184p' machtzev/police.mjs ⇒ gate('mutation-dart',…) · gate('mutation',…)",
+   "ls -d /home/user/flutter/bin ⇒ No such file or directory",
+   "grep -n mutation_verify /home/user/buildsmart/.githooks/pre-commit ⇒ ∅"
+  ]
+ },
+ {
+  "file": "buildsmart/app_flutter/scripts/polish_shot.js",
+  "lang": "js",
+  "lines": 26,
+  "does": [
+   {
+    "claim": "צילום-מסך headless של ה-build ב-Playwright chromium: goto(url) ⇒ המתנה קבועה ⇒ screenshot ⇒ סגירה",
+    "evidence": "polish_shot.js:37-39 (כותרת), 46-62"
+   },
+   {
+    "claim": "viewport של טלפון — 412×915 ב-deviceScaleFactor 2",
+    "evidence": "polish_shot.js:52-53"
+   },
+   {
+    "claim": "עוקף את ה-proxy עם תעודה לא-מהימנה של הסנדבוקס — `ignoreHTTPSErrors` + `--ignore-certificate-errors`",
+    "evidence": "polish_shot.js:38, 48, 51"
+   },
+   {
+    "claim": "מדפיס שגיאות-עמוד ל-stdout ויוצא 1 בכשל",
+    "evidence": "polish_shot.js:56, 62"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא מוודא שהאפליקציה בכלל עלתה** — ממתין זמן קבוע (‏13000ms ברירת-מחדל) ומצלם, גם אם המסך לבן",
+    "evidence": "polish_shot.js:44, 58 (‏`waitForTimeout(WAIT)`) — אין waitForFunction/waitForSelector"
+   },
+   {
+    "claim": "לא סופר widgets ולא בודק flt-glass-pane; אין קריטריון-הצלחה מלבד «לא נזרקה חריגה»",
+    "evidence": "polish_shot.js:57-61"
+   },
+   {
+    "claim": "לא אוסף requestfailed/console-error — רק pageerror",
+    "evidence": "polish_shot.js:56"
+   },
+   {
+    "claim": "לא מגיש את הקבצים ולא בונה — מקבל URL מוכן; ההגשה היא באחריות polish_shot.sh",
+    "evidence": "polish_shot.js:42 (argv[2]) · app_flutter/scripts/polish_shot.sh:30-34"
+   },
+   {
+    "claim": "דורש `playwright` המלא ב-NODE_PATH (לא playwright-core)",
+    "evidence": "polish_shot.js:40 (`require('playwright')`) · polish_shot.sh:35 (`NODE_PATH=/opt/node22/lib/node_modules`)"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/app_flutter/scripts/polish_shot.sh:35-36",
+    "how": "`NODE_PATH=… node \"$HERE/polish_shot.js\" \"http://localhost:8099${URLPATH}\" \"$OUT\" \"$WAIT\"`"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F polish_shot.js .` ⇒ 0. (‏האינדקס רושם לו `calledByName: [\"polish_shot\"]` — זו ההתאמה ל-polish_shot.sh בתוך buildsmart, לא חיבור למחולל.)"
+   }
+  ],
+  "connectAt": {
+   "point": "∅",
+   "gives": "יש מקבילה מחוברת טובה יותר — ראה s22"
+  },
+  "s22": {
+   "score": 0,
+   "why": "מקבילה מחוברת וטובה יותר בשם: `-ai-chat-server/machtzev/tools/site-shot.mjs` (28 שורות), הנקראת מצינור-המחולל ב-machtzev/generator/ship.mjs:96. היא עושה כל מה ש-polish_shot.js עושה ועוד, וההפרש הוא בדיוק מה שהופך צילום לראיה: ‏(א) `waitForFunction(document.title === t)` ⇒ **הוכחה שה-MaterialApp אתחל** (site-shot.mjs:22) במקום המתנה עיוורת · (ב) ספירת `flt-glass-pane, flutter-view` (24) · (ג) איסוף requestfailed + pageerror + console-error (18) · (ד) הגשת ה-build בעצמה ב-`python3 -m http.server` (14) · (ה) פלט JSON מובנה עם booted/glass/ms/bytes/errors (27). polish_shot.js מצלם מסך לבן ומדווח «OK»; site-shot.mjs מדווח `booted:false`"
+  },
+  "evidence": [
+   "cat -n app_flutter/scripts/polish_shot.js (26 שורות, כולן)",
+   "wc -l + sed -n '1,28p' machtzev/tools/site-shot.mjs (-ai-chat-server)",
+   "sed -n '75,100p' machtzev/generator/ship.mjs ⇒ שורה 96 קוראת ל-site-shot.mjs",
+   "grep -rn --exclude-dir=.git -F polish_shot.js (-ai-chat-server) ⇒ 0",
+   "git grep -n -F polish_shot.js (buildsmart) ⇒ app_flutter/scripts/polish_shot.sh:35"
+  ]
  }
 ]
