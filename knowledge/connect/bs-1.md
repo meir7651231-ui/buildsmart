@@ -4,7 +4,7 @@
 > רשימת-המקור: `machtzev/generator/engine-index.json` בענף `claude/mizug` של `-ai-chat-server` (40 מנועים).
 > HEAD-ים ופקודות: `knowledge/connect/NOTES-bs-1.md`.
 
-**מופו: 25/40**
+**מופו: 30/40**
 
 | # | קובץ | שורות | עושה (תמצית) | לא עושה (תמצית) | קוראים | איפה לחבר | §22 |
 |---|------|-------|--------------|------------------|--------|-----------|-----|
@@ -33,6 +33,11 @@
 | 23 | `functions/src/setEmployer.ts` | 126 | ‏callable `setEmployer({uid,employerUid})` — קובע (או מבטל) את קישור **עובד⇒מעסיק** כ-claim `employerId` + מראה במסמך-המשתמש; admin-בלבד | לא מאמת שה-`employerUid` הוא חשבון קיים או בעל תפקיד contractor — רק שהוא תואם-תבנית ואינו העובד עצמו | functions/src/index.ts:210 · האינדקס רושם calledByName = setEmployerCore.ts · -ai-chat-server | ∅ ישיר. הקובץ הוא עוטף-Firebase טהור; כל מה שנייד בו יושב ב-`setEmployerCore.ts` (רשומה 24). מה שכן שווה-שימת-לב הוא ה**דפוס-הארכיטקטוני** שהוא חולק ע | **1** |
 | 24 | `functions/src/setEmployerCore.ts` | 41 | ‏`parseSetEmployerInput(uid,employerUid)` — פותר מטען-גולמי ל-`{uid,employerValue,revoke}` **או** ל-`{error}` שהעוטף ממפה ל-invalid-argument. אפס I/O. | **מודול טהור — אפס ייבוא**, כדי ש-`test/setEmployer.test.ts` ייבא אותו ב-`ts-node` פשוט. מוצהר כ«the creditCore idiom». | functions/src/setEmployer.ts:36 · functions/test/setEmployer.test.ts · -ai-chat-server | ‏`new/atoms/` דרך promote-auto. הפונקציה טהורה, arity=2, אפס-דומיין, ומחזירה union מפורש של הצלחה-או-שגיאה במקום לזרוק — בדיוק החוזה שאטום צריך. | **1** |
 | 25 | `functions/src/setOrg.ts` | 137 | ‏callable `setOrg({uid,orgId})` — חברות-בארגון כ-claim `orgId` + מראה ב-`users/{uid}.orgId`; admin-בלבד, ו-null/'' מבטל | לא בודק שהארגון קיים בפועל — `ORG_ID_PATTERN` מאמת **צורה**; אין קריאה ל-`orgs/{orgId}`. זה שונה מ-`setRole`, שכן מאמת קיום-חנות ל-claim ה-storeId. | functions/src/index.ts:227 · -ai-chat-server | ∅ ישיר — עוטף-Firebase. הממצא בעל-הערך כאן הוא **השוואתי ולא חיבורי**: `setOrg.ts` ו-`setEmployer.ts` הם אותו קובץ כמעט מילה-במילה (‏admin-gate ⇒ וליד | **1** |
+| 26 | `functions/src/studio.ts` | 544 | ‏callable `publishConfig` — נתיב-הפרסום-לכולם **היחיד** של עץ-תצורת-הסטודיו; הפרסום הוא **היפוך-מצביע מעל תצלומים בלתי-משתנים**, כלומר O(משתמשים) ולא  | לא סומך על claim-הטוקן לבדו לסמכות-הפרסום — הדגל החי נקרא מחדש **בזמן-הביצוע** בתוך הטרנזקציה. זו הסיבה המוצהרת: שלילה בשניות, לא בשעה. | functions/src/index.ts:220 · functions/test/studio.test.ts · האינדקס רושם calledByName = `bootstrap-studio-poi | ‏`machtzev/generator/ship.mjs` + `machtzev/generator/gen-verify-baseline.json` (הראצ׳ט) — שם המחולל מפרסם פלט ומחזיק מדד-מונוטוני. ‏`ship.mjs:6` מתעד  | **2** |
+| 27 | `functions/src/taskNotifs.ts` | 99 | ‏טריגר `onTaskStatusChanged` על `tasks/{taskId}` שמוסיף רשומת-פעמון ל-`workerNotifs/{workerUid}` — **בכתיבת-שרת**, כי לקוח לעולם לא יכול לכתוב לפיד של | **אינו מודיע על ⇒review ועל ⇒proposed** — אלה מעברים שהעובד עצמו יזם, ומודיעים לקבלן ולא לפעמון. `bellFor` מחזיר null. | functions/src/index.ts:200 · -ai-chat-server | ‏`new/atoms/` עבור **צורת** `bellFor` — טבלת-מעברים ⇒ הודעה-או-∅. ⚠️ אבל לא התוכן: המחרוזות הן עברית-דומיין, ו-§20 אוסר «מילון-דומייני» במחולל. | **1** |
+| 28 | `functions/test/credit.test.ts` | 107 | בדיקה offline של שתי ליבות-ההכרעה הטהורות של `computeCredit` — `creditScopeFor` ו-`readCreditLimit` — עם **17** קריאות `check()` | **לא בודק את `computeCredit` עצמו** — לא את הטרנזקציה, לא את שאילתת-ההזמנות, לא את חישוב balance/pct ולא את רשומת-הביקורת. מוצהר בכותרת. | אדם, מהשורה · האינדקס רושם calledByName = `studio.test.ts` · -ai-chat-server | ‏`machtzev/police.mjs` / רישום-השערים. הערך אינו הקוד אלא **ההצהרה על גבול-הכיסוי**: הקובץ אומר בפירוש מה הוא **לא** בודק. | **1** |
+| 29 | `functions/test/setEmployer.test.ts` | 96 | בדיקה offline של `parseSetEmployerInput` עם **11** קריאות `check(label,actual,expected)`, בהשוואת JSON.stringify של האובייקט המלא | לא בודק את שער-ה-admin, לא את `setCustomUserClaims`, לא את merge-המראה ולא את הביקורת — «the admin-gate + Admin-SDK write live in the wrapper» | אדם, מהשורה · האינדקס רושם calledByName = `setEmployerCore.ts` · -ai-chat-server | ∅ ישיר. 96 שורות של טענות על פונקציה אחת מהריפו הזה — אין בהן קוד נייד. | **1** |
+| 30 | `functions/test/studio.test.ts` | 410 | הרתמה הגדולה ביותר בריפו: **54** קריאות `check()` על הליבות הטהורות של Step-56 (`decidePublish` · `rateLimitExceeded`) ושל Step-57 (`decideRevert` · ` | לא בודק את `publishConfig` ו-`revertIllegalConfigWrite` עצמם — לא את ה-CAS בתוך הטרנזקציה האמיתית, לא את יצירת-התצלום, לא את היפוך-המצביע | אדם, מהשורה · האינדקס רושם calledByName = `credit.test.ts` · -ai-chat-server | ‏`machtzev/generator/gen-verify.mjs` — הרתמה שמייצרת בדיקות-widget **מחוללות** לכל `gen_*.dart` ומדווחת `GENVERIFY {json}`. ההקבלה: שתיהן בודקות פלט ש | **2** |
 
 ## פירוט מלא
 
@@ -1100,4 +1105,218 @@
 - `sed -n '86,137p' functions/src/setOrg.ts | grep 'setCustomUserClaims|orgId|FieldValue|writeAudit'`
 - `השוואה מול functions/src/setEmployer.ts:60-126 (אותו רצף-צעדים)`
 - `functions/src/index.ts:96-103 (שם כן מאומת קיום — הניגוד)`
+
+### 26. `functions/src/studio.ts` · ts · 544 שורות · §22 = **2**
+
+**1 · מה הוא עושה**
+- ‏callable `publishConfig` — נתיב-הפרסום-לכולם **היחיד** של עץ-תצורת-הסטודיו; הפרסום הוא **היפוך-מצביע מעל תצלומים בלתי-משתנים**, כלומר O(משתמשים) ולא O(משתמשים×צמתים) — כל לקוח קורא מצביע של ~200B  
+  *ראיה:* functions/src/studio.ts:1-9, :209
+- ‏`decidePublish(i)` — ליבה **טהורה** בשלושה שלבים שהסדר בהם מהותי: (1) סמכות — בעלים **או** אישור-דו-בקרה, אחרת permission-denied «כדי לא לחשוף בכלל את מצב-הגרסה לקורא לא-מורשה» · (2) דגל-היתר **חי** — נקרא מחדש בטרנזקציה, ושלילה תופסת בשניות במקום בחלון-התפשטות-claim של עד שעה, **גם לבעלים עם טוקן תקף** · (3) CAS על `expectedBaseVersion`  
+  *ראיה:* functions/src/studio.ts:114-146
+- ‏**CAS ולא LWW**: גרסה שזזה ⇒ `failed-precondition` «פורסמה גרסה חדשה — רענן ומזג», לעולם לא דריסה. שני מנהלים שמפרסמים במקביל אינם יכולים לדרוס זה את זה — השני נדחה וחייב למזג.  
+  *ראיה:* functions/src/studio.ts:14-20, :133-139
+- ‏`decideRevert(i)` — ליבה טהורה לטריגר `revertIllegalConfigWrite`: מגן-לולאה (‏publishGuard השתנה ⇒ כתיבה מאושרת, דלג) ⇒ זיוף (‏guard **לא** השתנה אבל version|ref זזו ⇒ עקף את ה-callable ⇒ החזר) ⇒ אחרת כתיבה-אינרטית  
+  *ראיה:* functions/src/studio.ts:421-445
+- ‏`revertStillApplies(liveVersion,toVersion)` — מגן-דריסה טהור: ה-revert מתבצע רק אם הגרסה החיה עדיין שווה לזו שהזיוף קבע  
+  *ראיה:* functions/src/studio.ts:447-459
+- ‏`rateLimitExceeded(cur,now,windowMs,max)` — פרדיקט חלון-קבוע טהור, **חולץ במפורש כדי שהמסלול-הנשלח והבדיקה יריצו את אותו הכלל** (‏claude.ts:75 מטמיע את אותה לוגיקה inline); 12 פרסומים לדקה  
+  *ראיה:* functions/src/studio.ts:148-166, :73
+- מתעד מודל-אחסון מלא: `studioConfig/published` (מצביע) · `publishAllow` (דגל-חי, **fail-closed** — מסמך נעדר/false ⇒ דחייה) · `studioConfigApprovals/draft-<uid>` (דו-בקרה; נספר רק כש-approvedBy הוא uid **שונה**) · `studioConfigSnapshots/v<N>` (בלתי-משתנה)  
+  *ראיה:* functions/src/studio.ts:35-60
+
+**2 · מה הוא לא עושה**
+- לא סומך על claim-הטוקן לבדו לסמכות-הפרסום — הדגל החי נקרא מחדש **בזמן-הביצוע** בתוך הטרנזקציה. זו הסיבה המוצהרת: שלילה בשניות, לא בשעה.  
+  *ראיה:* functions/src/studio.ts:24-28, :125-132
+- לא סופר אישור-עצמי כדו-בקרה — נדרש `approvedBy` **שונה** מהמפרסם  
+  *ראיה:* functions/src/studio.ts:50-53
+- אינו נפרס עדיין — «Behind kServerCallables (client) + deploy-gated (the callable is not shipped until the Studio flags flip)»  
+  *ראיה:* functions/src/studio.ts:8-9
+- מגביל-הקצב **נכשל-פתוח** — שגיאת-Firestore חולפת מתירה את הפרסום; מודע ומתועד («an infra blip must not block a real publish»), אבל זו דלת פתוחה תחת הפרעה מתמשכת  
+  *ראיה:* functions/src/studio.ts:169-172
+- הטריגר אינו אוכף סמכות — הוא שומר על **המצביע** (‏guard+version+ref), לא על מי כתב; אכיפת-התפקיד לכתיבה ישירה היא של הכללים  
+  *ראיה:* functions/src/studio.ts:367-372, :415-420
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:220** — `export { publishConfig, revertIllegalConfigWrite } from "./studio";`
+- **functions/test/studio.test.ts** — בדיקת-יחידה של הליבות הטהורות (engine-index.json importedBy)
+- **האינדקס רושם calledByName = `bootstrap-studio-pointer`** — ‏אומת: זהו שם-שלב ב-`.github/workflows/firebase-deploy.yml`, ש-`selftest.ts:191` מחפש כ-`"Bootstrap studioConfig/published pointer"`. כלומר קריאה-בשם מה-CI, לא מקוד.
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/generator/ship.mjs` + `machtzev/generator/gen-verify-baseline.json` (הראצ׳ט) — שם המחולל מפרסם פלט ומחזיק מדד-מונוטוני. ‏`ship.mjs:6` מתעד `GHP_DIR` (‏worktree של gh-pages) כיעד-הפרסום.
+- *מה זה נותן:* **מודל-פרסום עם CAS ותצלום-בלתי-משתנה.** שלוש תרומות מדידות: (א) `decidePublish` — ‏CAS-על-גרסה במקום last-write-wins, שהוא בדיוק מה שמונע ממנוע-חילול שרץ פעמיים לדרוס פלט תקף; (ב) **סדר-הדחיות** (סמכות לפני מצב) — דפוס-אבטחה נייד; (ג) `rateLimitExceeded` — פרדיקט-חלון טהור, arity=4, אטום-מוכן. ⚠️ שקיפות: לא בדקתי האם ל-ship.mjs יש כבר הגנת-CAS; לא ידוע אם קיים מקבילה מחוברת. מה שכן מדדתי: `decidePublish`/`decideRevert`/`revertStillApplies`/`rateLimitExceeded` הם ארבע פונקציות טהורות מיוצאות (`grep '^export function' functions/src/studio.ts`), ולכן **חציבות מיידית** ללא עבודת-הפרדה.
+
+**5 · §22 = 2** — הקובץ העשיר-ביותר ברשימה שלי בליבות-טהורות-איכותיות (4 מיוצאות), ומודל «מצביע+תצלום-בלתי-משתנה» רלוונטי לכל מערכת שמפרסמת פלט מחולל. לא 3: אינו נוגע באף אחד משמונת פריטי-ה-HANDOFF, ופרסום-תצורה אינו החסם ב-§22 היום. לא 0: אין מקבילה מחוברת שמצאתי, והמנוע בנוי ונבדק.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `sed -n '1,60p' + '76,175p' + '395,465p' functions/src/studio.ts`
+- `grep -n '^export function|^export const|onCall|onDocument|runTransaction' functions/src/studio.ts`
+- `functions/src/selftest.ts:191 — הקישור בין `bootstrap-studio-pointer` ל-CI`
+- `grep -n 'BUILDSMART' machtzev/generator/ship.mjs ⇒ :6 (GHP_DIR · יעד-הפרסום)`
+
+### 27. `functions/src/taskNotifs.ts` · ts · 99 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- ‏טריגר `onTaskStatusChanged` על `tasks/{taskId}` שמוסיף רשומת-פעמון ל-`workerNotifs/{workerUid}` — **בכתיבת-שרת**, כי לקוח לעולם לא יכול לכתוב לפיד של משתמש אחר (הכלל הוא self-only, וה-Admin SDK הוא החוצה-גבול היחיד)  
+  *ראיה:* functions/src/taskNotifs.ts:2-7, :57
+- ‏`bellFor(from,to)` — פונקציה **טהורה** שממפה מעבר-סטטוס להודעה בעברית או ל-null: ⇒done «המשימה אושרה ✅» · ⇒rejected «הוחזרה לתיקון 🔁» · proposed⇒active «ההצעה אושרה — המשימה פעילה ✅» · pending⇒active «משימה חדשה הוקצתה 📋»  
+  *ראיה:* functions/src/taskNotifs.ts:45-55
+- פיד-מכסה בטרנזקציה: קורא-משנה-כותב את `{items,updatedAt}`, חדש-ראשון, חתוך ל-**50** (`CAP`, תואם `kWorkerNotifsCap` בלקוח), כך ששני אירועים מקבילים לא מאבדים רשומה  
+  *ראיה:* functions/src/taskNotifs.ts:15-17, :27, :83-90
+- מזהה-רשומה **דטרמיניסטי למעבר**: `${taskId}-${to}-${event.time}` — כך שריצה-כפולה של אותו טריגר מייצרת את אותו id  
+  *ראיה:* functions/src/taskNotifs.ts:75
+- צורת-הרשומה זהה ל-`WorkerNotif.toJson` של Dart (‏id·emoji·title·body·ts ISO-8601·read), כך שקורא-הלקוח תואם-בייט לאחסון-המקומי שהוא מחליף  
+  *ראיה:* functions/src/taskNotifs.ts:29-39
+- שלוש יציאות-מוקדמות לפני כל I/O: סטטוס לא השתנה · המעבר אינו פונה-לעובד · אין `assignedWorkerUid`  
+  *ראיה:* functions/src/taskNotifs.ts:62-70
+
+**2 · מה הוא לא עושה**
+- **אינו מודיע על ⇒review ועל ⇒proposed** — אלה מעברים שהעובד עצמו יזם, ומודיעים לקבלן ולא לפעמון. `bellFor` מחזיר null.  
+  *ראיה:* functions/src/taskNotifs.ts:41-44, :54
+- לא שולח FCM — פעמון **בתוך-האפליקציה** בלבד; התראות-דחיפה הן ב-push.ts  
+  *ראיה:* רשימת-הייבוא :20-23 — אין messaging
+- **אינו אידמפוטנטי בפועל** למרות ה-id הדטרמיניסטי: הטרנזקציה מוסיפה ל-`items` בלי לבדוק אם ה-id כבר קיים ⇒ ריצה-כפולה של הטריגר (at-least-once) תיצור רשומה כפולה  
+  *ראיה:* functions/src/taskNotifs.ts:86-88 — `[entry, ...prev].slice(0,CAP)` בלי `filter(x=>x.id!==entry.id)`
+- לא כותב ביקורת — כשל-פעמון נרשם ב-logger ונבלע  
+  *ראיה:* functions/src/taskNotifs.ts:91-97; אין ./audit בייבוא
+- לא מסמן נקרא/לא-נקרא מהשרת — `read:false` נכתב פעם אחת והלקוח מנהל מכאן  
+  *ראיה:* functions/src/taskNotifs.ts:80
+
+**3 · מי קורא לו היום**
+- **functions/src/index.ts:200** — `export { onTaskStatusChanged } from "./taskNotifs";`
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`new/atoms/` עבור **צורת** `bellFor` — טבלת-מעברים ⇒ הודעה-או-∅. ⚠️ אבל לא התוכן: המחרוזות הן עברית-דומיין, ו-§20 אוסר «מילון-דומייני» במחולל.
+- *מה זה נותן:* האטום הנייד הוא הצורה בלבד: «(from,to) ⇒ payload | null», עם ה-null המפורש כ«מעבר שאינו פונה לנמען הזה». זו בדיוק המשלימה של `orderFlow.TRANSITION_OWNER` («מי רשאי») — כאן «מי מעניין». שתיהן טבלאות-מעבר טהורות, ולאף אחת אין מקבילה ב-10 אטומי-`wf_*` (`grep -ln 'role|Role|owner|Owner' new/dart/wf_*.dart` ⇒ ∅). ‏`wf_advance_label.dart` הוא הקרוב ביותר — הוא נותן **תווית** לשלב, לא **נמען** למעבר.
+
+**5 · §22 = 1** — אטום-צורה קטן שתוכנו נאסר להעברה. מודל-הפיד (רשימה-מכוסה בטרנזקציה) שימושי אך שגרתי. לא 0: `wf_advance_label` המחובר עונה על שאלה אחרת, ואין מקבילה שעושה את זה טוב יותר. נרשם כאן גם באג-איכות אמיתי (כפילות ב-at-least-once) שלא נמצא בשום דוח שראיתי.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `cat -n functions/src/taskNotifs.ts :1-45 + sed -n '45,99p' (נקרא במלואו)`
+- `grep -ln 'role|Role|owner|Owner' new/dart/wf_*.dart ⇒ ∅`
+- `ls new/dart/ | grep '^wf_' ⇒ wf_advance_label בין העשרה`
+- `knowledge/HANDOFF-2026-09-16.md §2 (§20 «אפס מילון-דומייני»)`
+
+### 28. `functions/test/credit.test.ts` · ts · 107 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- בדיקה offline של שתי ליבות-ההכרעה הטהורות של `computeCredit` — `creditScopeFor` ו-`readCreditLimit` — עם **17** קריאות `check()`  
+  *ראיה:* functions/test/credit.test.ts:1-2; `grep -c 'check(' functions/test/credit.test.ts` ⇒ 17
+- מתעד בכותרת **מה שתי הליבות קיימות כדי למנוע**: היסטוריית-החור המלאה של `displayName` הכתיב-עצמית — «The gate was asking a question the caller got to answer»  
+  *ראיה:* functions/test/credit.test.ts:12-22
+- מצהיר במפורש על **גבול-הכיסוי**: הריפו אינו נושא `firebase-functions-test`, ולכן העוטף-onCall, קריאות-Firestore וכיור-הביקורת **נבדקים רק דרך הליבות** — «exactly as mayReviewRoleRequest is tested beside its untested transaction»  
+  *ראיה:* functions/test/credit.test.ts:3-6
+- יושב **מחוץ ל-src** במכוון, כך ש-build-הפריסה (‏tsconfig include:['src']) לעולם אינו מהדר או שולח אותו  
+  *ראיה:* functions/test/credit.test.ts:9-10
+- יוצא ב-`process.exit(1)` על כשל ומדפיס «all credit-core checks passed» בהצלחה  
+  *ראיה:* functions/test/credit.test.ts:103-107
+
+**2 · מה הוא לא עושה**
+- **לא בודק את `computeCredit` עצמו** — לא את הטרנזקציה, לא את שאילתת-ההזמנות, לא את חישוב balance/pct ולא את רשומת-הביקורת. מוצהר בכותרת.  
+  *ראיה:* functions/test/credit.test.ts:3-6
+- לא בודק את `contractorCredit`/`dartStringHashCode` — אלה מכוסים ב-`functions/src/selftest.ts` מול CREDIT_PROBE  
+  *ראיה:* functions/src/selftest.ts:45-60 מול היקף הקובץ הזה (creditScopeFor + readCreditLimit)
+- לא רץ ב-CI אוטומטי שמצאתי — ההרצה מתועדת כידנית (`npx ts-node functions/test/credit.test.ts`)  
+  *ראיה:* functions/test/credit.test.ts:8
+- אינו משתמש ב-framework — `check()` ידני, כמו כל שאר הרתמות בריפו  
+  *ראיה:* functions/test/credit.test.ts:2 («a check() harness over the pure cores»)
+
+**3 · מי קורא לו היום**
+- **אדם, מהשורה** — `npx ts-node functions/test/credit.test.ts` (functions/test/credit.test.ts:8)
+- **האינדקס רושם calledByName = `studio.test.ts`** — ‏אזכור-בהערה: `functions/test/studio.test.ts:2` מזכיר את הקובץ הזה כסגנון-אב. לא קריאה.
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/police.mjs` / רישום-השערים. הערך אינו הקוד אלא **ההצהרה על גבול-הכיסוי**: הקובץ אומר בפירוש מה הוא **לא** בודק.
+- *מה זה נותן:* תרופה לפריט 5 ב-HANDOFF («165 בלי-קורא · 39 בלי מטרה») ולאזהרת «ירוק-חלול · L27» ב-`hamtzaa.mjs:17-18`. ‏`engine-index.mjs` מייצר לכל מנוע שדה `isNot` — אבל הוא **נגזר-אוטומטית** מהיעדר (למשל «אין-מטרה-מתועדת», «לא-שער-משטרה»), לא מהצהרת-המחבר. ‏credit.test.ts מדגים `isNot` **מוצהר-ידנית וספציפי**: «העוטף, ה-I/O והביקורת אינם מכוסים». זה בדיוק ההבדל בין «הכלי לא מצא» ל«המחבר יודע ואומר». ⇒ הצעה: שדה-`isNot` ידני באינדקס, לצד הנגזר.
+
+**5 · §22 = 1** — בדיקה של 17 טענות על שתי פונקציות. אינה מקרבת את §22 ישירות. הערכה הוא בדפוס-ההצהרה, שכבר נספר אצל `selftest.ts` (רשומה 22) בציון 2 — כאן זו חזרה, לא תוספת. לא 0: אין מקבילה מחוברת, והקובץ חי ומתועד.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `head -22 + tail -8 functions/test/credit.test.ts · grep -c 'check(' ⇒ 17`
+- `functions/src/selftest.ts:45-60 (חלוקת-הכיסוי בין שתי הרתמות)`
+- `head -20 machtzev/generator/hamtzaa.mjs (L27 «ירוק-חלול»)`
+- `engine-index.json — שדה isNot נגזר-אוטומטית (למשל רשומת app/capacitor.config.ts)`
+
+### 29. `functions/test/setEmployer.test.ts` · ts · 96 שורות · §22 = **1**
+
+**1 · מה הוא עושה**
+- בדיקה offline של `parseSetEmployerInput` עם **11** קריאות `check(label,actual,expected)`, בהשוואת JSON.stringify של האובייקט המלא  
+  *ראיה:* functions/test/setEmployer.test.ts:14-25; `grep -c 'check(' functions/test/setEmployer.test.ts` ⇒ 11
+- מגדיר את מטרת-הליבה כ**חוזה-קלט**: «exactly which payloads assign, which REVOKE, and which are rejected — the input contract a mis-call (or a hostile client that somehow reached an admin token) must not be able to bend»  
+  *ראיה:* functions/test/setEmployer.test.ts:8-12
+- מונה שלושה וקטורי-תקיפה מפורשים שהחוזה חייב לעמוד בהם: מעסיק-עצמי · uid שבורח-מנתיב · טיפוס שגוי  
+  *ראיה:* functions/test/setEmployer.test.ts:12
+- משווה גם את **מחרוזת-השגיאה המדויקת**, לא רק את העובדה שנכשל — למשל «employerUid must be 1-128 chars of letters, digits, '_' or '-'.»  
+  *ראיה:* functions/test/setEmployer.test.ts:89-92
+- יושב מחוץ ל-src כך שה-deploy build לעולם אינו שולח אותו, וזורק `Error` מסכם בכשל  
+  *ראיה:* functions/test/setEmployer.test.ts:3-4, :93-95
+
+**2 · מה הוא לא עושה**
+- לא בודק את שער-ה-admin, לא את `setCustomUserClaims`, לא את merge-המראה ולא את הביקורת — «the admin-gate + Admin-SDK write live in the wrapper»  
+  *ראיה:* functions/test/setEmployer.test.ts:8-9
+- לא בודק מעגלי-העסקה — כי הליבה עצמה אינה מונעת אותם (ראה רשומה 24)  
+  *ראיה:* functions/src/setEmployerCore.ts:35-37 — ההשוואה היחידה היא עצמי-מול-עצמי
+- לא בודק את `uid` מול `UID_PATTERN` — כי הליבה לא עושה זאת; הבדיקה משקפת נאמנה פער-אמיתי ואינה מכסה עליו  
+  *ראיה:* functions/src/setEmployerCore.ts:20-22 (uid נבדק רק כמחרוזת-לא-ריקה)
+- אינו מדפיס מונה-הצלחות — רק «all ok» או זריקה; אין `N/M PASS` כמו ב-selftest/studio.test  
+  *ראיה:* functions/test/setEmployer.test.ts:96
+
+**3 · מי קורא לו היום**
+- **אדם, מהשורה** — `npx ts-node functions/test/setEmployer.test.ts` (setEmployer.test.ts:6)
+- **האינדקס רושם calledByName = `setEmployerCore.ts`** — ‏אומת: הכיוון הפוך — הבדיקה **מייבאת** את הליבה (`import { parseSetEmployerInput } from "../src/setEmployerCore"`, :14). האזכור באינדקס הוא מהערת-הכותרת של הליבה (`setEmployerCore.ts:2`).
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ∅ ישיר. 96 שורות של טענות על פונקציה אחת מהריפו הזה — אין בהן קוד נייד.
+- *מה זה נותן:* לא ידוע אם קיים מקבילה מחוברת. הערך היחיד הוא חיזוק דפוס «ליבה-טהורה נבדקת, עוטף לא» (דפוס 5 ב-NOTES), שכבר נספר ברשומות 22 ו-28. ⇒ אין כאן הצעת-חיבור; זו רשומה שמסכמת מנוע ולא מוצאת לו יעד, וזו תשובה לגיטימית.
+
+**5 · §22 = 1** — בדיקת-יחידה של 11 טענות על פונקציה אחת. אפס קוד נייד, אפס נגיעה בפריטי-HANDOFF. לא 0 בלבד משום שאין מקבילה מחוברת ואין ראיה שהיא מתה — היא מתועדת, בת-הרצה, ותואמת את ליבתה.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `head -22 + tail -8 functions/test/setEmployer.test.ts · grep -c 'check(' ⇒ 11`
+- `functions/src/setEmployerCore.ts:14-41 (הליבה הנבדקת)`
+- `functions/test/setEmployer.test.ts:14 (כיוון-הייבוא, שמפריך את calledByName)`
+
+### 30. `functions/test/studio.test.ts` · ts · 410 שורות · §22 = **2**
+
+**1 · מה הוא עושה**
+- הרתמה הגדולה ביותר בריפו: **54** קריאות `check()` על הליבות הטהורות של Step-56 (`decidePublish` · `rateLimitExceeded`) ושל Step-57 (`decideRevert` · `revertStillApplies`), **וגם** על ליבות-ה-P5.66 של analytics  
+  *ראיה:* `grep -c 'check(' functions/test/studio.test.ts` ⇒ 54; functions/test/studio.test.ts:1-8, :404-410
+- מכסה את מטריצת-הבדיקה של הספק (‏detail/051-068.md §56.5) שורה-שורה: happy-path · `expectedBaseVersion` מיושן ⇒ failed-precondition והמפורסם **לא משתנה** · מנהל-יחיד בלי בעלות ובלי דו-בקרה ⇒ permission-denied · **דגל-היתר שנשלל ⇒ permission-denied גם עם claim-בעלים תקף** · חריגת-קצב · וכל פסק-דין-דחייה נושא ok:false  
+  *ראיה:* functions/test/studio.test.ts:14-21
+- בודק גם את `summarizePresence` של analytics — כולל מקרה-קצה «משתמש-מקוון בלי תפקיד ⇒ byRole.unknown === 1»  
+  *ראיה:* functions/test/studio.test.ts:401-402
+- מצהיר שוב על גבול-הכיסוי ועל הסיבה: אין `firebase-functions-test` בריפו, ולכן העוטף/הטרנזקציה/כיור-הביקורת נבדקים דרך הליבות — «exactly as reviewRoleRequest's matrix is tested via mayReviewRoleRequest while its transaction/claim-grant is not»  
+  *ראיה:* functions/test/studio.test.ts:4-8
+- מדפיס פסק-דין `studio.test: N/M PASS` ומחזיר exitCode 1 בכשל — אותו פורמט כמו `functions/src/selftest.ts`  
+  *ראיה:* functions/test/studio.test.ts:406-409
+
+**2 · מה הוא לא עושה**
+- לא בודק את `publishConfig` ו-`revertIllegalConfigWrite` עצמם — לא את ה-CAS בתוך הטרנזקציה האמיתית, לא את יצירת-התצלום, לא את היפוך-המצביע  
+  *ראיה:* functions/test/studio.test.ts:4-8
+- לא בודק את שתי פונקציות-ה-onSchedule של analytics (`rollupAnalyticsDaily`/`rollupPresenceSummary`) — רק את הליבה הטהורה `summarizePresence`  
+  *ראיה:* functions/test/studio.test.ts:401-402 (הקטע היחיד של analytics)
+- לא רץ ב-CI אוטומטי שמצאתי; ההרצה מתועדת כידנית (`npx ts-node functions/test/studio.test.ts`), וזאת בניגוד ל-`functions/src/selftest.ts` שיש לו `npm run selftest`  
+  *ראיה:* functions/test/studio.test.ts:10-11 מול functions/src/selftest.ts:2
+- אינו משתמש ב-framework ואינו מייצר דוח-כיסוי — `check()` ידני כמו כל השאר  
+  *ראיה:* functions/test/studio.test.ts:4 («the SAME style as functions/src/selftest.ts»)
+
+**3 · מי קורא לו היום**
+- **אדם, מהשורה** — `npx ts-node functions/test/studio.test.ts` (studio.test.ts:10)
+- **האינדקס רושם calledByName = `credit.test.ts`** — ‏אזכור-בהערה (`studio.test.ts:2-3` מונה את סגנון-האב). לא קריאה.
+- **-ai-chat-server** — ∅
+
+**4 · איפה שווה לחבר**
+- *נקודה:* ‏`machtzev/generator/gen-verify.mjs` — הרתמה שמייצרת בדיקות-widget **מחוללות** לכל `gen_*.dart` ומדווחת `GENVERIFY {json}`. ההקבלה: שתיהן בודקות פלט שאינו-קוד-יד, ושתיהן מדווחות מספר-אחד-מסכם.
+- *מה זה נותן:* **מטריצת-בדיקה נגזרת-ממפרט.** ‏studio.test.ts:14-21 מצטט את מטריצת-הספק §56.5 ומכסה אותה שורה-שורה — כולל שלושת מקרי-השלילה החשובים (בסיס-מיושן · בלי-דו-בקרה · דגל-נשלל-גם-לבעלים). ‏gen-verify מודד «נרנדר / לא נרנדר» ואין לו מושג של **מטריצת-קבלה למסך**. ⇒ התרומה היא הרעיון שהמפרט מכתיב את רשימת-הטענות, ושהדחיות נבדקות במפורש — לא הקוד. לא ידוע אם קיים מנוע-מחובר שגוזר מטריצת-בדיקה ממפרט.
+
+**5 · §22 = 2** — פריט 1 ב-HANDOFF («37 מסכים לא מתרנדרים») נמדד ע"י gen-verify, ש-`gen-verify.mjs:4` עצמו מודה שהוא רק «pump ⇒ אפס-חריגות ⇒ DsScaffold קיים». ‏studio.test.ts מדגים את השלב הבא: רשימת-טענות שנגזרת ממפרט, עם שלילות מפורשות. יחד עם `smoke-settings.mjs` (רשומה 3) זה זוג-הראיות שהרצפה של §22 גבוהה מ«מרונדר». לא 3: תבנית, לא תיקון בר-ביצוע. לא 0: אין מקבילה מחוברת.
+
+**6 · ראיה — מה הורץ/נקרא**
+- `head -22 + tail -8 functions/test/studio.test.ts · grep -c 'check(' ⇒ 54`
+- `sed -n '1,40p' machtzev/generator/gen-verify.mjs (:4 «analyze ירוק ≠ מסך שעובד»)`
+- `functions/src/studio.ts:114-166 + :421-459 (ארבע הליבות הנבדקות)`
+- `grep -c '^export function' functions/src/studio.ts ⇒ 4`
 
