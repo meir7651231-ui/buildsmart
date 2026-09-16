@@ -333,5 +333,389 @@
       "ls edge-proxy/ ⇒ FILTERED-MODE-BUILD-ORDER.md · README.md · worker.js",
       "grep -rn 'buildsmart-il.com|edge-proxy' בשני הריפואים"
     ]
+  },
+  {
+    "file": "functions/src/analytics.ts",
+    "lang": "ts",
+    "lines": 311,
+    "does": [
+      {
+        "claim": "מממש מונה-מבוזר (distributed counter) — `incrementMetric(metric,delta)` מפזר כתיבה לשארד אקראי מתוך 10 ב-`analyticsCounters/{metric}/shards/{n}`, כדי לא לחצות את מגבלת ~כתיבה-לשנייה-למסמך",
+        "evidence": "functions/src/analytics.ts:94 (kNumShards=10), :213-232, :120-131 (pickShard)"
+      },
+      {
+        "claim": "‏`rollupAnalyticsDaily` — onSchedule ב-'5 0 * * *' סוכם את כל השארדים של כל מטריקה וכותב מסמך-יחיד `analyticsDaily/{YYYY-MM-DD}`, כך שהבעלים קורא ~מסמך-ליום במקום לספור 250K אירועים",
+        "evidence": "functions/src/analytics.ts:112, :251-272"
+      },
+      {
+        "claim": "‏`rollupPresenceSummary` — onSchedule כל דקה, סופר נוכחות **בצד-שרת** מ-`presence/*` וכותב מסמך-יחיד `presenceSummary/current`, כדי שהבעלים לא יאזין ל-O(משתמשים) מסמכים",
+        "evidence": "functions/src/analytics.ts:117, :288-306"
+      },
+      {
+        "claim": "‏`summarizePresence(docs,now,staleMs,sampleCap)` — פונקציה **טהורה** שמקפלת `presence/*` ל-{count,byRole,sample}, מוציאה «רוחות-רפאים» (heartbeat ישן מ-2 דקות) וחוסמת את ה-sample ב-20 כדי שהמסמך יישאר קטן",
+        "evidence": "functions/src/analytics.ts:182-211, :99 (kPresenceStaleMs=120_000)"
+      },
+      {
+        "claim": "שלוש עזר-פונקציות טהורות נוספות: `pickShard(r,numShards)` עם clamp הגנתי ל-r<0 או r≥1 · `sumShards(values)` שסופר רק מספרים סופיים (שארד ריק ⇒ 0) · `dayKey(d)` ⇒ YYYY-MM-DD ב-UTC",
+        "evidence": "functions/src/analytics.ts:120-149"
+      },
+      {
+        "claim": "מתעד בכותרת טבלת-עלות מפורטת (‏~$25–$144 לחודש ל-~5,000 משתמשים) ומסביר שהתקרה-הקשיחה היא Cloud Billing Budget בקונסולה, **בכוונה לא בקוד**, כי פונקציה לא יכולה לחסום את החיוב שמממן אותה",
+        "evidence": "functions/src/analytics.ts:36-63"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא כותב את `presence/*` — הוא רק **קורא** אותו; הכתיבה היא של Step 67 בצד-הלקוח",
+        "evidence": "functions/src/analytics.ts:150-152 (הערת-החוזה) + :295 `db().collection(\"presence\").get()` בלבד"
+      },
+      {
+        "claim": "לא מממש תקרת-חיוב קשיחה — מוצהר במפורש כ«INFRA, intentionally not code»",
+        "evidence": "functions/src/analytics.ts:51-63"
+      },
+      {
+        "claim": "‏dormant — לא נפרס ולא נצרך: «the shipped Flutter app build is byte-identical (it imports nothing here)», וכל ה-listeners כבויים עד שדגל `STUDIO_LIVE` נדלק",
+        "evidence": "functions/src/analytics.ts:25-34"
+      },
+      {
+        "claim": "לא מחשב דלתות-יומיות — `analyticsDaily` הוא snapshot מצטבר; הדלתא נגזרת בצד-הקריאה (today − yesterday)",
+        "evidence": "functions/src/analytics.ts:69-72 (הערת STORAGE MODEL)"
+      },
+      {
+        "claim": "אין בו אימות-קורא — שתי הפונקציות המיוצאות הן onSchedule, לא onCall; אין `callerRoles`",
+        "evidence": "`grep -n 'callerRoles\\|onCall' functions/src/analytics.ts` ⇒ ריק"
+      }
+    ],
+    "callers": [
+      {
+        "who": "functions/src/index.ts",
+        "how": "re-export של rollupAnalyticsDaily/rollupPresenceSummary (engine-index.json: importedBy)"
+      },
+      {
+        "who": "functions/test/studio.test.ts",
+        "how": "מייבא את הפונקציות הטהורות לבדיקה"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅ — אין אזכור"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`new/atoms/` דרך `machtzev/chisel.mjs` (שלב 3: promote-auto, «arity≤3, מגן-התנגשות») — ארבע הפונקציות הטהורות `pickShard` · `sumShards` · `dayKey` · `summarizePresence` עומדות בחוזה-האטום של המחולל: טהורות, ללא I/O, ארגומנטים ספורים, ואפס דאטת-דומיין (§20 «אפס מילון-דומייני»).",
+      "gives": "ארבעה אטומים-אמיתיים-מקוד-חי לשכבת-הלוגיקה. ⚠️ הצינור עצמו שבור: `machtzev/chisel.mjs:22` קורא ל-`/home/user/maor-system/machtzev/factory/gen-wires.mjs`, ו-`maor-system` מוצהר «❌ לא קיים בשום מקום» (‏CLAUDE.md של המחולל). ⇒ החיבור אפשרי רק אחרי שפריט 7 ב-HANDOFF נפתר, או דרך מחלץ חלופי."
+    },
+    "s22": {
+      "score": 2,
+      "why": "לא מקרב את §22 ישירות (אינו על מסלול משפט⇒אפליקציה), אבל מספק 4 אטומים-טהורים מאומתים-בקוד-חי לשכבת-הלוגיקה של המחולל — בדיוק המטבע שהמחולל סופר (1887 אטומים מאונדקסים; `ls new/atoms/*.mjs | grep -v test | wc -l` ⇒ 1160 קבצי-אטום). לא 3: אטומים גנריים אינם החסם — פריטים 1/3/6 ב-HANDOFF הם. לא 0: `ls new/atoms/*.mjs | grep -viE test | grep -iE 'shard|presence|counter|rollup|online'` ⇒ ∅ — אין אטום-מחובר שעושה מונה-מבוזר או קיפול-נוכחות."
+    },
+    "evidence": [
+      "sed -n '1,70p' + sed -n '120,215p' functions/src/analytics.ts",
+      "grep -n '^export|onCall|onSchedule|collection(' functions/src/analytics.ts",
+      "head -25 machtzev/chisel.mjs (שלבי-החציבה) + :22 התלות ב-maor-system",
+      "CLAUDE.md של -ai-chat-server: «maor-system ❌ לא קיים בשום מקום»",
+      "ls new/atoms/*.mjs | grep -v test | wc -l ⇒ 1160 · grep -iE 'shard|presence|counter|rollup|online' ⇒ ∅"
+    ]
+  },
+  {
+    "file": "functions/src/approveUsers.ts",
+    "lang": "ts",
+    "lines": 181,
+    "does": [
+      {
+        "claim": "‏callable `approveUsers({uids:string[],approve:boolean})` — מפעיל/משעה חשבונות בבת-אחת ע\"י merge-write של `users/{uid}.status` ל-'active'/'pending' דרך Admin SDK, הנתיב **היחיד** המאושר לשינוי status (הלקוח לעולם לא כותב את השדה)",
+        "evidence": "functions/src/approveUsers.ts:100, :135-144, :11-14 (הצהרת-הנתיב-היחיד)"
+      },
+      {
+        "claim": "‏`mayApproveUsers(roles)` — בדיקת-הרשאה **טהורה** ללא I/O: רק `manager` או `admin`",
+        "evidence": "functions/src/approveUsers.ts:39-45"
+      },
+      {
+        "claim": "‏`cleanApproveUids(input,cap)` — ולידציה **טהורה** של המטען: דוחה לא-מערך, uid לא-מחרוזת או ריק, רשימה ריקה, וחריגה מ-cap; ומסירה כפילויות דרך Set",
+        "evidence": "functions/src/approveUsers.ts:59-81"
+      },
+      {
+        "claim": "מגביל אצווה ל-500, במכוון מסונכרן עם `limit(500)` של הזרם בצד-הלקוח, כך ש«אשר-הכול» על הסט-הנראה תמיד נכנס בקריאה אחת",
+        "evidence": "functions/src/approveUsers.ts:30-33"
+      },
+      {
+        "claim": "מרענן את שורת-הספרייה הקריאה אחרי כל אישור (`syncDirectoryEntry`) כדי שהזרם יתהפך «ממתין⇒מאושר» בלי reload; וכותב רשומת-ביקורת אחת לכל אצווה",
+        "evidence": "functions/src/approveUsers.ts:146-152, :167-176"
+      },
+      {
+        "claim": "‏best-effort לכל uid: כשל-כתיבה בודד נרשם ומדולג ולעולם לא מפיל את האצווה; מחזיר {ok,count} כשה-count הוא מה שבוצע בפועל",
+        "evidence": "functions/src/approveUsers.ts:155-160, :180"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא מעניק ולא משנה שום תפקיד (role claim) — «this is the account-activation switch, not a role grant». זה ההבדל מ-`reviewRoleRequest`.",
+        "evidence": "functions/src/approveUsers.ts:15-16"
+      },
+      {
+        "claim": "לא אטומי — אין טרנזקציה על האצווה; אישור חלקי אפשרי ומדווח דרך count<requested",
+        "evidence": "functions/src/approveUsers.ts:137-161 (לולאה עם try/catch פר-uid, אין runTransaction)"
+      },
+      {
+        "claim": "לא בודק App Check ולא מגביל-קצב — רק `request.auth` + תפקיד",
+        "evidence": "functions/src/approveUsers.ts:100-127; `grep -n 'appCheck\\|RateLimit' functions/src/approveUsers.ts` ⇒ ריק"
+      },
+      {
+        "claim": "לא שולח התראה למאושר — אין קריאה ל-push/orderEmail כאן",
+        "evidence": "רשימת-הייבוא :23-28 — logger · https · audit · common · directory בלבד"
+      }
+    ],
+    "callers": [
+      {
+        "who": "functions/src/index.ts",
+        "how": "re-export של ה-callable לפריסה"
+      },
+      {
+        "who": "functions/src/deleteAccount.ts · functions/src/selftest.ts",
+        "how": "מייבאים את הפונקציות הטהורות/הקבוע (engine-index.json importedBy)"
+      },
+      {
+        "who": "מסך-הלקוח: app_flutter/lib/screens/manager_dashboard_screen.dart",
+        "how": "פאנל-האישור קורא ל-callable («approve all» / «approve selected») — מתועד ב-approveUsers.ts:6-9"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`new/atoms/` דרך promote-auto (‏`machtzev/chisel.mjs` שלב 3) — `mayApproveUsers(roles)` ו-`cleanApproveUids(input,cap)` הן טהורות, arity≤3 ונטולות-דומיין.",
+      "gives": "שני אטומי-הרשאה/ולידציה. ‏`cleanApproveUids` בפרט הוא תבנית כללית («רשימת-מזהים נקייה או סיבת-שגיאה») שחוזרת בכל טופס-אצווה. לא ידוע אם קיים מקבילה מחוברת — לא מצאתי אטום-ולידציה של רשימות-מזהים ב-new/atoms."
+    },
+    "s22": {
+      "score": 1,
+      "why": "המנוע עצמו קשור-דומיין (status של משתמשי BuildSmart) ולא ניתן להעברה. מה שכן בר-העברה הוא שני האטומים הטהורים, ותרומתם שולית לעומת פריטי-החוב ב-HANDOFF. לא 0: המנוע חי, מחובר לאפליקציה החיה, ואין לו מקבילה במחולל."
+    },
+    "evidence": [
+      "sed -n '1,60p' + '59,100p' + '135,181p' functions/src/approveUsers.ts",
+      "grep -n '^export|^function|onCall|HttpsError' functions/src/approveUsers.ts",
+      "engine-index.json: importedBy = [deleteAccount.ts, index.ts, selftest.ts]"
+    ]
+  },
+  {
+    "file": "functions/src/audit.ts",
+    "lang": "ts",
+    "lines": 64,
+    "does": [
+      {
+        "claim": "מייצא פונקציה אחת, `writeAudit(entry)`, שמוסיפה רשומת-ביקורת אחת לאוסף `auditLog` עם `FieldValue.serverTimestamp()`",
+        "evidence": "functions/src/audit.ts:45-60"
+      },
+      {
+        "claim": "מגדיר את הסכמה `AuditEntry` — 9 שדות: action · source · actorUid · actorRole · target · before · after · ok · reason? — כלומר «מי · מה · מתי · לפני⇒אחרי»",
+        "evidence": "functions/src/audit.ts:17-38"
+      },
+      {
+        "claim": "מנרמל before/after ל-null כשחסרים, ומשמיט את `reason` לגמרי כשלא סופק (spread מותנה) — כך שאין שדות-undefined ב-Firestore",
+        "evidence": "functions/src/audit.ts:55-58"
+      },
+      {
+        "claim": "‏best-effort במכוון: כשל-ביקורת נתפס, נרשם ב-`logger.error` («auditLog write failed») ולעולם לא מפיל את פעולת-העסק. הרשומה המובנית עדיין נוחתת ב-Cloud Logging.",
+        "evidence": "functions/src/audit.ts:40-43, :61-63"
+      },
+      {
+        "claim": "מצהיר ואוכף חוזה append-only: הקובץ מבצע `add()` בלבד ולעולם לא set/update/delete",
+        "evidence": "functions/src/audit.ts:6-9; `grep -n 'set(\\|update(\\|delete(' functions/src/audit.ts` ⇒ ריק"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא **קורא** את auditLog ולא מספק שאילתה/דוח — אין API-קריאה בקובץ כלל",
+        "evidence": "כל 64 השורות: קריאת-Firestore יחידה היא `.collection(\"auditLog\").add(...)` :47-49"
+      },
+      {
+        "claim": "לא אוכף את ה-append-only מול הלקוח — האכיפה נשענת על firestore.rules (צי-אחות) שחייב לדחות כל read/write של לקוח ב-auditLog. ‏audit.ts רץ עם Admin SDK, פטור-מכללים.",
+        "evidence": "functions/src/audit.ts:6-9 (ההצהרה המפורשת של התלות)"
+      },
+      {
+        "claim": "לא מחתים ולא משרשר (‏hash chain / tamper-evidence) — רשומה היא מסמך רגיל שאדם עם גישת-אדמין יכול למחוק",
+        "evidence": "functions/src/audit.ts:49-60 — אין hash/prev/signature בסכמה"
+      },
+      {
+        "claim": "לא כותב TTL ולא רוטציה — האוסף גדל ללא-גבול",
+        "evidence": "אין שדה expireAt/ttl בסכמה :17-38"
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏10 מודולים באותו ריפו",
+        "how": "approveUsers · credit · deleteAccount · index · orders · r2 · reviewRoleRequest · setEmployer · setOrg · studio (engine-index.json importedBy) — כולם `import { writeAudit } from \"./audit\"`"
+      },
+      {
+        "who": "האינדקס רושם גם `📄 INVENTORY-EMPIRE-RAW-MATERIAL-2026-08-31.md`",
+        "how": "**זה אזכור-בתיעוד, לא קורא-בקוד** — ראה דפוס 2 ב-NOTES"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`knowledge/assets/yeshiva-bench/audit_block.py` — הקובץ שה-HANDOFF (סעיף 3.5) מתאר כקובע «הדיווח הוא טענה, לא עובדה». זו נקודת-המפגש הרעיונית: המחולל חסר **יומן-פעולות מובנה של הריצה עצמה** (מי-מה-מתי-לפני⇒אחרי) שאפשר להריץ עליו את הכלל.",
+      "gives": "סכמת-יומן מוכחת-בפרודקשן בת 9 שדות + פוסטורת ה-best-effort. אזהרה כנה: `writeAudit` עצמו קשור ל-Firestore ולכן אינו נייד; מה שנייד הוא **הסכמה** והכלל «כשל-ביקורת לא מפיל את הפעולה». לא ידוע אם קיים מקבילה מחוברת — לא מצאתי במחולל מנוע-יומן-פעולות."
+    },
+    "s22": {
+      "score": 1,
+      "why": "אינו על מסלול משפט⇒אפליקציה ואינו נמדד בשום שער. ערכו הוא רעיוני-בלבד (סכמה), ו-64 שורות שרובן תיעוד. לא 0: אין מקבילה מחוברת ואינו מת — 10 מודולים חיים קוראים לו."
+    },
+    "evidence": [
+      "cat -n functions/src/audit.ts (64 שורות, נקראו במלואן)",
+      "engine-index.json: importedBy = 10 מודולים",
+      "knowledge/HANDOFF-2026-09-16.md §3.5 (audit_block.py)"
+    ]
+  },
+  {
+    "file": "functions/src/claude.ts",
+    "lang": "ts",
+    "lines": 166,
+    "does": [
+      {
+        "claim": "‏callable `askClaude({prompt,system?,model?,maxTokens?})` — פרוקסי-שרת מאומת ל-Anthropic API; מפתח-ה-API יושב **רק** ב-Secret Manager (`ANTHROPIC_API_KEY`, נקשר דרך `secrets:[anthropicKey]`) ולעולם לא בלקוח",
+        "evidence": "functions/src/claude.ts:8-11, :27, :112-115"
+      },
+      {
+        "claim": "‏allowlist-מודלים: רק `claude-haiku-4-5-20251001` (ברירת-מחדל זולה) ו-`claude-sonnet-4-6`; כל מחרוזת אחרת **נופלת חזרה** לזול במקום להיכשל, כך שקורא לא יכול לנעוץ מודל יקר",
+        "evidence": "functions/src/claude.ts:31-38, :138-141"
+      },
+      {
+        "claim": "מגביל-קצב פר-uid בטרנזקציית-Firestore על `_claudeRate/{uid}` — חלון-קבוע של 60 שניות, 40 בקשות; כשל-Firestore חולף **נכשל-פתוח** (רושם ומאשר) כדי ששיהוק-תשתית לא יחסום משתמשים אמיתיים",
+        "evidence": "functions/src/claude.ts:49-50, :75-103"
+      },
+      {
+        "claim": "שלושה חסמי-עלות נוספים: `maxInstances:10` (תקרת-מקביליות) · `timeoutSeconds:30` מול `kClientTimeoutMs=25_000` + `maxRetries:1` ב-SDK (ה-SDK מגיע עם timeout של 10 **דקות** ו-2 retries — נחסם במפורש) · `maxTokens` נחתך ל-2048 ו-prompt ל-8000 תווים",
+        "evidence": "functions/src/claude.ts:39-41, :52-56, :61-68, :114, :124-128, :142-148"
+      },
+      {
+        "claim": "ממפה שגיאות-upstream לשגיאה נייטרלית אחת (`internal`, \"Claude request failed.\") ורושם את המקור ב-logger בלבד — אין דליפת-פרטים ללקוח",
+        "evidence": "functions/src/claude.ts:160-164"
+      },
+      {
+        "claim": "מחלץ רק בלוקי-טקסט מהתשובה ומתעלם מבלוקי tool/thinking",
+        "evidence": "functions/src/claude.ts:154-158"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "**לא בונה פרומפטים ולא מעגן דאטה** — «GROUNDING IS THE CALLER'S JOB ... This proxy is deliberately generic + dumb». האחריות שהמודל «יחשוב מעל אמת ולא ימציא חלקי-קטלוג» היא של הקורא, לא שלו.",
+        "evidence": "functions/src/claude.ts:13-17"
+      },
+      {
+        "claim": "לא אוכף App Check — מוצהר כהחלטה מודעת שתתקשח בבת-אחת לכל ה-callables, לא כחריג נקודתי",
+        "evidence": "functions/src/claude.ts:3-6"
+      },
+      {
+        "claim": "לא שומר את השיחה ולא מייצר לוג-ביקורת — `writeAudit` לא מיובא כאן (בניגוד ל-9 מודולים אחרים)",
+        "evidence": "רשימת-הייבוא :20-25 — אין ./audit"
+      },
+      {
+        "claim": "לא תומך ב-streaming, ב-tool-use ולא בהיסטוריית-הודעות — הודעה אחת, תפקיד `user`, בקשה אחת",
+        "evidence": "functions/src/claude.ts:150-153 `messages:[{role:\"user\",content:prompt}]`"
+      }
+    ],
+    "callers": [
+      {
+        "who": "functions/src/index.ts",
+        "how": "re-export של ה-callable (engine-index.json importedBy)"
+      },
+      {
+        "who": "‏`ClaudeGateway` באפליקציית-ה-Flutter",
+        "how": "קורא עם {system,prompt[,model,maxTokens]} ומקבל {text} — מתועד ב-claude.ts:10-11"
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅ — אין אזכור ל-askClaude מהשרת. ראה «איפה לחבר» למה זה חשוב."
+      }
+    ],
+    "connectAt": {
+      "point": "‏`new/atoms/ask-claude.mjs` + `new/atoms/ask-claude-strings.mjs` — היציאה-ל-LLM היחידה של המחולל, שנחצבה מ-`maor/src/lib/ai.ts:61-87`. היא **קוראת ל-Anthropic מהדפדפן עם המפתח כארגומנט**: `askClaude(apiKey, prompt, doFetch, T)` ו-`ask-claude-strings.mjs:9-10` שולח `anthropic-dangerous-direct-browser-access: true`.",
+      "gives": "החלפת-פוסטורה. ‏claude.ts הוא אותו שירות עם: מפתח ב-Secret Manager במקום בארגומנט · allowlist-מודלים · מגביל-קצב פר-uid · maxInstances · timeout קצוב · מיפוי-שגיאות נייטרלי. כל אפליקציה שהמחולל יפלוט עם `ask-claude` **תחשוף מפתח-API בדפדפן**; claude.ts הוא הדפוס שמסיר את זה, והוא רץ בפרודקשן."
+    },
+    "s22": {
+      "score": 3,
+      "why": "§22 היא «אפליקציה עובדת 100%, אפס-באגים» — ואפליקציה שפולטת מפתח-Anthropic לדפדפן אינה עומדת ברצפה הזו. זה המנוע היחיד ברשימה שלי שמתקן פגם-אבטחה קונקרטי באטום **קיים** של המחולל, עם `file:line` בשני הצדדים. לא 0: המקבילה המחוברת (`ask-claude.mjs`) קיימת אך **גרועה יותר**, וזה בדיוק ההפך מהתנאי לאפס."
+    },
+    "evidence": [
+      "sed -n '1,90p' + '100,166p' functions/src/claude.ts",
+      "head -30 new/atoms/ask-claude.mjs ⇒ askClaude(apiKey, prompt, doFetch=fetch, T)",
+      "grep -n 'k7|k8|k1:' new/atoms/ask-claude-strings.mjs ⇒ k1=https://api.anthropic.com/v1/messages · k7=anthropic-dangerous-direct-browser-access · k8=true",
+      "grep -rln 'anthropic|Anthropic' --include=*.mjs בריפו-המחולל ⇒ new/atoms/ask-claude*.mjs · new/boxes/lib-ai.test.mjs · dict-he.mjs (ship.mjs רק ב-trailer של קומיט)",
+      "grep -n 'anthropic|askClaude' machtzev/generator/balagan.mjs ⇒ ∅ (האטום אינו על מסלול-ההרצה, הוא בספריית-האטומים)"
+    ]
+  },
+  {
+    "file": "functions/src/common.ts",
+    "lang": "ts",
+    "lines": 75,
+    "does": [
+      {
+        "claim": "מקבע את אזור-הפריסה היחיד `REGION=\"me-west1\"` (תל-אביב), תואם למיקום-Firestore ול-`kAuthFunctionsRegion` באפליקציה; כל פונקציה בקוד-בייס חייבת להעביר אותו לאופציות שלה",
+        "evidence": "functions/src/common.ts:13-17"
+      },
+      {
+        "claim": "מספק `db()` — ידית-Firestore **עצלה**. זה לב-הקובץ: `index.ts` קורא ל-`initializeApp()` בגוף-המודול, אבל ייבוא-ES מורם **מעל** הקריאה, ולכן מודול אסור לו לפתור שירות-Admin-SDK ב-module scope.",
+        "evidence": "functions/src/common.ts:4-8 (הסבר-סדר-הטעינה), :19-22"
+      },
+      {
+        "claim": "‏`callerRoles(token)` — מפשט את משטח-התפקידים של ה-ID-token לרשימה אחת: `admin:true` ⇒ פסאודו-תפקיד \"admin\" ראשון, ואז `role:string` ואז `roles:string[]`, בסינון ערכים ריקים",
+        "evidence": "functions/src/common.ts:29-47"
+      },
+      {
+        "claim": "‏`isOwnerEmail(auth)` — קובע בעלות לפי אימייל מאומת מול `OWNER_EMAIL=\"meir7651231@gmail.com\"`, עם trim+lowercase; סובלני ל-auth null / email חסר / לא-מחרוזת",
+        "evidence": "functions/src/common.ts:60, :70-75"
+      },
+      {
+        "claim": "‏`asString(v)` — כפיית שדה-Firestore לא-ידוע למחרוזת לא-ריקה או null",
+        "evidence": "functions/src/common.ts:24-27"
+      },
+      {
+        "claim": "מתעד שהערך `OWNER_EMAIL` משוכפל **מילה-במילה** בשלושה מקומות: כאן (השרת), ‏`app_flutter/lib/data/board_accounts_local.dart:98` (‏`kOwnerEmails`), ו-`isOwnerEmail()` ב-`firestore.rules` בשורש — כדי שהכללים וה-callable יחלקו זהות-בעלים אחת",
+        "evidence": "functions/src/common.ts:49-58, :62-69"
+      }
+    ],
+    "doesNot": [
+      {
+        "claim": "לא מאמת כלום ולא זורק — אין `HttpsError` בקובץ; הוא מחזיר עובדות (רשימת-תפקידים, בוליאני-בעלות), וההחלטה נשארת אצל הקורא",
+        "evidence": "`grep -n 'HttpsError\\|throw' functions/src/common.ts` ⇒ ריק"
+      },
+      {
+        "claim": "לא בודק את **תוקף** הטוקן — `callerRoles` מקבל `Record<string,unknown>` שכבר אומת ע\"י Firebase; הוא רק קורא claims",
+        "evidence": "functions/src/common.ts:35 חתימת-הפונקציה"
+      },
+      {
+        "claim": "אינו מגן מפני זהות-בעלים-סחופה — שלושת ההעתקים של OWNER_EMAIL אינם מסונכרנים ע\"י שום שער; הסנכרון מתועד, לא נאכף",
+        "evidence": "functions/src/common.ts:53-57 מתאר את השכפול כ«Mirrored — same verbatim value» בלי מנגנון-בדיקה"
+      },
+      {
+        "claim": "לא מאתחל את Admin SDK — `initializeApp()` נשאר ב-index.ts בלבד",
+        "evidence": "`grep -n 'initializeApp' functions/src/common.ts` ⇒ התאמה **אחת בלבד**, בשורה 4, בתוך הערת-הכותרת שמסבירה את סדר-הטעינה. אין קריאה בקוד."
+      }
+    ],
+    "callers": [
+      {
+        "who": "‏17 מודולים באותו ריפו",
+        "how": "analytics · approveUsers · audit · claude · credit · deleteAccount · directory · index · orderEmail · orders · push · r2 · reviewRoleRequest · setEmployer · setOrg · studio · taskNotifs, וגם functions/test/studio.test.ts (engine-index.json importedBy). זהו המודול המרכזי-ביותר ברשימה שלי."
+      },
+      {
+        "who": "-ai-chat-server",
+        "how": "∅"
+      }
+    ],
+    "connectAt": {
+      "point": "‏`machtzev/generator/hamtzaa.mjs` (גלאי-ההמצאות, פריט 4 ב-HANDOFF: «51 המצאות במסלול-הפירוקים», נעול ב-ratchet) — לא כקוד להעתיק, אלא כ**דפוס-שער חסר**: «ערך-SSOT שמשוכפל ל-N מקומות ואף אחד לא בודק שהם זהים» הוא בדיוק מחלקת-הבאגים ש-hamtzaa אמור לתפוס. ‏common.ts:53-57 הוא מקרה-מבחן חי עם 3 העתקים.",
+      "gives": "מקרה-מבחן אמיתי לשער-שכפול-SSOT, ו-`callerRoles`/`asString`/`isOwnerEmail` כשלושה אטומי-normalize טהורים ל-promote-auto. לא ידוע אם קיים שער-מחובר שבודק שכפול-ערכים חוצה-קבצים."
+    },
+    "s22": {
+      "score": 1,
+      "why": "מודול-תשתית קשור-Firebase; `db()` ו-`REGION` אינם ניתנים להעברה כלל. שלוש הפונקציות הטהורות קטנות וגנריות מכדי להזיז מחט מול פריטי-החוב. לא 0: אין מקבילה מחוברת, והמנוע הוא הצומת המרכזי ביותר ברשימה (17 מייבאים) — ולכן חשוב להבנת השאר, גם אם לא לחיבור."
+    },
+    "evidence": [
+      "cat -n functions/src/common.ts (75 שורות, נקראו במלואן)",
+      "engine-index.json: importedBy = 17 מודולים + studio.test.ts",
+      "knowledge/HANDOFF-2026-09-16.md פריט 4 (hamtzaa.mjs --ratchet --list)"
+    ]
   }
 ]

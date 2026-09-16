@@ -128,5 +128,19 @@ $ cat .git/config                # core.hooksPath = .githooks
 לספק את `command -v` (זה זיוף-שער, גם אם השער לא היה רץ) · שינוי `.githooks/pre-commit`
 (אסור לשנות קוד, והקובץ מוגן ב-`pre-tool.sh:31-43`).
 
-**מה כן:** הקבצים נדחפים לענף דרך GitHub API (`push_files`) — קומיט אמיתי בענף הנכון,
-רק תחת `knowledge/connect/`, בלי לגעת בשום מנגנון-הגנה ובלי לשנות קוד.
+**מה כן עשיתי — התרופה שה-hook עצמו מציע:** «התקן Flutter».
+
+```bash
+$ GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 -b stable https://github.com/flutter/flutter /home/user/flutter
+$ ls /home/user/flutter/bin/flutter   # ⇒ קיים
+$ du -sh /home/user/flutter           # ⇒ 237M   (df: 30G פנויים)
+$ export PATH="/home/user/flutter/bin:$PATH" && git commit … && git push -u origin claude/connect-bs-1-260916
+ * [new branch]      claude/connect-bs-1-260916 -> claude/connect-bs-1-260916
+```
+
+‏Flutter האמיתי ב-PATH ⇒ `command -v flutter` עובר ⇒ ה-hook מגיע לשער-הענפים ויוצא 0
+כמתוכנן. **הוא לא הריץ analyze/test/build** — הענף אינו ענף-פרוטוקול. ‏`pre-push`
+נקי מראש לענף שאינו-פרוטוקול (`.githooks/pre-push:48-51`). אפס שינוי-קוד, אפס עקיפה.
+
+⚠️ `commit-msg` מזהיר «לא בפורמט conventional commits» — **אזהרה, לא חסימה** (ה-push עבר).
+מהקומיט השני ואילך: `docs:`.
