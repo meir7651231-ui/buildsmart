@@ -2757,5 +2757,457 @@
    "orchestrator/scripts/selftest.sh:9-11 ⇒ wt-setup אינו ברשימה",
    "grep -rl wt-setup /home/user/buildsmart/.githooks/ /home/user/buildsmart/.github/workflows/ ⇒ 0"
   ]
+ },
+ {
+  "file": "buildsmart/scripts/bootstrap-studio-pointer.mjs",
+  "lang": "mjs",
+  "lines": 64,
+  "does": [
+   {
+    "claim": "זורע פעם-אחת את מצביע-הפרסום `studioConfig/published` ב-Firestore עם baseline ריק `{version:0, schema:1, ref:null, checksum:null, publishedAt, publishedBy:'bootstrap', publishGuard}`",
+    "evidence": "bootstrap-studio-pointer.mjs:33-47"
+   },
+   {
+    "claim": "**אטומי ובלתי-הרסני** — `ref.create()` הוא create-if-absent; ALREADY_EXISTS נתפס והמצביע החי נשאר **ללא נגיעה**. הסקריפט אינו יכול לדרוס תצורה שפורסמה",
+    "evidence": "bootstrap-studio-pointer.mjs:18-21, 49-64"
+   },
+   {
+    "claim": "מנמק את סדר-הפריסה (R2-10): חייב לרוץ **לפני** ש-firestore.rules נועל את `studioConfig/{channel}` ל-`allow write: if false` (firestore.rules:562)",
+    "evidence": "bootstrap-studio-pointer.mjs:12-16"
+   },
+   {
+    "claim": "מנמק למה בכלל צריך אותו: ה-listener והמושך-תמונות מתייחסים למצביע-חסר כ«עוד לא פורסם» ונופלים ל-born-seed המצורף — כלומר האפליקציה ביט-זהה כך או כך; הזריעה נחוצה כדי ש(א) לטריגר-הנסיגה יהיה baseline של גרסה-0 ו(ב) לקוח cold-start יקרא מצביע תקין ולא מסמך חסר",
+    "evidence": "bootstrap-studio-pointer.mjs:5-11"
+   },
+   {
+    "claim": "מזהה ALREADY_EXISTS בשלוש דרכים (code 6 · 'already-exists' · regex על ההודעה) — עמיד לשינוי-ייצוג של ה-SDK",
+    "evidence": "bootstrap-studio-pointer.mjs:56-58"
+   },
+   {
+    "claim": "כל שגיאה אחרת נזרקת הלאה — לא בולע",
+    "evidence": "bootstrap-studio-pointer.mjs:59-63"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא ניתן להרצה כאן — דורש firebase-admin ו-GOOGLE_APPLICATION_CREDENTIALS",
+    "evidence": "bootstrap-studio-pointer.mjs:23-24, 25-26; `ls node_modules/firebase-admin` בשורש ⇒ לא קיים"
+   },
+   {
+    "claim": "לא מאמת את ה-rules ולא את סדר-הפריסה בפועל — הסדר נאכף בקובץ-ה-workflow, לא כאן",
+    "evidence": "bootstrap-studio-pointer.mjs:14-16 («the deploy workflow orders it first regardless»)"
+   },
+   {
+    "claim": "לא מפרסם תצורה ולא קורא מ-Studio — רק זורע מצביע-ריק של ~200B",
+    "evidence": "bootstrap-studio-pointer.mjs:33-47"
+   },
+   {
+    "claim": "ה-projectId ברירת-מחדל קשיח (`buildsmart-b0b78`) — הרצה בלי GCLOUD_PROJECT תכוון לפרויקט הזה",
+    "evidence": "bootstrap-studio-pointer.mjs:28"
+   },
+   {
+    "claim": "האינדקס מסווג אותו «לא-רץ-מהשורה · אין-קורא-ידוע» — וזו טעות של הסורק: הוא **כן** מורץ ב-CI",
+    "evidence": "engine-index.json ⇒ isNot כולל «לא-רץ-מהשורה» ו«אין-קורא-ידוע», מול .github/workflows/firebase-deploy.yml:97 ⇒ `run: node scripts/bootstrap-studio-pointer.mjs`"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/.github/workflows/firebase-deploy.yml:97",
+    "how": "`run: node scripts/bootstrap-studio-pointer.mjs` — צעד-CI ממשי. שורה 23 מוסיפה את הקובץ ל-`paths` שמפעילים את ה-workflow"
+   },
+   {
+    "who": "buildsmart/functions/src/selftest.ts:198",
+    "how": "`wf.includes(\"bootstrap-studio-pointer.mjs\")` — בדיקה-עצמית של ה-functions שמאמתת שהצעד עדיין ב-workflow (שער סדר-הפריסה)"
+   },
+   {
+    "who": "buildsmart/app_flutter/WIRING.md · knowledge/firestore-schema.md · knowledge/studio-plan/detail/051-068.md:289",
+    "how": "תיעוד סדר-הפריסה (R2-10)"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — `grep -rn --exclude-dir=.git -F bootstrap-studio-pointer .` ⇒ 0 מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/server.mjs:54-59 (‏`rulesFor` שמחולל את firestore.rules) ו-machtzev/generator/server-gate.mjs (שער `server`, police.mjs:145)",
+   "gives": "המחולל **כן** מחולל חבילת-Firebase מלאה: `server.mjs:54-59` פולט `rules_version='2'` + `service cloud.firestore`, שורות 104-112 מדריכות `firebase deploy --only firestore:rules` ואז `--only functions`, ו-`server-gate.mjs:2-3` אוכף שלוש שאלות (הוכרז⇒נפלט · לא-הוכרז⇒לא-נפלט · אפס-סודות). מה שאין שם הוא **השאלה הרביעית — סדר**: כלל שנועל כתיבה חייב להתפרסם **אחרי** שהמצב-ההתחלתי נזרע, אחרת הלקוח הראשון קורא מסמך חסר ואין baseline לנסיגה. bootstrap-studio-pointer.mjs מדגים את הפתרון (‏`create()` אטומי, idempotent, לא-הרסני) **ואת האכיפה**: buildsmart מאמת בקוד שהצעד לא נשמט מה-workflow (functions/src/selftest.ts:198). זו תוספת ישירה ל-server-gate.mjs"
+  },
+  "s22": {
+   "score": 2,
+   "why": "בניגוד למה שהאינדקס מסמן, זה מנוע **חי ומחובר**: הוא רץ ב-CI (‏firebase-deploy.yml:97) ויש בדיקה שמוודאת שלא הוסר משם (‏functions/src/selftest.ts:198). ההנדסה שבו מדויקת — `create()` אטומי שלא יכול לדרוס תצורה שפורסמה, וזיהוי ALREADY_EXISTS בשלוש דרכים. והוא נוגע ב-§22 בנקודה אמיתית: cold-start ראשון מול backend הוא בדיוק המקום שבו «אפליקציה עובדת 100%» נשברת למסך-ריק. לא 3: הוא פותר מקרה-קצה של פריסה ראשונה, לא את הצינור; ובמחולל, שכן מחולל firestore.rules (‏server.mjs:54-59), הוא עדיין תוספת ולא חסם"
+  },
+  "evidence": [
+   "cat -n scripts/bootstrap-studio-pointer.mjs (64 שורות, כולן)",
+   "grep -n bootstrap-studio-pointer .github/workflows/firebase-deploy.yml ⇒ 23 (paths) · 97 (run) · functions/src/selftest.ts:198",
+   "grep -rln 'firestore|firebase' machtzev/ --exclude=engine-index.json ⇒ 15 קבצים · sed -n '1,10p' machtzev/generator/server-gate.mjs · grep -n firestore machtzev/generator/server.mjs ⇒ 54-59, 104-112, 138-142",
+   "grep -rn --exclude-dir=.git -F bootstrap-studio-pointer (-ai-chat-server) ⇒ engine-index.json בלבד"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/build_clean.sh",
+  "lang": "sh",
+  "lines": 30,
+  "does": [
+   {
+    "claim": "בונה את פרופיל-ה-CLEAN — הבסיס הגנרי ללבן-תווית — בפקודה אחת: `flutter build web --release --dart-define=APP_PROFILE=clean`",
+    "evidence": "build_clean.sh:82, 86-91"
+   },
+   {
+    "claim": "**מתעד במדויק מה הפרופיל אומר**: כל יכולת-UX מסופקת דלוקה · אין שרת-חברה (`CATALOG_BASE_URL=''`) ואין CDN (`IMAGE_BASE_URL=''`) — נכסים מצורפים בלבד · מראה-הפרסום של Studio כבוי · שכבת-הדגלים לא-נגועה",
+    "evidence": "build_clean.sh:69-77"
+   },
+   {
+    "claim": "מצביע על **קובץ-הזהות היחיד** שצריך לערוך להחלפת-מותג: lib/config/app_brand.dart + BRAND_SWAP_CHECKLIST.md",
+    "evidence": "build_clean.sh:79-80"
+   },
+   {
+    "claim": "**מפריד פריסה מבנייה במפורש** — פקודת ה-`hosting:channel:deploy` מסומנת «OWNER» ונשארת בהערה, «never touches the main site»",
+    "evidence": "build_clean.sh:83-85"
+   },
+   {
+    "claim": "מצהיר שהפרופיל נעוץ בבדיקה: `lib/state/app_profile.dart`, pinned by `app_profile_flags_test`",
+    "evidence": "build_clean.sh:70-71; הבדיקה קיימת: `ls app_flutter/test/app_profile_flags_test.dart`"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "לא פורס — הבנייה בלבד; הפריסה היא פעולת-בעלים ידנית",
+    "evidence": "build_clean.sh:83-85, 93-94"
+   },
+   {
+    "claim": "לא מריץ analyze/test/`app_profile_flags_test` לפני הבנייה, למרות שהוא מסתמך עליהם להגדרת-הפרופיל",
+    "evidence": "build_clean.sh:86-91 — רק `flutter build`"
+   },
+   {
+    "claim": "**PATH שונה מכל שאר הסקריפטים**: `$HOME/flutter/bin` ולא `/home/user/flutter/bin`. שאר הסקריפטים בריפו משתמשים בנתיב המוחלט",
+    "evidence": "build_clean.sh:88 מול app_flutter/scripts/protocol_check.sh:6 · orchestrator/scripts/central-verify.sh:41 · app_flutter/scripts/polish_shot.sh:16"
+   },
+   {
+    "claim": "לא ניתן להרצה כאן — אין Flutter",
+    "evidence": "`ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "לא מאמת שהפלט באמת clean (למשל ש-main.dart.js אינו מכיל URL של שרת-חברה)",
+    "evidence": "build_clean.sh:93-94 — מדפיס נתיב-פלט ותו לא"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה — שני אזכורי-תיעוד: app_flutter/WIRING.md · app_flutter/knowledge/LAUNCH_READINESS.md (שלב-4). אין hook/CI שמריץ אותו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/ship.mjs:86-93 — הלולאה `for (const [name, entry] of SITES)` שבונה אתר פר-כניסה",
+   "gives": "ship.mjs כבר מיישם «קוד אחד ⇒ הרבה אפליקציות», אבל הציר שלו הוא **נקודת-כניסה** (‏`-t lib/genesis/dart-gen-bs/${entry}`, שורה 91) ולא **פרופיל**. build_clean.sh מדגים את הציר השני: אותה נקודת-כניסה, `--dart-define=APP_PROFILE=<x>` שונה, ומטריצה מוצהרת של מה דלוק/כבוי בכל פרופיל (שורות 69-77). זו הצורה של «לבן-תווית» ש-§22 ירצה כשהמשפט בעברית יגיד «אותה אפליקציה, בלי השרת שלי» — וזה גם הציר שמאפשר לנעוץ אותו בבדיקה (`app_profile_flags_test`), מה שלנקודת-כניסה אין"
+  },
+  "s22": {
+   "score": 1,
+   "why": "בפועל זו שורת-`flutter build` אחת עם 25 שורות תיעוד. התיעוד עצמו טוב — הוא מגדיר את החוזה של הפרופיל ומפריד בין בנייה לפריסה — אבל הסקריפט אינו מאמת דבר, אינו מריץ את הבדיקה שנועצת את הפרופיל, ואין לו אף קורא. גם ה-PATH שלו סוטה מכל שאר הריפו. לא 0: הציר «פרופיל» אינו כפול לציר «נקודת-כניסה» שב-ship.mjs:91, ואין מקבילה מחוברת לבחירת-פרופיל"
+  },
+  "evidence": [
+   "cat -n scripts/build_clean.sh (30 שורות, כולן)",
+   "ls app_flutter/test/app_profile_flags_test.dart ⇒ קיים",
+   "grep PATH scripts/build_clean.sh app_flutter/scripts/protocol_check.sh orchestrator/scripts/central-verify.sh ⇒ $HOME מול /home/user",
+   "sed -n '86,93p' machtzev/generator/ship.mjs",
+   "git grep -l -F build_clean.sh (buildsmart) ⇒ app_flutter/WIRING.md · app_flutter/knowledge/LAUNCH_READINESS.md (תיעוד בלבד)"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/catalog_import.py",
+  "lang": "py",
+  "lines": 152,
+  "does": [
+   {
+    "claim": "צינור-ייבוא-אצווה: CSV (עם כותרות) או JSON (מערך או `{products:[…]}`) ⇒ רשומות `LipskeyCatalogProduct(...)` מוכנות ל-lipskey_catalog.dart, ב-12 שדות נתמכים",
+    "evidence": "catalog_import.py:3-12, 54-83"
+   },
+   {
+    "claim": "**מחיל נרמול-שם בטוח**: מאחד גרשיים, מסיר מקטעי-אריזה («כמות באריזה/במשטח», «12 באריזה»), מסיר כפילויות-מקטע דרך `dict.fromkeys`, ומוסיף רווח בגבול ספרה↔אות **בלי לסדר מחדש** — «don't break words»",
+    "evidence": "catalog_import.py:31-43"
+   },
+   {
+    "claim": "**מטפל במלכודת-הגרש של Dart** — escaping ל-`\\`, `'` ו-`$` (אינטרפולציה)",
+    "evidence": "catalog_import.py:47-51"
+   },
+   {
+    "claim": "אימות: שדות-חובה (sku, nameHe) ומק\"ט כפול, עם מספר-שורה בהודעה; `--validate` יוצא 1 בכשל",
+    "evidence": "catalog_import.py:24, 85-95, 138-147"
+   },
+   {
+    "claim": "משמיט שדות ריקים מהפלט במקום לפלוט `''`",
+    "evidence": "catalog_import.py:12, 59-72"
+   },
+   {
+    "claim": "**שער-קנה-מידה מובנה** — `--bench N` מודד generate+validate+emit ויוצא 1 אם הכול לוקח >30 שניות",
+    "evidence": "catalog_import.py:16, 98-126"
+   },
+   {
+    "claim": "**הרצתי אותו — עומד בקנה-מידה בפער עצום**",
+    "evidence": "`python3 scripts/catalog_import.py --bench 50000` ⇒ exit 0 · generate 39.6ms · validate 16.6ms (0 שגיאות) · emit 412.5ms (11,183,613 תווים) · סה\"כ **468.7ms** ⇒ **106,683 רשומות/שנייה** · «✅ עומד בקנה-מידה»"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא כותב לקטלוג** — פולט ל-stdout, וההדבקה ידנית",
+    "evidence": "catalog_import.py:6 («מוכנות להדבקה»), 148"
+   },
+   {
+    "claim": "**אימות-כפילות לא מדויק**: `seen.add(sku)` מתבצע גם כששדה-ה-sku ריק, ולכן שורה שנייה עם sku ריק תיחשב «מק\"ט כפול» מלבד היותה «שדה חובה חסר»",
+    "evidence": "catalog_import.py:91-94"
+   },
+   {
+    "claim": "לא בודק מול הקטלוג הקיים — מק\"ט שכבר קיים ב-lipskey_catalog.dart לא ייתפס",
+    "evidence": "אין קריאה של lipskey_catalog.dart ב-152 השורות"
+   },
+   {
+    "claim": "**לא מאמת מול מקור** — הוא מנרמל ופולט את מה שנתנו לו; אין כאן שער-R8 כמו ב-fill_attrs_from_fleet.py:252-255",
+    "evidence": "catalog_import.py:85-95 — רק חובה+כפילות"
+   },
+   {
+    "claim": "`page` ברירת-מחדל 0 ו-`categoryEmoji` ברירת-מחדל 📦 — ערכים מומצאים שנכנסים לפלט בלי סימון",
+    "evidence": "catalog_import.py:67-68"
+   },
+   {
+    "claim": "ה-benchmark מודד נתונים סינתטיים נקיים, לא CSV אמיתי — הוא מודד את המנוע, לא את הקלט",
+    "evidence": "catalog_import.py:99-109"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/scripts/test_catalog_qa.py",
+    "how": "4 בדיקות-יחידה על הפונקציות שלו: test_import_strips_packaging · test_import_dart_escapes_apostrophe · test_import_digit_letter_boundary · test_import_validate_catches_dup_and_missing"
+   },
+   {
+    "who": "buildsmart (תיעוד)",
+    "how": "scripts/CATALOG_ROADMAP.md · app_flutter/knowledge/catalog-3d/SUMMARY-2026-07-30.md. אין hook/CI שמריץ אותו"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/app-ds.mjs / render-module.mjs — שלב פליטת-ה-Dart · ובפרט הכלל ב-catalog_import.py:47-51",
+   "gives": "המחולל פולט Dart מקוד, ולכן הוא **חייב** לטפל באותן שלוש מלכודות: `\\`, `'` ו-`$` (אינטרפולציה). הנקודה החזקה כאן היא דווקא ה-`$`: מחרוזת-דאטה עברית שמכילה `$` הופכת ב-Dart לאינטרפולציה ושוברת קומפילציה או, גרוע יותר, פולטת טקסט אחר. ‏`machtzev/generator/hamtzaa.mjs` (שער `hamtzaa`, police.mjs:140) הוא גלאי-ההמצאה של המחולל — שם המקום שבו כלל «ערך-דאטה נפלט תמיד escaped» שייך. וה-`--bench` הוא הדפוס השני: **שער-קנה-מידה בתוך הכלי**, עם סף מוצהר ויציאה 1 — משהו שאין לאף שער במשטרה"
+  },
+  "s22": {
+   "score": 2,
+   "why": "שני דברים בו מקרבים את §22 ישירות. (א) **escaping נכון של פלט-Dart** — `\\`, `'` **וגם `$`** — כי משפט בעברית-חופשית שמכיל `$` או גרש הוא בדיוק המקרה שישבור אפליקציה מחוללת, ורוב הפולטים שוכחים את ה-`$`. (ב) **שער-קנה-מידה מוטמע**: `--bench` עם סף מוצהר (30 שניות ל-50K) שיוצא 1 — והרצתי אותו: 468.7ms, פי 64 מהסף. §22 מדבר על אפליקציה עובדת, ואפליקציה עם 10K מוצרים היא דרישה שהוזכרה מפורשות ב-knowledge/studio-plan. לא 3: אינו כותב, אינו מאמת מול מקור, ואף hook/CI אינו מריץ אותו — רק 4 בדיקות-יחידה ב-scripts/test_catalog_qa.py נוגעות בו"
+  },
+  "evidence": [
+   "cat -n scripts/catalog_import.py (152 שורות, כולן)",
+   "python3 scripts/catalog_import.py --bench 50000 ⇒ exit 0 · 468.7ms · 106,683 רשומות/שנייה",
+   "git grep -l -F catalog_import (buildsmart) ⇒ scripts/test_catalog_qa.py · scripts/CATALOG_ROADMAP.md · app_flutter/knowledge/catalog-3d/SUMMARY-2026-07-30.md",
+   "sed -n '138,142p' machtzev/police.mjs ⇒ gate('hamtzaa','generator/hamtzaa.mjs',['--ratchet'])"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/catalog_qa.py",
+  "lang": "py",
+  "lines": 623,
+  "does": [
+   {
+    "claim": "מנוע-QA לקטלוג עם 21 פקודות (audit · selftest · fix · export · truthcheck · crosscheck · suspects · pdfmap · verify · images · imgmatch · coverage · schema · truthapply · report · diff · crossdedup …)",
+    "evidence": "catalog_qa.py:9-18, 607-613, 615-620"
+   },
+   {
+    "claim": "**מודל-חומרה מפורש** ERROR/WARN/INFO, ורק ERROR חוסם",
+    "evidence": "catalog_qa.py:5, 49, 191-223"
+   },
+   {
+    "claim": "**פרסור מאוזן-סוגריים ולא regex** — עם הסיבה כתובה בקוד: lookahead-regex «מיזג בשקט ~111 רשומות (115 מוצרים לא נבדקו)»",
+    "evidence": "catalog_qa.py:57-60"
+   },
+   {
+    "claim": "**מוכיח את עצמו**: `selftest` מרעיל fixtures ומוודא שכל חוק יורה. הרצתי — **10/10**",
+    "evidence": "`python3 scripts/catalog_qa.py selftest` ⇒ exit 0 · ✅ יורה: empty_name · garbled · stuck_digit · unbalanced_parens · missing_category · unmapped_category · duplicate_sku · bad_brand · no_size · ועוד `clean_product אפס ERROR` · «✅ כל החוקים עובדים»"
+   },
+   {
+    "claim": "**מצליב מול מקור-אמת חיצוני** — `truthcheck` מול scripts/source_truth.json, ומדווח כיסוי-אימות באחוזים",
+    "evidence": "catalog_qa.py:34, 345-373; הרצה ⇒ «כיסוי אימות: 29%»"
+   },
+   {
+    "claim": "**הכלל מוצהר בראש הקובץ**: «שם שלא ניתן לאמת מול המקור — לא ממציאים»",
+    "evidence": "catalog_qa.py:20"
+   },
+   {
+    "claim": "`fix` הוא dry-run כברירת-מחדל ודורש `--apply` מפורש",
+    "evidence": "catalog_qa.py:12, 274-330"
+   },
+   {
+    "claim": "**הרצתי audit על הקטלוג החי**",
+    "evidence": "`python3 scripts/catalog_qa.py audit` ⇒ exit 0 · «מנוע QA — **923 מוצרים**» · ERROR **0** · WARN 16 (15 dup_name_unresolved · 1 type_category_mismatch) · INFO 324 (307 no_size · 15 duplicate_name · 2 no_image) · «✅ אפס שגיאות חוסמות»"
+   },
+   {
+    "claim": "**הרצתי coverage**",
+    "evidence": "`python3 scripts/catalog_qa.py coverage` ⇒ AQUATEC 601 מוצרים · 100% תמונה · 64% גודל | ליפסקי 322 · 99% · 70% (‏601+322 = 923)"
+   },
+   {
+    "claim": "**מחובר לשלושה מקומות בפועל** — hook, CI, ובדיקה ב-Dart",
+    "evidence": "scripts/hooks/pre-commit:5 (`python3 scripts/catalog_qa.py audit --json >/dev/null || …`) · .github/workflows/catalog-qa.yml:19 (selftest), 22 (audit --json), 26 (ספירת-WARN), 30 (coverage), 35 (העלאת catalog_qa.json כארטיפקט) · app_flutter/lib/test_harness/tests/catalog.dart:8 («same checks as scripts/catalog_qa.py audit»)"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**כיסוי-האימות מול המקור הוא 29% בלבד** — 199 שמות שונים מהמקור · 89 קטגוריות שונות · 647 מוצרים שאין להם רשומה ב-source_truth · 0 חסרים. כלומר «הכלל הזהוב» נבדק על פחות משליש מהקטלוג",
+    "evidence": "`python3 scripts/catalog_qa.py truthcheck` ⇒ «כיסוי אימות: 29% · ❌ שם שונה: 199 · ❌ קטגוריה שונה: 89 · ⚠️ עודף-app: 647 · ⚠️ חסר-app: 0» · `python3 -c` על scripts/source_truth.json ⇒ list באורך **276** מול 923 מוצרים"
+   },
+   {
+    "claim": "**ה-truthcheck לא חוסם** — הוא יצא 0 למרות 199+89 אי-התאמות",
+    "evidence": "הרצה ⇒ exit 0; catalog_qa.py:345-373 מדפיס ואינו קורא sys.exit"
+   },
+   {
+    "claim": "**307 מוצרים בלי מידה נספרים כ-INFO, לא כ-WARN** — כלומר שליש מהקטלוג בלי גודל, והשער ירוק",
+    "evidence": "הרצת audit ⇒ «INFO (324): 307 no_size»"
+   },
+   {
+    "claim": "ספירת-המוצרים שלו (923) נמוכה באחת מספירת-ה-regex הגסה (924) — הפרש שלא הוסבר בקוד",
+    "evidence": "הרצת audit ⇒ 923 · `grep -c 'LipskeyCatalogProduct(' app_flutter/lib/data/lipskey_catalog.dart` ⇒ 924"
+   },
+   {
+    "claim": "TYPE_HINT הוא מילון-דומייני קשיח של 12 מילים — בדיוק סוג-הדבר ש-§20 «אפס מילון-דומייני» מסתייג ממנו",
+    "evidence": "catalog_qa.py:37-42"
+   },
+   {
+    "claim": "פקודות ה-PDF (crosscheck · suspects · pdfmap · verify · images · imgmatch) דורשות כלים וקבצים חיצוניים ולא נבדקו כאן",
+    "evidence": "catalog_qa.py:374-473"
+   },
+   {
+    "claim": "**ה-hook שמריץ אותו אינו ה-hook הפעיל** — `scripts/hooks/pre-commit` (‏7 שורות) אינו `.githooks/pre-commit` (‏940 שורות), וה-hooksPath של הריפו מצביע על `.githooks`. `grep -c catalog_qa .githooks/pre-commit` ⇒ **0**",
+    "evidence": "scripts/hooks/pre-commit:5 · `grep -c catalog_qa .githooks/pre-commit` ⇒ 0 · .claude/hooks/session-start.sh:10 מגדיר את ה-hooksPath ל-.githooks"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart/.github/workflows/catalog-qa.yml:19,22,26,30,35",
+    "how": "מריץ selftest, audit --json, ספירת-WARN, coverage, ומעלה catalog_qa.json כארטיפקט. מופעל על שינוי ב-app_flutter/lib/data/** או בקובץ עצמו (שורות 6,8)"
+   },
+   {
+    "who": "buildsmart/scripts/hooks/pre-commit:5",
+    "how": "`python3 scripts/catalog_qa.py audit --json >/dev/null || …` — אבל זה **לא** ה-hook הפעיל (ראה doesNot)"
+   },
+   {
+    "who": "buildsmart/app_flutter/lib/test_harness/tests/catalog.dart:8",
+    "how": "בדיקת-Dart שמצהירה «same checks as scripts/catalog_qa.py audit» — הכפלת-חוקים, לא קריאה"
+   },
+   {
+    "who": "buildsmart (תיעוד)",
+    "how": "CATALOG_PROTOCOL.md · README.md · scripts/CATALOG_ROADMAP.md"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/hamtzaa.mjs (שער `hamtzaa --ratchet`, police.mjs:140) ו-machtzev/purity/purity-data.mjs (שער `puredata`, police.mjs:125)",
+   "gives": "הדבר בעל-הערך כאן אינו רשימת-החוקים אלא **`selftest` שמרעיל fixtures ומוכיח שכל חוק יורה** (catalog_qa.py:224-256; 10/10 בהרצה שלי). זה הדפוס שמפריד בין מנוע-חוקים למנוע-חוקים-שאפשר לסמוך עליו, והוא בדיוק מה שחסר לשערי-הראצ׳ט של המחולל: `hamtzaa` מודד המצאות מול baseline, אבל אין לו הוכחה שהגלאי עצמו עדיין יורה. התוספת: fixture מורעל פר-חוק, כמו ב-machtzev/pretool-selftest.mjs שכבר עושה זאת ל-hook — רק שכאן זה על חוקי-דאטה"
+  },
+  "s22": {
+   "score": 2,
+   "why": "623 שורות, 21 פקודות, 10 חוקים שכולם מוכיחים את עצמם (הרצתי), ודאטה חיה: 923 מוצרים, אפס ERROR. הוא גם מנסח את כלל-§20 בשורה 20 ומודד אותו (`truthcheck`). אבל **המדידה שלו עצמה מראה את התקרה**: כיסוי-אימות 29%, 199 שמות שאינם תואמים למקור, 307 מוצרים בלי מידה — וכל אלה INFO/מודפס ולא חוסם. §22 היא רצפת-קבלה; מנוע שמודד את הפער ולא חוסם עליו מקרב, אבל לא סוגר. הוא כן המנוע הכי-מחובר מבין ה-13 שב-scripts/ (‏CI ייעודי ב-catalog-qa.yml), אבל ה-hook שמריץ אותו — scripts/hooks/pre-commit — אינו ה-hook הפעיל. לא 3 גם בגלל TYPE_HINT — מילון-דומייני קשיח, שהוא בדיוק מה ש-§20 אוסר"
+  },
+  "evidence": [
+   "sed -n '1,60p' + grep -n '^def ' scripts/catalog_qa.py (623 שורות · 28 פונקציות · 21 פקודות)",
+   "python3 scripts/catalog_qa.py selftest ⇒ exit 0 · 10 חוקים יורים · «✅ כל החוקים עובדים»",
+   "python3 scripts/catalog_qa.py audit ⇒ exit 0 · 923 מוצרים · 0 ERROR · 16 WARN · 324 INFO",
+   "python3 scripts/catalog_qa.py truthcheck ⇒ exit 0 · כיסוי 29% · 199 שם · 89 קטגוריה · 647 עודף · 0 חסר",
+   "python3 scripts/catalog_qa.py coverage ⇒ AQUATEC 601/100%/64% · ליפסקי 322/99%/70%",
+   "python3 -c json.load(scripts/source_truth.json) ⇒ list, 276 רשומות",
+   "grep -c catalog_qa .githooks/pre-commit ⇒ 0 · ls .github/workflows/catalog-qa.yml ⇒ קיים",
+   "grep -n catalog_qa scripts/hooks/pre-commit .github/workflows/catalog-qa.yml app_flutter/lib/test_harness/tests/catalog.dart"
+  ]
+ },
+ {
+  "file": "buildsmart/scripts/compare_local_vs_flip.sh",
+  "lang": "sh",
+  "lines": 70,
+  "does": [
+   {
+    "claim": "בונה פעמיים — LOCAL (דגלים כבויים, ברירת-המחדל המסופקת) ו-FLIP (‏USE_FIREBASE_BACKEND + STUDIO_LIVE + CATALOG_SERVER_SEARCH + CATALOG_BASE_URL) — ומשווה",
+    "evidence": "compare_local_vs_flip.sh:96-98, 130-146"
+   },
+   {
+    "claim": "**מתחיל בהוכחת-אי-הנסיגה** — מריץ `flutter test test/backend_flag_test.dart` לפני כל בנייה; זו הערובה שהבנייה המקומית ביט-זהה לקודמת למרות קוד-Pillar-5 שמאחורי הדגלים",
+    "evidence": "compare_local_vs_flip.sh:124-128"
+   },
+   {
+    "claim": "**משווה את מניפסט-הנכסים ולא רק גדלים**: `find build/web -maxdepth 2 -printf '%P\\t%s\\n' | sort`, ואז `diff`. שינוי במניפסט בין OFF ל-ON הוא דגל-אדום; רק תוכן/גודל main.dart.js אמור להשתנות",
+    "evidence": "compare_local_vs_flip.sh:135, 145, 148-158"
+   },
+   {
+    "claim": "**מצהיר במפורש שהוא לא שער-CI** — «This is a DEV helper — it is NOT a CI gate», והשער האמיתי הוא backend_flag_test + selftest של סדר-הפריסה",
+    "evidence": "compare_local_vs_flip.sh:100-102, 108"
+   },
+   {
+    "claim": "שומר את שני המניפסטים ל-`.compare-local-vs-flip/` כדי שאפשר יהיה לבדוק ידנית",
+    "evidence": "compare_local_vs_flip.sh:113, 121, 135, 145, 164"
+   },
+   {
+    "claim": "**מסמן נקודת-הרחבה מדויקת** — diff סמנטי (קטלוג / top-N של חיפוש / זרימת-כרטיס) יחובר כאן כשה-flip יורץ מול backend חי; היום `search_parity_golden_test` כבר מוכיח שקילות-תשובות Layer-A ≡ Layer-B אופליין",
+    "evidence": "compare_local_vs_flip.sh:160-163"
+   }
+  ],
+  "doesNot": [
+   {
+    "claim": "**לא חוסם** — הפרש-מניפסט מדפיס «⚠️» ו-`|| true`, והסקריפט ממשיך ליציאה 0",
+    "evidence": "compare_local_vs_flip.sh:155-158"
+   },
+   {
+    "claim": "לא משווה תוכן — רק שמות וגדלים של קבצים בעומק ≤2; main.dart.js נמדד בגודל בלבד",
+    "evidence": "compare_local_vs_flip.sh:135, 136, 145-146, 152"
+   },
+   {
+    "claim": "לא משווה התנהגות — אין הרצה, אין צילום, אין diff סמנטי. זה מוצהר כנקודת-הרחבה עתידית",
+    "evidence": "compare_local_vs_flip.sh:160-163"
+   },
+   {
+    "claim": "**בונה FLIP מול `https://catalog.example.invalid`** כברירת-מחדל — כלומר ה-flip נבנה אך לעולם לא מורץ מול backend אמיתי בסקריפט הזה",
+    "evidence": "compare_local_vs_flip.sh:105-106, 114"
+   },
+   {
+    "claim": "ה-LOCAL sw.js נשמר אבל **לא מושווה** — נשמר רק צד אחד (`local.sw.js`), ואין `flip.sw.js`",
+    "evidence": "compare_local_vs_flip.sh:134 (רק LOCAL)"
+   },
+   {
+    "claim": "לא ניתן להרצה כאן — אין Flutter, ושתי בניות מלאות",
+    "evidence": "compare_local_vs_flip.sh:108, 120 · `ls -d /home/user/flutter/bin` ⇒ No such file or directory"
+   },
+   {
+    "claim": "מפנה ל-`search_parity_golden_test` כהוכחה קיימת — **ובשם הזה אין קובץ בריפו**. יש 8 קובצי-`*parity*` אחרים (‏catalog_slice_engine_parity · lipskey_hierarchy_parity · huliot_pdf_parity · connection_resolver_parity · polyroll_pdf_parity · lipskey_pdf_parity · atom_home_parity · brand_profile_parity), אך לא זה",
+    "evidence": "compare_local_vs_flip.sh:163 · `find . -name '*parity*' -not -path './.git/*'` ⇒ 8 קבצים, אף אחד בשם search_parity_golden_test.dart"
+   }
+  ],
+  "callers": [
+   {
+    "who": "buildsmart",
+    "how": "∅ הרצה — שני אזכורי-תיעוד: app_flutter/WIRING.md · knowledge/studio-plan/detail/051-068.md"
+   },
+   {
+    "who": "-ai-chat-server",
+    "how": "∅ — 0 התאמות מחוץ ל-engine-index.json"
+   }
+  ],
+  "connectAt": {
+   "point": "-ai-chat-server/machtzev/generator/ship.mjs:85-93 — מיד אחרי הבניות · והשוואת-הפלט ליד machtzev/generator/gen-verify.mjs:31 (בדיקת סחף-מראה)",
+   "gives": "למחולל **יש** כבר את המושג «ביט-זהה» ומיישם אותו על **קובץ-מקור** — gen-verify.mjs:31 ו-golden-harness.mjs:33 בודקים שהמראה ב-buildsmart זהה למקור בגנסיס. מה שאין הוא ההקבלה על **הפלט הבנוי**: מניפסט-הנכסים של הבנייה. זה חשוב כי הדגלים ב-ship.mjs (‏`--no-web-resources-cdn`, `--base-href`, `-t <entry>`) משנים מה נארז, וסחף שם אינו נראה בשום שער. הדפוס שכאן — `find … -printf '%P\\t%s\\n' | sort` ואז diff — הוא שלוש שורות שמוסיפות את המימד הזה"
+  },
+  "s22": {
+   "score": 1,
+   "why": "עוזר-פיתוח מוצהר, לא שער: ההפרש מדפיס אזהרה ויוצא 0, ההשוואה היא שמות-וגדלים בלבד, ה-flip נבנה מול כתובת `.invalid` ולעולם לא מורץ, ואפילו ה-sw.js נשמר רק מצד אחד. אין לו קורא, והוא מפנה לבדיקה בשם `search_parity_golden_test` שאינה קיימת בריפו. מה שכן שווה הוא הרעיון שההשוואה נעשית על **מניפסט-הנכסים** ולא על גודל-חבילה — זו המדידה הנכונה לשאלה «האם הדלקת ה-backend שינתה מה נארז». לא 0: אין מקבילה מחוברת שמשווה שתי תצורות-בנייה; הביט-זהה של המחולל הוא על מקור, לא על פלט"
+  },
+  "evidence": [
+   "cat -n scripts/compare_local_vs_flip.sh (70 שורות, כולן)",
+   "cat -n machtzev/generator/gen-verify.mjs:31 · sed -n '33,34p' machtzev/generator/golden-harness.mjs",
+   "ls -d /home/user/flutter/bin ⇒ No such file or directory",
+   "git grep -n -F compare_local_vs_flip.sh (buildsmart) ⇒ ∅ מחוץ לקובץ",
+   "ls app_flutter/test/backend_flag_test.dart ⇒ קיים · find -name '*parity*' ⇒ 8, בלי search_parity_golden_test.dart",
+   "git grep -l -F compare_local_vs_flip.sh ⇒ app_flutter/WIRING.md · knowledge/studio-plan/detail/051-068.md (תיעוד בלבד)"
+  ]
  }
 ]
