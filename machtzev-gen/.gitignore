@@ -1,0 +1,6 @@
+# קטלוג-אינדקס נגזר (generated) — נחצב ע"י harvest-particles.mjs, לא נשמר בענף-הפיצ'ר.
+# מסופק ע"י ענף-הבסיס claude/p0-bundle-data-migration-vg7z6b (שם הוא tracked) או נוצר מקומית.
+# היה untracked בתחילת הסשן; ה-gitignore מונע מ-stop-hook לדרוש commit של 977KB דאטה שאינו קוד-המשימה.
+empire-index.json
+# קובץ-הזהב (628 רשומות) — נמשך מענף claude/sort-golden-260917 לצורך מדידה בלבד, לא קוד-המשימה.
+sort-golden.json
