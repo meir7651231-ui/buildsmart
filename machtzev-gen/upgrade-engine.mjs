@@ -58,14 +58,154 @@ export function upgradeEngine(id) {
   return { id: target.id, role: tRole, keys: tKeys.slice(0, 8), gap, helpersFound: scored.length, plan };
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// bucketsOf — מיון-רשומה לסלים (A–Z). המיון שנעשה ידנית ע"י 6 סוכנים, כאן כמנוע.
+// דטרמיניסטי · מבנה-לפני-מילים (ראיה מבנית: נתיב/יצוא/ייבוא/קריאה; מילים-מ-dom = שובר-שוויון אחרון בלבד).
+// כויל מול קובץ-הזהב (628 רשומות) בשדרוג up-buckets2 — ראה NOTES-up-buckets2.md · BUCKETS-REPORT-2.md.
+// סדר-הכללים (חרוט):
+//   (1) סימני-נתיב/שם מבניים — RX פר-סל (M/E/I/B/C/D/G/H/L/N/A/F). כל סימן מוסיף סל (רב-סליות).
+//   (2) op-מבני — collection⇒C · predicate⇒E · guard⇒I · format⇒M · measure⇒C.
+//   (3) J — הרצה-בפועל בלבד: op=effect · srv(שרת/לולאה/hook) · או נתיב-הרצה (functions/githooks/hook/server/deploy).
+//         K רק לחלקיק (kind=fn · לא cli · לא srv · op-טהור) — לא לקובץ-מנוע-עם-CLI (סעיף Step-2).
+//   (4) H — effect שכותב/מרכיב (io או נתיב-assemble).
+//   (5) מילים-מ-dom — רק אם הסל עדיין ריק (שובר-שוויון); אחרת Z. מנוע יכול לקבל כמה סלים.
+// ⚠️ K_OPS ללא 'effect' (effect⇒J/H, לא חלקיק) וללא 'guard' (guard⇒I). engine (קובץ-שלם) אינו K.
+const K_OPS = new Set(['measure', 'predicate', 'collection', 'format', 'transform']);
+// RX פר-סל — ראיה מבנית (נתיב+שם). לוקח cli/srv/io/kind מרשומת-empire המועשרת (empire-index.mjs).
+const RX = {
+  M: /looks|(^|\/)skin|(^|[-\/])ds([-\/]|$)|design|theme|token|(^|\/)font|palette|typograph|screen-?css|\bcss\b/,
+  E: /verify|selftest|self-test|proof|golden|truth|mutation|parity|fuzz|roundtrip|acceptance|smoke|quality|(^|[-\/])prove|contract|coverage|no-faker|cross-source|goal-proof|(^|\/)tests?([-.\/]|$)|(^|\/)bench|assert|(^|[-\/])test_/,
+  I: /(^|[-\/])(checks?|gates?|police|baseline|ratchet|allow|rules?\d*|law|lint|enforce|audit|red-team|guard)([-.\/\d]|$)|rules_test|guardrail|police|(^|\/)functions([-\/]|$)|orchestrat/,
+  B: /particle|peruk|(^|\/)shape|decomp|partition|(^|\/)atom|frag|(^|[-\/])spec([-.\/]|$)|sentence|(^|[-\/])plan|(^|\/)lens|opsof|(^|\/)fold|carve|chisel|tzinor|purpose/,
+  C: /census|(^|\/)quarry|(^|[-\/])extract|index|inventory|(^|\/)shelf|catalog|(^|\/)minisql|collect|harvest|(^|\/)count/,
+  D: /search|retriev|(^|[-\/])match|oracle|lookup|(^|[-\/])intent|probe|(^|[-\/])find|combine-screen|screen/,
+  G: /purity|(^|\/)pure|purif|repair|(^|[-\/])heal|(^|[-\/])lift|enrich|(^|[-\/])fix|clean|normaliz|dehard|forge|apply/,
+  H: /assemble|(^|[-\/])box([-\/]|$)|compose|manifest|(^|[-\/])board|rethread|studio|render/,
+  L: /\.data\.json$|(^|\/)terms|(^|\/)atlas|registry|(^|\/)knowledge|fixture|(^|\/)assets?([-\/]|$)|(^|\/)seed|enum|examples?([-\/]|$)/,
+  N: /learn|curriculum|(^|\/)knowledge|yeshiva-bench|(^|\/)assets?([-\/]|$)/,
+  A: /(^|\/)yeshiva([-\/]|$)|psak|(^|\/)daf|dialectic|mefarshim|mishna|maimatai|מאימתי|ממאי|examples?([-\/]|$)|mahulal|(^|[-\/])lens|sentence|(^|[-\/])spec([-.\/]|$)|wizard|goal-/,
+  F: /dedup|reconcile/,
+};
+// J-נתיב-צר — הרצה-בפועל בלבד (לא כל "run"/"tools"; אלה נתנו 244 false-positives — ראה BUCKETS-REPORT-2.md).
+const RXJ = /(^|\/)functions([-\/]|$)|githooks|(^|[-\/])hook|daemon|autoloop|(^|\/)server|deploy/;
+// נרמול-נתיב: הסרת קידומת-ריפו + ./ מובילים (להתאמה מול קובץ-הזהב).
+export const normFile = (f) => String(f || '').replace(/^\.?\/+/, '').replace(/^(maor-system|maor|machtzev-gen|machtzev|buildsmart)\//, '');
+// gates.tsv — אם המנהל הדביק עותק machtzev-gen/gates.tsv, טוענים את עמודת-הקובץ ל-I מדויק.
+const GATES = (() => {
+  const set = new Set();
+  try {
+    const raw = fs.readFileSync(path.join(GEN, 'gates.tsv'), 'utf8');
+    for (const line of raw.split(/\r?\n/)) {
+      const cells = line.split('\t');
+      for (const c of cells) if (/\.(ts|tsx|js|mjs|dart)$/.test(c)) set.add(normFile(c.trim()));
+    }
+  } catch { /* אין עותק — נופלים לזיהוי-משם בלבד */ }
+  return set;
+})();
+
+export function bucketsOf(rec) {
+  const b = new Set();
+  const file = String(rec.file || '').toLowerCase(), id = String(rec.id || '').toLowerCase();
+  const hay = file + ' ' + id;
+  const domStr = (rec.dom || []).join(' ').toLowerCase();
+  const op = rec.op, cli = !!rec.cli, srv = !!rec.srv, io = !!rec.io, kind = rec.kind;
+  // yeshiva-bench = ידע/כללים (N/I), לא ליבת-A. מונע over-fire של A על assets.
+  const yeshivaBench = /yeshiva-bench|assets\/yeshiva/.test(file);
+  // (1) סימני-נתיב/שם מבניים — כל RX מוסיף סל (רב-סליות).
+  for (const [bk, rx] of Object.entries(RX)) { if (bk === 'A' && yeshivaBench) continue; if (rx.test(hay)) b.add(bk); }
+  // (2) I מדויק מ-gates.tsv (אם הודבק עותק) — ראיה חיצונית מבנית חזקה.
+  if (GATES.has(normFile(rec.file))) b.add('I');
+  // (3) op-מבני
+  if (op === 'collection') b.add('C');
+  if (op === 'predicate') b.add('E');
+  if (op === 'guard') b.add('I');
+  if (op === 'format') b.add('M');
+  if (op === 'measure') b.add('C');
+  // (4) J — הרצה-בפועל בלבד (effect/srv/נתיב-הרצה); K — חלקיק (fn · לא cli/srv · op-טהור).
+  if (op === 'effect' || srv || RXJ.test(hay)) b.add('J');
+  if (op === 'effect' && (io || RX.H.test(hay))) b.add('H');
+  if (kind === 'fn' && !cli && !srv && K_OPS.has(op)) b.add('K');
+  if (kind === undefined && K_OPS.has(op)) b.add('K'); // רשומות-בסיס (maor/machtzev) ללא kind — נשען על op.
+  // (5) שובר-שוויון מ-dom — רק אם הסל עדיין ריק (מילים אחרונות, אחרי כל ראיה מבנית).
+  if (b.size === 0) {
+    if (/index|census|אינדקס|צנזוס|חציב/.test(domStr)) b.add('C');
+    else if (/search|חיפוש|אחזור/.test(domStr)) b.add('D');
+    else if (/proof|golden|test|הוכח|זהב|בדיק/.test(domStr)) b.add('E');
+    else if (/purif|heal|טיהור|ריפוי|שדרוג/.test(domStr)) b.add('G');
+    else if (/wire|assemble|box|חיווט|הרכב|קופס/.test(domStr)) b.add('H');
+  }
+  if (b.size === 0) b.add('Z');
+  return [...b].sort();
+}
+
+// jaccard בין שתי קבוצות-סלים
+const jaccard = (a, c) => {
+  const A = new Set(a), C = new Set(c); if (!A.size && !C.size) return 1;
+  let inter = 0; for (const x of A) if (C.has(x)) inter++;
+  return inter / (A.size + C.size - inter);
+};
+
+// מדידה: מול sort-golden.json אם קיים, אחרת התפלגות מול empire-index בלבד.
+function measureBuckets() {
+  const rows = EMPIRE.map((r) => ({ id: r.id, repo: r.repo, file: r.file, buckets: bucketsOf(r) }));
+  const dist = {}; let multi = 0, total = 0;
+  const combo = {};
+  for (const r of rows) {
+    for (const bk of r.buckets) dist[bk] = (dist[bk] || 0) + 1;
+    if (r.buckets.length > 1) multi++;
+    total += r.buckets.length;
+    const k = r.buckets.join('+'); combo[k] = (combo[k] || 0) + 1;
+  }
+  const out = { records: rows.length, buckets: rows, dist, avgPerRec: +(total / rows.length).toFixed(3), multiBucket: multi, topCombos: Object.entries(combo).sort((a, b) => b[1] - a[1]).slice(0, 15) };
+  // זהב
+  let golden = null;
+  try { golden = JSON.parse(fs.readFileSync(path.join(GEN, 'sort-golden.json'), 'utf8')); } catch { /* אין */ }
+  if (golden) {
+    const gByFile = new Map();
+    for (const g of golden) gByFile.set(normFile(g.file), Array.isArray(g.buckets) ? g.buckets : String(g.buckets || '').split(/[^A-Z]+/).filter(Boolean));
+    const eByFile = new Map();
+    for (const r of rows) if (!eByFile.has(normFile(r.file))) eByFile.set(normFile(r.file), r.buckets); // ראשון-לקובץ
+    let shared = 0, sumJ = 0, ge05 = 0, zero = 0;
+    const conf = {}; // conf[goldBucket][engineBucket] = count
+    for (const [f, gb] of gByFile) {
+      const eb = eByFile.get(f); if (!eb) continue;
+      shared++; const j = jaccard(eb, gb); sumJ += j; if (j >= 0.5) ge05++; if (j === 0) zero++;
+      for (const gx of gb) { conf[gx] = conf[gx] || {}; for (const ex of eb) conf[gx][ex] = (conf[gx][ex] || 0) + 1; }
+    }
+    out.golden = { goldRecords: golden.length, sharedFiles: shared, avgJaccard: shared ? +(sumJ / shared).toFixed(4) : 0, ge05, zero, confusion: conf };
+  }
+  return out;
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  const ids = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-  for (const id of (ids.length ? ids : ['purity-data'])) {
-    const u = upgradeEngine(id);
-    console.log(`\n═══ שדרוג ${u.id}${u.error ? ' — ' + u.error : ''} ═══`);
-    if (u.error) continue;
-    console.log(`תפקיד-נוכחי: ${u.role} · אסימוני-זהות: ${u.keys.join(' ')} · עוזרים: ${u.helpersFound} · פער: [${u.gap.join(', ')}]`);
-    for (const p of u.plan) console.log(` ${p.role.padEnd(9)} → ${p.default}${p.variants.length > 1 ? '   | חלופות: ' + p.variants.slice(1).join(' · ') : ''}`);
+  const args = process.argv.slice(2);
+  const flags = args.filter((a) => a.startsWith('--'));
+  const ids = args.filter((a) => !a.startsWith('--'));
+  if (flags.includes('--buckets')) {
+    const m = measureBuckets();
+    if (flags.includes('--json')) { console.log(JSON.stringify(flags.includes('--full') ? m : { ...m, buckets: undefined }, null, flags.includes('--full') ? 0 : 1)); }
+    else {
+      console.log(`\n═══ מיון-לסלים · ${m.records} רשומות (empire-index) ═══`);
+      console.log('התפלגות-סלים:'); for (const [bk, c] of Object.entries(m.dist).sort((a, b) => b[1] - a[1])) console.log(`  ${bk} : ${c}`);
+      console.log(`ממוצע-סלים-לרשומה: ${m.avgPerRec} · רב-סליות: ${m.multiBucket} · Z(לא-ידוע): ${m.dist.Z || 0}`);
+      console.log('שילובים-נפוצים:'); for (const [k, c] of m.topCombos) console.log(`  ${k.padEnd(10)} ${c}`);
+      if (m.golden) {
+        const g = m.golden;
+        console.log(`\n── מול הזהב (sort-golden.json · ${g.goldRecords} רשומות) ──`);
+        console.log(`קבצים-משותפים: ${g.sharedFiles} · Jaccard-ממוצע: ${g.avgJaccard} · ≥0.5: ${g.ge05} · =0: ${g.zero}`);
+        console.log('מטריצת-בלבול (זהב→מנוע):'); for (const [gx, row] of Object.entries(g.confusion)) console.log(`  ${gx}: ${Object.entries(row).sort((a, b) => b[1] - a[1]).map(([e, c]) => e + ':' + c).join(' ')}`);
+      } else {
+        console.log('\n⚠️ אין sort-golden.json — מדידה מול empire-index בלבד. הדבק את SORT-ALL.json ל-machtzev-gen/sort-golden.json.');
+      }
+    }
+  } else {
+    for (const id of (ids.length ? ids : ['purity-data'])) {
+      const u = upgradeEngine(id);
+      console.log(`\n═══ שדרוג ${u.id}${u.error ? ' — ' + u.error : ''} ═══`);
+      if (u.error) continue;
+      console.log(`תפקיד-נוכחי: ${u.role} · אסימוני-זהות: ${u.keys.join(' ')} · עוזרים: ${u.helpersFound} · פער: [${u.gap.join(', ')}]`);
+      for (const p of u.plan) console.log(` ${p.role.padEnd(9)} → ${p.default}${p.top3.length > 1 ? '   | חלופות: ' + p.top3.slice(1).join(' · ') : ''}`);
+    }
   }
 }
