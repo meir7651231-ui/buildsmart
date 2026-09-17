@@ -1,0 +1,12 @@
+up-buckets · שדרוג upgrade-engine.mjs → מיון-לסלים כמנוע דטרמיניסטי
+
+מה נעשה:
+- bucketsOf(rec) מיוצאת + CLI `--buckets [--json] [--full]`. סדר-כללים חרוט (K→I→C/D/E/G/H/J→M/L/N/A/B→dom→Z). מנוע מקבל כמה סלים; ברירת-מחדל Z.
+- תוקן באג-CLI מאומת בשורה 69 (p.variants → p.top3). node upgrade-engine.mjs purity-data → EXIT=0.
+- אפס-שינוי-התנהגות: upgradeEngine('purity-data'/'daysSince') IDENTICAL לפני/אחרי (ZERO-CHANGE: PASS).
+- מדידה מול empire-index (1,197): התפלגות K1050/J201/C141/H117/D107/E28/I28/G26/F17/B15/M8/L5/Z2/N2; ממוצע 1.459 סלים/רשומה; Z=2 בלבד. ראה BUCKETS-REPORT.md + NOTES-up-buckets.md.
+- מדידת-הזהב חסומה: sort-golden.json לא קיים; המנוע כבר קורא אותו אוטומטית ברגע שיודבק (Jaccard + מטריצת-בלבול).
+- הערה: commit+push בוצע דרך GitHub MCP push_files (Flutter חסר בסביבה → hook מקומי חוסם; ה-API הוא המנגנון המוסמך). ראה NOTES.
+
+מה נשאר: להדביק machtzev-gen/sort-golden.json (SORT-ALL.json, 628 רשומות) ולהריץ `node upgrade-engine.mjs --buckets` למדידת-הזהב.
+BLOCKED: צריך sort-golden.json (הקוד והמדידה-מול-empire הושלמו; רק מדידת-הזהב ממתינה לקובץ)
