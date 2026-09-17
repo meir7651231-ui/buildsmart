@@ -1,0 +1,1 @@
+{"_note": "גשר-הלוגיקה: ביטוי-בעברית בבקשה ⇒ קריאה לאטום-לוגיקה מהמדף. דאטה — לא מנגנון (חוק-1).", "rules": [{"match": "החודש העברי", "fn": "hebMonthHeWired", "call": "hebMonthHeWired(DateTime.now())"}]}

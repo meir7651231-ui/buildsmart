@@ -1,0 +1,1 @@
+{"engine":"writeAudit","origin":"buildsmart:functions/src/audit.ts","fields":["action","source","actoruid","actorrole","target","before","after","ok","reason","servertimestamp","error"],"plan":[]}

@@ -1,0 +1,60 @@
+{
+ "name": "Tzedaka",
+ "sentences": [
+  "קופות צדקה לפי רכז",
+  "מבצע גיוס עם יעד",
+  "מוצר עם מחיר ומלאי",
+  "חנות שותפה עם כתובת",
+  "מורה עם שעות ושיעורים",
+  "שיבוצים של השנה",
+  "תורמים לפי סכום"
+ ],
+ "skin": {
+  "kpi": "ForgeStatPlain",
+  "navTile": "ForgeHubTile",
+  "stat": "ForgeStatPlain",
+  "hero": "ForgeStatPlain",
+  "button": "ForgeToneButton",
+  "statusChip": "ForgeStatusChip",
+  "banner": "ForgeToneBanner",
+  "emptyState": "ForgeSearchEmptyState",
+  "mediaRow": "ForgeContactTile",
+  "section": "ForgeTitledSection",
+  "frame": "ForgeStripPanelFrame",
+  "segmented": "ForgeSegmentedPillToggleSelection",
+  "chip": "ForgeFacetChip",
+  "meter": "ForgeLinearProgressStatus",
+  "glass": "ForgeGlassCard",
+  "timeline": "ForgeNotifRow",
+  "field": "ForgeDsField",
+  "enumField": "ForgeDsEnumField",
+  "numberField": "ForgeDsNumberField",
+  "dateField": "ForgeDsDateFieldInput",
+  "search": "ForgeDsSearch",
+  "pageHeader": "ForgeCenteredPageHeader",
+  "table": "ForgeDataGrid",
+  "bars": "ForgeBarChart",
+  "toneMap": {
+   "statusChip": [
+    "tone-info",
+    "tone-ok",
+    "tone-err",
+    "tone-warn"
+   ],
+   "banner": [
+    "tone-info",
+    "tone-ok",
+    "tone-err",
+    "tone-warn"
+   ],
+   "button": [
+    "tone-info",
+    "tone-ok",
+    "tone-err",
+    "tone-warn"
+   ]
+  },
+  "calendar": "ForgeEventCalendar",
+  "board": "ForgeKanbanBoard"
+ }
+}

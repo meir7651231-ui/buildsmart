@@ -1,0 +1,1 @@
+{"engine":"ayinActionVisible","origin":"maor-system:src/lib/ayin.ts","fields":["stage","names","eyes"],"plan":[{"kind":"fn","name":"validateHebMonthNames","op":"collection","sig":"hebYear: number = hebYearNow(=>): string","covers":["names"],"from":"maor-system:src/lib/hebdate.ts"}]}

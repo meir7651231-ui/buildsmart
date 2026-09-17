@@ -1,0 +1,1 @@
+{"engine":"donorSignals","origin":"maor-system:src/components/supporters/signals.ts","fields":["id","name","ils","date","recent_days","gap_days","drop_ratio","jump_ratio","lapsing_days"],"plan":[]}

@@ -1,0 +1,1 @@
+{"engine":"dashboardCsvRows","origin":"maor-system:src/components/courses/dashboard.ts","fields":["rows","name","teacher","enrolled","occupancy","waitlist","debt","absences","atrisk"],"plan":[]}

@@ -1,0 +1,1 @@
+{"engine":"payLink","origin":"maor-system:src/lib/payLink.ts","fields":["hostname","pathname","search","searchparams"],"plan":[{"kind":"fn","name":"normSearch","op":"transform","sig":"t=>","covers":["search"],"from":"maor-system:machtzev/new/atoms/norm-search.mjs"}]}

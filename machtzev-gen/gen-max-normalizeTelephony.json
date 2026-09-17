@@ -1,0 +1,1 @@
+{"engine":"normalizeTelephony","origin":"maor-system:src/lib/config.ts","fields":["isarray","numbers","kind","e164","id","label","kosher","officedays","isinteger","mjs","city","enabled","officestart","officeend","officeext","managerext","vmbox","koshermode","hebrewcalendar","zmanim","shabbat","fasts","voicemail"],"plan":[]}

@@ -1,0 +1,3063 @@
+{
+ "source": "schema-fields + enum-values.data.json + entity-terms.data.json + new/dart-maor (מעברים)",
+ "entities": [
+  {
+   "entity": "Member",
+   "term": "בן/בת משפחה",
+   "fields": 17,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "first"
+    },
+    {
+     "kind": "required",
+     "field": "gender"
+    },
+    {
+     "kind": "required",
+     "field": "birth"
+    },
+    {
+     "kind": "required",
+     "field": "idNum"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "phone2"
+    },
+    {
+     "kind": "required",
+     "field": "school"
+    },
+    {
+     "kind": "required",
+     "field": "grade"
+    },
+    {
+     "kind": "required",
+     "field": "health"
+    },
+    {
+     "kind": "required",
+     "field": "mSefach"
+    },
+    {
+     "kind": "required",
+     "field": "mInvite"
+    },
+    {
+     "kind": "required",
+     "field": "mRecommend"
+    },
+    {
+     "kind": "required",
+     "field": "mPhotos"
+    },
+    {
+     "kind": "required",
+     "field": "mVideos"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "gender",
+     "values": [
+      "m",
+      "f"
+     ]
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    },
+    {
+     "field": "phone2",
+     "channel": "phone"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "CredLogEntry",
+   "term": null,
+   "fields": 3,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "delta"
+    },
+    {
+     "kind": "required",
+     "field": "reason"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "FamilyCred",
+   "term": null,
+   "fields": 2,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "score"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "FamilyDoc",
+   "term": null,
+   "fields": 3,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "addedAt",
+     "event": "added",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "addedAt"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Family",
+   "term": "משפחה",
+   "fields": 25,
+   "id": true,
+   "relations": [],
+   "workflows": [
+    {
+     "field": "status",
+     "type": "FamilyStatus",
+     "states": [
+      "active",
+      "pending",
+      "inactive"
+     ],
+     "transitions": {
+      "order": "declared",
+      "note": "סדר-ההצהרה כברירת-מחדל — הצבה, לא אמת (חוק-7)"
+     }
+    }
+   ],
+   "events": [
+    {
+     "field": "createdAt",
+     "event": "created",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "father"
+    },
+    {
+     "kind": "required",
+     "field": "fatherId"
+    },
+    {
+     "kind": "required",
+     "field": "mother"
+    },
+    {
+     "kind": "required",
+     "field": "motherId"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "phone2"
+    },
+    {
+     "kind": "required",
+     "field": "email"
+    },
+    {
+     "kind": "required",
+     "field": "city"
+    },
+    {
+     "kind": "required",
+     "field": "address"
+    },
+    {
+     "kind": "required",
+     "field": "community"
+    },
+    {
+     "kind": "required",
+     "field": "maritalStatus"
+    },
+    {
+     "kind": "required",
+     "field": "language"
+    },
+    {
+     "kind": "required",
+     "field": "tzedaka"
+    },
+    {
+     "kind": "required",
+     "field": "fullSefach"
+    },
+    {
+     "kind": "required",
+     "field": "discount"
+    },
+    {
+     "kind": "required",
+     "field": "status"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "cred"
+    },
+    {
+     "kind": "required",
+     "field": "createdAt"
+    },
+    {
+     "kind": "enum",
+     "field": "status",
+     "values": [
+      "active",
+      "pending",
+      "inactive"
+     ]
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    },
+    {
+     "field": "phone2",
+     "channel": "phone"
+    },
+    {
+     "field": "email",
+     "channel": "email"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "CourseSession",
+   "term": null,
+   "fields": 3,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "day"
+    },
+    {
+     "kind": "required",
+     "field": "time"
+    },
+    {
+     "kind": "required",
+     "field": "label"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "CourseFile",
+   "term": null,
+   "fields": 6,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "kind"
+    },
+    {
+     "kind": "required",
+     "field": "data"
+    },
+    {
+     "kind": "enum",
+     "field": "kind",
+     "values": [
+      "image",
+      "file",
+      "link"
+     ]
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Course",
+   "term": "חוג",
+   "fields": 39,
+   "id": true,
+   "relations": [
+    {
+     "field": "teacherId",
+     "optional": false,
+     "target": "Teacher",
+     "how": "name"
+    },
+    {
+     "field": "roomId",
+     "optional": false,
+     "target": "Room",
+     "how": "name"
+    },
+    {
+     "field": "prevYearId",
+     "optional": true,
+     "target": "Course",
+     "how": "self?"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "start",
+     "event": "start",
+     "optional": false
+    },
+    {
+     "field": "end",
+     "event": "end",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "teacherId"
+    },
+    {
+     "kind": "required",
+     "field": "roomId"
+    },
+    {
+     "kind": "required",
+     "field": "description"
+    },
+    {
+     "kind": "required",
+     "field": "price"
+    },
+    {
+     "kind": "required",
+     "field": "price1"
+    },
+    {
+     "kind": "required",
+     "field": "price2"
+    },
+    {
+     "kind": "required",
+     "field": "price1Name"
+    },
+    {
+     "kind": "required",
+     "field": "price2Name"
+    },
+    {
+     "kind": "required",
+     "field": "model"
+    },
+    {
+     "kind": "required",
+     "field": "size"
+    },
+    {
+     "kind": "required",
+     "field": "start"
+    },
+    {
+     "kind": "required",
+     "field": "end"
+    },
+    {
+     "kind": "required",
+     "field": "weekday"
+    },
+    {
+     "kind": "required",
+     "field": "time"
+    },
+    {
+     "kind": "required",
+     "field": "maxStudents"
+    },
+    {
+     "kind": "required",
+     "field": "gender"
+    },
+    {
+     "kind": "required",
+     "field": "ageMin"
+    },
+    {
+     "kind": "required",
+     "field": "ageMax"
+    },
+    {
+     "kind": "required",
+     "field": "cat"
+    },
+    {
+     "kind": "required",
+     "field": "semester"
+    },
+    {
+     "kind": "required",
+     "field": "sector"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "model",
+     "values": [
+      "monthly",
+      "half_year",
+      "year",
+      "punch"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "teacherId",
+     "target": "Teacher"
+    },
+    {
+     "kind": "ref",
+     "field": "roomId",
+     "target": "Room"
+    },
+    {
+     "kind": "ref",
+     "field": "prevYearId",
+     "target": "Course"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Absence",
+   "term": null,
+   "fields": 6,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    },
+    {
+     "field": "makeupDate",
+     "event": "makeup",
+     "optional": true
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "reason"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Payment",
+   "term": null,
+   "fields": 4,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "rid"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "amount"
+    },
+    {
+     "kind": "required",
+     "field": "method"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Enrollment",
+   "term": "שיבוץ",
+   "fields": 26,
+   "id": true,
+   "relations": [
+    {
+     "field": "memberId",
+     "optional": false,
+     "target": "Member",
+     "how": "name"
+    },
+    {
+     "field": "courseId",
+     "optional": false,
+     "target": "Course",
+     "how": "name"
+    },
+    {
+     "field": "dueEventId",
+     "optional": true,
+     "target": "OrgEvent",
+     "how": "suffix(Event)"
+    },
+    {
+     "field": "renewedToId",
+     "optional": true,
+     "target": "Enrollment",
+     "how": "self?"
+    }
+   ],
+   "workflows": [
+    {
+     "field": "status",
+     "type": "EnrollmentStatus",
+     "states": [
+      "active",
+      "paused",
+      "ended",
+      "wait"
+     ],
+     "transitions": {
+      "order": "declared",
+      "note": "סדר-ההצהרה כברירת-מחדל — הצבה, לא אמת (חוק-7)"
+     }
+    }
+   ],
+   "events": [
+    {
+     "field": "dueDate",
+     "event": "due",
+     "optional": false
+    },
+    {
+     "field": "enrolledAt",
+     "event": "enrolled",
+     "optional": false
+    },
+    {
+     "field": "endedAt",
+     "event": "ended",
+     "optional": true
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "memberId"
+    },
+    {
+     "kind": "required",
+     "field": "courseId"
+    },
+    {
+     "kind": "required",
+     "field": "plan"
+    },
+    {
+     "kind": "required",
+     "field": "purchased"
+    },
+    {
+     "kind": "required",
+     "field": "used"
+    },
+    {
+     "kind": "required",
+     "field": "group"
+    },
+    {
+     "kind": "required",
+     "field": "totalDue"
+    },
+    {
+     "kind": "required",
+     "field": "dueDate"
+    },
+    {
+     "kind": "required",
+     "field": "status"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "required",
+     "field": "enrolledAt"
+    },
+    {
+     "kind": "enum",
+     "field": "plan",
+     "values": [
+      "monthly",
+      "half_year",
+      "year",
+      "punch"
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "status",
+     "values": [
+      "active",
+      "paused",
+      "ended",
+      "wait"
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "freqUnit",
+     "values": [
+      "week",
+      "month"
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "term",
+     "values": [
+      "once",
+      "weekly",
+      "biweekly",
+      "monthly",
+      "months",
+      "half_year",
+      "year"
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "tier",
+     "values": [
+      "",
+      "1",
+      "2",
+      "3"
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "renew",
+     "values": [
+      "yes",
+      "no",
+      "hold"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "memberId",
+     "target": "Member"
+    },
+    {
+     "kind": "ref",
+     "field": "courseId",
+     "target": "Course"
+    },
+    {
+     "kind": "ref",
+     "field": "dueEventId",
+     "target": "OrgEvent"
+    },
+    {
+     "kind": "ref",
+     "field": "renewedToId",
+     "target": "Enrollment"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Teacher",
+   "term": "מורה",
+   "fields": 19,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "startDate",
+     "event": "start",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "phone2"
+    },
+    {
+     "kind": "required",
+     "field": "email"
+    },
+    {
+     "kind": "required",
+     "field": "idNum"
+    },
+    {
+     "kind": "required",
+     "field": "address"
+    },
+    {
+     "kind": "required",
+     "field": "specialty"
+    },
+    {
+     "kind": "required",
+     "field": "payRate"
+    },
+    {
+     "kind": "required",
+     "field": "startDate"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "payMethod",
+     "values": [
+      "cash",
+      "salary",
+      "check",
+      ""
+     ]
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    },
+    {
+     "field": "phone2",
+     "channel": "phone"
+    },
+    {
+     "field": "email",
+     "channel": "email"
+    },
+    {
+     "field": "payeePhone",
+     "channel": "phone"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Room",
+   "term": "חדר",
+   "fields": 12,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "slot"
+    },
+    {
+     "kind": "required",
+     "field": "cap"
+    },
+    {
+     "kind": "required",
+     "field": "location"
+    },
+    {
+     "kind": "required",
+     "field": "rate"
+    },
+    {
+     "kind": "required",
+     "field": "from"
+    },
+    {
+     "kind": "required",
+     "field": "to"
+    },
+    {
+     "kind": "required",
+     "field": "access"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "eq"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "OrgEvent",
+   "term": null,
+   "fields": 13,
+   "id": true,
+   "relations": [
+    {
+     "field": "roomId",
+     "optional": false,
+     "target": "Room",
+     "how": "name"
+    },
+    {
+     "field": "famId",
+     "optional": false,
+     "target": "Family",
+     "how": "prefix(shortest)"
+    },
+    {
+     "field": "spId",
+     "optional": true,
+     "target": null,
+     "how": "reserved"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "title"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "time"
+    },
+    {
+     "kind": "required",
+     "field": "type"
+    },
+    {
+     "kind": "required",
+     "field": "customType"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "price"
+    },
+    {
+     "kind": "required",
+     "field": "roomId"
+    },
+    {
+     "kind": "required",
+     "field": "famId"
+    },
+    {
+     "kind": "required",
+     "field": "priority"
+    },
+    {
+     "kind": "required",
+     "field": "done"
+    },
+    {
+     "kind": "enum",
+     "field": "type",
+     "values": [
+      "org",
+      "reminder",
+      "call",
+      "wedding",
+      "memorial",
+      "anniversary",
+      "bday",
+      "custom"
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "priority",
+     "values": [
+      "red",
+      "orange",
+      "green"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "roomId",
+     "target": "Room"
+    },
+    {
+     "kind": "ref",
+     "field": "famId",
+     "target": "Family"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Donation",
+   "term": "תרומה",
+   "fields": 7,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "rid"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "amount"
+    },
+    {
+     "kind": "required",
+     "field": "cur"
+    },
+    {
+     "kind": "required",
+     "field": "cat"
+    },
+    {
+     "kind": "enum",
+     "field": "cur",
+     "values": [
+      "₪",
+      "$"
+     ]
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "AyinName",
+   "term": null,
+   "fields": 8,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "eyes"
+    },
+    {
+     "kind": "required",
+     "field": "done"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "KitItem",
+   "term": null,
+   "fields": 2,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "label"
+    },
+    {
+     "kind": "required",
+     "field": "done"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "WarehouseItem",
+   "term": null,
+   "fields": 5,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "unit"
+    },
+    {
+     "kind": "required",
+     "field": "qty"
+    },
+    {
+     "kind": "required",
+     "field": "cost"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "AyinAnswer",
+   "term": null,
+   "fields": 2,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TimeEntry",
+   "term": null,
+   "fields": 4,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "hours"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "MatEntry",
+   "term": null,
+   "fields": 3,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "qty"
+    },
+    {
+     "kind": "required",
+     "field": "cost"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "AyinLog",
+   "term": null,
+   "fields": 3,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "eyes"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "AyinCase",
+   "term": "תיק",
+   "fields": 15,
+   "id": false,
+   "relations": [],
+   "workflows": [
+    {
+     "field": "stage",
+     "type": "AyinStage",
+     "states": [
+      "new",
+      "lead",
+      "eyes",
+      "answer",
+      "done"
+     ],
+     "transitions": {
+      "engine": "next-stage",
+      "note": "מעברים מאטום-המדף"
+     }
+    }
+   ],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "stage"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "required",
+     "field": "answeredNote"
+    },
+    {
+     "kind": "required",
+     "field": "answerPushed"
+    },
+    {
+     "kind": "required",
+     "field": "nextTalk"
+    },
+    {
+     "kind": "required",
+     "field": "nextTalkTime"
+    },
+    {
+     "kind": "required",
+     "field": "lastTouch"
+    },
+    {
+     "kind": "enum",
+     "field": "stage",
+     "values": [
+      "new",
+      "lead",
+      "eyes",
+      "answer",
+      "done"
+     ]
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Hok",
+   "term": null,
+   "fields": 8,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "startedAt",
+     "event": "started",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "amount"
+    },
+    {
+     "kind": "required",
+     "field": "cur"
+    },
+    {
+     "kind": "required",
+     "field": "day"
+    },
+    {
+     "kind": "required",
+     "field": "method"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "startedAt"
+    },
+    {
+     "kind": "enum",
+     "field": "cur",
+     "values": [
+      "₪",
+      "$"
+     ]
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Supporter",
+   "term": "תורם",
+   "fields": 24,
+   "id": true,
+   "relations": [
+    {
+     "field": "nextEventId",
+     "optional": true,
+     "target": "OrgEvent",
+     "how": "suffix(Event)"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "nextDate",
+     "event": "next",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "email"
+    },
+    {
+     "kind": "required",
+     "field": "address"
+    },
+    {
+     "kind": "required",
+     "field": "idNum"
+    },
+    {
+     "kind": "required",
+     "field": "cat"
+    },
+    {
+     "kind": "required",
+     "field": "forWho"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "count"
+    },
+    {
+     "kind": "required",
+     "field": "ils"
+    },
+    {
+     "kind": "required",
+     "field": "usd"
+    },
+    {
+     "kind": "required",
+     "field": "first"
+    },
+    {
+     "kind": "required",
+     "field": "last"
+    },
+    {
+     "kind": "required",
+     "field": "nextDate"
+    },
+    {
+     "kind": "ref",
+     "field": "nextEventId",
+     "target": "OrgEvent"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    },
+    {
+     "field": "email",
+     "channel": "email"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "QuoteTemplate",
+   "term": null,
+   "fields": 3,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "lines"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "DialLogEntry",
+   "term": "חיוג",
+   "fields": 4,
+   "id": true,
+   "relations": [],
+   "workflows": [
+    {
+     "field": "outcome",
+     "type": "DialOutcome",
+     "states": [
+      "donated",
+      "noanswer",
+      "refused",
+      "callback",
+      "done",
+      "skip"
+     ],
+     "transitions": {
+      "order": "declared",
+      "note": "סדר-ההצהרה כברירת-מחדל — הצבה, לא אמת (חוק-7)"
+     }
+    }
+   ],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "outcome"
+    },
+    {
+     "kind": "required",
+     "field": "at"
+    },
+    {
+     "kind": "enum",
+     "field": "outcome",
+     "values": [
+      "donated",
+      "noanswer",
+      "refused",
+      "callback",
+      "done",
+      "skip"
+     ]
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "CallEntry",
+   "term": "שיחה",
+   "fields": 2,
+   "id": false,
+   "relations": [],
+   "workflows": [
+    {
+     "field": "outcome",
+     "type": "DialOutcome",
+     "states": [
+      "donated",
+      "noanswer",
+      "refused",
+      "callback",
+      "done",
+      "skip"
+     ],
+     "transitions": {
+      "order": "declared",
+      "note": "סדר-ההצהרה כברירת-מחדל — הצבה, לא אמת (חוק-7)"
+     }
+    }
+   ],
+   "events": [
+    {
+     "field": "at",
+     "event": "at",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "at"
+    },
+    {
+     "kind": "required",
+     "field": "outcome"
+    },
+    {
+     "kind": "enum",
+     "field": "outcome",
+     "values": [
+      "donated",
+      "noanswer",
+      "refused",
+      "callback",
+      "done",
+      "skip"
+     ]
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "DialerCampaign",
+   "term": null,
+   "fields": 5,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "startedAt"
+    },
+    {
+     "kind": "required",
+     "field": "total"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TzScoreEntry",
+   "term": null,
+   "fields": 3,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "delta"
+    },
+    {
+     "kind": "required",
+     "field": "reason"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TzCoordinator",
+   "term": "רכז",
+   "fields": 10,
+   "id": true,
+   "relations": [
+    {
+     "field": "famId",
+     "optional": false,
+     "target": "Family",
+     "how": "prefix(shortest)"
+    },
+    {
+     "field": "memberId",
+     "optional": false,
+     "target": "Member",
+     "how": "name"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "startDate",
+     "event": "start",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "famId"
+    },
+    {
+     "kind": "required",
+     "field": "memberId"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "startDate"
+    },
+    {
+     "kind": "required",
+     "field": "score"
+    },
+    {
+     "kind": "ref",
+     "field": "famId",
+     "target": "Family"
+    },
+    {
+     "kind": "ref",
+     "field": "memberId",
+     "target": "Member"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TzCollection",
+   "term": null,
+   "fields": 5,
+   "id": true,
+   "relations": [
+    {
+     "field": "campaignId",
+     "optional": false,
+     "target": "TzCampaign",
+     "how": "suffix+ns"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "amount"
+    },
+    {
+     "kind": "required",
+     "field": "campaignId"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "ref",
+     "field": "campaignId",
+     "target": "TzCampaign"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TzBox",
+   "term": "קופה",
+   "fields": 9,
+   "id": true,
+   "relations": [
+    {
+     "field": "coordinatorId",
+     "optional": false,
+     "target": "TzCoordinator",
+     "how": "suffix+ns"
+    },
+    {
+     "field": "famId",
+     "optional": false,
+     "target": "Family",
+     "how": "prefix(shortest)"
+    }
+   ],
+   "workflows": [
+    {
+     "field": "status",
+     "type": "TzBoxStatus",
+     "states": [
+      "home",
+      "office",
+      "lost",
+      "retired"
+     ],
+     "transitions": {
+      "order": "declared",
+      "note": "סדר-ההצהרה כברירת-מחדל — הצבה, לא אמת (חוק-7)"
+     }
+    }
+   ],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "num"
+    },
+    {
+     "kind": "required",
+     "field": "coordinatorId"
+    },
+    {
+     "kind": "required",
+     "field": "famId"
+    },
+    {
+     "kind": "required",
+     "field": "holderKind"
+    },
+    {
+     "kind": "required",
+     "field": "since"
+    },
+    {
+     "kind": "required",
+     "field": "status"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "holderKind",
+     "values": [
+      "donor",
+      "supported",
+      ""
+     ]
+    },
+    {
+     "kind": "enum",
+     "field": "status",
+     "values": [
+      "home",
+      "office",
+      "lost",
+      "retired"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "coordinatorId",
+     "target": "TzCoordinator"
+    },
+    {
+     "kind": "ref",
+     "field": "famId",
+     "target": "Family"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TzCampaign",
+   "term": "מבצע",
+   "fields": 7,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "start",
+     "event": "start",
+     "optional": false
+    },
+    {
+     "field": "end",
+     "event": "end",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "start"
+    },
+    {
+     "kind": "required",
+     "field": "end"
+    },
+    {
+     "kind": "required",
+     "field": "goal"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "TzEvent",
+   "term": null,
+   "fields": 9,
+   "id": true,
+   "relations": [
+    {
+     "field": "coordinatorId",
+     "optional": false,
+     "target": "TzCoordinator",
+     "how": "suffix+ns"
+    },
+    {
+     "field": "boxId",
+     "optional": false,
+     "target": "TzBox",
+     "how": "suffix+ns"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "title"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "time"
+    },
+    {
+     "kind": "required",
+     "field": "kind"
+    },
+    {
+     "kind": "required",
+     "field": "coordinatorId"
+    },
+    {
+     "kind": "required",
+     "field": "boxId"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "done"
+    },
+    {
+     "kind": "enum",
+     "field": "kind",
+     "values": [
+      "round",
+      "campaign",
+      "reminder"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "coordinatorId",
+     "target": "TzCoordinator"
+    },
+    {
+     "kind": "ref",
+     "field": "boxId",
+     "target": "TzBox"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopItem",
+   "term": "פריט",
+   "fields": 13,
+   "id": true,
+   "relations": [
+    {
+     "field": "storeId",
+     "optional": false,
+     "target": "ShopStore",
+     "how": "suffix+ns"
+    }
+   ],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "kind"
+    },
+    {
+     "kind": "required",
+     "field": "storeId"
+    },
+    {
+     "kind": "required",
+     "field": "value"
+    },
+    {
+     "kind": "required",
+     "field": "basePrice"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "kind",
+     "values": [
+      "meeting",
+      "coupon",
+      "gift",
+      "holidayGift"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "storeId",
+     "target": "ShopStore"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopComponent",
+   "term": null,
+   "fields": 10,
+   "id": true,
+   "relations": [
+    {
+     "field": "itemId",
+     "optional": false,
+     "target": "ShopItem",
+     "how": "suffix+ns"
+    },
+    {
+     "field": "storeId",
+     "optional": false,
+     "target": "ShopStore",
+     "how": "suffix+ns"
+    }
+   ],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "itemId"
+    },
+    {
+     "kind": "required",
+     "field": "kind"
+    },
+    {
+     "kind": "required",
+     "field": "label"
+    },
+    {
+     "kind": "required",
+     "field": "storeId"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "kind",
+     "values": [
+      "meeting",
+      "coupon",
+      "gift",
+      "holidayGift"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "itemId",
+     "target": "ShopItem"
+    },
+    {
+     "kind": "ref",
+     "field": "storeId",
+     "target": "ShopStore"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopIntake",
+   "term": null,
+   "fields": 9,
+   "id": true,
+   "relations": [
+    {
+     "field": "itemId",
+     "optional": false,
+     "target": "ShopItem",
+     "how": "suffix+ns"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    },
+    {
+     "field": "expiry",
+     "event": "expiry",
+     "optional": true
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "itemId"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "qty"
+    },
+    {
+     "kind": "required",
+     "field": "kind"
+    },
+    {
+     "kind": "required",
+     "field": "source"
+    },
+    {
+     "kind": "required",
+     "field": "cost"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "enum",
+     "field": "kind",
+     "values": [
+      "buy",
+      "donation"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "itemId",
+     "target": "ShopItem"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopProduct",
+   "term": "מוצר",
+   "fields": 7,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "desc"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopStore",
+   "term": "חנות",
+   "fields": 6,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "contact"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopCriterion",
+   "term": "קריטריון",
+   "fields": 4,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "discountPct"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopRedemption",
+   "term": null,
+   "fields": 10,
+   "id": true,
+   "relations": [
+    {
+     "field": "componentId",
+     "optional": false,
+     "target": "ShopComponent",
+     "how": "suffix+ns"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "voidedAt",
+     "event": "voided",
+     "optional": true
+    },
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "componentId"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "holiday"
+    },
+    {
+     "kind": "required",
+     "field": "paid"
+    },
+    {
+     "kind": "required",
+     "field": "value"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "ref",
+     "field": "componentId",
+     "target": "ShopComponent"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopAssignment",
+   "term": "שיוך",
+   "fields": 9,
+   "id": true,
+   "relations": [
+    {
+     "field": "productId",
+     "optional": false,
+     "target": "ShopProduct",
+     "how": "suffix+ns"
+    },
+    {
+     "field": "famId",
+     "optional": false,
+     "target": "Family",
+     "how": "prefix(shortest)"
+    },
+    {
+     "field": "memberId",
+     "optional": false,
+     "target": "Member",
+     "how": "name"
+    }
+   ],
+   "workflows": [
+    {
+     "field": "status",
+     "type": "ShopAssignmentStatus",
+     "states": [
+      "active",
+      "done",
+      "stopped"
+     ],
+     "transitions": {
+      "order": "declared",
+      "note": "סדר-ההצהרה כברירת-מחדל — הצבה, לא אמת (חוק-7)"
+     }
+    }
+   ],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "productId"
+    },
+    {
+     "kind": "required",
+     "field": "famId"
+    },
+    {
+     "kind": "required",
+     "field": "memberId"
+    },
+    {
+     "kind": "required",
+     "field": "since"
+    },
+    {
+     "kind": "required",
+     "field": "status"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "enum",
+     "field": "status",
+     "values": [
+      "active",
+      "done",
+      "stopped"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "productId",
+     "target": "ShopProduct"
+    },
+    {
+     "kind": "ref",
+     "field": "famId",
+     "target": "Family"
+    },
+    {
+     "kind": "ref",
+     "field": "memberId",
+     "target": "Member"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "ShopEvent",
+   "term": null,
+   "fields": 10,
+   "id": true,
+   "relations": [
+    {
+     "field": "assignmentId",
+     "optional": false,
+     "target": "ShopAssignment",
+     "how": "suffix+ns"
+    },
+    {
+     "field": "roomId",
+     "optional": true,
+     "target": "Room",
+     "how": "name"
+    },
+    {
+     "field": "mainEventId",
+     "optional": true,
+     "target": "OrgEvent",
+     "how": "suffix(Event)"
+    }
+   ],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "title"
+    },
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "time"
+    },
+    {
+     "kind": "required",
+     "field": "kind"
+    },
+    {
+     "kind": "required",
+     "field": "assignmentId"
+    },
+    {
+     "kind": "required",
+     "field": "notes"
+    },
+    {
+     "kind": "required",
+     "field": "done"
+    },
+    {
+     "kind": "enum",
+     "field": "kind",
+     "values": [
+      "meeting",
+      "delivery",
+      "holiday"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "assignmentId",
+     "target": "ShopAssignment"
+    },
+    {
+     "kind": "ref",
+     "field": "roomId",
+     "target": "Room"
+    },
+    {
+     "kind": "ref",
+     "field": "mainEventId",
+     "target": "OrgEvent"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Volunteer",
+   "term": "מתנדב",
+   "fields": 8,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "createdAt",
+     "event": "created",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "name"
+    },
+    {
+     "kind": "required",
+     "field": "phone"
+    },
+    {
+     "kind": "required",
+     "field": "active"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "required",
+     "field": "createdAt"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [
+    {
+     "field": "phone",
+     "channel": "phone"
+    }
+   ],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "WorkTask",
+   "term": null,
+   "fields": 10,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "assignee"
+    },
+    {
+     "kind": "required",
+     "field": "by"
+    },
+    {
+     "kind": "required",
+     "field": "title"
+    },
+    {
+     "kind": "required",
+     "field": "pri"
+    },
+    {
+     "kind": "required",
+     "field": "createdAt"
+    },
+    {
+     "kind": "enum",
+     "field": "ref",
+     "values": [
+      "supporter",
+      "family"
+     ]
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "Delivery",
+   "term": "מסירה",
+   "fields": 9,
+   "id": true,
+   "relations": [
+    {
+     "field": "dayId",
+     "optional": false,
+     "target": "DistributionDay",
+     "how": "suffix"
+    },
+    {
+     "field": "assignmentId",
+     "optional": false,
+     "target": "ShopAssignment",
+     "how": "suffix"
+    },
+    {
+     "field": "volunteerId",
+     "optional": false,
+     "target": "Volunteer",
+     "how": "name"
+    },
+    {
+     "field": "familyId",
+     "optional": false,
+     "target": "Family",
+     "how": "name"
+    }
+   ],
+   "workflows": [
+    {
+     "field": "status",
+     "type": "DeliveryStatus",
+     "states": [
+      "pickup",
+      "enroute",
+      "delivered"
+     ],
+     "transitions": {
+      "engine": "advance-status",
+      "note": "מעברים מאטום-המדף"
+     }
+    }
+   ],
+   "events": [
+    {
+     "field": "deliveredAt",
+     "event": "delivered",
+     "optional": true
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "dayId"
+    },
+    {
+     "kind": "required",
+     "field": "assignmentId"
+    },
+    {
+     "kind": "required",
+     "field": "volunteerId"
+    },
+    {
+     "kind": "required",
+     "field": "familyId"
+    },
+    {
+     "kind": "required",
+     "field": "status"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "enum",
+     "field": "status",
+     "values": [
+      "pickup",
+      "enroute",
+      "delivered"
+     ]
+    },
+    {
+     "kind": "ref",
+     "field": "dayId",
+     "target": "DistributionDay"
+    },
+    {
+     "kind": "ref",
+     "field": "assignmentId",
+     "target": "ShopAssignment"
+    },
+    {
+     "kind": "ref",
+     "field": "volunteerId",
+     "target": "Volunteer"
+    },
+    {
+     "kind": "ref",
+     "field": "familyId",
+     "target": "Family"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "DistributionDay",
+   "term": null,
+   "fields": 6,
+   "id": true,
+   "relations": [],
+   "workflows": [],
+   "events": [
+    {
+     "field": "date",
+     "event": "recorded",
+     "optional": false
+    },
+    {
+     "field": "createdAt",
+     "event": "created",
+     "optional": false
+    }
+   ],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "date"
+    },
+    {
+     "kind": "required",
+     "field": "title"
+    },
+    {
+     "kind": "required",
+     "field": "note"
+    },
+    {
+     "kind": "required",
+     "field": "closed"
+    },
+    {
+     "kind": "required",
+     "field": "createdAt"
+    },
+    {
+     "kind": "unique",
+     "field": "id"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  },
+  {
+   "entity": "AuditEntry",
+   "term": null,
+   "fields": 4,
+   "id": false,
+   "relations": [],
+   "workflows": [],
+   "events": [],
+   "rules": [
+    {
+     "kind": "required",
+     "field": "at"
+    },
+    {
+     "kind": "required",
+     "field": "who"
+    },
+    {
+     "kind": "required",
+     "field": "act"
+    },
+    {
+     "kind": "required",
+     "field": "what"
+    }
+   ],
+   "notification": [],
+   "policy": {
+    "note": "policy-config (שבת/כשרות/הרשאות) = הכרעת-בעלים — שקע מוצהר, ריק"
+   }
+  }
+ ]
+}

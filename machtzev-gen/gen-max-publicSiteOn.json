@@ -1,0 +1,1 @@
+{"engine":"publicSiteOn","origin":"maor-system:src/lib/config.ts","fields":["publicsite","site"],"plan":[{"kind":"fn","name":"normalizeSite","op":"transform","sig":"raw: unknown=>PublicSiteContent | undefi","covers":["site"],"from":"maor-system:src/lib/config.ts"}]}

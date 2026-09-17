@@ -1,0 +1,1 @@
+{"engine":"holidayOf","origin":"maor-system:src/lib/hebrew.ts","fields":["month","day","year","getday"],"plan":[{"kind":"fn","name":"validateHebMonthNames","op":"collection","sig":"hebYear: number = hebYearNow(=>): string","covers":["month"],"from":"maor-system:src/lib/hebdate.ts"}]}

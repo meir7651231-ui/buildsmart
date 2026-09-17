@@ -1,0 +1,5655 @@
+{
+ "entities": [
+  {
+   "entity": "Member",
+   "fields": 17,
+   "ops": [
+    "broadcast",
+    "calendar",
+    "certs",
+    "channel",
+    "contact",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "first",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "gender",
+     "type": "Gender",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "birth",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "idNum",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "phone2",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "school",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "grade",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "health",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "mSefach",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "mInvite",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "mRecommend",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "mPhotos",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "mVideos",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "isParent",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "CredLogEntry",
+   "fields": 3,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "delta",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "reason",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "FamilyCred",
+   "fields": 2,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "collection",
+    "export",
+    "filter",
+    "form",
+    "import",
+    "kpi",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "perm",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table"
+   ],
+   "perField": [
+    {
+     "field": "score",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "log",
+     "type": "CredLogEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "FamilyDoc",
+   "fields": 3,
+   "ops": [
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "panel",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "addedAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Family",
+   "fields": 25,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "balance",
+    "broadcast",
+    "calendar",
+    "certs",
+    "channel",
+    "collection",
+    "contact",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "makeups",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "risk",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "father",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "fatherId",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "mother",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "motherId",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "phone2",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "email",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "city",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "address",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "community",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "maritalStatus",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "language",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "tzedaka",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "fullSefach",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "discount",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "status",
+     "type": "FamilyStatus",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "kidsHome",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "kidsMarried",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "members",
+     "type": "Member[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "docs",
+     "type": "FamilyDoc[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "cred",
+     "type": "FamilyCred",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "createdAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "CourseSession",
+   "fields": 3,
+   "ops": [
+    "export",
+    "filter",
+    "form",
+    "kpi",
+    "panel",
+    "perm",
+    "search",
+    "slot",
+    "states",
+    "table",
+    "text",
+    "weekly"
+   ],
+   "perField": [
+    {
+     "field": "day",
+     "type": "Weekday",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "time",
+     "type": "TimeHM",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "label",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "CourseFile",
+   "fields": 6,
+   "ops": [
+    "aggregate",
+    "enrollment",
+    "export",
+    "filter",
+    "form",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "kind",
+     "type": "'image' | 'file' | 'link'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "data",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "mime",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "size",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Course",
+   "fields": 39,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "balance",
+    "calendar",
+    "certs",
+    "clash",
+    "collection",
+    "details",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "hok",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "load",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "relation",
+    "risk",
+    "roster",
+    "search",
+    "slot",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "weekly",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "teacherId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "roomId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "description",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "price",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "price1",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "price2",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "price1Name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "price2Name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "price3",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "price3Name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "model",
+     "type": "PricingModel",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "size",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "start",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "end",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "weekday",
+     "type": "Weekday",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "time",
+     "type": "TimeHM",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "maxStudents",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "gender",
+     "type": "Gender | 'all'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "ageMin",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "ageMax",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "cat",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "semester",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "sector",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "audience",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "img",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "gradeMin",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "gradeMax",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "sessions",
+     "type": "CourseSession[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "files",
+     "type": "CourseFile[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "perLesson",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "lessonPrice",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "lessonPrice1",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "lessonPrice2",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "lessonPrice3",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "year",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "prevYearId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Absence",
+   "fields": 6,
+   "ops": [
+    "calendar",
+    "certs",
+    "clash",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "panel",
+    "partition",
+    "perm",
+    "range",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "reason",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "makeup",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "makeupDate",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "noshow",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "justified",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Payment",
+   "fields": 4,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "holidayGuard",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "rid",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "amount",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "method",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Enrollment",
+   "fields": 26,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "balance",
+    "calendar",
+    "certs",
+    "clash",
+    "collection",
+    "details",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "hok",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "load",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "relation",
+    "risk",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "memberId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "courseId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "plan",
+     "type": "PricingModel",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "purchased",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "used",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "group",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "absences",
+     "type": "Absence[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    },
+    {
+     "field": "presents",
+     "type": "IsoDate[]",
+     "ops": [
+      "list"
+     ]
+    },
+    {
+     "field": "payments",
+     "type": "Payment[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    },
+    {
+     "field": "totalDue",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "dueDate",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "dueEventId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "status",
+     "type": "EnrollmentStatus",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "enrolledAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "endedAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "paidFull",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "freq",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "freqUnit",
+     "type": "'week' | 'month'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "term",
+     "type": "PricingTerm",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "termMonths",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "tier",
+     "type": "'' | '1' | '2' | '3'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "renew",
+     "type": "'yes' | 'no' | 'hold'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "renewNote",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "renewedToId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Teacher",
+   "fields": 19,
+   "ops": [
+    "aggregate",
+    "balance",
+    "broadcast",
+    "calendar",
+    "certs",
+    "channel",
+    "contact",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "phone2",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "email",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "idNum",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "address",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "specialty",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "payRate",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "startDate",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "payMethod",
+     "type": "'cash' | 'salary' | 'check' | ''",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "payToOther",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "payeeName",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "payeePhone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "payeeIdNum",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "bankName",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "bankBranch",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "bankAccount",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Room",
+   "fields": 12,
+   "ops": [
+    "aggregate",
+    "enrollment",
+    "export",
+    "filter",
+    "flag",
+    "flags",
+    "form",
+    "identity",
+    "kpi",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "risk",
+    "search",
+    "slot",
+    "stat",
+    "states",
+    "table",
+    "text",
+    "weekly"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "slot",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "cap",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "location",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "rate",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "from",
+     "type": "TimeHM",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "to",
+     "type": "TimeHM",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "access",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "eq",
+     "type": "Record<string, boolean>",
+     "ops": [
+      "flags"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "OrgEvent",
+   "fields": 13,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "certs",
+    "clash",
+    "details",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "hok",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "load",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "relation",
+    "risk",
+    "search",
+    "slot",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "weekly",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "title",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "time",
+     "type": "TimeHM",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "type",
+     "type": "EventType",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "customType",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "price",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "roomId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "famId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "spId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "priority",
+     "type": "EventPriority",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "done",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Donation",
+   "fields": 7,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "holidayGuard",
+    "kpi",
+    "lifecycle",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "rid",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "amount",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "cur",
+     "type": "'₪' | '$'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "cat",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "designation",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "purpose",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "AyinName",
+   "fields": 8,
+   "ops": [
+    "aggregate",
+    "enrollment",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "identity",
+    "kpi",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "relation-many",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "eyes",
+     "type": "number | ''",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "done",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "rate",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "days",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "deps",
+     "type": "Id[]",
+     "ops": [
+      "relation-many"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "KitItem",
+   "fields": 2,
+   "ops": [
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "kpi",
+    "panel",
+    "partition",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "label",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "done",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "WarehouseItem",
+   "fields": 5,
+   "ops": [
+    "aggregate",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "identity",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "unit",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "qty",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "cost",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "AyinAnswer",
+   "fields": 2,
+   "ops": [
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "panel",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TimeEntry",
+   "fields": 4,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "hours",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "rate",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "MatEntry",
+   "fields": 3,
+   "ops": [
+    "aggregate",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "qty",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "cost",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "AyinLog",
+   "fields": 3,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "eyes",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "AyinCase",
+   "fields": 15,
+   "ops": [
+    "attendance",
+    "calendar",
+    "certs",
+    "clash",
+    "collection",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "log",
+    "makeups",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "roster",
+    "search",
+    "slot",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "weekly",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "stage",
+     "type": "AyinStage",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "answeredNote",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "paid",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "answerPushed",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "nextTalk",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "nextTalkTime",
+     "type": "TimeHM",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "lastTouch",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "names",
+     "type": "AyinName[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "answers",
+     "type": "AyinAnswer[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "log",
+     "type": "AyinLog[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    },
+    {
+     "field": "time",
+     "type": "TimeEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    },
+    {
+     "field": "mat",
+     "type": "MatEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    },
+    {
+     "field": "kit",
+     "type": "KitItem[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "boardEventIds",
+     "type": "Partial<Record<string, Id>>",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Hok",
+   "fields": 8,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "certs",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "hok",
+    "holidayGuard",
+    "kpi",
+    "lifecycle",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "amount",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "cur",
+     "type": "'₪' | '$'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "day",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "method",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "startedAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "kevaId",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Supporter",
+   "fields": 24,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "balance",
+    "broadcast",
+    "calendar",
+    "channel",
+    "clash",
+    "collection",
+    "contact",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "list",
+    "load",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "perm",
+    "range",
+    "relation",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "email",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "address",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "city",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "idNum",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "extId",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "cat",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "forWho",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "count",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "ils",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "usd",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "first",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "last",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "nextDate",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "nextNote",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "photos",
+     "type": "string[]",
+     "ops": [
+      "list"
+     ]
+    },
+    {
+     "field": "nextEventId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "donations",
+     "type": "Donation[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "hok",
+     "type": "Hok",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "ayin",
+     "type": "AyinCase",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "calls",
+     "type": "CallEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "NotifPrefs",
+   "fields": 4,
+   "ops": [
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "kpi",
+    "panel",
+    "partition",
+    "perm",
+    "search",
+    "states",
+    "table"
+   ],
+   "perField": [
+    {
+     "field": "email",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "push",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "sms",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "strong",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ReportPrefs",
+   "fields": 4,
+   "ops": [
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "kpi",
+    "panel",
+    "partition",
+    "perm",
+    "search",
+    "states",
+    "table"
+   ],
+   "perField": [
+    {
+     "field": "daily",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "weekly",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "monthly",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "quarterly",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "QuoteTemplate",
+   "fields": 3,
+   "ops": [
+    "export",
+    "filter",
+    "form",
+    "identity",
+    "kpi",
+    "panel",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "lines",
+     "type": "{ name: string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "DialLogEntry",
+   "fields": 4,
+   "ops": [
+    "export",
+    "filter",
+    "form",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "search",
+    "states",
+    "table",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "outcome",
+     "type": "DialOutcome",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "at",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "CallEntry",
+   "fields": 2,
+   "ops": [
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "lifecycle",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "at",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "outcome",
+     "type": "DialOutcome",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "DialerCampaign",
+   "fields": 5,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "collection",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "import",
+    "kpi",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "perm",
+    "relation-many",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "startedAt",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "queue",
+     "type": "Id[]",
+     "ops": [
+      "relation-many"
+     ]
+    },
+    {
+     "field": "total",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "log",
+     "type": "DialLogEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "UiPrefs",
+   "fields": 9,
+   "ops": [
+    "attendance",
+    "collection",
+    "export",
+    "filter",
+    "form",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "makeups",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "roster",
+    "search",
+    "states",
+    "table",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "famView",
+     "type": "'list' | 'grid'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "crsView",
+     "type": "'list' | 'grid'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "quoteTemplates",
+     "type": "QuoteTemplate[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "supView",
+     "type": "'list' | 'grid'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "receiptFmt",
+     "type": "'txt' | 'pdf'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "homeLayout",
+     "type": "string[]",
+     "ops": [
+      "list"
+     ]
+    },
+    {
+     "field": "theme",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "accent",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "dialer",
+     "type": "DialerCampaign",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TzScoreEntry",
+   "fields": 3,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "delta",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "reason",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TzCoordinator",
+   "fields": 10,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "balance",
+    "broadcast",
+    "calendar",
+    "certs",
+    "channel",
+    "collection",
+    "contact",
+    "details",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "load",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "relation",
+    "risk",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "famId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "memberId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "startDate",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "score",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "scoreLog",
+     "type": "TzScoreEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TzCollection",
+   "fields": 5,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "load",
+    "measure",
+    "panel",
+    "perm",
+    "relation",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "amount",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "campaignId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TzBox",
+   "fields": 9,
+   "ops": [
+    "attendance",
+    "calendar",
+    "collection",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "load",
+    "makeups",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "relation",
+    "roster",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "num",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "coordinatorId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "famId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "holderKind",
+     "type": "'donor' | 'supported' | ''",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "since",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "status",
+     "type": "TzBoxStatus",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "collections",
+     "type": "TzCollection[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TzCampaign",
+   "fields": 7,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "certs",
+    "clash",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "range",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "start",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "end",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "goal",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "TzEvent",
+   "fields": 9,
+   "ops": [
+    "calendar",
+    "certs",
+    "clash",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "load",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "relation",
+    "search",
+    "slot",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "weekly",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "title",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "time",
+     "type": "TimeHM | ''",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "kind",
+     "type": "'round' | 'campaign' | 'reminder' | 'cus",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "coordinatorId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "boxId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "done",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopItem",
+   "fields": 13,
+   "ops": [
+    "aggregate",
+    "details",
+    "enrollment",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "list",
+    "load",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "relation",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "kind",
+     "type": "ShopComponentKind",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "storeId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "value",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "basePrice",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "stock",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "minStock",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "validDays",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "holidays",
+     "type": "string[]",
+     "ops": [
+      "list"
+     ]
+    },
+    {
+     "field": "waits",
+     "type": "{ famId: Id",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopComponent",
+   "fields": 10,
+   "ops": [
+    "aggregate",
+    "details",
+    "enrollment",
+    "export",
+    "filter",
+    "form",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "load",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "relation",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "itemId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "kind",
+     "type": "ShopComponentKind",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "label",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "storeId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "value",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "basePrice",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "stock",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "validDays",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopIntake",
+   "fields": 9,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "clash",
+    "details",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "load",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "relation",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "itemId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "qty",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "kind",
+     "type": "'buy' | 'donation'",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "source",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "cost",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "expiry",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopProduct",
+   "fields": 7,
+   "ops": [
+    "attendance",
+    "collection",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "identity",
+    "import",
+    "kpi",
+    "list",
+    "makeups",
+    "panel",
+    "partition",
+    "perm",
+    "roster",
+    "search",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "desc",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "img",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "components",
+     "type": "ShopComponent[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopStore",
+   "fields": 6,
+   "ops": [
+    "broadcast",
+    "channel",
+    "contact",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "identity",
+    "kpi",
+    "panel",
+    "partition",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "contact",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopCriterion",
+   "fields": 4,
+   "ops": [
+    "aggregate",
+    "export",
+    "filter",
+    "form",
+    "identity",
+    "kpi",
+    "measure",
+    "panel",
+    "perm",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "discountPct",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopRedemption",
+   "fields": 10,
+   "ops": [
+    "aggregate",
+    "balance",
+    "calendar",
+    "clash",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "hok",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "load",
+    "measure",
+    "panel",
+    "perm",
+    "range",
+    "relation",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "rid",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "voidedAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "voidReason",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "componentId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "holiday",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "paid",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "value",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopAssignment",
+   "fields": 9,
+   "ops": [
+    "attendance",
+    "calendar",
+    "collection",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "identity",
+    "import",
+    "kpi",
+    "lifecycle",
+    "list",
+    "load",
+    "makeups",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "relation",
+    "relation-many",
+    "roster",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "productId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "famId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "memberId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "criterionIds",
+     "type": "Id[]",
+     "ops": [
+      "relation-many"
+     ]
+    },
+    {
+     "field": "since",
+     "type": "IsoDate | ''",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "status",
+     "type": "ShopAssignmentStatus",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "redemptions",
+     "type": "ShopRedemption[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "ShopEvent",
+   "fields": 10,
+   "ops": [
+    "calendar",
+    "certs",
+    "clash",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "load",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "range",
+    "relation",
+    "search",
+    "slot",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "weekly",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "title",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "time",
+     "type": "TimeHM | ''",
+     "ops": [
+      "slot",
+      "weekly"
+     ]
+    },
+    {
+     "field": "kind",
+     "type": "'meeting' | 'delivery' | 'holiday' | 'cu",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "assignmentId",
+     "type": "Id | ''",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "roomId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "mainEventId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "notes",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "done",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Volunteer",
+   "fields": 8,
+   "ops": [
+    "aggregate",
+    "balance",
+    "broadcast",
+    "calendar",
+    "certs",
+    "channel",
+    "contact",
+    "enrollment",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "measure",
+    "panel",
+    "partition",
+    "perm",
+    "risk",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "trend"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "name",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "phone",
+     "type": "string",
+     "ops": [
+      "channel"
+     ]
+    },
+    {
+     "field": "area",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "maxDeliveries",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "active",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "createdAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "WorkTask",
+   "fields": 10,
+   "ops": [
+    "export",
+    "filter",
+    "form",
+    "kpi",
+    "lifecycle",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "search",
+    "states",
+    "table",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "assignee",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "by",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "title",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "ref",
+     "type": "{ kind: 'supporter' | 'family' | 'course",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "pri",
+     "type": "1 | 2 | 3",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "due",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "createdAt",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "doneAt",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Delivery",
+   "fields": 9,
+   "ops": [
+    "calendar",
+    "details",
+    "expiry",
+    "export",
+    "filter",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "lifecycle",
+    "load",
+    "panel",
+    "partition",
+    "perm",
+    "pipeline",
+    "relation",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text",
+    "triage",
+    "workflow"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "dayId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "assignmentId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "volunteerId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "familyId",
+     "type": "Id",
+     "ops": [
+      "relation"
+     ]
+    },
+    {
+     "field": "status",
+     "type": "DeliveryStatus",
+     "ops": [
+      "partition",
+      "lifecycle",
+      "workflow",
+      "filter"
+     ]
+    },
+    {
+     "field": "deliveredAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "signature",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "DistributionDay",
+   "fields": 6,
+   "ops": [
+    "calendar",
+    "certs",
+    "clash",
+    "expiry",
+    "export",
+    "filter",
+    "flag",
+    "form",
+    "holidayGuard",
+    "identity",
+    "kpi",
+    "panel",
+    "partition",
+    "perm",
+    "range",
+    "search",
+    "states",
+    "table",
+    "temporal",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "id",
+     "type": "Id",
+     "ops": [
+      "identity"
+     ]
+    },
+    {
+     "field": "date",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    },
+    {
+     "field": "title",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "note",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "closed",
+     "type": "boolean",
+     "ops": [
+      "flag",
+      "partition"
+     ]
+    },
+    {
+     "field": "createdAt",
+     "type": "IsoDate",
+     "ops": [
+      "temporal",
+      "calendar",
+      "expiry",
+      "holidayGuard"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "Db",
+   "fields": 41,
+   "ops": [
+    "aggregate",
+    "attendance",
+    "collection",
+    "export",
+    "filter",
+    "flags",
+    "form",
+    "import",
+    "kpi",
+    "list",
+    "log",
+    "makeups",
+    "measure",
+    "panel",
+    "perm",
+    "roster",
+    "search",
+    "stat",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "v",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "savedAt",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "seq",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "receiptSeq",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "donationSeq",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "shopReceiptSeq",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "families",
+     "type": "Family[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "enrollments",
+     "type": "Enrollment[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "courses",
+     "type": "Course[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "events",
+     "type": "OrgEvent[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "rooms",
+     "type": "Room[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "teachers",
+     "type": "Teacher[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "supporters",
+     "type": "Supporter[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "tzCoordinators",
+     "type": "TzCoordinator[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "tzBoxes",
+     "type": "TzBox[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "tzCampaigns",
+     "type": "TzCampaign[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "tzEvents",
+     "type": "TzEvent[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopItems",
+     "type": "ShopItem[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopProducts",
+     "type": "ShopProduct[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopStores",
+     "type": "ShopStore[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopCriteria",
+     "type": "ShopCriterion[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopAssignments",
+     "type": "ShopAssignment[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopEvents",
+     "type": "ShopEvent[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "shopIntakes",
+     "type": "ShopIntake[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "volunteers",
+     "type": "Volunteer[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "distributionDays",
+     "type": "DistributionDay[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "deliveries",
+     "type": "Delivery[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "tasks",
+     "type": "WorkTask[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "warehouse",
+     "type": "WarehouseItem[]",
+     "ops": [
+      "collection",
+      "table",
+      "list"
+     ]
+    },
+    {
+     "field": "orgName",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "orgSite",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "orgDonate",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "orgGoal",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "budget",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "usdRate",
+     "type": "number",
+     "ops": [
+      "measure",
+      "aggregate",
+      "stat"
+     ]
+    },
+    {
+     "field": "notif",
+     "type": "NotifPrefs",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "reports",
+     "type": "ReportPrefs",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "ui",
+     "type": "UiPrefs",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "attnDone",
+     "type": "Record<string, string>",
+     "ops": [
+      "flags"
+     ]
+    },
+    {
+     "field": "security",
+     "type": "SecurityCfg",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "audit",
+     "type": "AuditEntry[]",
+     "ops": [
+      "collection",
+      "table",
+      "log"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "AuditEntry",
+   "fields": 4,
+   "ops": [
+    "export",
+    "filter",
+    "form",
+    "kpi",
+    "panel",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "at",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "who",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "act",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "what",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    }
+   ]
+  },
+  {
+   "entity": "SecurityCfg",
+   "fields": 3,
+   "ops": [
+    "export",
+    "filter",
+    "form",
+    "kpi",
+    "list",
+    "panel",
+    "perm",
+    "search",
+    "states",
+    "table",
+    "text"
+   ],
+   "perField": [
+    {
+     "field": "primary",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "secondary",
+     "type": "string",
+     "ops": [
+      "text"
+     ]
+    },
+    {
+     "field": "zones",
+     "type": "string[]",
+     "ops": [
+      "list"
+     ]
+    }
+   ]
+  }
+ ],
+ "coverage": {
+  "inv": {
+   "particles": 25,
+   "derivable": 24,
+   "missing": [
+    "movements:log"
+   ]
+  },
+  "stu": {
+   "particles": 6,
+   "derivable": 6,
+   "missing": []
+  },
+  "par": {
+   "particles": 4,
+   "derivable": 3,
+   "missing": [
+    "par.details:details"
+   ]
+  },
+  "att": {
+   "particles": 5,
+   "derivable": 5,
+   "missing": []
+  },
+  "crs": {
+   "particles": 4,
+   "derivable": 4,
+   "missing": []
+  },
+  "tch": {
+   "particles": 4,
+   "derivable": 4,
+   "missing": []
+  },
+  "rm": {
+   "particles": 4,
+   "derivable": 4,
+   "missing": []
+  },
+  "fee": {
+   "particles": 4,
+   "derivable": 4,
+   "missing": []
+  },
+  "dash": {
+   "particles": 4,
+   "derivable": 4,
+   "missing": []
+  }
+ }
+}

@@ -1,0 +1,20 @@
+הירו 🗂️ שדה | ישות מורכבת — טופס + טבלה
+כותרת טופס שדה
+אטום FieldRow קוד
+אטום FieldRow שם
+אטום FieldRow שלב
+אטום FieldRow אחראי
+אטום FieldRow תאריך התחלה
+אטום FieldRow תאריך סיום
+אטום NumberStepper אחוז ביצוע
+אטום NumberStepper תקציב
+אטום NumberStepper עלות בפועל
+אטום AnimatedToggle סטטוס
+אטום FabMenu שמירה
+כותרת רשומות שדה
+אטום DataGrid שדה
+כותרת 🔗 מנוע-חוקים חי · 3 חוקים מהמדף
+חישוב אין שקעים שם פרטי (kForType)
+חישוב תאריך לתצוגה (fmtDate)
+חישוב קלט חופשי או אם (parseAnyDate)
+באנר ישות שדה: 10 שדות · 3 חוקים חיים · מהמדף

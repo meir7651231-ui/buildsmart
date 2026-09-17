@@ -1,0 +1,11 @@
+{
+  "inv": ["WarehouseItem", "ShopItem", "ShopIntake", "MatEntry"],
+  "stu": ["Member", "Family", "Enrollment"],
+  "par": ["Family", "Member"],
+  "att": ["Absence", "Enrollment", "CourseSession", "Course"],
+  "crs": ["Course", "Enrollment", "Room", "CourseSession", "CourseFile"],
+  "tch": ["Teacher", "Course", "CourseSession"],
+  "rm":  ["Room", "OrgEvent", "Course", "CourseSession"],
+  "fee": ["Payment", "Hok", "Enrollment", "Supporter", "Donation"],
+  "dash": ["WorkTask", "AuditEntry", "Enrollment", "Payment", "Absence"]
+}

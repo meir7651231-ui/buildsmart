@@ -1,0 +1,1 @@
+{"engine":"annualReportLines","origin":"maor-system:src/lib/annualReport.ts","fields":["donations","year","cur","isfinite","amount","orgname","orgtaxid","supportername","payerid","date","rid","designation","site"],"plan":[]}

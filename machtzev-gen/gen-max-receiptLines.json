@@ -1,0 +1,1 @@
+{"engine":"receiptLines","origin":"maor-system:src/lib/receipt.ts","fields":["currency","date","gettime","tolocaledatestring","taxreceipt","amount","mark","copy","orgname","orgtaxid","rid","verify","payer","payerid","method","forwhat","signatory","site","summary"],"plan":[]}

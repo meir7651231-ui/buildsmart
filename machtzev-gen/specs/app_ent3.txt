@@ -1,0 +1,27 @@
+הירו 🗂️ פרויקט | ישות מורכבת — טופס + טבלה
+אטום BreadcrumbTrail פרויקט: תכנון / הצעה / חוזה / ביצוע / מסירה / נסגר
+כותרת טופס פרויקט
+אטום NumberStepper מספר
+אטום FieldRow שם
+אטום FieldRow סוג
+אטום FieldRow לקוח
+אטום FieldRow כתובת
+אטום NumberStepper שטח
+אטום FieldRow מנהל פרויקט
+אטום NumberStepper מחיר חוזה
+אטום NumberStepper תקציב
+אטום FieldRow תאריך התחלה
+אטום FieldRow תאריך סיום
+אטום AnimatedToggle סטטוס
+אטום FabMenu שמירה
+אטום NeonButton קדם להצעה
+כותרת רשומות פרויקט
+אטום DataGrid פרויקט
+כותרת 🔗 מנוע-חוקים חי · 6 חוקים מהמדף
+חישוב מספר סידורי של (excelSerialToIso)
+חישוב אין שקעים שם פרטי (kForType)
+חישוב כרעת מנהל (isAdmin)
+חישוב פרטי במקור וצא לחוזה (nonEmptyString)
+חישוב תאריך לתצוגה (fmtDate)
+חישוב קלט חופשי או אם (parseAnyDate)
+באנר ישות פרויקט: 12 שדות · 6-שלבי workflow · 6 חוקים חיים · מהמדף

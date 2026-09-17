@@ -1,0 +1,1 @@
+{"engine":"ayinActive","origin":"maor-system:src/lib/ayin.ts","fields":["stage","names","lasttouch","answers","log"],"plan":[{"kind":"fn","name":"validateHebMonthNames","op":"collection","sig":"hebYear: number = hebYearNow(=>): string","covers":["names"],"from":"maor-system:src/lib/hebdate.ts"}]}

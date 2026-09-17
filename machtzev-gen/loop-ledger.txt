@@ -1,0 +1,3 @@
+[02:48] 25 מנועים · ולידטורים-PASS:0/3 · ריקים:1 · zeroloss-only=2 · enrich-detected=7 · exhausted=9 · effect-todo=6
+[02:55] 25 · PASS:0/6 · ריקים:0 · zeroloss-only=6 · enrich-detected=9 · exhausted=7 · effect-todo=3
+[02:56] 30 · PASS:0/5 · ריקים:1 · zeroloss-nocatch=1 · enrich-detected=8 · exhausted-max=20

@@ -1,0 +1,1 @@
+{"engine":"eventsCsvRows","origin":"maor-system:src/lib/exportRows.ts","fields":["family","events","date","title","customtype","type","time","families","id","famid","priority","notes","done"],"plan":[]}

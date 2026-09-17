@@ -1,0 +1,1 @@
+{"engine":"courseDateError","origin":"maor-system:src/components/courses/lib.ts","fields":["course"],"plan":[{"kind":"fn","name":"duplicateCourse","op":"transform","sig":"c: Course, newId: string, dates: { start","covers":["course"],"from":"maor-system:src/components/courses/lib.ts"}]}

@@ -1,0 +1,1 @@
+{"engine":"blockReason","origin":"maor-system:src/components/calendar/calLib.ts","fields":["getday","month","day"],"plan":[{"kind":"fn","name":"validateHebMonthNames","op":"collection","sig":"hebYear: number = hebYearNow(=>): string","covers":["month"],"from":"maor-system:src/lib/hebdate.ts"}]}

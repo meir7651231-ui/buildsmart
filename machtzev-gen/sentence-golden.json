@@ -1,0 +1,66 @@
+[
+ {
+  "text": "ניהול מתנדבים עם טלפון ואזור",
+  "entity": "Volunteer"
+ },
+ {
+  "text": "רשימת תרומות לפי תאריך וסכום",
+  "entity": "Donation"
+ },
+ {
+  "text": "מסך משפחות עם כתובת",
+  "entity": "Family"
+ },
+ {
+  "text": "מעקב חדרים ושעות",
+  "entity": "Room"
+ },
+ {
+  "text": "שיבוצים לחוגים",
+  "entity": "Enrollment"
+ },
+ {
+  "text": "מורים ומדריכות",
+  "entity": "Teacher"
+ },
+ {
+  "text": "פריטי קטלוג במלאי",
+  "entity": "ShopItem"
+ },
+ {
+  "text": "רשימת ספקים עם מחירים",
+  "entity": null
+ },
+ {
+  "text": "תורמים לפי סכום",
+  "entity": "Supporter"
+ },
+ {
+  "text": "רכזים לפי אזור",
+  "entity": "TzCoordinator"
+ },
+ {
+  "text": "בני משפחה לפי גיל",
+  "entity": "Member"
+ },
+ {
+  "text": "בן משפחה עם תאריך לידה",
+  "entity": "Member"
+ },
+ {
+  "text": "מסירות לפי מתנדב",
+  "entity": "Delivery"
+ },
+ {
+  "text": "שיחות עם תורמים",
+  "entity": "CallEntry"
+ },
+ {
+  "text": "יומן חיוג",
+  "entity": "DialLogEntry"
+ },
+ {
+  "text": "תיקי מעקב-טיפול פתוחים",
+  "entity": "AyinCase"
+ }
+]

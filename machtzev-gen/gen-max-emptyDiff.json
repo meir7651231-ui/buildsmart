@@ -1,0 +1,1 @@
+{"engine":"emptyDiff","origin":"maor-system:src/lib/cloud-diff.ts","fields":["sets","deletes","meta"],"plan":[{"kind":"list","name":"ENTITY_COLLECTIONS","op":"ignored-field","sig":"s.col ∈ ENTITY_COLLECTIONS (שדה-מוזנח!)","covers":["col"],"from":"maor-system:src/lib/cloud-diff.ts"}]}

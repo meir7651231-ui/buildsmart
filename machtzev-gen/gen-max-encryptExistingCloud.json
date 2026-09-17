@@ -1,0 +1,1 @@
+{"engine":"encryptExistingCloud","origin":"maor-system:src/lib/cloud.ts","fields":["supporters"],"plan":[{"kind":"fn","name":"supportersImportFormatRows","op":"collection","sig":"db: Db=>Cell[][]","covers":["supporters"],"from":"maor-system:src/lib/exportRows.ts"}]}

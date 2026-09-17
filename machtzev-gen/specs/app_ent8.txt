@@ -1,0 +1,21 @@
+הירו 🗂️ חוזה | ישות מורכבת — טופס + טבלה
+אטום BreadcrumbTrail חוזה: טיוטה / נחתם / פעיל / הושלם
+כותרת טופס חוזה
+אטום NumberStepper מספר
+אטום FieldRow סוג
+אטום FieldRow פרויקט
+אטום NumberStepper סכום
+אטום FieldRow תאריך חתימה
+אטום FieldRow התחלה
+אטום FieldRow סיום
+אטום FieldRow עיכבון
+אטום AnimatedToggle סטטוס
+אטום FabMenu שמירה
+אטום NeonButton קדם לנחתם
+כותרת רשומות חוזה
+אטום DataGrid חוזה
+כותרת 🔗 מנוע-חוקים חי · 3 חוקים מהמדף
+חישוב מספר סידורי של (excelSerialToIso)
+חישוב עיטוף סכום שקלים לתצוגה (shekel)
+חישוב תאריך לתצוגה (fmtDate)
+באנר ישות חוזה: 9 שדות · 4-שלבי workflow · 3 חוקים חיים · מהמדף

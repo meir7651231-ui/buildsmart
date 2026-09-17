@@ -1,0 +1,1 @@
+{"engine":"telephonyToTenant","origin":"maor-system:src/components/telephony/lib.ts","fields":["numbers","e164","id","label","kind","kosher","gatewaychannel","onramp","koshermode","hebrew","hebrewcalendar","shabbat","fasts","zmanim","voicemail","city","officedays","officestart","officeend","officeext","managerext","vmbox"],"plan":[]}

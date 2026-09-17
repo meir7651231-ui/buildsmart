@@ -1,0 +1,1 @@
+{"engine":"telephonyOn","origin":"maor-system:src/lib/config.ts","fields":["telephony"],"plan":[{"kind":"fn","name":"normalizeTelephony","op":"transform","sig":"raw: unknown=>TelephonyConfig | undefine","covers":["telephony"],"from":"maor-system:src/lib/config.ts"}]}

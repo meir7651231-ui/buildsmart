@@ -1,0 +1,87 @@
+{
+ "source": "maor-system/src/types/domain.ts (export type X = union of string literals)",
+ "enums": {
+  "Gender": [
+   "m",
+   "f"
+  ],
+  "FamilyStatus": [
+   "active",
+   "pending",
+   "inactive"
+  ],
+  "PricingModel": [
+   "monthly",
+   "half_year",
+   "year",
+   "punch"
+  ],
+  "EnrollmentStatus": [
+   "active",
+   "paused",
+   "ended",
+   "wait"
+  ],
+  "PricingTerm": [
+   "once",
+   "weekly",
+   "biweekly",
+   "monthly",
+   "months",
+   "half_year",
+   "year"
+  ],
+  "EventType": [
+   "org",
+   "reminder",
+   "call",
+   "wedding",
+   "memorial",
+   "anniversary",
+   "bday",
+   "custom"
+  ],
+  "EventPriority": [
+   "red",
+   "orange",
+   "green"
+  ],
+  "AyinStage": [
+   "new",
+   "lead",
+   "eyes",
+   "answer",
+   "done"
+  ],
+  "DialOutcome": [
+   "donated",
+   "noanswer",
+   "refused",
+   "callback",
+   "done",
+   "skip"
+  ],
+  "TzBoxStatus": [
+   "home",
+   "office",
+   "lost",
+   "retired"
+  ],
+  "ShopComponentKind": [
+   "meeting",
+   "coupon",
+   "gift",
+   "holidayGift"
+  ],
+  "ShopAssignmentStatus": [
+   "active",
+   "done",
+   "stopped"
+  ],
+  "DeliveryStatus": [
+   "pickup",
+   "enroute",
+   "delivered"
+  ]
+ }
+}

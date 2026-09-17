@@ -1,0 +1,1 @@
+{"engine":"supHasRegion","origin":"maor-system:src/components/supporters/lib.ts","fields":["region"],"plan":[{"kind":"fn","name":"phoneRegion","op":"transform","sig":"raw: string=>'il' | 'intl'","covers":["region"],"from":"maor-system:src/components/supporters/lib.ts"}]}

@@ -1,0 +1,4625 @@
+[
+ {
+  "id": "clampScale",
+  "file": "src/lib/a11y.ts",
+  "op": "measure",
+  "sockets": [
+   "number"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "stepScale",
+  "file": "src/lib/a11y.ts",
+  "op": "measure",
+  "sockets": [
+   "number",
+   "1 | -1"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "parseAcc",
+  "file": "src/lib/a11y.ts",
+  "op": "transform",
+  "sockets": [
+   "string | null"
+  ],
+  "ret": "AccPrefs"
+ },
+ {
+  "id": "readAiKey",
+  "file": "src/lib/ai.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "writeAiKey",
+  "file": "src/lib/ai.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "thanksPrompt",
+  "file": "src/lib/ai.ts",
+  "op": "format",
+  "sockets": [
+   "ThanksInput"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "askClaude",
+  "file": "src/lib/ai.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "AiFetch = fetch"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "donationYears",
+  "file": "src/lib/annualReport.ts",
+  "op": "collection",
+  "sockets": [
+   "AnnualDonation[]"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "donationsOfYear",
+  "file": "src/lib/annualReport.ts",
+  "op": "collection",
+  "sockets": [
+   "AnnualDonation[]",
+   "string"
+  ],
+  "ret": "AnnualDonation[]"
+ },
+ {
+  "id": "annualReportLines",
+  "file": "src/lib/annualReport.ts",
+  "op": "collection",
+  "sockets": [
+   "AnnualReportInput"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "annualAllLines",
+  "file": "src/lib/annualReport.ts",
+  "op": "collection",
+  "sockets": [
+   "string",
+   "string | undefined",
+   "string",
+   "Array<{ name: string; idNum?: string; donations: AnnualDonation[] }>",
+   "string"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "downloadAnnualReport",
+  "file": "src/lib/annualReport.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string[]"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "initAppCheck",
+  "file": "src/lib/appCheck.ts",
+  "op": "transform",
+  "sockets": [
+   "FirebaseApp",
+   "string"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "phoneIssue",
+  "file": "src/lib/audit.ts",
+  "op": "guard",
+  "sockets": [
+   "string | undefined"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "runAudit",
+  "file": "src/lib/audit.ts",
+  "op": "collection",
+  "sockets": [
+   "Db",
+   "todayIso = ''",
+   "extra = true",
+   "OrgConfig"
+  ],
+  "ret": "AuditIssue[]"
+ },
+ {
+  "id": "auditReportLines",
+  "file": "src/lib/audit.ts",
+  "op": "collection",
+  "sockets": [
+   "string",
+   "AuditIssue[]",
+   "string"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "stageLabel",
+  "file": "src/lib/ayin.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig",
+   "AyinStage"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "featLabel",
+  "file": "src/lib/ayin.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "itemLabel",
+  "file": "src/lib/ayin.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "unitLabel",
+  "file": "src/lib/ayin.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "stageIndex",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinStage"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "nextStage",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "AyinStage"
+  ],
+  "ret": "AyinStage | null"
+ },
+ {
+  "id": "revertPatch",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "AyinStage"
+  ],
+  "ret": "Partial<AyinCase>"
+ },
+ {
+  "id": "normName",
+  "file": "src/lib/ayin.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "ayinActive",
+  "file": "src/lib/ayin.ts",
+  "op": "predicate",
+  "sockets": [
+   "AyinCase | null | undefined"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "eyesTotal",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinCase"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "boqLineAmount",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinName"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "boqTotal",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinCase"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "timeHoursTotal",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinCase"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "timeCostTotal",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinCase"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "matCostTotal",
+  "file": "src/lib/ayin.ts",
+  "op": "measure",
+  "sockets": [
+   "AyinCase"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "namesToTemplateLines",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "AyinName[]"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "ayinActionVisible",
+  "file": "src/lib/ayin.ts",
+  "op": "predicate",
+  "sockets": [
+   "AyinCase"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "ayinAdvanceLabel",
+  "file": "src/lib/ayin.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig",
+   "AyinCase"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "planAyinAdvance",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig",
+   "string",
+   "AyinCase"
+  ],
+  "ret": "AyinAdvancePlan | null"
+ },
+ {
+  "id": "planAddName",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "AyinCase",
+   "string",
+   "number | ''",
+   "string"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "ayinDailyRows",
+  "file": "src/lib/ayin.ts",
+  "op": "collection",
+  "sockets": [
+   "OrgConfig",
+   "Supporter[]",
+   "string"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "ayinAllRows",
+  "file": "src/lib/ayin.ts",
+  "op": "collection",
+  "sockets": [
+   "OrgConfig",
+   "Supporter[]"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "ayinBoardItems",
+  "file": "src/lib/ayin.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]"
+  ],
+  "ret": "AyinBoardItem[]"
+ },
+ {
+  "id": "filterAyinBoard",
+  "file": "src/lib/ayin.ts",
+  "op": "collection",
+  "sockets": [
+   "AyinBoardItem[]",
+   "string",
+   "null | 'wait' | 'done'",
+   "AyinStage | null"
+  ],
+  "ret": "AyinBoardItem[]"
+ },
+ {
+  "id": "ayinSheetRows",
+  "file": "src/lib/ayin.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "parseAyinSheet",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "string[][]",
+   "Supporter[]"
+  ],
+  "ret": "AyinSheetParse"
+ },
+ {
+  "id": "applyAyinSheet",
+  "file": "src/lib/ayin.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "AyinSheetUpd[]",
+   "string"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "normEmail",
+  "file": "src/lib/bulkContact.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "callerKindLabel",
+  "file": "src/lib/callerId.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig",
+   "CallerKind"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "phoneKey",
+  "file": "src/lib/callerId.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "findCaller",
+  "file": "src/lib/callerId.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "string"
+  ],
+  "ret": "Caller | null"
+ },
+ {
+  "id": "familyContext",
+  "file": "src/lib/callerId.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "string"
+  ],
+  "ret": "FamilyContext"
+ },
+ {
+  "id": "colPath",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "boolean",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "metaPath",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "boolean"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "envPath",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "boolean"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "donationsPath",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "boolean"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "stripSupporterDonations",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "transform",
+  "sockets": [
+   "DbDiff"
+  ],
+  "ret": "DbDiff"
+ },
+ {
+  "id": "metaOf",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "collection",
+  "sockets": [
+   "Db"
+  ],
+  "ret": "Record<string, unknown>"
+ },
+ {
+  "id": "diffDb",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "Db"
+  ],
+  "ret": "DbDiff"
+ },
+ {
+  "id": "fullDbDiff",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "transform",
+  "sockets": [
+   "Db"
+  ],
+  "ret": "DbDiff"
+ },
+ {
+  "id": "emptyDiff",
+  "file": "src/lib/cloud-diff.ts",
+  "op": "predicate",
+  "sockets": [
+   "DbDiff"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "sanitizeIncoming",
+  "file": "src/lib/cloud-merge.ts",
+  "op": "collection",
+  "sockets": [
+   "string",
+   "Record<string",
+   "unknown>"
+  ],
+  "ret": "Record<string, unknown>"
+ },
+ {
+  "id": "mergeDonationsPreserving",
+  "file": "src/lib/cloud-merge.ts",
+  "op": "collection",
+  "sockets": [
+   "string",
+   "Record<string",
+   "unknown>",
+   "Record<string",
+   "unknown>"
+  ],
+  "ret": "Record<string, unknown>"
+ },
+ {
+  "id": "applyEntityPartial",
+  "file": "src/lib/cloud-merge.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "string",
+   "Array<{ id: string; data: unknown; deleted: boolean }>"
+  ],
+  "ret": "Db"
+ },
+ {
+  "id": "applyMetaPartial",
+  "file": "src/lib/cloud-merge.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "Record<string",
+   "unknown>"
+  ],
+  "ret": "Db"
+ },
+ {
+  "id": "setCloudScope",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "boolean"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "setDonationSplit",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "boolean"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "donationSplitActive",
+  "file": "src/lib/cloud.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "setAllowedPurposes",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string[] | null"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "setSupEnforce",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "boolean"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "supEnforceActive",
+  "file": "src/lib/cloud.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "setAuditContext",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "boolean"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "auditWriterEmail",
+  "file": "src/lib/cloud.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "pushAuditRing",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "AuditEntry[]",
+   "CryptoKey | null"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "pullAuditRing",
+  "file": "src/lib/cloud.ts",
+  "op": "collection",
+  "sockets": [
+   "CryptoKey | null"
+  ],
+  "ret": "Promise<AuditEntry[] | null>"
+ },
+ {
+  "id": "pushDonations",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "DonationCloudDiff",
+   "CryptoKey | null"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "migrateDonationsToCollection",
+  "file": "src/lib/cloud.ts",
+  "op": "measure",
+  "sockets": [
+   "Db['supporters']",
+   "CryptoKey | null"
+  ],
+  "ret": "Promise<number>"
+ },
+ {
+  "id": "migrateSupportersToKeyed",
+  "file": "src/lib/cloud.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter[]",
+   "Db['events']",
+   "CryptoKey | null"
+  ],
+  "ret": "Promise<number>"
+ },
+ {
+  "id": "initCloud",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "FirebaseOrgConfig"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "cloudDb",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "Firestore"
+ },
+ {
+  "id": "signIn",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "signUp",
+  "file": "src/lib/cloud.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "signOutCloud",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "resetPassword",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "changePassword",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "readCloudEnvelope",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "Promise<EncEnvelope | null>"
+ },
+ {
+  "id": "writeCloudEnvelope",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "EncEnvelope"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "encryptExistingCloud",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "CryptoKey"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "pullAll",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "CryptoKey | null"
+  ],
+  "ret": "Promise<Db | null>"
+ },
+ {
+  "id": "fetchNedarimDonors",
+  "file": "src/lib/cloud.ts",
+  "op": "collection",
+  "sockets": [],
+  "ret": "Promise<NedarimDonor[]>"
+ },
+ {
+  "id": "fetchIncomingPayments",
+  "file": "src/lib/cloud.ts",
+  "op": "collection",
+  "sockets": [],
+  "ret": "Promise<IncomingPayment[]>"
+ },
+ {
+  "id": "fetchProviderRows",
+  "file": "src/lib/cloud.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<IncomingPayment[]>"
+ },
+ {
+  "id": "pullNedarim",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "{ reset?: boolean } = {}"
+  ],
+  "ret": "Promise<"
+ },
+ {
+  "id": "pullSola",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "{ reset?: boolean } = {}"
+  ],
+  "ret": "Promise<"
+ },
+ {
+  "id": "markIncomingPayment",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "writeSmsOutbox",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "writeMailOutbox",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "fetchOutboxIssues",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "Promise<"
+ },
+ {
+  "id": "retryOutboxItem",
+  "file": "src/lib/cloud.ts",
+  "op": "transform",
+  "sockets": [
+   "'sms' | 'mail'",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "fetchOrgCloudConfig",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<OrgCloudDoc | null>"
+ },
+ {
+  "id": "writeOrgCloudDoc",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "Partial<OrgCloudDoc>"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "writeOrgCloudConfig",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "OrgConfig"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "writeOrgSecrets",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "Partial<Record<OrgSecretKey",
+   "string>>"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "readOrgSecretsMeta",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "predicate",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<Partial<Record<OrgSecretKey, boolean>>>"
+ },
+ {
+  "id": "deleteOrgRequest",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "writeOrgRequest",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "OrgRequestDoc"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "fetchOrgRequests",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "collection",
+  "sockets": [],
+  "ret": "Promise<Array<OrgRequestDoc &"
+ },
+ {
+  "id": "findMemberOrgSlugs",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<string[]>"
+ },
+ {
+  "id": "fetchAllOrgs",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "collection",
+  "sockets": [],
+  "ret": "Promise<Array<OrgCloudDoc &"
+ },
+ {
+  "id": "writeOrgJoinRequest",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "OrgJoinRequestDoc"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "fetchOrgJoinRequests",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<Array<OrgJoinRequestDoc &"
+ },
+ {
+  "id": "deleteOrgJoinRequest",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "deleteOrgMemberConfig",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "clearEmployeeField",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "addOrgMember",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "removeOrgMember",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "deleteOrgCompletely",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "measure",
+  "sockets": [
+   "string",
+   "readonly string[]"
+  ],
+  "ret": "Promise<number>"
+ },
+ {
+  "id": "writeOrgLead",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgLeadDoc"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "fetchOrgLeads",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "collection",
+  "sockets": [],
+  "ret": "Promise<Array<OrgLeadDoc &"
+ },
+ {
+  "id": "sendSupportMessage",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "{ email?: string; orgName?: string }",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "sendSupportReply",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "markSupportRead",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "SupportSide"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "sendTeamMessage",
+  "file": "src/lib/cloudConfig.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "Promise<void>"
+ },
+ {
+  "id": "isEncDoc",
+  "file": "src/lib/cloudCrypto.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "d is EncDoc"
+ },
+ {
+  "id": "encryptDoc",
+  "file": "src/lib/cloudCrypto.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown",
+   "CryptoKey"
+  ],
+  "ret": "Promise<EncDoc>"
+ },
+ {
+  "id": "decryptDoc",
+  "file": "src/lib/cloudCrypto.ts",
+  "op": "collection",
+  "sockets": [
+   "Record<string",
+   "unknown>",
+   "CryptoKey"
+  ],
+  "ret": "Promise<Record<string, unknown>>"
+ },
+ {
+  "id": "createCloudKey",
+  "file": "src/lib/cloudCrypto.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "Promise<"
+ },
+ {
+  "id": "openCloudKey",
+  "file": "src/lib/cloudCrypto.ts",
+  "op": "transform",
+  "sockets": [
+   "EncEnvelope",
+   "string",
+   "'pass' | 'rec'"
+  ],
+  "ret": "Promise<CryptoKey | null>"
+ },
+ {
+  "id": "moduleOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig",
+   "ModuleKey"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "featureOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "donationSplitOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "supEnforceOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "integrationOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "telephonyOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "integrationSetting",
+  "file": "src/lib/config.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig",
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "safeHttpsUrl",
+  "file": "src/lib/config.ts",
+  "op": "guard",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "termOf",
+  "file": "src/lib/config.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig",
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "normalizeTelephony",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "TelephonyConfig | undefined"
+ },
+ {
+  "id": "normalizeSite",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "PublicSiteContent | undefined"
+ },
+ {
+  "id": "normalizeConfig",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "OrgConfig | null"
+ },
+ {
+  "id": "publicSiteOn",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "roleOf",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig",
+   "string | null | undefined"
+  ],
+  "ret": "UserRole"
+ },
+ {
+  "id": "teacherIdOf",
+  "file": "src/lib/config.ts",
+  "op": "guard",
+  "sockets": [
+   "OrgConfig",
+   "string | null | undefined"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "isAdminUser",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig",
+   "string | null | undefined"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "canGrantedAction",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig",
+   "string | null | undefined",
+   "boolean",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "readConfigOverride",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "OrgConfig | null"
+ },
+ {
+  "id": "saveConfigOverride",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "clearConfigOverride",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "void"
+ },
+ {
+  "id": "isSuperAdmin",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "string | null | undefined"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "signUpError",
+  "file": "src/lib/config.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "string",
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "employeeSignUpError",
+  "file": "src/lib/config.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "cloudCfgCacheKey",
+  "file": "src/lib/config.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "readCloudConfigCache",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "OrgConfig | null"
+ },
+ {
+  "id": "writeCloudConfigCache",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "OrgConfig"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "resolveOrgConfig",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig",
+   "unknown"
+  ],
+  "ret": "OrgConfig"
+ },
+ {
+  "id": "orgSlugFromUrl",
+  "file": "src/lib/config.ts",
+  "op": "guard",
+  "sockets": [],
+  "ret": "string | null"
+ },
+ {
+  "id": "loadOrgConfig",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "Promise<OrgConfig>"
+ },
+ {
+  "id": "isSafeAccent",
+  "file": "src/lib/config.ts",
+  "op": "predicate",
+  "sockets": [
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "applyTheme",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "faviconDataUri",
+  "file": "src/lib/config.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "applyFavicon",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "applyConfig",
+  "file": "src/lib/config.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "buildCourseDailyRows",
+  "file": "src/lib/courseDaily.ts",
+  "op": "transform",
+  "sockets": [
+   "Course",
+   "Db",
+   "OrgConfig"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "genRecoveryKey",
+  "file": "src/lib/crypto.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "encryptDb",
+  "file": "src/lib/crypto.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "Promise<EncEnvelope>"
+ },
+ {
+  "id": "isEncrypted",
+  "file": "src/lib/crypto.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "raw is EncEnvelope"
+ },
+ {
+  "id": "openDek",
+  "file": "src/lib/crypto.ts",
+  "op": "transform",
+  "sockets": [
+   "EncEnvelope",
+   "string",
+   "'pass' | 'rec'"
+  ],
+  "ret": "Promise<CryptoKey | null>"
+ },
+ {
+  "id": "decryptDb",
+  "file": "src/lib/crypto.ts",
+  "op": "format",
+  "sockets": [
+   "EncEnvelope",
+   "CryptoKey"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "reencryptDb",
+  "file": "src/lib/crypto.ts",
+  "op": "transform",
+  "sockets": [
+   "EncEnvelope",
+   "CryptoKey",
+   "string"
+  ],
+  "ret": "Promise<EncEnvelope>"
+ },
+ {
+  "id": "rewrapPassword",
+  "file": "src/lib/crypto.ts",
+  "op": "transform",
+  "sockets": [
+   "EncEnvelope",
+   "CryptoKey",
+   "string"
+  ],
+  "ret": "Promise<EncEnvelope>"
+ },
+ {
+  "id": "csvEscape",
+  "file": "src/lib/csvx.ts",
+  "op": "format",
+  "sockets": [
+   "Cell"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "toCsv",
+  "file": "src/lib/csvx.ts",
+  "op": "format",
+  "sockets": [
+   "Cell[][]"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "downloadCsv",
+  "file": "src/lib/csvx.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "Cell[][]"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "decodeCsvBuffer",
+  "file": "src/lib/csvx.ts",
+  "op": "format",
+  "sockets": [
+   "ArrayBuffer"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "readCsvFileText",
+  "file": "src/lib/csvx.ts",
+  "op": "format",
+  "sockets": [
+   "File"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "parseCsv",
+  "file": "src/lib/csvx.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "parseAnyDate",
+  "file": "src/lib/csvx.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "expFieldDefs",
+  "file": "src/lib/customExport.ts",
+  "op": "collection",
+  "sockets": [
+   "OrgConfig",
+   "ExportTarget"
+  ],
+  "ret": "ExpField[]"
+ },
+ {
+  "id": "overrideColumn",
+  "file": "src/lib/customExport.ts",
+  "op": "collection",
+  "sockets": [
+   "Cell[][]",
+   "number",
+   "Record<number",
+   "string>"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "buildCustomExport",
+  "file": "src/lib/customExport.ts",
+  "op": "collection",
+  "sockets": [
+   "OrgConfig",
+   "Db",
+   "ExportTarget",
+   "ExportRange",
+   "string[]"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "isoToday",
+  "file": "src/lib/date-util.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "isoLocal",
+  "file": "src/lib/date-util.ts",
+  "op": "format",
+  "sockets": [
+   "Date"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "isoDaysAgo",
+  "file": "src/lib/date-util.ts",
+  "op": "format",
+  "sockets": [
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "dateInRange",
+  "file": "src/lib/date-util.ts",
+  "op": "predicate",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "normPhone",
+  "file": "src/lib/dedup.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "findDuplicateGroups",
+  "file": "src/lib/dedup.ts",
+  "op": "collection",
+  "sockets": [
+   "Family[]"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "mergeFamilies",
+  "file": "src/lib/dedup.ts",
+  "op": "transform",
+  "sockets": [
+   "Family",
+   "Family[]"
+  ],
+  "ret": "Family"
+ },
+ {
+  "id": "dupFieldValue",
+  "file": "src/lib/dedup.ts",
+  "op": "format",
+  "sockets": [
+   "Family[]",
+   "DupFieldDef",
+   "Record<string",
+   "number>",
+   "Record<string",
+   "string>"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "mergeFamiliesByFields",
+  "file": "src/lib/dedup.ts",
+  "op": "transform",
+  "sockets": [
+   "Family[]",
+   "Record<string",
+   "number>",
+   "Record<string",
+   "string>"
+  ],
+  "ret": "Family"
+ },
+ {
+  "id": "normId",
+  "file": "src/lib/dedup.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "findSupporterDupGroups",
+  "file": "src/lib/dedup.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "mergeSupporterInto",
+  "file": "src/lib/dedup.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "Supporter"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "mergeSupportersGroup",
+  "file": "src/lib/dedup.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "Supporter[]"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "supDupFieldValue",
+  "file": "src/lib/dedup.ts",
+  "op": "format",
+  "sockets": [
+   "Supporter[]",
+   "SupDupFieldDef",
+   "Record<string",
+   "number>",
+   "Record<string",
+   "string>"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "mergeSupportersByFields",
+  "file": "src/lib/dedup.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "Record<string",
+   "number>",
+   "Record<string",
+   "string>"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "planDemoCleanup",
+  "file": "src/lib/demoCleanup.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "Partial<Db>"
+  ],
+  "ret": "DemoCleanupPlan"
+ },
+ {
+  "id": "freshenDemoDb",
+  "file": "src/lib/demoFresh.ts",
+  "op": "transform",
+  "sockets": [
+   "Db",
+   "string"
+  ],
+  "ret": "Db"
+ },
+ {
+  "id": "startCampaign",
+  "file": "src/lib/dialer.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string[]",
+   "string"
+  ],
+  "ret": "DialerCampaign"
+ },
+ {
+  "id": "currentId",
+  "file": "src/lib/dialer.ts",
+  "op": "guard",
+  "sockets": [
+   "DialerCampaign"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "applyOutcome",
+  "file": "src/lib/dialer.ts",
+  "op": "transform",
+  "sockets": [
+   "DialerCampaign",
+   "DialOutcome",
+   "string",
+   "string"
+  ],
+  "ret": "DialerCampaign"
+ },
+ {
+  "id": "progress",
+  "file": "src/lib/dialer.ts",
+  "op": "transform",
+  "sockets": [
+   "DialerCampaign"
+  ],
+  "ret": "DialerProgress"
+ },
+ {
+  "id": "isDone",
+  "file": "src/lib/dialer.ts",
+  "op": "predicate",
+  "sockets": [
+   "DialerCampaign"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "undoLast",
+  "file": "src/lib/dialer.ts",
+  "op": "transform",
+  "sockets": [
+   "DialerCampaign"
+  ],
+  "ret": "DialerCampaign"
+ },
+ {
+  "id": "appendCall",
+  "file": "src/lib/dialer.ts",
+  "op": "collection",
+  "sockets": [
+   "CallEntry[] | undefined",
+   "DialOutcome",
+   "IsoDate"
+  ],
+  "ret": "CallEntry[] | undefined"
+ },
+ {
+  "id": "popCall",
+  "file": "src/lib/dialer.ts",
+  "op": "collection",
+  "sockets": [
+   "CallEntry[] | undefined"
+  ],
+  "ret": "CallEntry[] | undefined"
+ },
+ {
+  "id": "callStats",
+  "file": "src/lib/dialer.ts",
+  "op": "transform",
+  "sockets": [
+   "CallEntry[] | undefined"
+  ],
+  "ret": "CallStats"
+ },
+ {
+  "id": "purposeKeyOf",
+  "file": "src/lib/donationPartition.ts",
+  "op": "format",
+  "sockets": [
+   "Pick<Donation",
+   "'purpose'>"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "donAllowedKeys",
+  "file": "src/lib/donationPartition.ts",
+  "op": "collection",
+  "sockets": [
+   "string[]"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "explodeSupporter",
+  "file": "src/lib/donationPartition.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "DonationDoc[]"
+ },
+ {
+  "id": "reassembleDonations",
+  "file": "src/lib/donationPartition.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "DonationDoc[]"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "donationPartitionDiff",
+  "file": "src/lib/donationPartition.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "Supporter[]"
+  ],
+  "ret": "DonationCloudDiff"
+ },
+ {
+  "id": "evLabel",
+  "file": "src/lib/eventMeta.ts",
+  "op": "format",
+  "sockets": [
+   "OrgEvent"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "exportAllowed",
+  "file": "src/lib/exportGate.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "guardExport",
+  "file": "src/lib/exportGate.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "familiesImportFormatRows",
+  "file": "src/lib/exportRows.ts",
+  "op": "collection",
+  "sockets": [
+   "Db"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "supportersImportFormatRows",
+  "file": "src/lib/exportRows.ts",
+  "op": "collection",
+  "sockets": [
+   "Db"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "eventsCsvRows",
+  "file": "src/lib/exportRows.ts",
+  "op": "collection",
+  "sockets": [
+   "Db",
+   "OrgConfig"
+  ],
+  "ret": "Cell[][]"
+ },
+ {
+  "id": "parseFamiliesCsv",
+  "file": "src/lib/familiesImport.ts",
+  "op": "transform",
+  "sockets": [
+   "string[][]",
+   "Family[]"
+  ],
+  "ret": "FamiliesImportPlan"
+ },
+ {
+  "id": "mergeFamilyImport",
+  "file": "src/lib/familiesImport.ts",
+  "op": "transform",
+  "sockets": [
+   "Family",
+   "FamilyImportRow"
+  ],
+  "ret": "Family"
+ },
+ {
+  "id": "guideRecipes",
+  "file": "src/lib/guide.ts",
+  "op": "format",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "monthHeOf",
+  "file": "src/lib/hebdate.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "monthEnOf",
+  "file": "src/lib/hebdate.ts",
+  "op": "guard",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "hebYearNow",
+  "file": "src/lib/hebdate.ts",
+  "op": "measure",
+  "sockets": [],
+  "ret": "number"
+ },
+ {
+  "id": "isHebLeapYear",
+  "file": "src/lib/hebdate.ts",
+  "op": "predicate",
+  "sockets": [
+   "number"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "hebMonthsOf",
+  "file": "src/lib/hebdate.ts",
+  "op": "collection",
+  "sockets": [
+   "number"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "hebToIso",
+  "file": "src/lib/hebdate.ts",
+  "op": "guard",
+  "sockets": [
+   "number",
+   "string",
+   "number"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "isoToHebParts",
+  "file": "src/lib/hebdate.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "gem",
+  "file": "src/lib/hebrew.ts",
+  "op": "format",
+  "sockets": [
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "gemYear",
+  "file": "src/lib/hebrew.ts",
+  "op": "format",
+  "sockets": [
+   "number | string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "adarNorm",
+  "file": "src/lib/hebrew.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "hebAnnualEq",
+  "file": "src/lib/hebrew.ts",
+  "op": "predicate",
+  "sockets": [
+   "{ day: number; month: string }",
+   "{ day: number; month: string; year?: number }"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "hebParts",
+  "file": "src/lib/hebrew.ts",
+  "op": "transform",
+  "sockets": [
+   "Date"
+  ],
+  "ret": "HebParts"
+ },
+ {
+  "id": "hebPartsOfIso",
+  "file": "src/lib/hebrew.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "HebParts"
+ },
+ {
+  "id": "hebDateFull",
+  "file": "src/lib/hebrew.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "holidayOf",
+  "file": "src/lib/hebrew.ts",
+  "op": "guard",
+  "sockets": [
+   "Date"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "integerInWords",
+  "file": "src/lib/hebrewNumber.ts",
+  "op": "guard",
+  "sockets": [
+   "number"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "amountInWords",
+  "file": "src/lib/hebrewNumber.ts",
+  "op": "format",
+  "sockets": [
+   "number",
+   "'₪' | '$' = '₪'"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "icsEscape",
+  "file": "src/lib/ics.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "foldIcsLine",
+  "file": "src/lib/ics.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "buildIcs",
+  "file": "src/lib/ics.ts",
+  "op": "format",
+  "sockets": [
+   "IcsOccurrence[]",
+   "string",
+   "Date"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "downloadIcs",
+  "file": "src/lib/ics.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "mintFeedToken",
+  "file": "src/lib/icsFeed.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "readIcsFeedToken",
+  "file": "src/lib/icsFeed.ts",
+  "op": "guard",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<string | null>"
+ },
+ {
+  "id": "publishIcsFeed",
+  "file": "src/lib/icsFeed.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "{ rotate?: boolean }"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "icsFeedUrl",
+  "file": "src/lib/icsFeed.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "makeId",
+  "file": "src/lib/ids.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "number",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "deviceTag",
+  "file": "src/lib/ids.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "pickAndCompressImage",
+  "file": "src/lib/imagePick.ts",
+  "op": "format",
+  "sockets": [
+   "File"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "readFileAsDataUrl",
+  "file": "src/lib/imagePick.ts",
+  "op": "format",
+  "sockets": [
+   "File",
+   "number = MAX_EMBED_BYTES"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "kitProgress",
+  "file": "src/lib/installKit.ts",
+  "op": "transform",
+  "sockets": [
+   "Pick<AyinCase",
+   "'kit'> | null | undefined"
+  ],
+  "ret": "KitProgress"
+ },
+ {
+  "id": "lockKey",
+  "file": "src/lib/lock.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "readLock",
+  "file": "src/lib/lock.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "LockCfg"
+ },
+ {
+  "id": "writeLock",
+  "file": "src/lib/lock.ts",
+  "op": "transform",
+  "sockets": [
+   "LockCfg"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "isValidPin",
+  "file": "src/lib/lock.ts",
+  "op": "predicate",
+  "sockets": [
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "hashPin",
+  "file": "src/lib/lock.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "Promise<string>"
+ },
+ {
+  "id": "pinNeedsRehash",
+  "file": "src/lib/lock.ts",
+  "op": "predicate",
+  "sockets": [
+   "string | undefined"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "verifyPin",
+  "file": "src/lib/lock.ts",
+  "op": "predicate",
+  "sockets": [
+   "string",
+   "string | undefined"
+  ],
+  "ret": "Promise<boolean>"
+ },
+ {
+  "id": "readPinFails",
+  "file": "src/lib/lock.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "PinFails"
+ },
+ {
+  "id": "notePinFail",
+  "file": "src/lib/lock.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "number"
+  ],
+  "ret": "PinFails"
+ },
+ {
+  "id": "clearPinFails",
+  "file": "src/lib/lock.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "cooldownForFails",
+  "file": "src/lib/lock.ts",
+  "op": "measure",
+  "sockets": [
+   "number"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "mapsSearchUrl",
+  "file": "src/lib/mapsLink.ts",
+  "op": "guard",
+  "sockets": [
+   "string",
+   "city = ''"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "mapsRouteUrl",
+  "file": "src/lib/mapsLink.ts",
+  "op": "guard",
+  "sockets": [
+   "string[]"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "sameLoc",
+  "file": "src/lib/navhist.ts",
+  "op": "predicate",
+  "sockets": [
+   "NavLoc",
+   "NavLoc"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "pushNav",
+  "file": "src/lib/navhist.ts",
+  "op": "collection",
+  "sockets": [
+   "NavLoc[]",
+   "NavLoc"
+  ],
+  "ret": "NavLoc[]"
+ },
+ {
+  "id": "pushRecent",
+  "file": "src/lib/navhist.ts",
+  "op": "collection",
+  "sockets": [
+   "string[]",
+   "string"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "providerClearer",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "chargeToHist",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "SyncCharge"
+  ],
+  "ret": "HistEntry"
+ },
+ {
+  "id": "chargeDedupKey",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "format",
+  "sockets": [
+   "SyncCharge"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "withNedarimHok",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "SyncCharge"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "detectRecurringHok",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "string",
+   "minMonths = 3"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "candidateSupportersForCharge",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "collection",
+  "sockets": [
+   "SyncCharge",
+   "Supporter[]",
+   "limit = 8"
+  ],
+  "ret": "Supporter[]"
+ },
+ {
+  "id": "fillCardFromCharge",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "SyncCharge"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "attachChargeTo",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "string",
+   "SyncCharge"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "relabelHistByTxn",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "string[]",
+   "string"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "repairCardsFromRows",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "SyncCharge[]",
+   "string"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "strongMatchForCharge",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "SyncCharge",
+   "Supporter[]"
+  ],
+  "ret": "Supporter | null"
+ },
+ {
+  "id": "autoMatchCharges",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "SyncCharge[]",
+   "Supporter[]"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "attachChargesBulk",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "{ supId: string; charge: SyncCharge }[]"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "planNedarimSync",
+  "file": "src/lib/nedarimSync.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter[]",
+   "SyncDonor[]",
+   "SyncCharge[]",
+   "{ attachOnly?: boolean } = {}"
+  ],
+  "ret": "SyncPlan"
+ },
+ {
+  "id": "netCheckTargets",
+  "file": "src/lib/netcheck.ts",
+  "op": "collection",
+  "sockets": [
+   "string",
+   "FirebaseOrgConfig | null"
+  ],
+  "ret": "NetCheckTarget[]"
+ },
+ {
+  "id": "runNetCheck",
+  "file": "src/lib/netcheck.ts",
+  "op": "collection",
+  "sockets": [
+   "NetCheckTarget[]",
+   "timeoutMs = 8000"
+  ],
+  "ret": "Promise<NetCheckResult[]>"
+ },
+ {
+  "id": "netCheckScript",
+  "file": "src/lib/netcheck.ts",
+  "op": "format",
+  "sockets": [
+   "NetCheckResult[]"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "orbitTheme",
+  "file": "src/lib/orbitTheme.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "OrbitTheme"
+ },
+ {
+  "id": "foreignHost",
+  "file": "src/lib/originGuard.ts",
+  "op": "predicate",
+  "sockets": [
+   "string",
+   "readonly string[] | undefined"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "runOriginGuard",
+  "file": "src/lib/originGuard.ts",
+  "op": "predicate",
+  "sockets": [
+   "readonly string[] | undefined",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "payLink",
+  "file": "src/lib/payLink.ts",
+  "op": "guard",
+  "sockets": [
+   "string",
+   "number",
+   "name = ''"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "canAddPhoto",
+  "file": "src/lib/photoGallery.ts",
+  "op": "predicate",
+  "sockets": [
+   "readonly string[] | undefined"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "isDataImage",
+  "file": "src/lib/photoGallery.ts",
+  "op": "format",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "s is string"
+ },
+ {
+  "id": "fitDimensions",
+  "file": "src/lib/photoGallery.ts",
+  "op": "transform",
+  "sockets": [
+   "number",
+   "number",
+   "number"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "sanitizePhotos",
+  "file": "src/lib/photoGallery.ts",
+  "op": "collection",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "nameMatches",
+  "file": "src/lib/plannedMatch.ts",
+  "op": "predicate",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "findAllOpenPlans",
+  "file": "src/lib/plannedMatch.ts",
+  "op": "collection",
+  "sockets": [
+   "Db"
+  ],
+  "ret": "OpenPlanRef[]"
+ },
+ {
+  "id": "matchIncomingToPlanned",
+  "file": "src/lib/plannedMatch.ts",
+  "op": "transform",
+  "sockets": [
+   "IncomingPayment",
+   "OpenPlanRef[]"
+  ],
+  "ret": "PlannedMatch | null"
+ },
+ {
+  "id": "matchAll",
+  "file": "src/lib/plannedMatch.ts",
+  "op": "collection",
+  "sockets": [
+   "IncomingPayment[]",
+   "OpenPlanRef[]"
+  ],
+  "ret": "PlannedMatch[]"
+ },
+ {
+  "id": "normalizePrices",
+  "file": "src/lib/pricing.ts",
+  "op": "transform",
+  "sockets": [
+   "unknown"
+  ],
+  "ret": "PriceTable"
+ },
+ {
+  "id": "shekel",
+  "file": "src/lib/pricing.ts",
+  "op": "format",
+  "sockets": [
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "readPrices",
+  "file": "src/lib/pricing.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "PriceTable"
+ },
+ {
+  "id": "writePrices",
+  "file": "src/lib/pricing.ts",
+  "op": "transform",
+  "sockets": [
+   "PriceTable"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "scheduleTasks",
+  "file": "src/lib/projectSchedule.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly AyinName[]"
+  ],
+  "ret": "ProjectSchedule"
+ },
+ {
+  "id": "isRtlLang",
+  "file": "src/lib/publicSite.ts",
+  "op": "predicate",
+  "sockets": [
+   "SiteLang"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "sitePalette",
+  "file": "src/lib/publicSite.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "SitePalette"
+ },
+ {
+  "id": "siteVocab",
+  "file": "src/lib/publicSite.ts",
+  "op": "transform",
+  "sockets": [
+   "boolean",
+   "SiteLang"
+  ],
+  "ret": "SiteVocab"
+ },
+ {
+  "id": "resolveLocalized",
+  "file": "src/lib/publicSite.ts",
+  "op": "format",
+  "sockets": [
+   "LocalizedText | undefined",
+   "SiteLang"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "siteLangs",
+  "file": "src/lib/publicSite.ts",
+  "op": "collection",
+  "sockets": [
+   "PublicSiteContent | undefined"
+  ],
+  "ret": "SiteLang[]"
+ },
+ {
+  "id": "siteUi",
+  "file": "src/lib/publicSite.ts",
+  "op": "format",
+  "sockets": [
+   "SiteLang",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "campaignProgress",
+  "file": "src/lib/publicSite.ts",
+  "op": "transform",
+  "sockets": [
+   "{ goal?: number; raised?: number; end?: string; currency?: string } | undefined",
+   "number"
+  ],
+  "ret": "CampaignProgress"
+ },
+ {
+  "id": "hasPublicSite",
+  "file": "src/lib/publicSite.ts",
+  "op": "predicate",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "siteDonateUrl",
+  "file": "src/lib/publicSite.ts",
+  "op": "guard",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "installAvailable",
+  "file": "src/lib/pwa.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "promptInstall",
+  "file": "src/lib/pwa.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "Promise<boolean>"
+ },
+ {
+  "id": "isStandalone",
+  "file": "src/lib/pwa.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "isIos",
+  "file": "src/lib/pwa.ts",
+  "op": "predicate",
+  "sockets": [],
+  "ret": "boolean"
+ },
+ {
+  "id": "registerPwa",
+  "file": "src/lib/pwa.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "applyOrgManifest",
+  "file": "src/lib/pwa.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "receiptVerifyCode",
+  "file": "src/lib/receipt.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "number",
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "receiptLines",
+  "file": "src/lib/receipt.ts",
+  "op": "collection",
+  "sockets": [
+   "ReceiptInfo"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "downloadReceipt",
+  "file": "src/lib/receipt.ts",
+  "op": "transform",
+  "sockets": [
+   "ReceiptInfo"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "receiptHtml",
+  "file": "src/lib/receipt.ts",
+  "op": "format",
+  "sockets": [
+   "ReceiptInfo"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "printReceipt",
+  "file": "src/lib/receipt.ts",
+  "op": "transform",
+  "sockets": [
+   "ReceiptInfo"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "deliverReceipt",
+  "file": "src/lib/receipt.ts",
+  "op": "transform",
+  "sockets": [
+   "ReceiptInfo",
+   "'txt' | 'pdf'"
+  ],
+  "ret": "void"
+ },
+ {
+  "id": "receiptFmtOf",
+  "file": "src/lib/receipt.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig",
+   "{ receiptFmt?: 'txt' | 'pdf' }"
+  ],
+  "ret": "'txt' | 'pdf' | undefined"
+ },
+ {
+  "id": "levenshtein",
+  "file": "src/lib/search.ts",
+  "op": "measure",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "scoreTerm",
+  "file": "src/lib/search.ts",
+  "op": "measure",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "expandQuery",
+  "file": "src/lib/search.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "smartScore",
+  "file": "src/lib/search.ts",
+  "op": "measure",
+  "sockets": [
+   "string",
+   "string[]"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "wizardStepError",
+  "file": "src/lib/signupWizard.ts",
+  "op": "guard",
+  "sockets": [
+   "number",
+   "WizardState"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "industryLabel",
+  "file": "src/lib/signupWizard.ts",
+  "op": "format",
+  "sockets": [
+   "string | undefined"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "sizeLabel",
+  "file": "src/lib/signupWizard.ts",
+  "op": "format",
+  "sockets": [
+   "string | undefined"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "needLabel",
+  "file": "src/lib/signupWizard.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "smtpHostFor",
+  "file": "src/lib/smtpUrl.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "composeSmtpUrl",
+  "file": "src/lib/smtpUrl.ts",
+  "op": "guard",
+  "sockets": [
+   "string",
+   "string",
+   "string"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "sanitizeSupportText",
+  "file": "src/lib/supportChat.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "isSendableSupportText",
+  "file": "src/lib/supportChat.ts",
+  "op": "predicate",
+  "sockets": [
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "sortSupportMsgs",
+  "file": "src/lib/supportChat.ts",
+  "op": "collection",
+  "sockets": [
+   "SupportMsg[]"
+  ],
+  "ret": "SupportMsg[]"
+ },
+ {
+  "id": "supportMsgTime",
+  "file": "src/lib/supportChat.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "supportDayLabel",
+  "file": "src/lib/supportChat.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "supportPreview",
+  "file": "src/lib/supportChat.ts",
+  "op": "format",
+  "sockets": [
+   "string | undefined",
+   "max = 40"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "supportUnread",
+  "file": "src/lib/supportChat.ts",
+  "op": "measure",
+  "sockets": [
+   "SupportThread | null | undefined",
+   "SupportSide"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "sortTeamMsgs",
+  "file": "src/lib/supportChat.ts",
+  "op": "collection",
+  "sockets": [
+   "TeamMsg[]"
+  ],
+  "ret": "TeamMsg[]"
+ },
+ {
+  "id": "sortSupportThreads",
+  "file": "src/lib/supportChat.ts",
+  "op": "collection",
+  "sockets": [
+   "Array<SupportThread & { uid: string }>"
+  ],
+  "ret": "Array<SupportThread &"
+ },
+ {
+  "id": "supporterAggregates",
+  "file": "src/lib/supporterAgg.ts",
+  "op": "transform",
+  "sockets": [
+   "Pick<Supporter",
+   "'donations' | 'hist'>"
+  ],
+  "ret": "SupAgg"
+ },
+ {
+  "id": "supKeyOf",
+  "file": "src/lib/supporterPartition.ts",
+  "op": "format",
+  "sockets": [
+   "Pick<Supporter",
+   "'forWho'>"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "docSkey",
+  "file": "src/lib/supporterPartition.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "Record<string",
+   "unknown>",
+   "Map<string",
+   "string>"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "supKeyMapOf",
+  "file": "src/lib/supporterPartition.ts",
+  "op": "collection",
+  "sockets": [
+   "Pick<Supporter",
+   "'id' | 'forWho'>[]"
+  ],
+  "ret": "Map<string, string>"
+ },
+ {
+  "id": "supAllowedKeys",
+  "file": "src/lib/supporterPartition.ts",
+  "op": "collection",
+  "sockets": [
+   "string[]"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "telHref",
+  "file": "src/lib/tel.ts",
+  "op": "guard",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "activeDriver",
+  "file": "src/lib/telephony/driver.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "DialDriver"
+ },
+ {
+  "id": "renderTemplate",
+  "file": "src/lib/templates.ts",
+  "op": "format",
+  "sockets": [
+   "Pick<OrgConfig",
+   "'templates'> | undefined",
+   "string",
+   "Record<string",
+   "string>"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "mountBrainScene",
+  "file": "src/lib/three-scene.ts",
+  "op": "transform",
+  "sockets": [
+   "HTMLCanvasElement",
+   "BrainSceneOptions = {}"
+  ],
+  "ret": "BrainSceneHandle | null"
+ },
+ {
+  "id": "tourAdvance",
+  "file": "src/lib/tour.ts",
+  "op": "guard",
+  "sockets": [
+   "number",
+   "number",
+   "number"
+  ],
+  "ret": "number | null"
+ },
+ {
+  "id": "spotlightBox",
+  "file": "src/lib/tour.ts",
+  "op": "transform",
+  "sockets": [
+   "Rect | null",
+   "number",
+   "number",
+   "pad = 10"
+  ],
+  "ret": "Rect | null"
+ },
+ {
+  "id": "validIsraeliId",
+  "file": "src/lib/validate.ts",
+  "op": "predicate",
+  "sockets": [
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "normalizePhone",
+  "file": "src/lib/validate.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "formatIsraeliPhone",
+  "file": "src/lib/validate.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "normSearch",
+  "file": "src/lib/validate.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "normName",
+  "file": "src/lib/validate.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "nameSortKey",
+  "file": "src/lib/validate.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "decodeQuotedPrintable",
+  "file": "src/lib/vcardImport.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "parseVcards",
+  "file": "src/lib/vcardImport.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "VCardContact[]"
+ },
+ {
+  "id": "isJunkContact",
+  "file": "src/lib/vcardImport.ts",
+  "op": "predicate",
+  "sockets": [
+   "VCardContact"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "importableContacts",
+  "file": "src/lib/vcardImport.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "VCardContact[]"
+ },
+ {
+  "id": "contactToRow",
+  "file": "src/lib/vcardImport.ts",
+  "op": "transform",
+  "sockets": [
+   "VCardContact"
+  ],
+  "ret": "ContactRow"
+ },
+ {
+  "id": "applyVerticalPack",
+  "file": "src/lib/verticalPacks.ts",
+  "op": "transform",
+  "sockets": [
+   "OrgConfig",
+   "string"
+  ],
+  "ret": "OrgConfig"
+ },
+ {
+  "id": "waDigits",
+  "file": "src/lib/wa.ts",
+  "op": "guard",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "waLink",
+  "file": "src/lib/wa.ts",
+  "op": "guard",
+  "sockets": [
+   "string",
+   "text = ''"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "waAppLink",
+  "file": "src/lib/wa.ts",
+  "op": "guard",
+  "sockets": [
+   "string",
+   "text = ''"
+  ],
+  "ret": "string | null"
+ },
+ {
+  "id": "waHref",
+  "file": "src/lib/wa.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string",
+   "boolean"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "waDeliveryText",
+  "file": "src/lib/wa.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "waPaymentText",
+  "file": "src/lib/wa.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "number",
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "waBirthdayText",
+  "file": "src/lib/wa.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "string",
+   "OrgConfig"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "warehouseOverview",
+  "file": "src/lib/warehouse.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly WarehouseItem[]",
+   "readonly Supporter[]"
+  ],
+  "ret": "WarehouseAllocation[]"
+ },
+ {
+  "id": "warehouseValue",
+  "file": "src/lib/warehouse.ts",
+  "op": "measure",
+  "sockets": [
+   "readonly WarehouseItem[]"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "taskIdentity",
+  "file": "src/lib/worktasks.ts",
+  "op": "format",
+  "sockets": [
+   "string | undefined | null"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "openTasksFor",
+  "file": "src/lib/worktasks.ts",
+  "op": "collection",
+  "sockets": [
+   "WorkTask[]",
+   "string"
+  ],
+  "ret": "WorkTask[]"
+ },
+ {
+  "id": "doneTodayFor",
+  "file": "src/lib/worktasks.ts",
+  "op": "measure",
+  "sockets": [
+   "WorkTask[]",
+   "string",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "taskOverdue",
+  "file": "src/lib/worktasks.ts",
+  "op": "predicate",
+  "sockets": [
+   "WorkTask",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "taskStatsFor",
+  "file": "src/lib/worktasks.ts",
+  "op": "transform",
+  "sockets": [
+   "WorkTask[]",
+   "string",
+   "string"
+  ],
+  "ret": "TaskStats"
+ },
+ {
+  "id": "overdueContactTaskDrafts",
+  "file": "src/lib/worktasks.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]",
+   "WorkTask[]",
+   "string",
+   "string"
+  ],
+  "ret": "Omit<WorkTask, 'id' | 'createdAt' | 'by'>[]"
+ },
+ {
+  "id": "colRefToIndex",
+  "file": "src/lib/xlsx.ts",
+  "op": "measure",
+  "sockets": [
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "parseXlsxSheet",
+  "file": "src/lib/xlsx.ts",
+  "op": "collection",
+  "sockets": [
+   "Uint8Array"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "askMaor",
+  "file": "src/components/supporters/askMaor.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "Db",
+   "string",
+   "number"
+  ],
+  "ret": "AskAnswer | null"
+ },
+ {
+  "id": "daysSince",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "measure",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "cockpitAtRisk",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "silentDays = COCKPIT_SILENT_DAYS"
+  ],
+  "ret": "Supporter[]"
+ },
+ {
+  "id": "cockpitCalls",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7",
+   "silentDays = COCKPIT_SILENT_DAYS"
+  ],
+  "ret": "CockpitTask[]"
+ },
+ {
+  "id": "cockpitThanks",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "windowDays = COCKPIT_THANK_DAYS"
+  ],
+  "ret": "CockpitTask[]"
+ },
+ {
+  "id": "cockpitHokTasks",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string"
+  ],
+  "ret": "CockpitTask[]"
+ },
+ {
+  "id": "cockpitCollectedThisMonth",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "measure",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "cockpitKpis",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "CockpitKpis"
+ },
+ {
+  "id": "cockpitQueue",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "CockpitQueue"
+ },
+ {
+  "id": "cockpitProgress",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "transform",
+  "sockets": [
+   "CockpitQueue",
+   "ReadonlySet<string>"
+  ],
+  "ret": ""
+ },
+ {
+  "id": "cockpitCsvRows",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "collection",
+  "sockets": [
+   "CockpitQueue"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "cockpitWorkListText",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "format",
+  "sockets": [
+   "CockpitQueue"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "cockpitFeed",
+  "file": "src/components/supporters/cockpit.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "limit = 8"
+  ],
+  "ret": "CockpitFeedItem[]"
+ },
+ {
+  "id": "buildCommands",
+  "file": "src/components/supporters/commands.ts",
+  "op": "collection",
+  "sockets": [
+   "CommandContext"
+  ],
+  "ret": "Command[]"
+ },
+ {
+  "id": "filterCommands",
+  "file": "src/components/supporters/commands.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Command[]",
+   "string",
+   "limit = 12"
+  ],
+  "ret": "Command[]"
+ },
+ {
+  "id": "donorConstellation",
+  "file": "src/components/supporters/constellation.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "ConstellationOpts = {}"
+  ],
+  "ret": "ConstellationNode[]"
+ },
+ {
+  "id": "hebSeasonOf",
+  "file": "src/components/supporters/hebTiming.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "HebSeasonNow"
+ },
+ {
+  "id": "hebTimingTasks",
+  "file": "src/components/supporters/hebTiming.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "cap = 40"
+  ],
+  "ret": "HebTimingTask[]"
+ },
+ {
+  "id": "shiftIso",
+  "file": "src/components/supporters/intel.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "dayDiff",
+  "file": "src/components/supporters/intel.ts",
+  "op": "measure",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "donorScan",
+  "file": "src/components/supporters/intel.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "string",
+   "rate = 3.7",
+   "months = 12"
+  ],
+  "ret": "DonorScan"
+ },
+ {
+  "id": "rfmFromScan",
+  "file": "src/components/supporters/intel.ts",
+  "op": "transform",
+  "sockets": [
+   "DonorScan",
+   "string"
+  ],
+  "ret": "Rfm"
+ },
+ {
+  "id": "churnFromScan",
+  "file": "src/components/supporters/intel.ts",
+  "op": "measure",
+  "sockets": [
+   "DonorScan",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "forecastFromScan",
+  "file": "src/components/supporters/intel.ts",
+  "op": "transform",
+  "sockets": [
+   "DonorScan",
+   "string"
+  ],
+  "ret": "GiftForecast | null"
+ },
+ {
+  "id": "trendFromScan",
+  "file": "src/components/supporters/intel.ts",
+  "op": "transform",
+  "sockets": [
+   "DonorScan"
+  ],
+  "ret": "DonorTrend"
+ },
+ {
+  "id": "donorIntel",
+  "file": "src/components/supporters/intel.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "string",
+   "rate = 3.7",
+   "months = 12"
+  ],
+  "ret": "DonorIntel"
+ },
+ {
+  "id": "intelCsvRows",
+  "file": "src/components/supporters/intelExport.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "string[][]"
+ },
+ {
+  "id": "fmtDate",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "isoToday",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [],
+  "ret": "string"
+ },
+ {
+  "id": "supporterPurposes",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "{ donations?: Supporter['donations']; forWho?: string }"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "supporterVisibleForDesignations",
+  "file": "src/components/supporters/lib.ts",
+  "op": "predicate",
+  "sockets": [
+   "{ forWho?: string }",
+   "string[] | null"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "visibleSupportersForDesignations",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]",
+   "string[] | null"
+  ],
+  "ret": "Supporter[]"
+ },
+ {
+  "id": "allDonationPurposes",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "{ donations?: Supporter['donations']; forWho?: string }[]"
+  ],
+  "ret": "string[]"
+ },
+ {
+  "id": "supIls",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "supUsd",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "supCount",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "supLast",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "supLastInPeriod",
+  "file": "src/components/supporters/lib.ts",
+  "op": "predicate",
+  "sockets": [
+   "Supporter",
+   "number | null",
+   "number | null"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "supTotalIls",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter",
+   "rate = 3.7"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "supScore",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter",
+   "rate = 3.7"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "supTier",
+  "file": "src/components/supporters/lib.ts",
+  "op": "transform",
+  "sockets": [
+   "number"
+  ],
+  "ret": "SupTier"
+ },
+ {
+  "id": "supScoreBins",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "rate = 3.7"
+  ],
+  "ret": "number[]"
+ },
+ {
+  "id": "supAvgDon",
+  "file": "src/components/supporters/lib.ts",
+  "op": "guard",
+  "sockets": [
+   "readonly Supporter[]",
+   "rate = 3.7"
+  ],
+  "ret": "number | null"
+ },
+ {
+  "id": "sup12m",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "readonly Supporter[]",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "chipStyle",
+  "file": "src/components/supporters/lib.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "string"
+  ],
+  "ret": "CSSProperties"
+ },
+ {
+  "id": "fixPhone",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "phoneRegion",
+  "file": "src/components/supporters/lib.ts",
+  "op": "transform",
+  "sockets": [
+   "string"
+  ],
+  "ret": "'il' | 'intl'"
+ },
+ {
+  "id": "allSupPhones",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "SupPhoneRow[]"
+ },
+ {
+  "id": "supHasRegion",
+  "file": "src/components/supporters/lib.ts",
+  "op": "predicate",
+  "sockets": [
+   "Supporter",
+   "'il' | 'intl'"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "cleanSupPhones",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "SupPhone[] | undefined"
+  ],
+  "ret": "SupPhone[]"
+ },
+ {
+  "id": "segulaReminders",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "string",
+   "readonly number[] = SEGULA_OFFSETS"
+  ],
+  "ret": "SegulaReminder[]"
+ },
+ {
+  "id": "segulaTitle",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "SegulaReminder",
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "totalLabel",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "supDonEvents",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter",
+   "OrgConfig"
+  ],
+  "ret": "SupDonEvent[]"
+ },
+ {
+  "id": "personalCalEntries",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter"
+  ],
+  "ret": "SupCalEntry[]"
+ },
+ {
+  "id": "orgCalEntries",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]"
+  ],
+  "ret": "SupCalEntry[]"
+ },
+ {
+  "id": "normName",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "excelSerialToIso",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "parseSupporterGrid",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "string[][]"
+  ],
+  "ret": "SupporterImportRow[]"
+ },
+ {
+  "id": "parseSupporterCsv",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "string"
+  ],
+  "ret": "SupporterImportRow[]"
+ },
+ {
+  "id": "mergeHist",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "HistEntry[]",
+   "HistEntry[]"
+  ],
+  "ret": "HistEntry[]"
+ },
+ {
+  "id": "planSupporterImport",
+  "file": "src/components/supporters/lib.ts",
+  "op": "transform",
+  "sockets": [
+   "SupporterImportRow[]",
+   "Supporter[]"
+  ],
+  "ret": "SupporterImportPlan"
+ },
+ {
+  "id": "mergeSupporterRow",
+  "file": "src/components/supporters/lib.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "SupporterImportRow"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "newSupporterFromRow",
+  "file": "src/components/supporters/lib.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "SupporterImportRow"
+  ],
+  "ret": "Supporter"
+ },
+ {
+  "id": "hokEffectivelyActive",
+  "file": "src/components/supporters/lib.ts",
+  "op": "predicate",
+  "sockets": [
+   "Supporter",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "hokRecordedThisMonth",
+  "file": "src/components/supporters/lib.ts",
+  "op": "predicate",
+  "sockets": [
+   "Supporter",
+   "string"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "hokDue",
+  "file": "src/components/supporters/lib.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter[]",
+   "string"
+  ],
+  "ret": "Supporter[]"
+ },
+ {
+  "id": "hokMonthlyTotal",
+  "file": "src/components/supporters/lib.ts",
+  "op": "measure",
+  "sockets": [
+   "Supporter[]",
+   "number",
+   "string"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "hokMethodLabel",
+  "file": "src/components/supporters/lib.ts",
+  "op": "format",
+  "sockets": [
+   "string"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "paretoReport",
+  "file": "src/components/supporters/pareto.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "ParetoReport"
+ },
+ {
+  "id": "isOpenPlan",
+  "file": "src/components/supporters/planned.ts",
+  "op": "predicate",
+  "sockets": [
+   "PlannedCharge"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "openPlans",
+  "file": "src/components/supporters/planned.ts",
+  "op": "collection",
+  "sockets": [
+   "HasPlannedCharges"
+  ],
+  "ret": "PlannedCharge[]"
+ },
+ {
+  "id": "pendingIls",
+  "file": "src/components/supporters/planned.ts",
+  "op": "measure",
+  "sockets": [
+   "HasPlannedCharges"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "pendingUsd",
+  "file": "src/components/supporters/planned.ts",
+  "op": "measure",
+  "sockets": [
+   "HasPlannedCharges"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "plannedNextDate",
+  "file": "src/components/supporters/planned.ts",
+  "op": "format",
+  "sockets": [
+   "HasPlannedCharges"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "overduePlans",
+  "file": "src/components/supporters/planned.ts",
+  "op": "collection",
+  "sockets": [
+   "HasPlannedCharges",
+   "string"
+  ],
+  "ret": "PlannedCharge[]"
+ },
+ {
+  "id": "nextUpcomingPlan",
+  "file": "src/components/supporters/planned.ts",
+  "op": "transform",
+  "sockets": [
+   "HasPlannedCharges",
+   "string"
+  ],
+  "ret": "PlannedCharge | undefined"
+ },
+ {
+  "id": "addMonthsClamped",
+  "file": "src/components/supporters/planned.ts",
+  "op": "format",
+  "sockets": [
+   "string",
+   "number"
+  ],
+  "ret": "string"
+ },
+ {
+  "id": "planCharges",
+  "file": "src/components/supporters/planned.ts",
+  "op": "collection",
+  "sockets": [
+   "PlanSpec"
+  ],
+  "ret": "PlannedCharge[]"
+ },
+ {
+  "id": "portfolioIntel",
+  "file": "src/components/supporters/portfolio.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7",
+   "topN = 10"
+  ],
+  "ret": "PortfolioIntel"
+ },
+ {
+  "id": "tierTrendCounts",
+  "file": "src/components/supporters/portfolio.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "TierTrend[]"
+ },
+ {
+  "id": "activeByMonth",
+  "file": "src/components/supporters/portfolio.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "months = 12",
+   "rate = 3.7"
+  ],
+  "ret": "number[]"
+ },
+ {
+  "id": "contactWindow",
+  "file": "src/components/supporters/quietHours.ts",
+  "op": "transform",
+  "sockets": [
+   "string",
+   "number",
+   "number"
+  ],
+  "ret": "ContactWindow"
+ },
+ {
+  "id": "localQuiet",
+  "file": "src/components/supporters/quietHours.ts",
+  "op": "predicate",
+  "sockets": [
+   "number"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "donorRanks",
+  "file": "src/components/supporters/ranks.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "Map<string, DonorRank>"
+ },
+ {
+  "id": "acquisitionCohorts",
+  "file": "src/components/supporters/retention.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "RetentionReport"
+ },
+ {
+  "id": "seasonality",
+  "file": "src/components/supporters/seasonality.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "rate = 3.7"
+  ],
+  "ret": "Seasonality"
+ },
+ {
+  "id": "donorRhythm",
+  "file": "src/components/supporters/seasonality.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "rate = 3.7"
+  ],
+  "ret": "DonorRhythm"
+ },
+ {
+  "id": "takeSupportersSegment",
+  "file": "src/components/supporters/segments.ts",
+  "op": "transform",
+  "sockets": [],
+  "ret": "SegmentKey | null"
+ },
+ {
+  "id": "segmentCounts",
+  "file": "src/components/supporters/segments.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "SegmentCount[]"
+ },
+ {
+  "id": "atRiskIdSet",
+  "file": "src/components/supporters/segments.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string"
+  ],
+  "ret": "ReadonlySet<string>"
+ },
+ {
+  "id": "matchSegment",
+  "file": "src/components/supporters/segments.ts",
+  "op": "predicate",
+  "sockets": [
+   "Supporter",
+   "SegmentKey",
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7",
+   "ReadonlySet<string>"
+  ],
+  "ret": "boolean"
+ },
+ {
+  "id": "donorSignals",
+  "file": "src/components/supporters/signals.ts",
+  "op": "collection",
+  "sockets": [
+   "Supporter",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "DonorSignal[]"
+ },
+ {
+  "id": "portfolioSignals",
+  "file": "src/components/supporters/signals.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7",
+   "limit = 40"
+  ],
+  "ret": "PortfolioSignals"
+ },
+ {
+  "id": "tierAsOf",
+  "file": "src/components/supporters/tierMigration.ts",
+  "op": "transform",
+  "sockets": [
+   "Supporter",
+   "string",
+   "rate = 3.7"
+  ],
+  "ret": "TierLabel | null"
+ },
+ {
+  "id": "tierMigration",
+  "file": "src/components/supporters/tierMigration.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "monthsBack = 12",
+   "rate = 3.7"
+  ],
+  "ret": "TierMigration"
+ },
+ {
+  "id": "churnAtOffset",
+  "file": "src/components/supporters/timemachine.ts",
+  "op": "measure",
+  "sockets": [
+   "DonorScan",
+   "string",
+   "number"
+  ],
+  "ret": "number"
+ },
+ {
+  "id": "timeMachine",
+  "file": "src/components/supporters/timemachine.ts",
+  "op": "transform",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "rate = 3.7",
+   "readonly number[] = DEFAULT_HORIZONS"
+  ],
+  "ret": "TimeMachine"
+ },
+ {
+  "id": "donorUniverse",
+  "file": "src/components/supporters/universe3d.ts",
+  "op": "collection",
+  "sockets": [
+   "readonly Supporter[]",
+   "string",
+   "ConstellationOpts = {}"
+  ],
+  "ret": "UniverseNode[]"
+ },
+ {
+  "id": "project",
+  "file": "src/components/supporters/universe3d.ts",
+  "op": "transform",
+  "sockets": [
+   "{ x: number; y: number; z: number }",
+   "number",
+   "number",
+   "number",
+   "number"
+  ],
+  "ret": ""
+ }
+]

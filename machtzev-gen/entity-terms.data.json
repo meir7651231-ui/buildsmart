@@ -1,0 +1,273 @@
+{
+ "source": "maor-system/src/types/features.ts TERM_DEFS (entity.*) + נרדפות-ורטיקל מהמדף",
+ "terms": [
+  {
+   "key": "entity.tzCoordinator",
+   "entity": "TzCoordinator",
+   "forms": [
+    "רכז"
+   ],
+   "label": "רכז/ת קופות"
+  },
+  {
+   "key": "entity.tzBox",
+   "entity": "TzBox",
+   "forms": [
+    "קופה"
+   ],
+   "label": "קופת צדקה"
+  },
+  {
+   "key": "entity.tzCampaign",
+   "entity": "TzCampaign",
+   "forms": [
+    "מבצע"
+   ],
+   "label": "מבצע התרמה"
+  },
+  {
+   "key": "entity.volunteer",
+   "entity": "Volunteer",
+   "forms": [
+    "מתנדב"
+   ],
+   "label": "מתנדב"
+  },
+  {
+   "key": "entity.volunteers",
+   "entity": "Volunteer",
+   "forms": [
+    "מתנדבים"
+   ],
+   "label": "מתנדבים (רבים)"
+  },
+  {
+   "key": "entity.shopProduct",
+   "entity": "ShopProduct",
+   "forms": [
+    "מוצר"
+   ],
+   "label": "מוצר שירות"
+  },
+  {
+   "key": "entity.shopStore",
+   "entity": "ShopStore",
+   "forms": [
+    "חנות"
+   ],
+   "label": "חנות שותפה"
+  },
+  {
+   "key": "entity.shopCriterion",
+   "entity": "ShopCriterion",
+   "forms": [
+    "קריטריון"
+   ],
+   "label": "קריטריון זכאות"
+  },
+  {
+   "key": "entity.shopAssignment",
+   "entity": "ShopAssignment",
+   "forms": [
+    "שיוך"
+   ],
+   "label": "שיוך מוצר"
+  },
+  {
+   "key": "entity.shopItem",
+   "entity": "ShopItem",
+   "forms": [
+    "פריט"
+   ],
+   "label": "פריט קטלוג"
+  },
+  {
+   "key": "entity.family",
+   "entity": "Family",
+   "forms": [
+    "משפחה",
+    "לקוח",
+    "בית-אב",
+    "לקוחה"
+   ],
+   "label": "משפחה (יחיד)"
+  },
+  {
+   "key": "entity.familyOf",
+   "entity": "Family",
+   "forms": [
+    "משפחת",
+    "לקוח",
+    "בית"
+   ],
+   "label": "משפחה (סמיכות: \"משפחת דוד\")"
+  },
+  {
+   "key": "entity.member",
+   "entity": "Member",
+   "forms": [
+    "בן/בת משפחה"
+   ],
+   "label": "בן/בת משפחה"
+  },
+  {
+   "key": "entity.members",
+   "entity": "Member",
+   "forms": [
+    "בני משפחה"
+   ],
+   "label": "בני משפחה (רבים)"
+  },
+  {
+   "key": "entity.course",
+   "entity": "Course",
+   "forms": [
+    "חוג",
+    "שיעור",
+    "סדנה"
+   ],
+   "label": "חוג (יחיד)"
+  },
+  {
+   "key": "entity.teacher",
+   "entity": "Teacher",
+   "forms": [
+    "מורה",
+    "מדריכה"
+   ],
+   "label": "מורה"
+  },
+  {
+   "key": "entity.room",
+   "entity": "Room",
+   "forms": [
+    "חדר",
+    "אולם"
+   ],
+   "label": "חדר"
+  },
+  {
+   "key": "entity.rooms",
+   "entity": "Room",
+   "forms": [
+    "חדרים",
+    "אולמות"
+   ],
+   "label": "חדרים (רבים)"
+  },
+  {
+   "key": "entity.student",
+   "entity": null,
+   "forms": [
+    "תלמיד/ה"
+   ],
+   "label": "תלמיד/ה"
+  },
+  {
+   "key": "entity.students",
+   "entity": null,
+   "forms": [
+    "תלמידים"
+   ],
+   "label": "תלמידים (רבים)"
+  },
+  {
+   "key": "entity.supporter",
+   "entity": "Supporter",
+   "forms": [
+    "תורם",
+    "ליד"
+   ],
+   "label": "תורם"
+  },
+  {
+   "key": "entity.donation",
+   "entity": "Donation",
+   "forms": [
+    "תרומה"
+   ],
+   "label": "תרומה"
+  },
+  {
+   "key": "entity.donations",
+   "entity": "Donation",
+   "forms": [
+    "תרומות",
+    "נדבות"
+   ],
+   "label": "תרומות (רבים)"
+  },
+  {
+   "key": "entity.enrollment",
+   "entity": "Enrollment",
+   "forms": [
+    "שיבוץ"
+   ],
+   "label": "שיבוץ"
+  },
+  {
+   "key": "entity.enrollments",
+   "entity": "Enrollment",
+   "forms": [
+    "שיבוצים"
+   ],
+   "label": "שיבוצים (רבים)"
+  },
+  {
+   "key": "entity.cred",
+   "entity": null,
+   "forms": [
+    "מדד אמינות"
+   ],
+   "label": "מדד אמינות"
+  },
+  {
+   "key": "entity.ayinItem",
+   "entity": null,
+   "forms": [
+    "שם לטיפול"
+   ],
+   "label": "פריט למעקב (יחיד)"
+  },
+  {
+   "key": "entity.ayinUnit",
+   "entity": null,
+   "forms": [
+    "כמות"
+   ],
+   "label": "מונה הפריט"
+  },
+  {
+   "key": "entity.delivery",
+   "entity": "Delivery",
+   "forms": [
+    "מסירה"
+   ],
+   "label": "מסירה (חלוקה, יחיד)"
+  },
+  {
+   "key": "entity.callEntry",
+   "entity": "CallEntry",
+   "forms": [
+    "שיחה"
+   ],
+   "label": "כרטיס-שיחה (יחיד)"
+  },
+  {
+   "key": "entity.dialLogEntry",
+   "entity": "DialLogEntry",
+   "forms": [
+    "חיוג"
+   ],
+   "label": "רשומת-חיוג (יחיד)"
+  },
+  {
+   "key": "entity.ayinCase",
+   "entity": "AyinCase",
+   "forms": [
+    "תיק"
+   ],
+   "label": "תיק מעקב-טיפול (יחיד)"
+  }
+ ]
+}

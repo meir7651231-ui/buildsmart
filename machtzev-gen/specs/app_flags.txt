@@ -1,0 +1,15 @@
+הירו 🎚️ דגלי-יכולת | הפעלה/כיבוי מודולים
+כותרת מודולים
+אטום AnimatedToggle ליד
+אטום AnimatedToggle לקוח
+אטום AnimatedToggle פרויקט
+אטום AnimatedToggle שדה
+אטום AnimatedToggle סעיף כתב כמויות
+אטום AnimatedToggle אומדן
+אטום AnimatedToggle הצעה
+אטום AnimatedToggle חוזה
+אטום AnimatedToggle תקציב
+אטום AnimatedToggle משימה
+אטום AnimatedToggle דוח יומי
+אטום AnimatedToggle עובד
+באנר כיבוי מודול לא מוחק נתונים — rollback נשמר

@@ -1,0 +1,1 @@
+{"engine":"parseVcards","origin":"maor-system:src/lib/vcardImport.ts","fields":["fullname","given","family","phones","emails","org","title","address","note"],"plan":[]}

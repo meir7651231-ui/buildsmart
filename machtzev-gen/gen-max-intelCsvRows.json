@@ -1,0 +1,1 @@
+{"engine":"intelCsvRows","origin":"maor-system:src/components/supporters/intelExport.ts","fields":["scan","rfm","kind","name","cat","phone","email","label","ltv","avggift","churn","forecast","topmonth","seasonal"],"plan":[]}

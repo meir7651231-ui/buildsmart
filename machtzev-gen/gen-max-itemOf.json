@@ -1,0 +1,1 @@
+{"engine":"itemOf","origin":"maor-system:src/components/shop/lib.ts","fields":["shopitems","id","itemid","label","kind","storeid","value","baseprice","stock","validdays","name","holidays","active"],"plan":[]}

@@ -1,0 +1,95 @@
+{
+ "regenerated": 9,
+ "modules": 9,
+ "tests": 87,
+ "testsTotal": 87,
+ "rows": [
+  {
+   "module": "schoolos_attendance.dart",
+   "fragments": "193/193",
+   "identical": true,
+   "dead": [],
+   "tests": "5/5",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_rooms.dart",
+   "fragments": "189/190",
+   "identical": false,
+   "dead": [
+    "_RoomsScreenState._anyCap"
+   ],
+   "tests": "7/7",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_teachers.dart",
+   "fragments": "177/177",
+   "identical": true,
+   "dead": [],
+   "tests": "18/18",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_parents.dart",
+   "fragments": "202/202",
+   "identical": true,
+   "dead": [],
+   "tests": "13/13",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_dashboard.dart",
+   "fragments": "143/143",
+   "identical": true,
+   "dead": [],
+   "tests": "8/8",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_fees.dart",
+   "fragments": "203/203",
+   "identical": true,
+   "dead": [],
+   "tests": "10/10",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_students.dart",
+   "fragments": "220/221",
+   "identical": false,
+   "dead": [
+    "_StuData.daysSince"
+   ],
+   "tests": "6/6",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos_courses.dart",
+   "fragments": "222/223",
+   "identical": false,
+   "dead": [
+    "_CoursesData.coursesInRoom"
+   ],
+   "tests": "10/10",
+   "green": true,
+   "fail": ""
+  },
+  {
+   "module": "schoolos.dart",
+   "fragments": "115/116",
+   "identical": false,
+   "dead": [],
+   "tests": "10/10",
+   "green": true,
+   "fail": ""
+  }
+ ]
+}

@@ -1,0 +1,91 @@
+{
+  "families": {
+    "action": {
+      "count": 68,
+      "canonical": 50,
+      "inherit": 18
+    },
+    "card": {
+      "count": 58,
+      "canonical": 32,
+      "inherit": 26
+    },
+    "chat": {
+      "count": 6,
+      "canonical": 6,
+      "inherit": 0
+    },
+    "composite": {
+      "count": 32,
+      "canonical": 18,
+      "inherit": 14
+    },
+    "dataviz": {
+      "count": 37,
+      "canonical": 24,
+      "inherit": 13
+    },
+    "feedback": {
+      "count": 51,
+      "canonical": 27,
+      "inherit": 24
+    },
+    "header": {
+      "count": 33,
+      "canonical": 27,
+      "inherit": 6
+    },
+    "input": {
+      "count": 31,
+      "canonical": 27,
+      "inherit": 4
+    },
+    "list": {
+      "count": 51,
+      "canonical": 16,
+      "inherit": 35
+    },
+    "media": {
+      "count": 30,
+      "canonical": 27,
+      "inherit": 3
+    },
+    "motion": {
+      "count": 8,
+      "canonical": 8,
+      "inherit": 0
+    },
+    "nav": {
+      "count": 12,
+      "canonical": 12,
+      "inherit": 0
+    },
+    "selection": {
+      "count": 57,
+      "canonical": 26,
+      "inherit": 31
+    },
+    "spatial": {
+      "count": 8,
+      "canonical": 8,
+      "inherit": 0
+    },
+    "status": {
+      "count": 54,
+      "canonical": 27,
+      "inherit": 27
+    },
+    "temporal": {
+      "count": 8,
+      "canonical": 8,
+      "inherit": 0
+    },
+    "text": {
+      "count": 20,
+      "canonical": 16,
+      "inherit": 4
+    }
+  },
+  "total": 564,
+  "generatedBy": "machtzev/pure/pure-decompose.mjs"
+}

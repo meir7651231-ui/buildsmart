@@ -1,0 +1,1 @@
+{"engine":"teacherMonthCsvRows","origin":"maor-system:src/components/courses/teacher.ts","fields":["enrollments","courseid","id","status","endedat","presents","absences","date","name","memberid"],"plan":[]}

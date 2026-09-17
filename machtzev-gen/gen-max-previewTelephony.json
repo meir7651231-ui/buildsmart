@@ -1,0 +1,1 @@
+{"engine":"previewTelephony","origin":"maor-system:src/components/telephony/lib.ts","fields":["ok","errors","warnings","tenant","numbers","kind","call","when","summary","outcome","grade","score","ready","failing","label","detail","severity","files"],"plan":[]}

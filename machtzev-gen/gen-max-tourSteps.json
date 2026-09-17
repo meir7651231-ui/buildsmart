@@ -1,0 +1,1 @@
+{"engine":"tourSteps","origin":"maor-system:src/lib/tour.ts","fields":["caption","families","courses","anchortext","course","module"],"plan":[{"kind":"fn","name":"courseDateError","op":"guard","sig":"start: string, end: string, config?: Org","covers":["course"],"from":"maor-system:src/components/courses/lib.ts"}]}

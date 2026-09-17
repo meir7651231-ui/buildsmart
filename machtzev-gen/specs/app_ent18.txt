@@ -1,0 +1,18 @@
+הירו 🗂️ שדה | ישות מורכבת — טופס + טבלה
+אטום BreadcrumbTrail שדה: חדש / נשלח / בבדיקה / נענה / מאושר / סגור
+כותרת טופס שדה
+אטום NumberStepper מספר
+אטום FieldRow פרויקט
+אטום FieldRow תחום
+אטום FieldRow שאלה
+אטום FieldRow מועד נדרש
+אטום FieldRow דחיפות
+אטום NumberStepper השפעת עלות
+אטום AnimatedToggle סטטוס
+אטום FabMenu שמירה
+אטום NeonButton קדם לנשלח
+כותרת רשומות שדה
+אטום DataGrid שדה
+כותרת 🔗 מנוע-חוקים חי · 1 חוקים מהמדף
+חישוב מספר סידורי של (excelSerialToIso)
+באנר ישות שדה: 8 שדות · 6-שלבי workflow · 1 חוקים חיים · מהמדף

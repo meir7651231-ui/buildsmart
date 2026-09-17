@@ -1,0 +1,3135 @@
+{
+ "count": 60,
+ "entities": [
+  {
+   "entity": "Member",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "first",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "gender",
+     "optional": false,
+     "type": "Gender"
+    },
+    {
+     "name": "birth",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "idNum",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone2",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "school",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "grade",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "health",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "mSefach",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "mInvite",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "mRecommend",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "mPhotos",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "mVideos",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "mConsentAt",
+     "optional": true,
+     "type": "Partial<Record<'mSefach' | 'mInvite' | '"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "isParent",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "CredLogEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "delta",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "reason",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "FamilyCred",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "score",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "log",
+     "optional": false,
+     "type": "CredLogEntry[]"
+    }
+   ]
+  },
+  {
+   "entity": "FamilyDoc",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "addedAt",
+     "optional": false,
+     "type": "IsoDate"
+    }
+   ]
+  },
+  {
+   "entity": "Family",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "father",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "fatherId",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "mother",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "motherId",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone2",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "email",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "city",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "address",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "community",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "maritalStatus",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "language",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "tzedaka",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "fullSefach",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "discount",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "status",
+     "optional": false,
+     "type": "FamilyStatus"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "kidsHome",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "kidsMarried",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "members",
+     "optional": false,
+     "type": "Member[]"
+    },
+    {
+     "name": "docs",
+     "optional": false,
+     "type": "FamilyDoc[]"
+    },
+    {
+     "name": "cred",
+     "optional": false,
+     "type": "FamilyCred"
+    },
+    {
+     "name": "createdAt",
+     "optional": false,
+     "type": "IsoDate"
+    }
+   ]
+  },
+  {
+   "entity": "CourseSession",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "day",
+     "optional": false,
+     "type": "Weekday"
+    },
+    {
+     "name": "time",
+     "optional": false,
+     "type": "TimeHM"
+    },
+    {
+     "name": "label",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "CourseFile",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "kind",
+     "optional": false,
+     "type": "'image' | 'file' | 'link'"
+    },
+    {
+     "name": "data",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "mime",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "size",
+     "optional": true,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "Course",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "teacherId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "roomId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "description",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "price",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "price1",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "price2",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "price1Name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "price2Name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "price3",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "price3Name",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "model",
+     "optional": false,
+     "type": "PricingModel"
+    },
+    {
+     "name": "size",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "start",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "end",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "weekday",
+     "optional": false,
+     "type": "Weekday"
+    },
+    {
+     "name": "time",
+     "optional": false,
+     "type": "TimeHM"
+    },
+    {
+     "name": "maxStudents",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "gender",
+     "optional": false,
+     "type": "Gender | 'all'"
+    },
+    {
+     "name": "ageMin",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "ageMax",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cat",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "semester",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "sector",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "audience",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "img",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "gradeMin",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "gradeMax",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "sessions",
+     "optional": false,
+     "type": "CourseSession[]"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "files",
+     "optional": true,
+     "type": "CourseFile[]"
+    },
+    {
+     "name": "perLesson",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "lessonPrice",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "lessonPrice1",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "lessonPrice2",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "lessonPrice3",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "year",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "prevYearId",
+     "optional": true,
+     "type": "Id"
+    }
+   ]
+  },
+  {
+   "entity": "Absence",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "reason",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "makeup",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "makeupDate",
+     "optional": true,
+     "type": "IsoDate"
+    },
+    {
+     "name": "noshow",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "justified",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "Payment",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "rid",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "amount",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "method",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "Enrollment",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "memberId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "courseId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "plan",
+     "optional": false,
+     "type": "PricingModel"
+    },
+    {
+     "name": "purchased",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "used",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "group",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "absences",
+     "optional": false,
+     "type": "Absence[]"
+    },
+    {
+     "name": "presents",
+     "optional": true,
+     "type": "IsoDate[]"
+    },
+    {
+     "name": "payments",
+     "optional": false,
+     "type": "Payment[]"
+    },
+    {
+     "name": "totalDue",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "dueDate",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "dueEventId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "status",
+     "optional": false,
+     "type": "EnrollmentStatus"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "enrolledAt",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "endedAt",
+     "optional": true,
+     "type": "IsoDate"
+    },
+    {
+     "name": "paidFull",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "freq",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "freqUnit",
+     "optional": true,
+     "type": "'week' | 'month'"
+    },
+    {
+     "name": "term",
+     "optional": true,
+     "type": "PricingTerm"
+    },
+    {
+     "name": "termMonths",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "tier",
+     "optional": true,
+     "type": "'' | '1' | '2' | '3'"
+    },
+    {
+     "name": "renew",
+     "optional": true,
+     "type": "'yes' | 'no' | 'hold'"
+    },
+    {
+     "name": "renewNote",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "renewedToId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "year",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "plannedCharges",
+     "optional": true,
+     "type": "PlannedCharge[]"
+    },
+    {
+     "name": "carryBalance",
+     "optional": true,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "Teacher",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone2",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "email",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "idNum",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "address",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "specialty",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "payRate",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "startDate",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "payMethod",
+     "optional": true,
+     "type": "'cash' | 'salary' | 'check' | ''"
+    },
+    {
+     "name": "payToOther",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "payeeName",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "payeePhone",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "payeeIdNum",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "bankName",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "bankBranch",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "bankAccount",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "Room",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "slot",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cap",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "location",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "rate",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "from",
+     "optional": false,
+     "type": "TimeHM"
+    },
+    {
+     "name": "to",
+     "optional": false,
+     "type": "TimeHM"
+    },
+    {
+     "name": "access",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "eq",
+     "optional": false,
+     "type": "Record<string, boolean>"
+    }
+   ]
+  },
+  {
+   "entity": "OrgEvent",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "title",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "time",
+     "optional": false,
+     "type": "TimeHM"
+    },
+    {
+     "name": "type",
+     "optional": false,
+     "type": "EventType"
+    },
+    {
+     "name": "customType",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "price",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "roomId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "famId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "spId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "priority",
+     "optional": false,
+     "type": "EventPriority"
+    },
+    {
+     "name": "done",
+     "optional": false,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "Donation",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "rid",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "amount",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cur",
+     "optional": false,
+     "type": "'₪' | '$'"
+    },
+    {
+     "name": "cat",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "designation",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "purpose",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "AyinName",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "eyes",
+     "optional": false,
+     "type": "number | ''"
+    },
+    {
+     "name": "done",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "rate",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "note",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "days",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "deps",
+     "optional": true,
+     "type": "Id[]"
+    }
+   ]
+  },
+  {
+   "entity": "KitItem",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "label",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "done",
+     "optional": false,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "WarehouseItem",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "unit",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "qty",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cost",
+     "optional": false,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "AyinAnswer",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "TimeEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "hours",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "rate",
+     "optional": true,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "MatEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "qty",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cost",
+     "optional": false,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "AyinLog",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "eyes",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "name",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "AyinCase",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "stage",
+     "optional": false,
+     "type": "AyinStage"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "answeredNote",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "paid",
+     "optional": true,
+     "type": "boolean"
+    },
+    {
+     "name": "answerPushed",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "nextTalk",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "nextTalkTime",
+     "optional": false,
+     "type": "TimeHM"
+    },
+    {
+     "name": "lastTouch",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "names",
+     "optional": false,
+     "type": "AyinName[]"
+    },
+    {
+     "name": "answers",
+     "optional": false,
+     "type": "AyinAnswer[]"
+    },
+    {
+     "name": "log",
+     "optional": false,
+     "type": "AyinLog[]"
+    },
+    {
+     "name": "time",
+     "optional": true,
+     "type": "TimeEntry[]"
+    },
+    {
+     "name": "mat",
+     "optional": true,
+     "type": "MatEntry[]"
+    },
+    {
+     "name": "kit",
+     "optional": true,
+     "type": "KitItem[]"
+    },
+    {
+     "name": "boardEventIds",
+     "optional": true,
+     "type": "Partial<Record<string, Id>>"
+    }
+   ]
+  },
+  {
+   "entity": "PlannedCharge",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "amount",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cur",
+     "optional": false,
+     "type": "'₪' | '$'"
+    },
+    {
+     "name": "method",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "cat",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "installmentOf",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "chargedRid",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "cancelledAt",
+     "optional": true,
+     "type": "IsoDate"
+    },
+    {
+     "name": "note",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "componentId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "shopValue",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "shopHoliday",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "Hok",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "amount",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "cur",
+     "optional": false,
+     "type": "'₪' | '$'"
+    },
+    {
+     "name": "day",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "method",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "startedAt",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "kevaId",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "SupPhone",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "num",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "label",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "note",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "wa",
+     "optional": true,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "Supporter",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phones",
+     "optional": true,
+     "type": "SupPhone[]"
+    },
+    {
+     "name": "email",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "address",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "city",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "idNum",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "extId",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "cat",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "forWho",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "count",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "ils",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "usd",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "first",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "last",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "nextDate",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "nextNote",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "photos",
+     "optional": true,
+     "type": "string[]"
+    },
+    {
+     "name": "nextEventId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "donations",
+     "optional": false,
+     "type": "Donation[]"
+    },
+    {
+     "name": "d",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "a",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "c",
+     "optional": true,
+     "type": "'₪' | '$'"
+    },
+    {
+     "name": "ref",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "last4",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "clearer",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "pays",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "hok",
+     "optional": true,
+     "type": "Hok"
+    },
+    {
+     "name": "plannedCharges",
+     "optional": true,
+     "type": "PlannedCharge[]"
+    },
+    {
+     "name": "ayin",
+     "optional": true,
+     "type": "AyinCase"
+    },
+    {
+     "name": "calls",
+     "optional": true,
+     "type": "CallEntry[]"
+    }
+   ]
+  },
+  {
+   "entity": "NotifPrefs",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "email",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "push",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "sms",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "strong",
+     "optional": false,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "ReportPrefs",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "daily",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "weekly",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "monthly",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "quarterly",
+     "optional": false,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "QuoteTemplate",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "lines",
+     "optional": false,
+     "type": "{ name: string"
+    }
+   ]
+  },
+  {
+   "entity": "DialLogEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "outcome",
+     "optional": false,
+     "type": "DialOutcome"
+    },
+    {
+     "name": "note",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "at",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "CallEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "at",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "outcome",
+     "optional": false,
+     "type": "DialOutcome"
+    }
+   ]
+  },
+  {
+   "entity": "DialerCampaign",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "startedAt",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "queue",
+     "optional": false,
+     "type": "Id[]"
+    },
+    {
+     "name": "total",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "log",
+     "optional": false,
+     "type": "DialLogEntry[]"
+    }
+   ]
+  },
+  {
+   "entity": "UiPrefs",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "famView",
+     "optional": false,
+     "type": "'list' | 'grid'"
+    },
+    {
+     "name": "crsView",
+     "optional": false,
+     "type": "'list' | 'grid'"
+    },
+    {
+     "name": "quoteTemplates",
+     "optional": true,
+     "type": "QuoteTemplate[]"
+    },
+    {
+     "name": "supView",
+     "optional": true,
+     "type": "'list' | 'grid'"
+    },
+    {
+     "name": "receiptFmt",
+     "optional": true,
+     "type": "'txt' | 'pdf'"
+    },
+    {
+     "name": "homeLayout",
+     "optional": true,
+     "type": "string[]"
+    },
+    {
+     "name": "theme",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "accent",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "dialer",
+     "optional": true,
+     "type": "DialerCampaign"
+    },
+    {
+     "name": "cashSeq",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "cashReceipts",
+     "optional": true,
+     "type": "CashReceiptRec[]"
+    },
+    {
+     "name": "cashShift",
+     "optional": true,
+     "type": "CashShiftRec | null"
+    },
+    {
+     "name": "cashShifts",
+     "optional": true,
+     "type": "CashShiftCloseRec[]"
+    }
+   ]
+  },
+  {
+   "entity": "CashReceiptRec",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "num",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "at",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "client",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "due",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "received",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "change",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "items",
+     "optional": true,
+     "type": "{ name: string"
+    }
+   ]
+  },
+  {
+   "entity": "CashShiftRec",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "openedAt",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "float",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "checks",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "other",
+     "optional": true,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "CashShiftCloseRec",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "closedAt",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "openedAt",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "float",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "sales",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "count",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "counted",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "diff",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "openChecks",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "closeChecks",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "openOther",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "closeOther",
+     "optional": true,
+     "type": "number"
+    }
+   ]
+  },
+  {
+   "entity": "TzScoreEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "delta",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "reason",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "TzCoordinator",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "famId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "memberId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "startDate",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "score",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "scoreLog",
+     "optional": false,
+     "type": "TzScoreEntry[]"
+    }
+   ]
+  },
+  {
+   "entity": "TzCollection",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "amount",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "campaignId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "TzBox",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "num",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "coordinatorId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "famId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "holderKind",
+     "optional": false,
+     "type": "'donor' | 'supported' | ''"
+    },
+    {
+     "name": "since",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "status",
+     "optional": false,
+     "type": "TzBoxStatus"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "collections",
+     "optional": false,
+     "type": "TzCollection[]"
+    }
+   ]
+  },
+  {
+   "entity": "TzCampaign",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "start",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "end",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "goal",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "TzEvent",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "title",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "time",
+     "optional": false,
+     "type": "TimeHM | ''"
+    },
+    {
+     "name": "kind",
+     "optional": false,
+     "type": "'round' | 'campaign' | 'reminder' | 'cus"
+    },
+    {
+     "name": "coordinatorId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "boxId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "done",
+     "optional": false,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "ShopItem",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "kind",
+     "optional": false,
+     "type": "ShopComponentKind"
+    },
+    {
+     "name": "storeId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "value",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "basePrice",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "stock",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "minStock",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "validDays",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "holidays",
+     "optional": true,
+     "type": "string[]"
+    },
+    {
+     "name": "waits",
+     "optional": true,
+     "type": "{ famId: Id"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "ShopComponent",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "itemId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "kind",
+     "optional": false,
+     "type": "ShopComponentKind"
+    },
+    {
+     "name": "label",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "storeId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "value",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "basePrice",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "stock",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "validDays",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "ShopIntake",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "itemId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "qty",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "kind",
+     "optional": false,
+     "type": "'buy' | 'donation'"
+    },
+    {
+     "name": "source",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "cost",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "expiry",
+     "optional": true,
+     "type": "IsoDate"
+    }
+   ]
+  },
+  {
+   "entity": "ShopProduct",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "desc",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "img",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "components",
+     "optional": false,
+     "type": "ShopComponent[]"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "ShopStore",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "contact",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "ShopCriterion",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "discountPct",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "ShopRedemption",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "rid",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "voidedAt",
+     "optional": true,
+     "type": "IsoDate"
+    },
+    {
+     "name": "voidReason",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "componentId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "holiday",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "paid",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "value",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "ShopAssignment",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "productId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "famId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "memberId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "criterionIds",
+     "optional": false,
+     "type": "Id[]"
+    },
+    {
+     "name": "since",
+     "optional": false,
+     "type": "IsoDate | ''"
+    },
+    {
+     "name": "status",
+     "optional": false,
+     "type": "ShopAssignmentStatus"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "redemptions",
+     "optional": false,
+     "type": "ShopRedemption[]"
+    },
+    {
+     "name": "plannedCharges",
+     "optional": true,
+     "type": "PlannedCharge[]"
+    }
+   ]
+  },
+  {
+   "entity": "ShopEvent",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "title",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "time",
+     "optional": false,
+     "type": "TimeHM | ''"
+    },
+    {
+     "name": "kind",
+     "optional": false,
+     "type": "'meeting' | 'delivery' | 'holiday' | 'cu"
+    },
+    {
+     "name": "assignmentId",
+     "optional": false,
+     "type": "Id | ''"
+    },
+    {
+     "name": "roomId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "mainEventId",
+     "optional": true,
+     "type": "Id"
+    },
+    {
+     "name": "notes",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "done",
+     "optional": false,
+     "type": "boolean"
+    }
+   ]
+  },
+  {
+   "entity": "Volunteer",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "name",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "phone",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "area",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "maxDeliveries",
+     "optional": true,
+     "type": "number"
+    },
+    {
+     "name": "active",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "createdAt",
+     "optional": false,
+     "type": "IsoDate"
+    }
+   ]
+  },
+  {
+   "entity": "WorkTask",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "assignee",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "by",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "title",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "ref",
+     "optional": true,
+     "type": "{ kind: 'supporter' | 'family' | 'course"
+    },
+    {
+     "name": "pri",
+     "optional": false,
+     "type": "1 | 2 | 3"
+    },
+    {
+     "name": "due",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "createdAt",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "doneAt",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "note",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "Delivery",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "dayId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "assignmentId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "volunteerId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "familyId",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "status",
+     "optional": false,
+     "type": "DeliveryStatus"
+    },
+    {
+     "name": "deliveredAt",
+     "optional": true,
+     "type": "IsoDate"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "signature",
+     "optional": true,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "DistributionDay",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "id",
+     "optional": false,
+     "type": "Id"
+    },
+    {
+     "name": "date",
+     "optional": false,
+     "type": "IsoDate"
+    },
+    {
+     "name": "title",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "note",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "closed",
+     "optional": false,
+     "type": "boolean"
+    },
+    {
+     "name": "createdAt",
+     "optional": false,
+     "type": "IsoDate"
+    }
+   ]
+  },
+  {
+   "entity": "Db",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "v",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "savedAt",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "seq",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "receiptSeq",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "donationSeq",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "shopReceiptSeq",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "families",
+     "optional": false,
+     "type": "Family[]"
+    },
+    {
+     "name": "enrollments",
+     "optional": false,
+     "type": "Enrollment[]"
+    },
+    {
+     "name": "courses",
+     "optional": false,
+     "type": "Course[]"
+    },
+    {
+     "name": "events",
+     "optional": false,
+     "type": "OrgEvent[]"
+    },
+    {
+     "name": "rooms",
+     "optional": false,
+     "type": "Room[]"
+    },
+    {
+     "name": "teachers",
+     "optional": false,
+     "type": "Teacher[]"
+    },
+    {
+     "name": "supporters",
+     "optional": false,
+     "type": "Supporter[]"
+    },
+    {
+     "name": "tzCoordinators",
+     "optional": false,
+     "type": "TzCoordinator[]"
+    },
+    {
+     "name": "tzBoxes",
+     "optional": false,
+     "type": "TzBox[]"
+    },
+    {
+     "name": "tzCampaigns",
+     "optional": false,
+     "type": "TzCampaign[]"
+    },
+    {
+     "name": "tzEvents",
+     "optional": false,
+     "type": "TzEvent[]"
+    },
+    {
+     "name": "shopItems",
+     "optional": false,
+     "type": "ShopItem[]"
+    },
+    {
+     "name": "shopProducts",
+     "optional": false,
+     "type": "ShopProduct[]"
+    },
+    {
+     "name": "shopStores",
+     "optional": false,
+     "type": "ShopStore[]"
+    },
+    {
+     "name": "shopCriteria",
+     "optional": false,
+     "type": "ShopCriterion[]"
+    },
+    {
+     "name": "shopAssignments",
+     "optional": false,
+     "type": "ShopAssignment[]"
+    },
+    {
+     "name": "shopEvents",
+     "optional": false,
+     "type": "ShopEvent[]"
+    },
+    {
+     "name": "shopIntakes",
+     "optional": false,
+     "type": "ShopIntake[]"
+    },
+    {
+     "name": "volunteers",
+     "optional": false,
+     "type": "Volunteer[]"
+    },
+    {
+     "name": "distributionDays",
+     "optional": false,
+     "type": "DistributionDay[]"
+    },
+    {
+     "name": "deliveries",
+     "optional": false,
+     "type": "Delivery[]"
+    },
+    {
+     "name": "tasks",
+     "optional": false,
+     "type": "WorkTask[]"
+    },
+    {
+     "name": "warehouse",
+     "optional": false,
+     "type": "WarehouseItem[]"
+    },
+    {
+     "name": "orgName",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "orgSite",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "orgDonate",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "orgGoal",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "budget",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "usdRate",
+     "optional": false,
+     "type": "number"
+    },
+    {
+     "name": "notif",
+     "optional": false,
+     "type": "NotifPrefs"
+    },
+    {
+     "name": "reports",
+     "optional": false,
+     "type": "ReportPrefs"
+    },
+    {
+     "name": "ui",
+     "optional": false,
+     "type": "UiPrefs"
+    },
+    {
+     "name": "attnDone",
+     "optional": false,
+     "type": "Record<string, string>"
+    },
+    {
+     "name": "security",
+     "optional": false,
+     "type": "SecurityCfg"
+    },
+    {
+     "name": "audit",
+     "optional": true,
+     "type": "AuditEntry[]"
+    },
+    {
+     "name": "delLog",
+     "optional": true,
+     "type": "DelEntry[]"
+    }
+   ]
+  },
+  {
+   "entity": "AuditEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "at",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "who",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "act",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "what",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "DelEntry",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "at",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "col",
+     "optional": false,
+     "type": "string"
+    },
+    {
+     "name": "id",
+     "optional": false,
+     "type": "string"
+    }
+   ]
+  },
+  {
+   "entity": "SecurityCfg",
+   "repo": "maor",
+   "fields": [
+    {
+     "name": "primary",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "secondary",
+     "optional": true,
+     "type": "string"
+    },
+    {
+     "name": "zones",
+     "optional": true,
+     "type": "string[]"
+    }
+   ]
+  }
+ ]
+}

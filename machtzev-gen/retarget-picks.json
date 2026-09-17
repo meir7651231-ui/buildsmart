@@ -1,0 +1,494 @@
+{
+ "picks": [
+  {
+   "entity": "Member",
+   "module": "schoolos_students.dart",
+   "seed": "families",
+   "names": 16,
+   "sim": 0.906,
+   "fields": 17,
+   "confidence": 0.94,
+   "strength": "strong"
+  },
+  {
+   "entity": "CredLogEntry",
+   "module": "schoolos_teachers.dart",
+   "seed": "roster",
+   "names": 2,
+   "sim": 0.664,
+   "fields": 3,
+   "confidence": 0.67,
+   "strength": "medium"
+  },
+  {
+   "entity": "FamilyCred",
+   "module": "schoolos_students.dart",
+   "seed": "families",
+   "names": 1,
+   "sim": 0.101,
+   "fields": 2,
+   "confidence": 0.5,
+   "strength": "weak"
+  },
+  {
+   "entity": "FamilyDoc",
+   "module": "schoolos_students.dart",
+   "seed": "families",
+   "names": 3,
+   "sim": 0.657,
+   "fields": 3,
+   "confidence": 1,
+   "strength": "medium"
+  },
+  {
+   "entity": "Family",
+   "module": "schoolos_students.dart",
+   "seed": "families",
+   "names": 19,
+   "sim": 0.965,
+   "fields": 25,
+   "confidence": 0.76,
+   "strength": "strong"
+  },
+  {
+   "entity": "CourseSession",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 3,
+   "sim": 0.532,
+   "fields": 3,
+   "confidence": 1,
+   "strength": "medium"
+  },
+  {
+   "entity": "CourseFile",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 4,
+   "sim": 0.921,
+   "fields": 6,
+   "confidence": 0.67,
+   "strength": "strong"
+  },
+  {
+   "entity": "Course",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 23,
+   "sim": 0.959,
+   "fields": 39,
+   "confidence": 0.59,
+   "strength": "strong"
+  },
+  {
+   "entity": "Absence",
+   "module": "schoolos_teachers.dart",
+   "seed": "roster",
+   "names": 2,
+   "sim": 0.384,
+   "fields": 6,
+   "confidence": 0.33,
+   "strength": "medium"
+  },
+  {
+   "entity": "Payment",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 4,
+   "sim": 0.93,
+   "fields": 4,
+   "confidence": 1,
+   "strength": "strong"
+  },
+  {
+   "entity": "Enrollment",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 4,
+   "sim": 0.547,
+   "fields": 26,
+   "confidence": 0.15,
+   "strength": "strong"
+  },
+  {
+   "entity": "Teacher",
+   "module": "schoolos_students.dart",
+   "seed": "families",
+   "names": 8,
+   "sim": 0.966,
+   "fields": 19,
+   "confidence": 0.42,
+   "strength": "strong"
+  },
+  {
+   "entity": "Room",
+   "module": "schoolos_rooms.dart",
+   "seed": "rooms",
+   "names": 11,
+   "sim": 0.985,
+   "fields": 12,
+   "confidence": 0.92,
+   "strength": "strong"
+  },
+  {
+   "entity": "OrgEvent",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 5,
+   "sim": 0.716,
+   "fields": 13,
+   "confidence": 0.38,
+   "strength": "strong"
+  },
+  {
+   "entity": "Donation",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 5,
+   "sim": 0.931,
+   "fields": 7,
+   "confidence": 0.71,
+   "strength": "strong"
+  },
+  {
+   "entity": "AyinName",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 3,
+   "sim": 0.618,
+   "fields": 8,
+   "confidence": 0.38,
+   "strength": "medium"
+  },
+  {
+   "entity": "KitItem",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 1,
+   "sim": 0.652,
+   "fields": 2,
+   "confidence": 0.5,
+   "strength": "weak"
+  },
+  {
+   "entity": "WarehouseItem",
+   "module": "schoolos.dart",
+   "seed": "items",
+   "names": 2,
+   "sim": 0.929,
+   "fields": 5,
+   "confidence": 0.4,
+   "strength": "medium"
+  },
+  {
+   "entity": "AyinAnswer",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 2,
+   "sim": 0.84,
+   "fields": 2,
+   "confidence": 1,
+   "strength": "medium"
+  },
+  {
+   "entity": "TimeEntry",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 2,
+   "sim": 0.647,
+   "fields": 4,
+   "confidence": 0.5,
+   "strength": "medium"
+  },
+  {
+   "entity": "MatEntry",
+   "module": "schoolos.dart",
+   "seed": "items",
+   "names": 1,
+   "sim": 0.911,
+   "fields": 3,
+   "confidence": 0.33,
+   "strength": "weak"
+  },
+  {
+   "entity": "AyinLog",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 2,
+   "sim": 0.8,
+   "fields": 3,
+   "confidence": 0.67,
+   "strength": "medium"
+  },
+  {
+   "entity": "AyinCase",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 1,
+   "sim": 0.555,
+   "fields": 15,
+   "confidence": 0.07,
+   "strength": "weak"
+  },
+  {
+   "entity": "Hok",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 8,
+   "sim": 0.854,
+   "fields": 8,
+   "confidence": 1,
+   "strength": "strong"
+  },
+  {
+   "entity": "Supporter",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 11,
+   "sim": 0.976,
+   "fields": 24,
+   "confidence": 0.46,
+   "strength": "strong"
+  },
+  {
+   "entity": "QuoteTemplate",
+   "module": "schoolos_attendance.dart",
+   "seed": "students",
+   "names": 2,
+   "sim": 0.655,
+   "fields": 3,
+   "confidence": 0.67,
+   "strength": "medium"
+  },
+  {
+   "entity": "DialLogEntry",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 4,
+   "sim": 0.768,
+   "fields": 4,
+   "confidence": 1,
+   "strength": "strong"
+  },
+  {
+   "entity": "CallEntry",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 2,
+   "sim": 0.21,
+   "fields": 2,
+   "confidence": 1,
+   "strength": "medium"
+  },
+  {
+   "entity": "DialerCampaign",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 2,
+   "sim": 0.879,
+   "fields": 5,
+   "confidence": 0.4,
+   "strength": "medium"
+  },
+  {
+   "entity": "TzScoreEntry",
+   "module": "schoolos_teachers.dart",
+   "seed": "roster",
+   "names": 2,
+   "sim": 0.664,
+   "fields": 3,
+   "confidence": 0.67,
+   "strength": "medium"
+  },
+  {
+   "entity": "TzCoordinator",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 5,
+   "sim": 0.802,
+   "fields": 10,
+   "confidence": 0.5,
+   "strength": "strong"
+  },
+  {
+   "entity": "TzCollection",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 4,
+   "sim": 0.599,
+   "fields": 5,
+   "confidence": 0.8,
+   "strength": "strong"
+  },
+  {
+   "entity": "TzBox",
+   "module": "schoolos_teachers.dart",
+   "seed": "roster",
+   "names": 3,
+   "sim": 0.659,
+   "fields": 9,
+   "confidence": 0.33,
+   "strength": "medium"
+  },
+  {
+   "entity": "TzCampaign",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 5,
+   "sim": 0.812,
+   "fields": 7,
+   "confidence": 0.71,
+   "strength": "strong"
+  },
+  {
+   "entity": "TzEvent",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 4,
+   "sim": 0.636,
+   "fields": 9,
+   "confidence": 0.44,
+   "strength": "strong"
+  },
+  {
+   "entity": "ShopItem",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 4,
+   "sim": 0.808,
+   "fields": 13,
+   "confidence": 0.31,
+   "strength": "strong"
+  },
+  {
+   "entity": "ShopComponent",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 4,
+   "sim": 0.738,
+   "fields": 10,
+   "confidence": 0.4,
+   "strength": "strong"
+  },
+  {
+   "entity": "ShopIntake",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 3,
+   "sim": 0.72,
+   "fields": 9,
+   "confidence": 0.33,
+   "strength": "medium"
+  },
+  {
+   "entity": "ShopProduct",
+   "module": "schoolos_rooms.dart",
+   "seed": "rooms",
+   "names": 4,
+   "sim": 0.718,
+   "fields": 7,
+   "confidence": 0.57,
+   "strength": "strong"
+  },
+  {
+   "entity": "ShopStore",
+   "module": "schoolos_students.dart",
+   "seed": "families",
+   "names": 4,
+   "sim": 0.961,
+   "fields": 6,
+   "confidence": 0.67,
+   "strength": "strong"
+  },
+  {
+   "entity": "ShopCriterion",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 3,
+   "sim": 0.955,
+   "fields": 4,
+   "confidence": 0.75,
+   "strength": "medium"
+  },
+  {
+   "entity": "ShopRedemption",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 4,
+   "sim": 0.898,
+   "fields": 10,
+   "confidence": 0.4,
+   "strength": "strong"
+  },
+  {
+   "entity": "ShopAssignment",
+   "module": "schoolos_teachers.dart",
+   "seed": "roster",
+   "names": 3,
+   "sim": 0.48,
+   "fields": 9,
+   "confidence": 0.33,
+   "strength": "medium"
+  },
+  {
+   "entity": "ShopEvent",
+   "module": "schoolos_courses.dart",
+   "seed": "courses",
+   "names": 5,
+   "sim": 0.579,
+   "fields": 10,
+   "confidence": 0.5,
+   "strength": "strong"
+  },
+  {
+   "entity": "Volunteer",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 5,
+   "sim": 0.941,
+   "fields": 8,
+   "confidence": 0.63,
+   "strength": "strong"
+  },
+  {
+   "entity": "WorkTask",
+   "module": "schoolos_dashboard.dart",
+   "seed": "tasks",
+   "names": 4,
+   "sim": 0.929,
+   "fields": 10,
+   "confidence": 0.4,
+   "strength": "strong"
+  },
+  {
+   "entity": "Delivery",
+   "module": "schoolos_dashboard.dart",
+   "seed": "tasks",
+   "names": 3,
+   "sim": 0.385,
+   "fields": 9,
+   "confidence": 0.33,
+   "strength": "medium"
+  },
+  {
+   "entity": "DistributionDay",
+   "module": "schoolos_fees.dart",
+   "seed": "families",
+   "names": 3,
+   "sim": 0.798,
+   "fields": 6,
+   "confidence": 0.5,
+   "strength": "medium"
+  },
+  {
+   "entity": "AuditEntry",
+   "module": "schoolos_dashboard.dart",
+   "seed": "tasks",
+   "names": 1,
+   "sim": 0.943,
+   "fields": 4,
+   "confidence": 0.25,
+   "strength": "weak"
+  }
+ ]
+}

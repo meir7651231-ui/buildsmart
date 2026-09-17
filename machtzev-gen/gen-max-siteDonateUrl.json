@@ -1,0 +1,1 @@
+{"engine":"siteDonateUrl","origin":"maor-system:src/lib/publicSite.ts","fields":["site","integrations","payurl"],"plan":[{"kind":"fn","name":"normalizeSite","op":"transform","sig":"raw: unknown=>PublicSiteContent | undefi","covers":["site"],"from":"maor-system:src/lib/config.ts"}]}
