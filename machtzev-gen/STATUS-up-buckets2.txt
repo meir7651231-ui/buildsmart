@@ -1,0 +1,17 @@
+up-buckets2 — שני שדרוגים ל-machtzev-gen (empire-index לכל-ריפו + כללי-סלים מול הזהב)
+
+מה נעשה:
+- צעד-0: קובץ-הזהב (628) נמשך; מצב-הפתיחה שוחזר בול (179 · 0.3644 · ≥0.5=77 · =0=62).
+- צעד-1: empire-index.mjs — --roots/EMPIRE_ROOTS/--out/--base (לכל ריפו, לא נתיב-קשוח) + חילוץ-py
+  (def name(...)->ret) + רשומת-קובץ ל-sh/dart/yml + העשרה מבנית (kind/cli/srv/io).
+  נסרקו: -ai-chat-server(7488) · buildsmart(1899) · yeshiva-engine(864) + בסיס maor/machtzev(1197) = 11,448.
+  קבצים-משותפים עם הזהב: 179 → 503 (ai 334 · yeshiva 90 · buildsmart 79).
+- צעד-2: bucketsOf — כללים מבניים מכוילים למטריצת-הבלבול (K רק חלקיק-fn ללא CLI; J רק הרצה-בפועל;
+  guard⇒I · predicate⇒E · format⇒M · measure/collection⇒C; dom = שובר-שוויון אחרון). ראצ'ט: כל שינוי העלה ממוצע.
+
+תוצאה: Jaccard-ממוצע 0.3644 → 0.4183 (מעל היעד) על 503 קבצים משותפים · ≥0.5: 77 → 236.
+ZERO-CHANGE ל-upgradeEngine(id): PASS (IDENTICAL על 6 ids מול אינדקס-הבסיס).
+פלט: BUCKETS-REPORT-2.md + NOTES-up-buckets2.md. empire-index.json + sort-golden.json ב-.gitignore (דאטה נגזרת).
+לא נפתח PR. לא נגעתי ב-routines/סשנים.
+
+DONE · Jaccard 0.4183>0.3644 על 503 משותפים (×2.8), ZERO-CHANGE PASS · נשאר: 3 ריפואים חסרי-קלון יעלו כיסוי מעבר ל-503
