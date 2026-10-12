@@ -12,11 +12,15 @@
 //   Runtime Config API is decommissioned; this codebase is v2 and uses
 //   params/secrets. Full setup steps: README.)
 //
-// The OBJECT KEY IS SERVER-OWNED: `{kind}/{uid}/{ts}-{sanitized-name}` — the
+// The OBJECT KEY IS SERVER-OWNED:
+// `{kind}/{uid}/{ts}-{uuid}-{sanitized-name}.{ext}` ({ext} always from the
+// allowlisted contentType; the caller's own extension is dropped) — the
 // client never chooses the path (no traversal, no cross-user overwrite), only
 // an upload kind (POD / before-after photos per S7.2) + an image contentType.
 // Every issued URL is audit-logged (S8.4).
 // ─────────────────────────────────────────────────────────────────────────────
+
+import { randomUUID } from "node:crypto";
 
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -44,21 +48,24 @@ const CONTENT_TYPES: Record<string, string> = {
   "image/heif": "heif",
 };
 
-const EXPIRES_SECONDS = 600; // 10 minutes
+const EXPIRES_SECONDS = 300; // 5 minutes (the client PUTs immediately)
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // optional declared-size ceiling
 
 function isUploadKind(v: unknown): v is UploadKind {
   return typeof v === "string" &&
     (UPLOAD_KINDS as readonly string[]).includes(v);
 }
 
-/** Keep only a safe basename; never a path. Empty → `upload.<ext>`. */
+/** Keep only a safe basename; never a path. The extension is ALWAYS the one
+ *  derived from the allowlisted contentType (a caller's `.html` is dropped). */
 function sanitizeFileName(name: string | null, ext: string): string {
   const last = (name ?? "").split("/").pop() ?? "";
   const base = (last.split("\\").pop() ?? "")
     .replace(/[^A-Za-z0-9._-]/g, "-")
     .replace(/^[.-]+/, "")
+    .replace(/\.[^.]*$/, "") // drop the caller's extension
     .slice(0, 80);
-  return base.length > 0 ? base : `upload.${ext}`;
+  return `${base.length > 0 ? base : "upload"}.${ext}`;
 }
 
 // Lazy, cached S3 client — params/secrets are only readable at runtime.
@@ -80,6 +87,9 @@ function s3(): S3Client {
         secretAccessKey: r2SecretAccessKey.value(),
       },
       forcePathStyle: true,
+      // Presign has no body: the default WHEN_SUPPORTED bakes
+      // x-amz-checksum-crc32=AAAAAA== (CRC32 of an EMPTY payload) into every URL.
+      requestChecksumCalculation: "WHEN_REQUIRED",
     });
   }
   return cachedClient;
@@ -89,6 +99,7 @@ interface GetUploadUrlData {
   kind?: unknown;
   contentType?: unknown;
   fileName?: unknown;
+  size?: unknown;
 }
 
 export const getUploadUrl = onCall(
@@ -96,6 +107,10 @@ export const getUploadUrl = onCall(
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+    if (request.auth.token.firebase?.sign_in_provider === "anonymous") {
+      // Guests keep the local base64 photo (client falls back on any error).
+      throw new HttpsError("permission-denied", "A registered account is required.");
     }
     const data = (request.data ?? {}) as GetUploadUrlData;
 
@@ -115,6 +130,20 @@ export const getUploadUrl = onCall(
         `contentType must be one of: ${Object.keys(CONTENT_TYPES).join(", ")}.`
       );
     }
+    // Optional declared byte size — when present it is SIGNED as Content-Length
+    // (the PUT must carry exactly that many bytes). Absent = legacy (unbounded)
+    // until the client sends it; then make it required.
+    let size: number | undefined;
+    if (data.size !== undefined && data.size !== null) {
+      if (typeof data.size !== "number" || !Number.isInteger(data.size) ||
+          data.size < 1 || data.size > MAX_UPLOAD_BYTES) {
+        throw new HttpsError(
+          "invalid-argument",
+          `size must be an integer 1..${MAX_UPLOAD_BYTES}.`
+        );
+      }
+      size = data.size;
+    }
     const bucket = r2Bucket.value();
     if (bucket.length === 0) {
       throw new HttpsError(
@@ -125,13 +154,25 @@ export const getUploadUrl = onCall(
 
     const uid = request.auth.uid;
     const key =
-      `${data.kind}/${uid}/${Date.now()}-` +
+      `${data.kind}/${uid}/${Date.now()}-${randomUUID()}-` +
       sanitizeFileName(asString(data.fileName), ext);
 
     const url = await getSignedUrl(
       s3(),
-      new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType }),
-      { expiresIn: EXPIRES_SECONDS }
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        ContentType: contentType,
+        ...(size !== undefined ? { ContentLength: size } : {}),
+      }),
+      {
+        expiresIn: EXPIRES_SECONDS,
+        // The presigner marks content-type UNSIGNABLE by default — bind it (and
+        // the declared length) into the signature so the PUT can't swap them.
+        signableHeaders: new Set(
+          size !== undefined ? ["content-type", "content-length"] : ["content-type"]
+        ),
+      }
     );
 
     await writeAudit({

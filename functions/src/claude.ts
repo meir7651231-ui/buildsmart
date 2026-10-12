@@ -13,8 +13,9 @@
 // GROUNDING IS THE CALLER'S JOB: every feature passes the relevant VERIFIED data
 // (a VerifiedSpec, a compliance checklist, the closed recipe set…) inside `prompt`
 // /`system`, so the model REASONS OVER TRUTH and never invents catalog parts. This
-// proxy is deliberately generic + dumb — it adds auth, App Check, input bounds, a
-// cheap default model, and neutral error mapping; it does no prompt-building.
+// proxy is deliberately generic + dumb — it adds auth (registered accounts only),
+// per-uid rate limits, input bounds, a cheap default model, and neutral error
+// mapping; it does no prompt-building. App Check is NOT enforced (see above).
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -33,21 +34,24 @@ const kDefaultModel = "claude-haiku-4-5-20251001";
 // unknown/arbitrary string falls back to the cheap default, so a caller can't pin
 // an expensive model or pass garbage. Extend deliberately if a feature needs a tier.
 const kAllowedModels = new Set<string>([
-  kDefaultModel, // haiku 4.5 — the cheap default
-  "claude-sonnet-4-6", // the only stronger tier this app may opt into
+  kDefaultModel, // haiku 4.5 — the cheap default (no app caller pins a model)
 ]);
 const kDefaultMaxTokens = 1024;
 const kMaxPromptChars = 8000;
-const kMaxTokensCap = 2048;
+const kMaxSystemChars = 4000; // largest app system prompt today: 484 chars
+const kMaxTokensCap = 1024; // largest app request today: 600 (manager brief)
 
 // Cost-safety (audit גל-5): this proxy is a deliberately generic, auth-gated LLM
 // endpoint, so a single signed-in account could otherwise loop it to drain the
 // Anthropic budget. Two backstops: a hard concurrency cap (`maxInstances`, in the
 // onCall options) bounds the burst, and a per-uid fixed-window limiter (below)
-// bounds sustained volume. Per-request cost is already bounded (model allowlist +
-// 2048-token cap), so a generous window is fine — it only has to stop a runaway.
-const kRateWindowMs = 60_000; // 1-minute rolling window
+// bounds sustained volume. Per-request cost is bounded (prompt ≤8000 + system
+// ≤4000 chars, Haiku-only allowlist, 1024-token cap); a per-uid daily cap bounds
+// the total. The minute window only has to stop a runaway.
+const kRateWindowMs = 60_000; // 1-minute FIXED window (not rolling)
 const kRateMaxPerWindow = 40; // generous for a human; a loop is thousands/min
+const kDayWindowMs = 86_400_000; // 24h fixed window
+const kDayMaxPerUid = 200; // per-uid daily cap (owner-tunable)
 
 // Fail-fast (audit גל-5): the Anthropic SDK defaults to a 10-MINUTE timeout with
 // 2 retries — on a stuck upstream the callable would hang to the function ceiling
@@ -63,15 +67,16 @@ function client(): Anthropic {
   return (cachedClient ??= new Anthropic({
     apiKey: anthropicKey.value(),
     timeout: kClientTimeoutMs,
-    maxRetries: 1,
+    maxRetries: 0, // a retry cannot fit inside the 30s function ceiling
   }));
 }
 
-// Per-uid fixed-window rate limit, enforced in a Firestore transaction on
-// `_claudeRate/{uid}` (server-only — clients never read/write it; admin SDK
-// bypasses rules). Throws `resource-exhausted` once the window budget is spent.
-// A transient Firestore error FAILS OPEN (logs + allows): the abuse case is rare,
-// but an infra blip would otherwise block every real user.
+// Per-uid fixed-window rate limit (minute + day), enforced in ONE Firestore
+// transaction on `_claudeRate/{uid}` (server-only — clients never read/write it;
+// admin SDK bypasses rules; deleteAccount removes it). Throws
+// `resource-exhausted` once either budget is spent. FAILS CLOSED: any non-limit
+// error (incl. contention ABORTED after the SDK's 5 attempts — caller-triggerable
+// by parallel calls) maps to `unavailable`, never an uncounted call.
 async function enforceRateLimit(uid: string): Promise<void> {
   const ref = db().collection("_claudeRate").doc(uid);
   try {
@@ -79,26 +84,39 @@ async function enforceRateLimit(uid: string): Promise<void> {
       const snap = await tx.get(ref);
       const cur = snap.exists ? snap.data() : undefined;
       const now = Date.now();
-      const windowStart =
-        typeof cur?.windowStart === "number" ? cur.windowStart : 0;
-      const count = typeof cur?.count === "number" ? cur.count : 0;
+      const num = (v: unknown): number =>
+        typeof v === "number" && Number.isFinite(v) ? v : 0;
+      let windowStart = num(cur?.windowStart);
+      let count = num(cur?.count);
+      let dayStart = num(cur?.dayStart); // legacy docs lack it → 0 → fresh day
+      let dayCount = num(cur?.dayCount);
       if (now - windowStart >= kRateWindowMs) {
-        tx.set(ref, { windowStart: now, count: 1 });
-        return;
+        windowStart = now;
+        count = 0;
       }
-      if (count >= kRateMaxPerWindow) {
+      if (now - dayStart >= kDayWindowMs) {
+        dayStart = now;
+        dayCount = 0;
+      }
+      if (count >= kRateMaxPerWindow || dayCount >= kDayMaxPerUid) {
         throw new HttpsError(
           "resource-exhausted",
           "Too many requests — try again shortly."
         );
       }
-      tx.set(ref, { windowStart, count: count + 1 }, { merge: true });
+      tx.set(ref, {
+        windowStart,
+        count: count + 1,
+        dayStart,
+        dayCount: dayCount + 1,
+      });
     });
   } catch (e) {
     if (e instanceof HttpsError) throw e; // the real limit — propagate
-    logger.error("askClaude: rate-limit check failed (allowing)", {
+    logger.error("askClaude: rate-limit check failed (denying)", {
       error: String(e),
     });
+    throw new HttpsError("unavailable", "Please try again shortly.");
   }
 }
 
@@ -112,10 +130,22 @@ interface AskClaudeData {
 export const askClaude = onCall(
   // maxInstances caps concurrency → a hard ceiling on parallel spend; timeoutSeconds
   // pairs with the SDK client timeout so a stuck upstream fails fast (audit גל-5).
-  { region: REGION, secrets: [anthropicKey], maxInstances: 10, timeoutSeconds: 30 },
+  {
+    region: REGION,
+    secrets: [anthropicKey],
+    maxInstances: 10,
+    concurrency: 1, // default is 80/instance → 800 in flight; 1 makes the cap real
+    timeoutSeconds: 30,
+  },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
+    // Guests (anonymous Auth) are free, unlimited uids — they would void the
+    // per-uid limiter. Same predicate as firestore.rules isRealUser(); checked
+    // BEFORE the limiter so a guest call costs no Firestore write.
+    if (request.auth.token.firebase?.sign_in_provider === "anonymous") {
+      throw new HttpsError("permission-denied", "A registered account is required.");
     }
     await enforceRateLimit(request.auth.uid);
     const data = (request.data ?? {}) as AskClaudeData;
@@ -130,10 +160,13 @@ export const askClaude = onCall(
         `prompt exceeds ${kMaxPromptChars} characters.`
       );
     }
-    const system =
-      typeof data.system === "string" && data.system.length > 0
-        ? data.system
-        : undefined;
+    const system = typeof data.system === "string" ? data.system.trim() : "";
+    if (system.length > kMaxSystemChars) {
+      throw new HttpsError(
+        "invalid-argument",
+        `system exceeds ${kMaxSystemChars} characters.`
+      );
+    }
     const model =
       typeof data.model === "string" && kAllowedModels.has(data.model)
         ? data.model
@@ -142,7 +175,7 @@ export const askClaude = onCall(
       typeof data.maxTokens === "number" &&
       Number.isFinite(data.maxTokens) &&
       data.maxTokens > 0
-        ? Math.min(Math.round(data.maxTokens), kMaxTokensCap)
+        ? Math.min(Math.max(1, Math.round(data.maxTokens)), kMaxTokensCap)
         : kDefaultMaxTokens;
 
     try {

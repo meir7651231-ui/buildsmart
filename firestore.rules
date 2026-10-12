@@ -213,13 +213,14 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      // 12.10.2026: anonymous sessions may not create/update users docs (push spam + fake directory rows)
       allow create: if isAdmin()
-          || (isSignedIn() && request.auth.uid == uid
+          || (isRealUser() && request.auth.uid == uid
               && !request.resource.data.keys()
                   .hasAny(['role', 'roles', 'storeUid', 'orgId', 'employerId'])
               && request.resource.data.get('status', 'pending') == 'pending');
       allow update: if isAdmin()
-          || (isSignedIn() && request.auth.uid == uid
+          || (isRealUser() && request.auth.uid == uid
               && !request.resource.data.diff(resource.data)
                   .affectedKeys()
                   .hasAny(['role', 'roles', 'storeUid', 'orgId', 'status', 'employerId']));
@@ -536,6 +537,10 @@ service cloud.firestore {
     // per-project membership (`projects.members[]` / projectId get() joins) is
     // the post-uid-migration hardening step, alongside S8's server-side
     // validation.
+    // 12.10.2026: siteNodes/projects reads require a real (non-anonymous) user
+    // (isRealUser()); stock, material_requests and siteStageProgress
+    // deliberately stay isSignedIn() because guest listeners die on
+    // permission-denied and never resubscribe (Flutter fix first).
 
     // stock — the store persona's inventory (`move`) + manager oversight.
     match /stock/{stockId} {
@@ -546,14 +551,14 @@ service cloud.firestore {
     // siteNodes — the site workspace structure (S3.S schema row); written by
     // the contractor running the site, overseen by manager.
     match /siteNodes/{nodeId} {
-      allow read: if isSignedIn();
+      allow read: if isRealUser();
       allow write: if hasRole('contractor') || isManager();
     }
 
     // projects — {name, address, status, contractorId, members[]}. A contractor
     // may create/maintain a project bound to themself; manager everything.
     match /projects/{projectId} {
-      allow read: if isSignedIn();
+      allow read: if isRealUser();
       allow create, update: if isManager()
           || (hasRole('contractor')
               && request.resource.data.get('contractorId', '')
@@ -957,7 +962,8 @@ service cloud.firestore {
       }
       allow read: if isSignedIn()
           && (request.auth.uid == uid || canReview(resource.data.requestedRole));
-      allow create: if isSignedIn()
+      // 12.10.2026: anonymous sessions may not file role requests
+      allow create: if isRealUser()
           && request.auth.uid == uid
           && request.resource.data.status == 'pending'
           && request.resource.data.requestedRole

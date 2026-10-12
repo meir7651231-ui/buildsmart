@@ -106,6 +106,17 @@ export const reviewRoleRequest = onCall({ region: REGION }, async (request) => {
   }
   const approverRole = APPROVER_FOR[requestedRole];
 
+  // 12.10.2026: never grant a role to an anonymous guest session (no linked provider).
+  if (decision === "approve") {
+    const target = await getAuth().getUser(uid);
+    if (target.providerData.length === 0) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Cannot approve an anonymous guest session."
+      );
+    }
+  }
+
   const approved = decision === "approve";
 
   // ATOMIC status flip (closes the concurrent-review race): re-read status inside a
