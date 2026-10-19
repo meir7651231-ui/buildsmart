@@ -202,6 +202,30 @@ def test_lookup_for_other_engines():
                               "brand": None, "image": None, "findings": []}
 
 
+def test_pdf_reversed_hebrew_and_checks():
+    try:
+        import pymupdf  # noqa: F401
+    except ImportError:
+        return  # PDF commands need pymupdf
+    assert q._is_visual("ףלשנ חבטמ זרב 1/2") and not q._is_visual("ברז מטבח נשלף 1/2")
+    assert q._logical('רויכל )ןופיס( םוסחמDN40') == 'מחסום (סיפון) לכיור DN40'
+    with tempfile.TemporaryDirectory() as tmp:
+        example(tmp)
+        pdf = os.path.join(EXAMPLES, "manufacturer.pdf")
+        checked, _ = quiet(q.cmd_pdfcheck, pdf)
+        by = {}
+        for r in checked:
+            by.setdefault(r["sku"], []).append(r)
+        assert by["1004"][0]["score"] == 1.0  # visual-order PDF, matched after turning it back
+        assert by["1006"][0]["score"] == 1.0  # "| 20 כמות באריזה" in the store's name doesn't count
+        assert by["1009"][0]["found"] is False
+        dup = [r for r in by["1001"] if r["name"].startswith("ברך")][0]
+        assert dup["score"] == 0.0 and dup["elsewhere"]["sku"] == "1010"
+        rows, _ = quiet(q.cmd_pdfrows, pdf)
+        assert {r["sku"]: r["name"] for r in rows}["1004"] == 'מחסום (סיפון) לכיור DN40'
+        assert len(rows) == 10
+
+
 def test_selftest_needs_no_config():
     setup()
     try:

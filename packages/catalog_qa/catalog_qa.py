@@ -21,6 +21,8 @@ BuildSmart: python3 scripts/catalog_qa.py <cmd>  (scripts/catalog_qa.buildsmart.
   pdfmap <pdf>            מיפוי עמוד→מק"טים
   verify <pdf> sku...     רינדור עמודי מקור ל-/tmp/*.png
   lookup sku...           JSON: המוצר וההפרות שלו (למנועים אחרים)
+  pdfcheck <pdf...>       JSON: כל מוצר מול קטלוג ה-PDF של היצרן: נמצא? באיזה עמוד? השם תואם?
+  pdfrows <pdf...>        JSON: טיוטת קטלוג מתוך PDF של יצרן (מק"ט והטקסט לידו), לבדיקה
 
 כלל הזהב: שם שלא ניתן לאמת מול המקור — לא ממציאים.
 """
@@ -778,6 +780,116 @@ def cmd_lookup(*skus):
     return out
 
 
+# ── manufacturer PDF ─────────────────────────────────────────────────────────
+# PDFs often store Hebrew in visual order, so text comes out reversed
+# ("ףלשנ חבטמ זרב" for "ברז מטבח נשלף"). Final letters (ך ם ן ף ץ) only end a
+# Hebrew word, so a line whose words start with them is reversed, and is turned
+# back. A PDF is written one way throughout, so the decision is made per page,
+# from all its words: a short line with no final letter still gets it right.
+# Matching is by words, and each PDF word still counts both ways.
+FINALS = "ךםןףץ"
+HE_RUN = re.compile(r"[א-ת][א-ת\s()\"'״׳.,\-]*[א-ת]|[א-ת]")
+
+
+def _is_visual(text):
+    words = re.findall(r"[א-ת]{2,}", text)
+    return sum(w[0] in FINALS for w in words) > sum(w[-1] in FINALS for w in words)
+
+
+def _logical(line):
+    """A visual-order line turned back: every Hebrew run reversed, LTR runs kept."""
+    line = HE_RUN.sub(lambda m: m.group(0)[::-1], line)
+    return re.sub(r"(?<=[א-ת])(?=[A-Za-z0-9])", " ", line)
+SKU_TOKEN = re.compile(r"(?<![\w-])[A-Z]{0,4}-?\d[\dA-Z-]{2,}(?![\w-])")
+
+
+def _pdf_lines(pdfs):
+    try:
+        import pymupdf as fitz  # the current name; `import fitz` prints a deprecation warning to stdout
+    except ImportError:
+        import fitz
+    out = []
+    for pdf in pdfs:
+        d = fitz.open(pdf)
+        for i in range(len(d)):
+            raw = d[i].get_text()
+            visual = _is_visual(raw)
+            lines = [_logical(l.strip()) if visual else l.strip() for l in raw.splitlines() if l.strip()]
+            src = f"{os.path.basename(pdf)}#p{i + 1}"
+            for j, l in enumerate(lines):
+                # a name often sits on the line next to its SKU
+                out.append((src, l, lines[j + 1] if j + 1 < len(lines) else ""))
+    return out
+
+
+def _he_words(s):
+    return set(re.findall(r"[א-ת]{2,}", s))
+
+
+def _tokens(s):
+    """Hebrew words and size-like tokens (45, DN50, 1/2): a name is its words and its sizes."""
+    return _he_words(s) | set(re.findall(r"[A-Za-z]*\d[\dA-Za-z/.]*", s.upper()))
+
+
+def _pdf_score(name, text):
+    nw = _tokens(name)
+    if not _he_words(name):
+        return None
+    tw = _tokens(text)
+    tw |= {w[::-1] for w in _he_words(text)}
+    return round(len(nw & tw) / len(nw), 2)
+
+
+def cmd_pdfcheck(*args):
+    """JSON: every catalog product against the manufacturer's PDF — found? page? does the name match?"""
+    pdfs = [a for a in args if not a.startswith("--")]
+    lines = _pdf_lines(pdfs)
+
+    def elsewhere(name):
+        """Where the PDF has this name under another SKU: the SKU is probably wrong."""
+        best = None
+        for src, l, nxt in lines:
+            m = SKU_TOKEN.search(l)
+            sc = _pdf_score(_normalize(name), l) if m else None
+            if sc is not None and sc >= 0.75 and (best is None or sc > best["score"]):
+                best = {"sku": m.group(0), "page": src, "score": sc}
+        return best
+
+    out = []
+    for p in parse_catalog():
+        hits = [(src, l, nxt) for src, l, nxt in lines if re.search(rf"(?<![\w-]){re.escape(p['sku'])}(?![\w-])", l)]
+        if not hits:
+            out.append({"sku": p["sku"], "name": p["name"], "found": False, "elsewhere": elsewhere(p["name"])})
+            continue
+        scored = [(_pdf_score(_normalize(p["name"]), f"{l} {nxt}"), src, l, nxt) for src, l, nxt in hits]
+        best = max(scored, key=lambda x: -1 if x[0] is None else x[0])
+        row = {"sku": p["sku"], "name": p["name"], "found": True, "page": best[1],
+               "score": best[0], "pdfText": f"{best[2]} {best[3]}".strip()[:160]}
+        if best[0] is not None and best[0] < 0.5:
+            row["elsewhere"] = elsewhere(p["name"])
+        out.append(row)
+    print(json.dumps(out, ensure_ascii=False))
+    return out
+
+
+def cmd_pdfrows(*args):
+    """Draft catalog rows from a manufacturer's PDF: a SKU and the Hebrew text beside it. For review."""
+    pdfs = [a for a in args if not a.startswith("--")]
+    rows, seen = [], set()
+    for src, l, nxt in _pdf_lines(pdfs):
+        m = SKU_TOKEN.search(l)
+        if not m or m.group(0) in seen:
+            continue
+        rest = (l[:m.start()] + " " + l[m.end():]).strip(" |·-")
+        text = rest if HE.search(rest) else (nxt if HE.search(nxt) and not SKU_TOKEN.search(nxt) else "")
+        if not text:
+            continue
+        seen.add(m.group(0))
+        rows.append({"sku": m.group(0), "name": _normalize(text), "page": src})
+    print(json.dumps(rows, ensure_ascii=False))
+    return rows
+
+
 CMDS_EXTRA = True
 
 
@@ -786,7 +898,8 @@ CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
         "imgmatch": cmd_imgmatch, "coverage": cmd_coverage, "schema": cmd_schema,
         "truthapply": cmd_truthapply, "report": cmd_report, "diff": cmd_diff,
         "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify,
-        "suspects": cmd_suspects, "crossdedup": cmd_crossdedup, "lookup": cmd_lookup}
+        "suspects": cmd_suspects, "crossdedup": cmd_crossdedup, "lookup": cmd_lookup,
+        "pdfcheck": cmd_pdfcheck, "pdfrows": cmd_pdfrows}
 
 
 def _take_opt(a, name):
