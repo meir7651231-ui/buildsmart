@@ -1,0 +1,803 @@
+#!/usr/bin/env python3
+"""
+catalog_qa.py — מנוע QA לקטלוג מוצרים (v2 · engine).
+
+מערכת אכיפה: מנוע חוקים עם חומרה (ERROR/WARN/INFO), תיקון אוטומטי בטוח,
+אימות מול מקור, והוכחת-עצמו. נועד לעשרות אלפי מוצרים.
+
+קטלוג: CSV · JSON · או קובץ ה-Dart של BuildSmart (LipskeyCatalogProduct(...))
+הגדרות: --config <json>  (או catalog_qa.json בתיקייה הנוכחית)
+        --catalog <file> --categories <file> --brands a,b --truth <json>
+        --images <dir> --out-dir <dir>
+BuildSmart: python3 scripts/catalog_qa.py <cmd>  (scripts/catalog_qa.buildsmart.json)
+
+פקודות:
+  audit [--json]          בדיקה תחבירית מלאה (מנוע החוקים)
+  selftest                מוכיח שכל חוק יורה (fixtures מורעלים)
+  fix [--apply]           נרמול בטוח של שמות (ברירת מחדל: dry-run)
+  export <csv>            CSV מלא + דגלים
+  truthcheck              השוואה מול scripts/source_truth.json (אימות 100%)
+  crosscheck <pdf...>     השוואת שם↔טקסט PDF ליד המק"ט
+  pdfmap <pdf>            מיפוי עמוד→מק"טים
+  verify <pdf> sku...     רינדור עמודי מקור ל-/tmp/*.png
+
+כלל הזהב: שם שלא ניתן לאמת מול המקור — לא ממציאים.
+"""
+import csv
+import json
+import os
+import re
+import sys
+from collections import defaultdict
+
+# ── configuration ────────────────────────────────────────────────────────────
+# Which catalog to check and what counts as valid. Set by configure() from a
+# config file or CLI flags; BuildSmart's are in scripts/catalog_qa.buildsmart.json.
+CATALOG = None       # .csv · .json · .dart (BuildSmart)
+TREE = None          # allowed categories (.dart tree · .json · .txt one per line) · None = skip rule
+TRUTH = None         # source_truth.json (truthcheck · schema · truthapply)
+IMAGES_DIR = None    # product image folder (images)
+OUT_DIR = "."        # where reports and logs are written
+VALID_BRANDS = None  # set of allowed brands · None = skip bad_brand
+DEFAULT_BRAND = ""   # brand for a product that has none
+COLUMNS = {}         # CSV/JSON column names that differ, e.g. {"sku": "מק\"ט"}
+
+HE = re.compile(r"[א-ת]")
+SIZE = re.compile(r'DN\s?\d+|\d+/\d+|\d+["׳״]|\b(?:32|40|50|60|75|90|110|130|160|200)\b')
+STUCK = re.compile(r"\d[א-ת]|[א-ת]\d")
+# מילון סוג→קטגוריה צפויה (לזיהוי אי-התאמה). מילת-סוג בשם שמרמזת קטגוריה אחרת.
+TYPE_HINT = {
+    "מחסום": "ניקוז", "סיפון": "ניקוז", "מאסף": "ניקוז", "קולט": "ניקוז",
+    "ברך": "ניקוז", "מסעף": "ניקוז", "מצמד": "ניקוז", "צינור": "ניקוז",
+    "מושב אסלה": "אסל", "מיכל הדחה": "אסל",
+    "מזלף": "מקלח", "ראש מקלחת": "מקלח",
+}
+
+# ── severity model ───────────────────────────────────────────────────────────
+ERROR, WARN, INFO = "ERROR", "WARN", "INFO"
+
+
+def load_config(path):
+    """Read a JSON config. Paths in it are relative to the config file; "catalog"
+    may be a list, and the first one that exists wins."""
+    base = os.path.dirname(os.path.abspath(path))
+    cfg = json.load(open(path, encoding="utf-8"))
+
+    def rel(v):
+        return v if not v or os.path.isabs(v) else os.path.normpath(os.path.join(base, v))
+
+    out = dict(cfg)
+    cat = cfg.get("catalog")
+    if isinstance(cat, list):
+        cands = [rel(c) for c in cat]
+        out["catalog"] = next((c for c in cands if os.path.exists(c)), cands[0] if cands else None)
+    elif cat:
+        out["catalog"] = rel(cat)
+    for k in ("categories", "truth", "images_dir", "out_dir"):
+        if cfg.get(k):
+            out[k] = rel(cfg[k])
+    return out
+
+
+def configure(cfg):
+    global CATALOG, TREE, TRUTH, IMAGES_DIR, OUT_DIR, VALID_BRANDS, DEFAULT_BRAND, COLUMNS
+    CATALOG = cfg.get("catalog", CATALOG)
+    TREE = cfg.get("categories", TREE)
+    TRUTH = cfg.get("truth", TRUTH)
+    IMAGES_DIR = cfg.get("images_dir", IMAGES_DIR)
+    OUT_DIR = cfg.get("out_dir", OUT_DIR)
+    if "brands" in cfg:
+        VALID_BRANDS = None if cfg["brands"] is None else set(cfg["brands"])
+    DEFAULT_BRAND = cfg.get("default_brand", DEFAULT_BRAND)
+    COLUMNS = dict(cfg.get("columns", COLUMNS))
+
+
+# ── parsing ──────────────────────────────────────────────────────────────────
+def _field(body, name):
+    m = re.search(rf"{name}:\s*(['\"])(.*?)\1", body, re.DOTALL)
+    return m.group(2) if m else ""
+
+
+def _split_products(src):
+    """Paren-balanced split of every LipskeyCatalogProduct(...) body. Robust to
+    field ordering, nested maps (dims) and comments — unlike a lookahead regex,
+    which silently merged ~111 entries (115 products went unaudited)."""
+    bodies, marker = [], "LipskeyCatalogProduct("
+    i = 0
+    while True:
+        i = src.find(marker, i)
+        if i == -1:
+            break
+        j = i + len(marker)
+        depth, in_str, quote = 1, False, ""
+        while j < len(src) and depth:
+            c = src[j]
+            if in_str:
+                if c == quote and src[j - 1] != "\\":
+                    in_str = False
+            elif c in "'\"":
+                in_str, quote = True, c
+            elif c == "(":
+                depth += 1
+            elif c == ")":
+                depth -= 1
+            j += 1
+        bodies.append(src[i + len(marker):j - 1])
+        i = j
+    return bodies
+
+
+def _fmt(path):
+    return os.path.splitext(path or "")[1].lower().lstrip(".")
+
+
+def parse_catalog(path=None):
+    path = path or CATALOG
+    if not path:
+        sys.exit("❌ לא הוגדר קטלוג: --catalog <file> או --config <file>")
+    if _fmt(path) == "csv":
+        return _parse_rows(_read_rows(path))
+    if _fmt(path) == "json":
+        return _parse_rows(_read_rows(path))
+    return _parse_dart(path)
+
+
+def _parse_dart(path):
+    src = open(path, encoding="utf-8").read()
+    # drop the class definition body so only the data list is parsed
+    list_start = src.find("kLipskeyCatalog = [")
+    if list_start != -1:
+        src = src[list_start:]
+    out = []
+    for b in _split_products(src):
+        out.append({
+            "sku": _field(b, "sku"), "name": _field(b, "nameHe"),
+            "nameEn": _field(b, "nameEn"), "category": _field(b, "categoryHe"),
+            "page": _field(b, "page"), "image": bool(re.search(r"imageFile:\s*'", b)),
+            "brand": _field(b, "brand") or DEFAULT_BRAND,
+            "color": _field(b, "color"),
+        })
+    return out
+
+
+_FIELDS = ("sku", "name", "nameEn", "category", "page", "image", "brand", "color")
+
+
+def _read_rows(path):
+    """CSV (header row) or JSON (a list, or {"products": [...]}) → list of dicts."""
+    if _fmt(path) == "csv":
+        with open(path, newline="", encoding="utf-8-sig") as fh:
+            return list(csv.DictReader(fh))
+    data = json.load(open(path, encoding="utf-8-sig"))
+    return data if isinstance(data, list) else data.get("products", [])
+
+
+def _parse_rows(rows):
+    col = {f: COLUMNS.get(f, f) for f in _FIELDS}
+    out = []
+    for r in rows:
+        def get(f):
+            v = r.get(col[f])
+            return "" if v is None else str(v)
+        img = get("image").strip()
+        out.append({
+            "sku": get("sku").strip(), "name": get("name"), "nameEn": get("nameEn"),
+            "category": get("category"), "page": get("page"),
+            "image": img.lower() not in ("", "n", "no", "false", "0"),
+            "imageFile": img if "." in img else "",
+            "brand": get("brand") or DEFAULT_BRAND, "color": get("color"),
+        })
+    return out
+
+
+def _save_names(new_by_sku):
+    """CSV/JSON catalogs: write corrected names back into the same file."""
+    sk, nm = COLUMNS.get("sku", "sku"), COLUMNS.get("name", "name")
+    if _fmt(CATALOG) == "csv":
+        with open(CATALOG, newline="", encoding="utf-8-sig") as fh:
+            rd = csv.DictReader(fh)
+            rows, fields = list(rd), rd.fieldnames
+        for r in rows:
+            if str(r.get(sk, "")).strip() in new_by_sku:
+                r[nm] = new_by_sku[str(r[sk]).strip()]
+        with open(CATALOG, "w", newline="", encoding="utf-8-sig") as fh:
+            w = csv.DictWriter(fh, fieldnames=fields)
+            w.writeheader()
+            w.writerows(rows)
+        return
+    data = json.load(open(CATALOG, encoding="utf-8-sig"))
+    for r in (data if isinstance(data, list) else data.get("products", [])):
+        if str(r.get(sk, "")).strip() in new_by_sku:
+            r[nm] = new_by_sku[str(r[sk]).strip()]
+    json.dump(data, open(CATALOG, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+
+def tree_categories(path=None):
+    """The allowed categories, or None when none are configured (rule skipped)."""
+    path = path or TREE
+    if not path:
+        return None
+    src = open(path, encoding="utf-8-sig").read()
+    if _fmt(path) == "dart":
+        return set(re.findall(r"lipskeyCategory:\s*'([^']+)'", src))
+    if _fmt(path) == "json":
+        data = json.loads(src)
+        return set(data if isinstance(data, list) else data.get("categories", []))
+    return {line.strip() for line in src.splitlines() if line.strip()}
+
+
+# ── rule engine ──────────────────────────────────────────────────────────────
+_UNSET = object()
+
+
+def run_rules(products, tcats, brands=_UNSET):
+    """Return list of findings: {rule, severity, sku, detail}.
+    tcats/brands None = that rule is skipped (nothing to check against)."""
+    if brands is _UNSET:
+        brands = VALID_BRANDS
+    f = []
+
+    def add(rule, sev, sku, detail=""):
+        f.append({"rule": rule, "severity": sev, "sku": sku, "detail": detail})
+
+    seen_sku = defaultdict(int)
+    name_in_cat = defaultdict(list)
+
+    for p in products:
+        n, sku, cat = p["name"], p["sku"], p["category"]
+        seen_sku[sku] += 1
+        name_in_cat[(cat, n)].append(sku)
+
+        # ERROR rules — block
+        if not n.strip():
+            add("empty_name", ERROR, sku)
+        if "|" in n or "כמות" in n or "״" in n or "“" in n:
+            add("garbled", ERROR, sku, n[:40])
+        if STUCK.search(n):
+            add("stuck_digit", ERROR, sku, n[:40])
+        if n.count("(") != n.count(")"):
+            add("unbalanced_parens", ERROR, sku, n[:40])
+        if not sku:
+            add("missing_sku", ERROR, "?", n[:40])
+        if not cat:
+            add("missing_category", ERROR, sku)
+        if cat and tcats is not None and cat not in tcats:
+            add("unmapped_category", ERROR, sku, cat)
+
+        # WARN rules — review
+        if brands is not None and p["brand"] not in brands:
+            add("bad_brand", WARN, sku, p["brand"])
+        if "  " in n or " | " in n:
+            add("messy_name", WARN, sku, n[:40])
+        # cross-DOMAIN mismatch only (high confidence): a faucet word inside a
+        # pure-drainage category, or vice-versa. Conservative to avoid noise.
+        if "ברז" in n and any(x in cat for x in ("מחסומ", "סיפונ", "מאספ", "מסעפ")):
+            add("type_category_mismatch", WARN, sku, f"'ברז' ב-[{cat}]")
+        if "אסלה" in n and "ברז" in cat:
+            add("type_category_mismatch", WARN, sku, f"'אסלה' ב-[{cat}]")
+
+        # INFO rules — completeness
+        if not SIZE.search(n):
+            add("no_size", INFO, sku)
+        if not p["image"]:
+            add("no_image", INFO, sku)
+
+    for sku, c in seen_sku.items():
+        if c > 1:
+            add("duplicate_sku", ERROR, sku, f"×{c}")
+    by_sku = {p["sku"]: p for p in products}
+    for (cat, n), sks in name_in_cat.items():
+        if len(sks) > 1:
+            # שם-כפול לבדו אינו שגיאה (וריאציות לגיטימיות, gotcha #5) → INFO.
+            # ה-WARN האמיתי הוא dup_name_unresolved (אין מבדיל גוון/מידה).
+            add("duplicate_name", INFO, sks[0], f"[{cat}] '{n[:25]}' ×{len(sks)}")
+            # צעד 25: identical-name group — propose the attribute that already
+            # distinguishes them (color / size) so the differentiator is real,
+            # not invented. Only flag as unresolvable when nothing separates them.
+            colors = {by_sku[s].get("color", "") for s in sks}
+            sizes = {tuple(sorted(SIZE.findall(by_sku[s]["name"]))) for s in sks}
+            if len(colors) > 1:
+                add("dup_name_differentiator", INFO, sks[0],
+                    f"בידול לפי גוון: {sorted(c for c in colors if c)}")
+            elif len(sizes) > 1:
+                add("dup_name_differentiator", INFO, sks[0], "בידול לפי מידה בשם")
+            else:
+                add("dup_name_unresolved", WARN, sks[0],
+                    f"כפילות-שם ללא מבדיל (גוון/מידה זהים) — {sks}")
+    return f
+
+
+def _cat_ok(kw, cat):
+    """Allow legit cross-uses (e.g. 'מסעף' appears in אביזרי תבריג too)."""
+    ok = {"מסעף": ["תבריג"], "ברך": ["תבריג", "קצה"], "מצמד": ["שקע", "קצה"],
+          "צינור": ["גמיש", "מקלח", "גן"]}
+    return any(x in cat for x in ok.get(kw, []))
+
+
+# ── commands ─────────────────────────────────────────────────────────────────
+def cmd_audit(*args):
+    as_json = "--json" in args
+    products = parse_catalog()
+    findings = run_rules(products, tree_categories())
+    by_sev = defaultdict(lambda: defaultdict(int))
+    for fi in findings:
+        by_sev[fi["severity"]][fi["rule"]] += 1
+
+    if as_json:
+        errors = sum(1 for fi in findings if fi["severity"] == ERROR)
+        print(json.dumps({"products": len(products), "findings": len(findings),
+                          "errors": errors, "by_rule": {s: dict(r) for s, r in by_sev.items()}},
+                         ensure_ascii=False))
+        sys.exit(1 if errors else 0)
+
+    print("=" * 58)
+    print(f"  מנוע QA — {len(products)} מוצרים")
+    print("=" * 58)
+    for sev, icon in [(ERROR, "❌"), (WARN, "⚠️"), (INFO, "ℹ️")]:
+        rules = by_sev.get(sev, {})
+        total = sum(rules.values())
+        print(f"\n{icon} {sev} ({total}):")
+        for rule, c in sorted(rules.items(), key=lambda x: -x[1]):
+            print(f"     {c:>4}  {rule}")
+            if sev == ERROR:
+                for fi in [x for x in findings if x["rule"] == rule][:4]:
+                    print(f"            {fi['sku']}: {fi['detail']}")
+    errs = sum(by_sev.get(ERROR, {}).values())
+    print("\n" + "-" * 58)
+    print("  ✅ אפס שגיאות חוסמות" if errs == 0 else f"  ❌ {errs} שגיאות חוסמות")
+    return errs
+
+
+def cmd_selftest(*_):
+    """מוכיח שכל חוק ERROR יורה על fixture מורעל. עונה ל'הכלי לא עובד'."""
+    tcats = {"קטגוריה תקינה"}
+    base = {"sku": "X1", "name": "מוצר תקין DN50", "nameEn": "ok",
+            "category": "קטגוריה תקינה", "page": "1", "image": True, "brand": "ליפסקי"}
+    poisons = {
+        "empty_name": {"name": ""},
+        "garbled": {"name": "מוצר | 20 כמות באריזה"},
+        "stuck_digit": {"name": "מחסום2 לכיור"},
+        "unbalanced_parens": {"name": "מחסום (סיפון DN50"},
+        "missing_category": {"category": ""},
+        "unmapped_category": {"category": "קטגוריה לא קיימת"},
+        "duplicate_sku": None,  # handled below
+        "bad_brand": {"brand": "מותג מזויף"},
+        "no_size": {"name": "מוצר בלי גודל"},
+    }
+    ok = True
+    for rule, patch in poisons.items():
+        if rule == "duplicate_sku":
+            prods = [dict(base), dict(base)]  # same sku twice
+        else:
+            p = dict(base); p.update(patch); prods = [p]
+        fired = {f["rule"] for f in run_rules(prods, tcats, brands={"ליפסקי"})}
+        hit = rule in fired
+        print(f"  {'✅' if hit else '❌'} {rule:<22} {'יורה' if hit else 'לא יורה!'}")
+        ok = ok and hit
+    # negative control: clean product fires no ERROR
+    clean_fire = [f for f in run_rules([dict(base)], tcats, brands={"ליפסקי"})
+                  if f["severity"] == ERROR]
+    print(f"  {'✅' if not clean_fire else '❌'} clean_product           {'אפס ERROR' if not clean_fire else clean_fire}")
+    print("\n" + ("✅ כל החוקים עובדים" if ok and not clean_fire else "❌ חוק לא עובד"))
+    sys.exit(0 if ok and not clean_fire else 1)
+
+
+def _normalize(n):
+    n = n.replace("״", '"').replace("“", '"').replace("”", '"')
+    # Drop the packaging phrase ("20 כמות באריזה"), not the whole segment: a
+    # segment like "20 כמות באריזה DN50" keeps its size.
+    parts = [re.sub(r"\d*\s*כמות (באריזה|במשטח)\s*\d*", " ", p).strip(" )(")
+             for p in n.split("|")]
+    parts = [re.sub(r"\s+", " ", p) for p in parts]
+    parts = [p for p in parts if p and not re.fullmatch(r"\d+ ?(במשטח|באריזה)?", p)]
+    seen, uniq = set(), []
+    for p in parts:
+        k = re.sub(r"\s+", "", p)
+        if k not in seen:
+            seen.add(k); uniq.append(p)
+    n = " · ".join(uniq) if uniq else (n.split("|")[0] if "|" in n else n)
+    n = re.sub(r"(?<=[א-ת])(?=\d)", " ", n)
+    n = re.sub(r"(?<=[\d\"])(?=[א-ת])", " ", n)
+    n = re.sub(r"\s+", " ", n).strip(" |)(·")
+    return n
+
+
+def cmd_fix(*args):
+    """נרמול בטוח. --apply לכתיבה · --rule <name> לתיקון ממוקד (צעדים 19,20,24,27)."""
+    apply = "--apply" in args
+    backup = True  # צעד 26 — גיבוי לפני כתיבה
+    # צעד 27 — תיקון ממוקד: --rule packaging|gershayim|stuck|spaces
+    rule = next((a.split("=")[1] for a in args if a.startswith("--rule=")), None)
+    triggers = {
+        "packaging": lambda n: "|" in n or "כמות" in n,
+        "gershayim": lambda n: "״" in n or "“" in n,
+        "stuck": lambda n: bool(STUCK.search(n)),
+        "spaces": lambda n: "  " in n,
+    }
+    src = open(CATALOG, encoding="utf-8").read()
+    products = parse_catalog()
+    changes = []
+    for p in products:
+        n = p["name"]
+        if rule:
+            dirty = triggers.get(rule, lambda _: False)(n)
+        else:
+            dirty = ("|" in n or "כמות" in n or "״" in n or "“" in n
+                     or STUCK.search(n) or "  " in n)  # צעד 24
+        if not dirty:
+            continue
+        new = _normalize(n)
+        if "'" in new and _fmt(CATALOG) == "dart":  # a lone ' breaks the Dart string
+            new = new.replace("'", "")
+        if new and new != n:
+            changes.append((p["sku"], n, new))
+            if apply:
+                src = src.replace(f"nameHe: '{n}'", f"nameHe: '{new}'", 1)
+    for sku, a, b in changes[:30]:
+        print(f"  {sku}\n    -  {a[:50]}\n    +  {b[:50]}")
+    print(f"\n{len(changes)} שמות {'תוקנו' if apply else 'לתיקון (dry-run; הוסף --apply)'}")
+    if apply and changes:
+        if backup:
+            open(CATALOG + ".bak", "w", encoding="utf-8").write(open(CATALOG, encoding="utf-8").read())
+        if _fmt(CATALOG) == "dart":
+            open(CATALOG, "w", encoding="utf-8").write(src)
+        else:
+            _save_names({s: b for s, _, b in changes})
+        # צעד 20 — לוג שינויים
+        import csv as _csv
+        from datetime import date
+        logp = os.path.join(OUT_DIR, "fix_log.csv")
+        new_file = not os.path.exists(logp)
+        with open(logp, "a", newline="", encoding="utf-8-sig") as fh:
+            w = _csv.writer(fh)
+            if new_file:
+                w.writerow(["date", "sku", "field", "before", "after"])
+            for sku, a, b in changes:
+                w.writerow([date.today().isoformat(), sku, "nameHe", a, b])
+        # צעד 28 — אידמפוטנטיות
+        again = sum(1 for p in parse_catalog()
+                    if _normalize(p["name"]) != p["name"]
+                    and ("|" in p["name"] or "כמות" in p["name"]))
+        print(f"גיבוי: {CATALOG}.bak · לוג: {os.path.relpath(logp)} · "
+              f"אידמפוטנטיות: {'✅' if again == 0 else '❌ '+str(again)}")
+
+
+def cmd_export(out="catalog_qa.csv", *_):
+    products = parse_catalog(); tcats = tree_categories()
+    findings = defaultdict(list)
+    for f in run_rules(products, tcats):
+        findings[f["sku"]].append(f"{f['severity']}:{f['rule']}")
+    with open(out, "w", newline="", encoding="utf-8-sig") as fh:
+        w = csv.writer(fh)
+        w.writerow(["sku", "name", "nameEn", "category", "page", "image", "brand", "flags"])
+        for p in products:
+            w.writerow([p["sku"], p["name"], p["nameEn"], p["category"], p["page"],
+                        "Y" if p["image"] else "", p["brand"], "|".join(findings.get(p["sku"], []))])
+    print(f"נכתב {out} ({len(products)} שורות)")
+
+
+def cmd_truthcheck(*_):
+    if not TRUTH or not os.path.exists(TRUTH):
+        print(f"❌ אין {TRUTH} — הסוכן השני צריך לייצר מ-4 ה-PDFs.")
+        return
+    ref = {r["sku"]: r for r in json.load(open(TRUTH, encoding="utf-8"))}
+    products = parse_catalog()
+    nd, cd, miss = [], [], []
+    live = set()
+    for p in products:
+        live.add(p["sku"]); r = ref.get(p["sku"])
+        if not r:
+            miss.append(p["sku"]); continue
+        if p["name"].strip() != r.get("nameHe", "").strip():
+            nd.append((p["sku"], p["name"], r.get("nameHe", "")))
+        if p["category"] != r.get("categoryHe", ""):
+            cd.append((p["sku"], p["category"], r.get("categoryHe", "")))
+    only = [s for s in ref if s not in live]
+    print(f"כיסוי אימות: {len(live & set(ref))*100//max(1,len(products))}%")
+    print(f"❌ שם שונה: {len(nd)} · ❌ קטגוריה שונה: {len(cd)} · "
+          f"⚠️ עודף-app: {len(miss)} · ⚠️ חסר-app: {len(only)}")
+    for sk, a, b in nd[:15]:
+        print(f"   {sk}: app='{a[:35]}' src='{b[:35]}'")
+    # brand diff (step 34)
+    bd = [p["sku"] for p in products if p["sku"] in ref
+          and ref[p["sku"]].get("brand") and p["brand"] != ref[p["sku"]]["brand"]]
+    if bd:
+        print(f"❌ מותג שונה: {len(bd)} {bd[:8]}")
+
+
+def cmd_crosscheck(*pdfs):
+    import fitz
+    pages = []
+    for pdf in pdfs:
+        d = fitz.open(pdf)
+        pages += [d[i].get_text() for i in range(len(d))]
+    hw = lambda s: set(re.findall(r"[א-ת]{2,}", s))
+    products = parse_catalog()
+    checked, sus, unv = 0, [], 0
+    for p in products:
+        loc = next((t for t in pages if p["sku"] in t), None)
+        if loc is None:
+            unv += 1; continue
+        checked += 1
+        nw = hw(p["name"])
+        if nw and len(nw & hw(loc)) / len(nw) < 0.5:
+            sus.append(p["sku"])
+    print(f"ניתן לאמת: {checked}/{len(products)} ({checked*100//max(1,len(products))}%) · "
+          f"לא במקור: {unv} · חשודים: {len(sus)} {sus[:10]}")
+
+
+def cmd_suspects(*pdfs):
+    """צעדים 40-42 — תור-בדיקה: שמות בעלי חפיפה נמוכה למקור, עם ניקוד מדורג,
+    נשמר ל-scripts/suspects.csv לסקירה ויזואלית (verify)."""
+    import csv as _csv
+    import fitz
+    pages = []
+    for pdf in pdfs:
+        d = fitz.open(pdf)
+        pages += [(f"{os.path.basename(pdf)}#p{i+1}", d[i].get_text()) for i in range(len(d))]
+    hw = lambda s: set(re.findall(r"[א-ת]{2,}", s))
+    rows = []
+    for p in parse_catalog():
+        loc = next(((lbl, t) for lbl, t in pages if p["sku"] in t), None)
+        if not loc:
+            continue
+        nw = hw(p["name"])
+        if not nw:
+            continue
+        score = round(len(nw & hw(loc[1])) / len(nw), 2)
+        if score < 0.6:
+            rows.append((p["sku"], p["name"], loc[0], score))
+    rows.sort(key=lambda r: r[3])  # worst first
+    out = os.path.join(OUT_DIR, "suspects.csv")
+    with open(out, "w", newline="", encoding="utf-8-sig") as fh:
+        w = _csv.writer(fh)
+        w.writerow(["sku", "name", "source", "score"])
+        w.writerows(rows)
+    print(f"חשודים: {len(rows)} (נשמר {out}). הגרועים:")
+    for sk, nm, srcp, sc in rows[:12]:
+        print(f"   {sc}  {sk}  {nm[:30]}  [{srcp}]")
+    print(f"\nלאימות ויזואלי: python3 scripts/catalog_qa.py verify <pdf> "
+          + " ".join(r[0] for r in rows[:5]))
+
+
+def cmd_pdfmap(pdf, *_):
+    import fitz
+    d = fitz.open(pdf)
+    for i in range(len(d)):
+        sk = [s for s in set(re.findall(r"\b[A-Z0-9]{6,10}\b", d[i].get_text())) if re.search(r"\d", s)]
+        if sk:
+            print(f"page {i+1}: {sorted(sk)}")
+
+
+def cmd_verify(pdf, *skus):
+    import fitz
+    d = fitz.open(pdf); want = set(skus)
+    for i in range(len(d)):
+        t = d[i].get_text()
+        if any(s in t for s in want):
+            png = f"/tmp/verify_p{i+1}.png"
+            d[i].get_pixmap(matrix=fitz.Matrix(2.2, 2.2)).save(png)
+            print(f"page {i+1} → {png} ({[s for s in want if s in t]})")
+
+
+def cmd_images(*_):
+    adir = IMAGES_DIR or ""
+    have = set(os.listdir(adir)) if os.path.isdir(adir) else set()
+    if _fmt(CATALOG) == "dart":
+        src = open(CATALOG, encoding="utf-8").read()
+        refs = re.findall(r"imageFile:\s*'([^']+)'", src)
+    else:
+        refs = [p["imageFile"] for p in parse_catalog() if p["imageFile"]]
+    missing = sorted({f for f in refs if f not in have})
+    print(f"imageFile מוגדרים: {len(refs)} · קבצים: {len(have)}")
+    print(f"❌ imageFile בלי קובץ: {len(missing)} {missing[:10]}")
+    orphan = sorted(have - set(refs))
+    print(f"ℹ️ קבצים יתומים: {len(orphan)} {orphan[:6]}")
+
+
+def cmd_imgmatch(*_):
+    """צעד 38 — אימות התאמת תמונה↔מק"ט (שם הקובץ מתחיל ב-sku)."""
+    if _fmt(CATALOG) == "dart":
+        src = open(CATALOG, encoding="utf-8").read()
+        pairs = [m.groups() for m in
+                 re.finditer(r"sku:\s*'([^']+)'[^)]*?imageFile:\s*'([^']+)'", src, re.DOTALL)]
+    else:
+        pairs = [(p["sku"], p["imageFile"]) for p in parse_catalog() if p["imageFile"]]
+    bad = []
+    for sku, img in pairs:
+        if not img.split(".")[0] == sku:
+            bad.append((sku, img))
+    print(f"❌ תמונה שלא תואמת מק\"ט: {len(bad)}")
+    for sku, img in bad[:12]:
+        print(f"   {sku} ↔ {img}")
+
+
+def cmd_coverage(*_):
+    """צעד 39 — דוח כיסוי מפולח לפי מותג/קטגוריה."""
+    products = parse_catalog()
+    by_brand = defaultdict(lambda: [0, 0, 0])  # total, with-image, with-size
+    for p in products:
+        b = by_brand[p["brand"]]
+        b[0] += 1
+        b[1] += 1 if p["image"] else 0
+        b[2] += 1 if SIZE.search(p["name"]) else 0
+    print("מותג        סה\"כ   תמונה    גודל")
+    for brand, (t, i, s) in sorted(by_brand.items(), key=lambda x: -x[1][0]):
+        print(f"{brand:<10} {t:>6} {i*100//t:>7}% {s*100//t:>7}%")
+
+
+def cmd_schema(*_):
+    """צעד 30 — ולידציה של source_truth.json מול הסכמה."""
+    if not TRUTH or not os.path.exists(TRUTH):
+        print(f"אין {TRUTH}"); return
+    ref = json.load(open(TRUTH, encoding="utf-8"))
+    req = {"sku": str, "nameHe": str, "categoryHe": str}
+    bad = []
+    seen = set()
+    for i, r in enumerate(ref):
+        for f, ty in req.items():
+            if f not in r or not isinstance(r[f], ty) or not str(r.get(f, "")).strip():
+                bad.append((i, r.get("sku", "?"), f))
+        if "sizes" in r and not isinstance(r["sizes"], list):
+            bad.append((i, r.get("sku", "?"), "sizes!=list"))
+        if r.get("sku") in seen:
+            bad.append((i, r["sku"], "dup-sku"))
+        seen.add(r.get("sku"))
+    print(f"רשומות: {len(ref)} · ❌ הפרות סכמה: {len(bad)}")
+    for i, sk, f in bad[:15]:
+        print(f"   #{i} {sk}: {f}")
+
+
+def cmd_truthapply(*args):
+    """צעד 36 — תיקון אוטומטי של שמות מ-source_truth (dry-run; --apply לכתיבה)."""
+    if not TRUTH or not os.path.exists(TRUTH):
+        print(f"אין {TRUTH}"); return
+    apply = "--apply" in args
+    ref = {r["sku"]: r for r in json.load(open(TRUTH, encoding="utf-8"))}
+    if _fmt(CATALOG) != "dart":
+        changes = [(p["sku"], p["name"], ref[p["sku"]]["nameHe"]) for p in parse_catalog()
+                   if p["sku"] in ref and ref[p["sku"]].get("nameHe")
+                   and p["name"] != ref[p["sku"]]["nameHe"]]
+        for sk, a, b in changes[:20]:
+            print(f"   {sk}: '{a[:30]}' → '{b[:30]}'")
+        print(f"\n{len(changes)} שמות {'תוקנו' if apply else 'לתיקון (--apply ליישום)'}")
+        if apply and changes:
+            _save_names({s: b for s, _, b in changes})
+        return
+    src = open(CATALOG, encoding="utf-8").read()
+    parts = re.split(r"(LipskeyCatalogProduct\()", src)
+    res = parts[0]; changes = []
+    for k in range(1, len(parts), 2):
+        body = parts[k + 1]
+        skm = re.search(r"sku:\s*'([^']+)'", body)
+        if skm and skm.group(1) in ref:
+            want = ref[skm.group(1)]["nameHe"]
+            cur = re.search(r"nameHe:\s*(['\"])(.*?)\1(?=,)", body, re.DOTALL)
+            if cur and cur.group(2) != want:
+                changes.append((skm.group(1), cur.group(2), want))
+                if apply:
+                    nm = "'" + want.replace("\\", "").replace("'", "\\'") + "'"
+                    body = re.sub(r"nameHe:\s*(['\"]).*?\1(?=,)", f"nameHe: {nm}", body, 1, re.DOTALL)
+        res += parts[k] + body
+    for sk, a, b in changes[:20]:
+        print(f"   {sk}: '{a[:30]}' → '{b[:30]}'")
+    print(f"\n{len(changes)} שמות {'תוקנו' if apply else 'לתיקון (--apply ליישום)'}")
+    if apply:
+        open(CATALOG, "w", encoding="utf-8").write(res)
+
+
+def cmd_report(*_):
+    """צעדים 93,96 — KPI איכות + export JSON ל-stakeholders."""
+    products = parse_catalog()
+    n = len(products)
+    img = sum(1 for p in products if p["image"])
+    sz = sum(1 for p in products if SIZE.search(p["name"]))
+    findings = run_rules(products, tree_categories())
+    errs = sum(1 for f in findings if f["severity"] == ERROR)
+    kpi = {"products": n, "errors": errs,
+           "image_pct": img * 100 // n, "size_pct": sz * 100 // n,
+           "categories": len({p["category"] for p in products})}
+    out = os.path.join(OUT_DIR, "catalog_kpi.json")
+    json.dump(kpi, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    print(json.dumps(kpi, ensure_ascii=False, indent=2))
+    print(f"נכתב {out}")
+
+
+def cmd_diff(old, new):
+    """צעד 94 — דוח 'מה השתנה' בין שני קבצי-קטלוג (snapshots)."""
+    a = {p["sku"]: p["name"] for p in parse_catalog(old)}
+    b = {p["sku"]: p["name"] for p in parse_catalog(new)}
+    added = set(b) - set(a); removed = set(a) - set(b)
+    changed = [s for s in a if s in b and a[s] != b[s]]
+    print(f"➕ נוספו: {len(added)} · ➖ הוסרו: {len(removed)} · ✏️ שונו: {len(changed)}")
+
+
+def _dedup_sig(name):
+    """חתימת מוצר לדדופ: (core ללא מידות, מידות ממוינות)."""
+    n = _normalize(name)
+    sizes = tuple(sorted(set(SIZE.findall(n))))
+    core = re.sub(r"\s+", " ", SIZE.sub("", n)).strip()
+    return (core, sizes)
+
+
+def crossdedup_groups(products):
+    """צעד 82 — קבוצות חוצות-מותג: שם-מנורמל+מידות זהים תחת ≥2 מותגים."""
+    groups = defaultdict(list)
+    for p in products:
+        groups[_dedup_sig(p["name"])].append(p)
+    hits = []
+    for (core, sizes), ps in groups.items():
+        brands = {p["brand"] for p in ps}
+        if len(brands) >= 2 and core:
+            hits.append((core, sizes, ps, brands))
+    hits.sort(key=lambda h: -len(h[2]))
+    return hits
+
+
+def cmd_crossdedup(*_):
+    """צעד 82 — דדופ חוצה-מותג: אותו מוצר פיזי עם מק"ט שונה אצל מותגים שונים.
+    אות-זיהוי: שם-מנורמל זהה (או סוג+מידות זהים) תחת ≥2 מותגים שונים."""
+    hits = crossdedup_groups(parse_catalog())
+    print("=" * 58)
+    print(f"  דדופ חוצה-מותג — {len(hits)} קבוצות-מועמדות")
+    print("=" * 58)
+    for core, sizes, ps, brands in hits[:40]:
+        sz = "/".join(sizes) if sizes else "—"
+        print(f"\n  «{core[:34]}» [{sz}]  · {len(ps)} מק\"טים · {len(brands)} מותגים")
+        for p in ps:
+            print(f"     {p['brand']:<8} {p['sku']:<10} {p['name'][:40]}")
+    print("\n" + "-" * 58)
+    print(f"  סה\"כ {sum(len(h[2]) for h in hits)} מוצרים ב-{len(hits)} קבוצות חוצות-מותג.")
+    print("  ℹ️ מועמדים בלבד — אַחֵד מק\"טים רק לאחר אימות ויזואלי (R8).")
+    return len(hits)
+
+
+CMDS_EXTRA = True
+
+
+CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
+        "export": cmd_export, "truthcheck": cmd_truthcheck, "images": cmd_images,
+        "imgmatch": cmd_imgmatch, "coverage": cmd_coverage, "schema": cmd_schema,
+        "truthapply": cmd_truthapply, "report": cmd_report, "diff": cmd_diff,
+        "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify,
+        "suspects": cmd_suspects, "crossdedup": cmd_crossdedup}
+
+
+def _take_opt(a, name):
+    """Remove `--name X` or `--name=X` from the arg list; return X or None."""
+    for i, x in enumerate(a):
+        if x == name and i + 1 < len(a):
+            v = a[i + 1]
+            del a[i:i + 2]
+            return v
+        if x.startswith(name + "="):
+            del a[i]
+            return x.split("=", 1)[1]
+    return None
+
+
+def main(argv=None):
+    a = list(sys.argv[1:] if argv is None else argv)
+    cfg = _take_opt(a, "--config")
+    if cfg:
+        configure(load_config(cfg))
+    elif CATALOG is None and os.path.exists("catalog_qa.json"):
+        configure(load_config("catalog_qa.json"))
+    for opt, key in (("--catalog", "catalog"), ("--categories", "categories"),
+                     ("--truth", "truth"), ("--images", "images_dir"),
+                     ("--out-dir", "out_dir")):
+        v = _take_opt(a, opt)
+        if v:
+            configure({key: os.path.abspath(v)})
+    brands = _take_opt(a, "--brands")
+    if brands is not None:
+        configure({"brands": [b.strip() for b in brands.split(",") if b.strip()]})
+    if not a or a[0] not in CMDS:
+        print(__doc__); return
+    rc = CMDS[a[0]](*a[1:])
+    if a[0] == "audit" and rc:
+        sys.exit(1)  # blocking errors fail the run
+
+
+if __name__ == "__main__":
+    main()

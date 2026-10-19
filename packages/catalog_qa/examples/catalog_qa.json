@@ -1,0 +1,6 @@
+{
+  "catalog": "store_catalog.csv",
+  "categories": "categories.txt",
+  "brands": ["חמת", "פלסון"],
+  "out_dir": "."
+}

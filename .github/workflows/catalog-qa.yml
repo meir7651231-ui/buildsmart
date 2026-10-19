@@ -3,9 +3,9 @@ name: catalog-qa
 # שער אכיפה: כל push/PR שנוגע בנתוני הקטלוג עובר מנוע QA + analyze.
 on:
   push:
-    paths: ["app_flutter/lib/data/**", "app_flutter/lib/test_harness/**", "packages/compat_engine/lib/data/**", "scripts/catalog_qa.py"]
+    paths: ["app_flutter/lib/data/**", "app_flutter/lib/test_harness/**", "packages/compat_engine/lib/data/**", "scripts/catalog_qa.py", "scripts/catalog_qa.buildsmart.json", "packages/catalog_qa/**"]
   pull_request:
-    paths: ["app_flutter/lib/data/**", "packages/compat_engine/lib/data/**", "scripts/catalog_qa.py"]
+    paths: ["app_flutter/lib/data/**", "packages/compat_engine/lib/data/**", "scripts/catalog_qa.py", "scripts/catalog_qa.buildsmart.json", "packages/catalog_qa/**"]
 
 jobs:
   qa:
@@ -17,6 +17,11 @@ jobs:
 
       - name: Self-test — מוכיח שכל חוק QA יורה
         run: python3 scripts/catalog_qa.py selftest
+
+      - name: Engine tests — המנוע על קטלוג כללי (CSV/JSON) + קטלוג BuildSmart
+        run: |
+          python3 packages/catalog_qa/tests/test_engine.py
+          (cd scripts && python3 test_catalog_qa.py)
 
       - name: Audit — חוסם על שגיאות
         run: python3 scripts/catalog_qa.py audit --json | tee catalog_qa.json

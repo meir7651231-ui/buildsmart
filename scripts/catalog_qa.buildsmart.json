@@ -1,0 +1,13 @@
+{
+  "_comment": "BuildSmart settings for the catalog QA engine (packages/catalog_qa). Paths are relative to this file.",
+  "catalog": [
+    "../packages/compat_engine/lib/data/lipskey_catalog.dart",
+    "../app_flutter/lib/data/lipskey_catalog.dart"
+  ],
+  "categories": "../app_flutter/lib/data/catalog_tree.dart",
+  "truth": "source_truth.json",
+  "images_dir": "../app_flutter/assets/lipskey/products",
+  "out_dir": ".",
+  "brands": ["AQUATEC", "ליפסקי", "פלסון", "חגור", "גרוהה", "חמת"],
+  "default_brand": "ליפסקי"
+}
