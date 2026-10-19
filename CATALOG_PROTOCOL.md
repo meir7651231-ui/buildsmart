@@ -153,6 +153,8 @@ specImageAsset     →  crop עמוד ה-PDF (page_NN.jpg) + זום מלא
 `dup_name_unresolved` (WARN — אין מבדיל אמיתי, **לא ממציאים**).
 בדיקות-יחידה: `scripts/test_catalog_qa.py` (pytest, 6/6).
 הפעלה תמיד מ-**שורש הריפו**: `python3 scripts/catalog_qa.py <cmd>`.
+המנוע עצמו נמצא ב-`packages/catalog_qa/` (עובד גם על קטלוג CSV/JSON של כל חנות).
+`scripts/catalog_qa.py` מריץ אותו עם ההגדרות של BuildSmart: `scripts/catalog_qa.buildsmart.json`.
 
 ---
 
