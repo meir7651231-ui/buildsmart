@@ -864,7 +864,7 @@ def cmd_pdfcheck(*args):
         scored = [(_pdf_score(_normalize(p["name"]), f"{l} {nxt}"), src, l, nxt) for src, l, nxt in hits]
         best = max(scored, key=lambda x: -1 if x[0] is None else x[0])
         row = {"sku": p["sku"], "name": p["name"], "found": True, "page": best[1],
-               "score": best[0], "pdfText": f"{best[2]} {best[3]}".strip()[:160]}
+               "score": best[0], "pdfText": (best[2] if HE.search(best[2]) else f"{best[2]} {best[3]}").strip()[:160]}
         if best[0] is not None and best[0] < 0.5:
             row["elsewhere"] = elsewhere(p["name"])
         out.append(row)
