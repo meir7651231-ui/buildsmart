@@ -398,7 +398,9 @@ def _normalize(n):
             seen.add(k); uniq.append(p)
     n = " · ".join(uniq) if uniq else (n.split("|")[0] if "|" in n else n)
     n = re.sub(r"(?<=[א-ת])(?=\d)", " ", n)
-    n = re.sub(r"(?<=[\d\"])(?=[א-ת])", " ", n)
+    # An inch mark after a digit is followed by a space (3/4"לכיור → 3/4" לכיור); gershayim
+    # inside a Hebrew abbreviation stay as they are (מ"מ, ס"מ, ממ"ר).
+    n = re.sub(r"(?<=\d)(?=[א-ת])|(?<=\d\")(?=[א-ת])", " ", n)
     n = re.sub(r"\s+", " ", n).strip(" |)(·")
     return n
 

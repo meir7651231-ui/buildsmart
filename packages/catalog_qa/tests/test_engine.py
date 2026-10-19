@@ -118,6 +118,13 @@ def test_normalize_keeps_size_next_to_packaging():
     assert q._normalize("מחסום | 20 | כמות באריזה") == "מחסום"
 
 
+def test_normalize_keeps_hebrew_abbreviations():
+    # A space after an inch mark that follows a digit; gershayim inside מ"מ / ממ"ר stay.
+    assert q._normalize('מחבר  שן 16 מ"מ | 50 כמות באריזה') == 'מחבר שן 16 מ"מ'
+    assert q._normalize('מחסום 1.25"לכיור') == 'מחסום 1.25" לכיור'
+    assert q._normalize('כבל 3x2.5 ממ"ר') == 'כבל 3x2.5 ממ"ר'
+
+
 def test_fix_apply_writes_csv_and_is_idempotent():
     with tempfile.TemporaryDirectory() as tmp:
         path = example(tmp)
