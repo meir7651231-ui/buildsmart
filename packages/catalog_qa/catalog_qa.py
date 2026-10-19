@@ -20,6 +20,7 @@ BuildSmart: python3 scripts/catalog_qa.py <cmd>  (scripts/catalog_qa.buildsmart.
   crosscheck <pdf...>     השוואת שם↔טקסט PDF ליד המק"ט
   pdfmap <pdf>            מיפוי עמוד→מק"טים
   verify <pdf> sku...     רינדור עמודי מקור ל-/tmp/*.png
+  lookup sku...           JSON: המוצר וההפרות שלו (למנועים אחרים)
 
 כלל הזהב: שם שלא ניתן לאמת מול המקור — לא ממציאים.
 """
@@ -752,6 +753,29 @@ def cmd_crossdedup(*_):
     return len(hits)
 
 
+def cmd_lookup(*skus):
+    """For other engines: each SKU's product and the rules it breaks, as JSON.
+    A SKU that is not in the catalog comes back with "found": false."""
+    products = parse_catalog()
+    findings = defaultdict(list)
+    for f in run_rules(products, tree_categories()):
+        findings[f["sku"]].append({k: f[k] for k in ("rule", "severity", "detail")})
+    by_sku = {}
+    for p in products:
+        by_sku.setdefault(p["sku"], p)
+    out = []
+    for sku in skus:
+        p = by_sku.get(sku)
+        out.append({"sku": sku, "found": p is not None,
+                    "name": p["name"] if p else None,
+                    "category": p["category"] if p else None,
+                    "brand": p["brand"] if p else None,
+                    "image": p["image"] if p else None,
+                    "findings": findings.get(sku, [])})
+    print(json.dumps(out, ensure_ascii=False))
+    return out
+
+
 CMDS_EXTRA = True
 
 
@@ -760,7 +784,7 @@ CMDS = {"audit": cmd_audit, "selftest": cmd_selftest, "fix": cmd_fix,
         "imgmatch": cmd_imgmatch, "coverage": cmd_coverage, "schema": cmd_schema,
         "truthapply": cmd_truthapply, "report": cmd_report, "diff": cmd_diff,
         "crosscheck": cmd_crosscheck, "pdfmap": cmd_pdfmap, "verify": cmd_verify,
-        "suspects": cmd_suspects, "crossdedup": cmd_crossdedup}
+        "suspects": cmd_suspects, "crossdedup": cmd_crossdedup, "lookup": cmd_lookup}
 
 
 def _take_opt(a, name):
