@@ -23,6 +23,7 @@ on:
     branches: [ claude/whats-happening-LyY9G ]
     paths:
       - 'app_flutter/**'
+      - 'packages/compat_engine/**'
       - '.github/workflows/android-google-test.yml'
 
 permissions:

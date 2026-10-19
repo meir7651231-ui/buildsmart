@@ -2,7 +2,7 @@
 """Match the swarm's VALIDATED Lipskey-PDF extraction against the live catalog.
 
 Input  : knowledge/_pdf_extracted.json  = {"products":[{sku,color,nameHe,nameEn,dims,page,confidence}]}
-Catalog: lib/data/lipskey_catalog.dart  (the 924 LipskeyCatalogProduct SKUs)
+Catalog: ../packages/compat_engine/lib/data/lipskey_catalog.dart  (the 924 LipskeyCatalogProduct SKUs)
 Output : knowledge/_enrich_validated.json = {"dims":[{sku,dims}], "colors":[{sku,color}]}
          (consumed by apply_lipskey_enrich.py — only SKUs that EXIST in the catalog)
 Report : prints matched/new/low-confidence tallies; lists NEW SKUs (in PDF, not catalog) for
@@ -15,7 +15,7 @@ import json, re, sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 EXTRACT = 'knowledge/_pdf_extracted.json'
-CATALOG = 'lib/data/lipskey_catalog.dart'
+CATALOG = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 OUT = 'knowledge/_enrich_validated.json'
 
 # qty keys the catalog stores as first-class int fields (NOT inside dims)

@@ -12,7 +12,7 @@ Usage: python scripts/fill_modes_from_name.py
 import re, sys, io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-F = 'lib/data/lipskey_catalog.dart'
+F = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 PARITY = 'test/lipskey_pdf_parity_test.dart'
 TYPE_TOKENS = ['טלסקופי', 'נשלף', 'מהקיר', 'שולחני', 'כפול', 'יחיד']
 

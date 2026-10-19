@@ -12,7 +12,7 @@ Usage: python scripts/fix_audit_dims.py
 import re, sys, io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-F = 'lib/data/lipskey_catalog.dart'
+F = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 
 FIX_UNIT = {'7777707C': ('200 ס"מ', '200 מ"מ'), '7777708C': ('250 ס"מ', '250 מ"מ')}
 REMOVE_MIDA = {'910603440', '9106320031', '9105011411', '9105011241', '9105020030', '9102010011'}

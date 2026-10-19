@@ -5,7 +5,7 @@ catalog_qa.py — מנוע QA לקטלוג BuildSmart (v2 · engine).
 מערכת אכיפה: מנוע חוקים עם חומרה (ERROR/WARN/INFO), תיקון אוטומטי בטוח,
 אימות מול מקור, והוכחת-עצמו. נועד לעשרות אלפי מוצרים.
 
-מקור: app_flutter/lib/data/lipskey_catalog.dart  (LipskeyCatalogProduct(...))
+מקור: packages/compat_engine/lib/data/lipskey_catalog.dart  (LipskeyCatalogProduct(...))
 
 פקודות:
   audit [--json]          בדיקה תחבירית מלאה (מנוע החוקים)
@@ -27,7 +27,7 @@ import sys
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CATALOG = os.path.join(ROOT, "app_flutter/lib/data/lipskey_catalog.dart")
+CATALOG = os.path.join(ROOT, "packages/compat_engine/lib/data/lipskey_catalog.dart")
 TREE = os.path.join(ROOT, "app_flutter/lib/data/catalog_tree.dart")
 TRUTH = os.path.join(ROOT, "scripts/source_truth.json")
 

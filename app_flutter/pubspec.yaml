@@ -22,6 +22,10 @@ dependencies:
 
   flutter:
     sdk: flutter
+
+  # The compatibility engine ("what connects to what") — pure Dart, its own package.
+  compat_engine:
+    path: ../packages/compat_engine
   flutter_localizations:
     sdk: flutter
 

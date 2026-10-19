@@ -60,15 +60,22 @@ void main() {
   test('closed-set sweep: only sanctioned infra reads kCatalogProducts in CODE',
       () {
     final offenders = <String>[];
-    for (final f in Directory('lib').listSync(recursive: true)) {
+    // The app's lib/ plus the compatibility engine package. Package files are
+    // checked under their lib/-relative path, the same name they had in the app.
+    const engineRoot = '../packages/compat_engine/';
+    for (final f in [
+      ...Directory('lib').listSync(recursive: true),
+      ...Directory('${engineRoot}lib').listSync(recursive: true),
+    ]) {
       if (f is! File || !f.path.endsWith('.dart')) continue;
-      if (kSanctionedRawReaders.contains(f.path)) continue;
+      final path = f.path.startsWith(engineRoot) ? f.path.substring(engineRoot.length) : f.path;
+      if (kSanctionedRawReaders.contains(path)) continue;
       // Comment-only mentions are fine — scan non-comment lines only.
       final code = f
           .readAsLinesSync()
           .where((l) => !l.trimLeft().startsWith('//'))
           .join('\n');
-      if (code.contains('kCatalogProducts')) offenders.add(f.path);
+      if (code.contains('kCatalogProducts')) offenders.add(path);
     }
     expect(offenders, isEmpty,
         reason: 'a new direct kCatalogProducts read bypasses the ACTIVE '

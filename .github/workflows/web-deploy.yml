@@ -17,6 +17,7 @@ on:
     branches: [ claude/whats-happening-LyY9G ]
     paths:
       - 'app_flutter/**'
+      - 'packages/compat_engine/**'
       - 'firebase.json'
       - '.github/workflows/web-deploy.yml'
 

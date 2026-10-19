@@ -64,7 +64,7 @@ void main() {
       ]);
     });
     test('catalog + chat + cart helpers', () {
-      mustContain('lib/data/lipskey_catalog.dart', ['bool indexableWord(']);
+      mustContain('../packages/compat_engine/lib/data/lipskey_catalog.dart', ['bool indexableWord(']);
       mustContain('lib/screens/chats_screen.dart', ['bool showOnlinePresence(']);
       mustContain('lib/state/smart_cart.dart',
           ['int qtyForKey(', 'void setQtyForKey(']);

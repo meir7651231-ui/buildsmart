@@ -1,0 +1,48 @@
+// After the Polyroll bridge, PPR products should score significantly higher
+// in `cardReadinessScore` than they did before (because they now have a
+// VerifiedSpec, install effort, install tools, compat mates, etc.).
+
+import 'package:compat_engine/data/lipskey_verified_connections.dart';
+import 'package:compat_engine/data/polyroll_catalog.dart';
+import 'package:compat_engine/data/polyroll_specs.dart';
+import 'package:compat_engine/data/related_info.dart';
+import 'package:test/test.dart';
+
+void main() {
+  test('PPR DN20 pipe scores ≥ "טוב" band (≥55) after bridge registration',
+      () {
+    // Score BEFORE registration to capture the baseline.
+    final pipe = kPolyrollCatalog.firstWhere((p) => p.sku == '95016002');
+    // Ensure no leftover state from other tests in the same run.
+    kVerifiedSpecs.remove(pipe.sku);
+    final pre = cardReadinessScore(pipe);
+    // Composite model: even without a registered spec the pipe carries intrinsic
+    // `dims` data (depth) plus a category-derived standard, so the baseline is a
+    // low-mid בסיסי (~41), not near-zero. The bridge then lifts it to ~99.
+    expect(pre.score, lessThanOrEqualTo(50),
+        reason:
+            'PPR baseline stays low (no spec/compat; only intrinsic dims)');
+
+    registerPolyrollSpecs();
+    final post = cardReadinessScore(pipe);
+    expect(post.score, greaterThan(pre.score),
+        reason: 'pre=${pre.score} post=${post.score}');
+    expect(post.score, greaterThanOrEqualTo(55),
+        reason: 'PPR with full bridge should reach טוב band (≥55)');
+  });
+
+  test('every PPR product with a synthesised spec scores > baseline', () {
+    registerPolyrollSpecs();
+    var checked = 0;
+    var aboveBaseline = 0;
+    for (final p in kPolyrollCatalog) {
+      if (kVerifiedSpecs[p.sku] == null) continue;
+      checked++;
+      final s = cardReadinessScore(p);
+      if (s.score > 20) aboveBaseline++;
+    }
+    expect(checked, greaterThan(700));
+    expect(aboveBaseline / checked, greaterThanOrEqualTo(0.99),
+        reason: '$aboveBaseline/$checked above baseline 20');
+  });
+}

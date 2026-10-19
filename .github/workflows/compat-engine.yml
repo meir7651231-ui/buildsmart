@@ -1,0 +1,25 @@
+name: compat-engine
+
+# מנוע ההתאמות ("מה מתחבר למה") — חבילת Dart נקייה, בלי Flutter.
+on:
+  push:
+    paths: ["packages/compat_engine/**", ".github/workflows/compat-engine.yml"]
+  pull_request:
+    paths: ["packages/compat_engine/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/compat_engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with: { sdk: "3.7.2" }
+      - run: dart pub get
+      - name: dart analyze — חוסם רק על errors
+        run: |
+          dart analyze 2>&1 | tee /tmp/an.txt || true
+          if grep -qE "^\s*error " /tmp/an.txt; then echo "❌ errors"; exit 1; fi
+      - run: dart test

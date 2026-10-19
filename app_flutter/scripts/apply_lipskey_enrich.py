@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Apply VALIDATED Lipskey enrichment (dims + color) onto lib/data/lipskey_catalog.dart.
+"""Apply VALIDATED Lipskey enrichment (dims + color) onto ../packages/compat_engine/lib/data/lipskey_catalog.dart.
 
 Deterministic single-writer applier — the swarm's audit+validate produce the data;
 this script inserts each verified field into the right product block. R8: it only
 inserts what the validated payload contains (verbatim from the catalog pages/names).
 
 Input  : knowledge/_enrich_validated.json  = {"dims":[{"sku","dims":{..}}], "colors":[{"sku","color"}]}
-Target : lib/data/lipskey_catalog.dart
+Target : ../packages/compat_engine/lib/data/lipskey_catalog.dart
 Skips  : a field already present on that product (idempotent, never overwrites).
 Usage  : python scripts/apply_lipskey_enrich.py [--dry]
 """
@@ -14,7 +14,7 @@ import json, re, sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 DRY = '--dry' in sys.argv
-CATALOG = 'lib/data/lipskey_catalog.dart'
+CATALOG = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 PAYLOAD = 'knowledge/_enrich_validated.json'
 
 def dart_value(v):

@@ -9,7 +9,7 @@ Scoped per-SKU block. Usage: python scripts/fix_audit_all.py
 import re, sys, io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-F = 'lib/data/lipskey_catalog.dart'
+F = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 
 # typo → corrected, replaced everywhere inside the product block (name + תיאור)
 TYPOS = {

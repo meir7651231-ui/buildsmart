@@ -241,10 +241,13 @@ void main() {
         () {
       final re = RegExp("fromEnvironment\\(\\s*'([A-Z0-9_]+)'");
       final found = <String>{};
-      for (final f in Directory('lib').listSync(recursive: true)) {
-        if (f is! File || !f.path.endsWith('.dart')) continue;
-        for (final m in re.allMatches(f.readAsStringSync())) {
-          found.add(m.group(1)!);
+      // The app's lib/ plus the compatibility engine package it depends on.
+      for (final root in ['lib', '../packages/compat_engine/lib']) {
+        for (final f in Directory(root).listSync(recursive: true)) {
+          if (f is! File || !f.path.endsWith('.dart')) continue;
+          for (final m in re.allMatches(f.readAsStringSync())) {
+            found.add(m.group(1)!);
+          }
         }
       }
       final classified = {

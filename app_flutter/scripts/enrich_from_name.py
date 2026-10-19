@@ -16,7 +16,7 @@ Output feeds apply_lipskey_enrich.py (idempotent). Usage: python scripts/enrich_
 import re, json, sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-CATALOG = 'lib/data/lipskey_catalog.dart'
+CATALOG = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 OUT = 'knowledge/_enrich_validated.json'
 
 # longest-first so "זהב מוברש" wins over "זהב"

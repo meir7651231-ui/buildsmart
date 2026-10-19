@@ -15,9 +15,13 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 final _repo = p.canonicalize(p.join(Directory.current.path, '../../..'));
-final _engine = p.join(_repo, 'app_flutter/lib/logic/install_engine.dart');
+final _engine = p.join(_repo, 'packages/compat_engine/lib/logic/install_engine.dart');
 final _cart = p.join(_repo, 'app_flutter/lib/state/smart_cart.dart');
-String _lib(String rel) => p.join(_repo, 'app_flutter/lib/$rel');
+// Engine files live in packages/compat_engine; the rest of the app in app_flutter.
+String _lib(String rel) {
+  final engine = p.join(_repo, 'packages/compat_engine/lib/$rel');
+  return File(engine).existsSync() ? engine : p.join(_repo, 'app_flutter/lib/$rel');
+}
 
 void main() {
   final present = File(_engine).existsSync();

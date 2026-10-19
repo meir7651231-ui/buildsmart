@@ -205,15 +205,24 @@ void main() {
   group('c · closed-set sweep — gate consumers are a registered set', () {
     Set<String> consumersOf(String gateName) {
       final found = <String>{};
-      for (final f in Directory('lib').listSync(recursive: true)) {
+      // The app's lib/ plus the compatibility engine package. Package files are
+      // checked under their lib/-relative path, the same name they had in the app.
+      const engineRoot = '../packages/compat_engine/';
+      for (final f in [
+        ...Directory('lib').listSync(recursive: true),
+        ...Directory('${engineRoot}lib').listSync(recursive: true),
+      ]) {
         if (f is! File || !f.path.endsWith('.dart')) continue;
+        final path = f.path.startsWith(engineRoot)
+            ? f.path.substring(engineRoot.length)
+            : f.path;
         // Comment-only mentions are fine — scan non-comment lines only
         // (the stage3 sweep idiom).
         final code = f
             .readAsLinesSync()
             .where((l) => !l.trimLeft().startsWith('//'))
             .join('\n');
-        if (code.contains(gateName)) found.add(f.path);
+        if (code.contains(gateName)) found.add(path);
       }
       return found;
     }

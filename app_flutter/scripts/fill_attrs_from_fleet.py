@@ -10,7 +10,7 @@ import json, re, sys, io
 from collections import defaultdict
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-F = 'lib/data/lipskey_catalog.dart'
+F = '../packages/compat_engine/lib/data/lipskey_catalog.dart'
 PARITY = 'test/lipskey_pdf_parity_test.dart'
 INP = 'knowledge/_fleet_attrs.json'
 KEY_ORDER = ['זווית', 'יציאות', 'תצורה', 'מאפיין', 'ייעוד']
