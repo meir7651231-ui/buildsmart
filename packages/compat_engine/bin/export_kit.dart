@@ -28,14 +28,14 @@ void main(List<String> args) {
     stderr.writeln('usage: dart run compat_engine:export_kit <catalog.csv> [<pairs.txt>]');
     exit(64);
   }
-  final out = StringBuffer('sku,name,category,material,ends\n');
+  final out = StringBuffer('sku,name,category,material,ends,maxTemp\n');
   final specs = <String, VerifiedSpec>{};
   for (final p in chainUniverse) {
     final s = kVerifiedSpecs[p.sku];
     if (s == null || specs.containsKey(p.sku)) continue;
     specs[p.sku] = s;
     final ends = s.ends.map((e) => '${kinds[e.type]} ${e.size}').join('; ');
-    out.writeln([csv(p.sku), csv(p.nameHe), csv(p.categoryHe), csv(s.material), csv(ends)].join(','));
+    out.writeln([csv(p.sku), csv(p.nameHe), csv(p.categoryHe), csv(s.material), csv(ends), s.maxTempC.round()].join(','));
   }
   File(args[0]).writeAsStringSync(out.toString());
   if (args.length > 1) {

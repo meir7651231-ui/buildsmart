@@ -68,6 +68,15 @@ void main() {
     expect(bridge.map((p) => (p as Map)['sku']), ['9103201211']);
   });
 
+  test('hot line: parts that cannot take the temperature are listed', () {
+    final cold = ask.check(['9103201211', '77775255'], 20);
+    expect(cold['tempProblems'], isEmpty);
+    final hot = ask.check(['9103201211', '77775255'], 60);
+    expect((hot['tempProblems'] as List).map((p) => (p as Map)['sku']), ['9103201211']); // HDPE: 40°
+    expect(hot['allConnect'], isTrue, reason: 'it connects; it just cannot take hot water');
+    expect(((hot['products'] as List).first as Map)['maxTemp'], 40.0);
+  });
+
   test('unknown SKUs are reported, never guessed', () {
     final r = ask.check(['NOPE', '9103201211'], 20);
     expect(r['unknown'], ['NOPE']);

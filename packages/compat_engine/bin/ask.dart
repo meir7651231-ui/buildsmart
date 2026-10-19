@@ -12,7 +12,8 @@
 //   check       {chain: [sku...], tempC?}
 //               each neighbouring pair: connects? how? why not? and the
 //               shortest bridge of real products when it doesn't; the install
-//               kit when the whole chain connects.
+//               kit when the whole chain connects; parts that can't take the
+//               line's temperature (tempProblems).
 import 'dart:convert';
 import 'dart:io';
 
@@ -35,6 +36,7 @@ Map<String, Object?> productJson(LipskeyCatalogProduct p) => {
       'brand': p.brand,
       'sizes': p.connectionSizes,
       'verified': kVerifiedSpecs.containsKey(p.sku),
+      'maxTemp': productMaxTempC(p),
     };
 
 const _stop = {
@@ -232,7 +234,13 @@ Map<String, Object?> check(List<String> skus, int tempC) {
     break; // past a dead end the walk says nothing; fix this one and ask again
   }
   final allConnect = unknown.isEmpty && pairs.every((p) => p['connects'] == true);
+  final tempProblems = [
+    for (final p in chain)
+      if (!productSuitableForTemp(p, tempC)) {'sku': p.sku, 'name': p.nameHe, 'maxTemp': productMaxTempC(p)},
+  ];
   return {
+    'tempC': tempC,
+    'tempProblems': tempProblems,
     'unknown': unknown,
     'products': [for (final p in chain) productJson(p)],
     'pairs': pairs,
