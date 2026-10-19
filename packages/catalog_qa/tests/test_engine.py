@@ -183,6 +183,18 @@ def test_cli_audit_fails_on_errors_and_passes_when_clean():
         quiet(q.main, ["--catalog", clean, "--brands", "X", "audit"])  # no SystemExit
 
 
+def test_lookup_for_other_engines():
+    with tempfile.TemporaryDirectory() as tmp:
+        example(tmp)
+        out, printed = quiet(q.cmd_lookup, "1005", "1003", "NOPE")
+        assert json.loads(printed) == out
+        by = {r["sku"]: r for r in out}
+        assert by["1005"]["found"] and {f["rule"] for f in by["1005"]["findings"]} >= {"stuck_digit"}
+        assert by["1003"]["name"] == "ברז  אמבטיה קיר"
+        assert by["NOPE"] == {"sku": "NOPE", "found": False, "name": None, "category": None,
+                              "brand": None, "image": None, "findings": []}
+
+
 def test_selftest_needs_no_config():
     setup()
     try:

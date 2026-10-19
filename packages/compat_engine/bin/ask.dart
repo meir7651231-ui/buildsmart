@@ -22,6 +22,8 @@ import 'package:compat_engine/data/lipskey_verified_connections.dart';
 import 'package:compat_engine/logic/install_engine.dart';
 import 'package:compat_engine/logic/install_kit.dart';
 
+// Verified ends: VerifiedSpec / ConnectorEnd come with lipskey_verified_connections.
+
 final Map<String, LipskeyCatalogProduct> _bySku = {
   for (final p in chainUniverse) p.sku: p,
 };
@@ -113,6 +115,86 @@ List<Map<String, Object?>> candidates(String q, int perWord, int limit) {
   return out;
 }
 
+bool _mates(VerifiedSpec a, ConnectorEnd ea, VerifiedSpec b, ConnectorEnd eb) =>
+    VerifiedSpec(sku: a.sku, ends: [ea], material: a.material)
+        .compatibleWith(VerifiedSpec(sku: b.sku, ends: [eb], material: b.material));
+
+/// Which ends of each part can take the previous part, when every end joins at
+/// most one neighbour (the pairwise check alone would let a two-ended adapter
+/// use the same end on both sides). Index i holds the ends of chain[i] that the
+/// walk can arrive on; {-1} = the first part (nothing arrives), null = a part
+/// without verified ends (not tracked). An empty set = the walk is stuck there.
+List<Set<int>?> endWalk(List<LipskeyCatalogProduct> chain) {
+  final out = <Set<int>?>[];
+  for (var i = 0; i < chain.length; i++) {
+    final spec = kVerifiedSpecs[chain[i].sku];
+    if (i == 0 || spec == null) {
+      out.add(spec == null ? null : {-1});
+      continue;
+    }
+    final prev = kVerifiedSpecs[chain[i - 1].sku];
+    final arrivedPrev = out[i - 1];
+    if (prev == null || arrivedPrev == null) {
+      out.add({for (var z = 0; z < spec.ends.length; z++) z});
+      continue;
+    }
+    out.add({
+      if (arrivedPrev.isNotEmpty)
+        for (var z = 0; z < spec.ends.length; z++)
+          if (arrivedPrev.any((x) => [
+                for (var y = 0; y < prev.ends.length; y++)
+                  if (y != x) y,
+              ].any((y) => _mates(prev, prev.ends[y], spec, spec.ends[z]))))
+            z,
+    });
+  }
+  return out;
+}
+
+/// Real parts that join [a] (arrived on one of [arrived]) to [b]: one part if
+/// possible, else two. Only two-ended parts: a tee or a manifold would leave an
+/// open port on the line.
+List<LipskeyCatalogProduct>? endBridge(
+    LipskeyCatalogProduct a, Set<int> arrived, LipskeyCatalogProduct b, int tempC) {
+  final sa = kVerifiedSpecs[a.sku], sb = kVerifiedSpecs[b.sku];
+  if (sa == null || sb == null || arrived.isEmpty) return null;
+  final freeA = <ConnectorEnd>{
+    for (final x in arrived)
+      for (var y = 0; y < sa.ends.length; y++)
+        if (y != x) sa.ends[y],
+  };
+  final parts = [
+    for (final p in chainUniverse)
+      if (p.sku != a.sku &&
+          p.sku != b.sku &&
+          kVerifiedSpecs[p.sku]?.ends.length == 2 &&
+          productSuitableForTemp(p, tempC))
+        p,
+  ]..sort((x, y) => (isFitting(x) ? 0 : 1).compareTo(isFitting(y) ? 0 : 1)); // fittings first: a nipple, not a shower arm
+  // The end of each part left free after joining the side it came from.
+  List<(LipskeyCatalogProduct, ConnectorEnd)> from(
+          VerifiedSpec s, Iterable<ConnectorEnd> ends) =>
+      [
+        for (final p in parts)
+          for (var i = 0; i < 2; i++)
+            if (ends.any((e) => _mates(s, e, kVerifiedSpecs[p.sku]!, kVerifiedSpecs[p.sku]!.ends[i])))
+              (p, kVerifiedSpecs[p.sku]!.ends[1 - i]),
+      ];
+  bool reachesB(LipskeyCatalogProduct p, ConnectorEnd e) =>
+      sb.ends.any((z) => _mates(kVerifiedSpecs[p.sku]!, e, sb, z));
+
+  final first = from(sa, freeA);
+  for (final (p, e) in first) {
+    if (reachesB(p, e)) return [p];
+  }
+  for (final (p, e) in first) {
+    for (final (q, f) in from(kVerifiedSpecs[p.sku]!, [e])) {
+      if (q.sku != p.sku && reachesB(q, f)) return [p, q];
+    }
+  }
+  return null;
+}
+
 Map<String, Object?> check(List<String> skus, int tempC) {
   final unknown = [for (final s in skus) if (!_bySku.containsKey(s)) s];
   final chain = [for (final s in skus) if (_bySku[s] != null) _bySku[s]!];
@@ -131,6 +213,23 @@ Map<String, Object?> check(List<String> skus, int tempC) {
           : [for (final p in path.sublist(1, path.length - 1)) productJson(p)];
     }
     pairs.add(pair);
+  }
+  // Second pass: each end joins one neighbour only.
+  final walk = endWalk(chain);
+  for (var i = 0; i < pairs.length; i++) {
+    final arrivedB = walk[i + 1];
+    if (arrivedB == null || walk[i] == null || arrivedB.isNotEmpty) continue;
+    final pair = pairs[i];
+    if (pair['connects'] == true) {
+      pair
+        ..['connects'] = false
+        ..['endConflict'] = true
+        ..remove('method')
+        ..['reason'] = 'הקצה של ${chain[i].nameHe} שמתאים לחלק הבא כבר תפוס בחיבור לחלק הקודם';
+    }
+    final bridge = endBridge(chain[i], walk[i]!, chain[i + 1], tempC);
+    pair['bridge'] = bridge == null ? null : [for (final p in bridge) productJson(p)];
+    break; // past a dead end the walk says nothing; fix this one and ask again
   }
   final allConnect = unknown.isEmpty && pairs.every((p) => p['connects'] == true);
   return {

@@ -9,7 +9,7 @@
 ```bash
 cd packages/compat_engine
 dart pub get
-dart test        # 669 בדיקות
+dart test        # 678 בדיקות
 dart analyze
 ```
 
@@ -32,6 +32,28 @@ import 'package:compat_engine/logic/install_engine.dart';
 final path = findShortestPath(from, to, tempC: 60);
 if (path == null) print(connectionFailReason(from, to));
 ```
+
+## שאלות ממנועים אחרים (`bin/ask.dart`)
+
+מנוע אחר שולח שאלה ב-JSON ומקבל תשובה ב-JSON. תהליך אחד עונה על כמה שאלות, ולוקח בערך שנייה.
+
+```bash
+echo '{"ops":[{"op":"candidates","q":"צינור HDPE 32 לברז ניל 1/2"},{"op":"check","chain":["9103201211","77775255"]}]}' \
+  | dart run compat_engine:ask
+```
+
+| שאלה | מה חוזר |
+|---|---|
+| `search {q}` | מוצרים שהשם שלהם מתאים למילים ולמידות |
+| `candidates {q}` | כמה מוצרים לכל סוג חלק שמוזכר בבקשה |
+| `product {sku}` · `compatible {sku}` | מוצר אחד · מה מתחבר אליו |
+| `check {chain}` | לכל זוג שכנים: מתחבר או לא, איך, למה לא, ומה חסר באמצע. כשכל השרשרת מתחברת חוזרת גם ערכת ההתקנה |
+
+שני כללים ב-`check` שאין בבדיקה של זוג בודד:
+- **כל קצה מתחבר לשכן אחד בלבד.** מעבר עם שני קצוות לא יכול להשתמש באותו קצה משני הצדדים.
+- **חלק חסר הוא אביזר עם שני קצוות בדיוק,** ואביזרים מוצעים לפני מוצרים אחרים. מסעף היה משאיר פתח פתוח בקו.
+
+מק"ט שלא קיים חוזר ב-`unknown`. המנוע לא מנחש.
 
 ## איך האפליקציה משתמשת בזה
 

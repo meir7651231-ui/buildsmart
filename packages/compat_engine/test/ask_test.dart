@@ -44,6 +44,30 @@ void main() {
     expect((r['kit'] as List).map((k) => (k as Map)['label']).join(' '), contains('טפלון'));
   });
 
+  test('each end joins one neighbour: a 2-ended adapter cannot use one end twice', () {
+    // ניל F½ + מעבר 8315 (M½ × F¾) + צינור משוריין F½: every pair matches on
+    // its own, but the adapter's only ½" end would be used on both sides.
+    final r = ask.check(['9103201211', '77775255', '8315', '77121240'], 20);
+    final last = (r['pairs'] as List).last as Map;
+    expect(last['connects'], isFalse);
+    expect(last['endConflict'], isTrue);
+    expect(r['allConnect'], isFalse);
+  });
+
+  test('a missing part is a real two-ended fitting (no open tee port, no shower arm)', () {
+    final r = ask.check(['77775255', '77121240'], 20); // F½ + F½
+    final bridge = ((r['pairs'] as List).single as Map)['bridge'] as List;
+    expect(bridge.map((p) => (p as Map)['sku']), ['77777641']); // ניפל כפול ½"
+    final fixed = ask.check(['77775255', '77777641', '77121240'], 20);
+    expect(fixed['allConnect'], isTrue);
+  });
+
+  test('wrong HDPE coupling: the bridge is the straight threaded coupling, not a tee', () {
+    final r = ask.check(['9103203210', '77775255'], 20);
+    final bridge = ((r['pairs'] as List).single as Map)['bridge'] as List;
+    expect(bridge.map((p) => (p as Map)['sku']), ['9103201211']);
+  });
+
   test('unknown SKUs are reported, never guessed', () {
     final r = ask.check(['NOPE', '9103201211'], 20);
     expect(r['unknown'], ['NOPE']);

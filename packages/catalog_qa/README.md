@@ -59,12 +59,14 @@ python3 catalog_qa.py audit --catalog products.csv --categories categories.txt -
 
 ## כל הפקודות
 
+`lookup <sku...>` מחזיר JSON עם המוצר וההפרות שלו. בו משתמשים מנועים אחרים, למשל "המחסנאי" בחדר הישיבות.
+
 `audit [--json]` · `selftest` · `fix [--apply] [--rule=packaging|gershayim|stuck|spaces]` · `export <csv>` · `truthcheck` · `truthapply [--apply]` · `schema` · `coverage` · `images` · `imgmatch` · `report` · `diff <old> <new>` · `crossdedup`. עם PDF: `crosscheck` · `suspects` · `pdfmap` · `verify`.
 
 ## בדיקות
 
 ```bash
-python3 packages/catalog_qa/tests/test_engine.py   # 13 בדיקות, בלי קבצי BuildSmart
+python3 packages/catalog_qa/tests/test_engine.py   # 14 בדיקות, בלי קבצי BuildSmart
 ```
 
 ## ב-BuildSmart
