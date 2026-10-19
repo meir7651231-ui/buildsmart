@@ -800,7 +800,9 @@ def _logical(line):
     """A visual-order line turned back: every Hebrew run reversed, LTR runs kept."""
     line = HE_RUN.sub(lambda m: m.group(0)[::-1], line)
     return re.sub(r"(?<=[א-ת])(?=[A-Za-z0-9])", " ", line)
-SKU_TOKEN = re.compile(r"(?<![\w-])[A-Z]{0,4}-?\d[\dA-Z-]{2,}(?![\w-])")
+# ASCII boundaries: in Python a Hebrew letter is a word character, and a PDF line can
+# glue a SKU to the name ("1003ברז").
+SKU_TOKEN = re.compile(r"(?<![A-Za-z0-9_-])[A-Z]{0,4}-?\d[\dA-Z-]{2,}(?![A-Za-z0-9_-])")
 
 
 def _pdf_lines(pdfs):
@@ -850,14 +852,16 @@ def cmd_pdfcheck(*args):
         best = None
         for src, l, nxt in lines:
             m = SKU_TOKEN.search(l)
-            sc = _pdf_score(_normalize(name), l) if m else None
+            # the name may sit on the line after its SKU
+            text = l if HE.search(l) else f"{l} {nxt}"
+            sc = _pdf_score(_normalize(name), text) if m else None
             if sc is not None and sc >= 0.75 and (best is None or sc > best["score"]):
                 best = {"sku": m.group(0), "page": src, "score": sc}
         return best
 
     out = []
     for p in parse_catalog():
-        hits = [(src, l, nxt) for src, l, nxt in lines if re.search(rf"(?<![\w-]){re.escape(p['sku'])}(?![\w-])", l)]
+        hits = [(src, l, nxt) for src, l, nxt in lines if re.search(rf"(?<![A-Za-z0-9_-]){re.escape(p['sku'])}(?![A-Za-z0-9_-])", l)]
         if not hits:
             out.append({"sku": p["sku"], "name": p["name"], "found": False, "elsewhere": elsewhere(p["name"])})
             continue
@@ -870,6 +874,14 @@ def cmd_pdfcheck(*args):
         out.append(row)
     print(json.dumps(out, ensure_ascii=False))
     return out
+
+
+def _tidy_pdf_name(t):
+    """Sizes a PDF put first ('"1/2 ברז מטבח נשלף') go back to the end; an inch mark follows its number."""
+    m = re.match(r'^((?:["״]?(?:DN)?[\d./×xX-]+["״]?\s+)+)(?=.*[א-ת])', t)
+    if m:
+        t = f"{t[m.end():]} {m.group(0).strip()}"
+    return re.sub(r'(^|\s)["״](\d+(?:[./]\d+)?)(?=\s|$)', r'\1\2"', t).strip()
 
 
 def cmd_pdfrows(*args):
@@ -885,7 +897,7 @@ def cmd_pdfrows(*args):
         if not text:
             continue
         seen.add(m.group(0))
-        rows.append({"sku": m.group(0), "name": _normalize(text), "page": src})
+        rows.append({"sku": m.group(0), "name": _tidy_pdf_name(_normalize(text)), "page": src})
     print(json.dumps(rows, ensure_ascii=False))
     return rows
 
