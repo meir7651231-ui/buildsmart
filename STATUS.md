@@ -6,7 +6,7 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 ## מצב נוכחי
 | רכיב | מצב | אימות בסשן זה (2026-11-03) |
 |---|---|---|
-| `app_flutter/` (Flutter, הפעיל) | 🟢 חי ב-buildsmart-il.com · Android AAB/APK ב-CI · iOS טרם נבנה | analyze: **0 errors** (56 warnings, infos) · tests: __TESTS__ |
+| `app_flutter/` (Flutter, הפעיל) | 🟢 חי ב-buildsmart-il.com · Android AAB/APK ב-CI · iOS טרם נבנה | analyze: **0 errors** (56 warnings, infos) · tests: **6034 ✅ · 0 ✗ · 12 skip** (Flutter 3.44, ~18 דק׳) |
 | `app/` (Preact legacy) | 🟡 GitHub Pages, תיקוני באגים בלבד | typecheck ✅ · build ✅ · smoke **21/21** ✅ (בעקיפת נתיב Chromium — ראה בעיה 2) |
 | `functions/` | 🟢 me-west1, gen2 | typecheck ✅ · selftest **100/100** ✅ |
 | קטלוג (`scripts/catalog_qa.py`) | 🟢 | selftest ✅ · audit: אפס שגיאות חוסמות ✅ |

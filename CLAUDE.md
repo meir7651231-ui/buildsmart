@@ -43,7 +43,7 @@ export PATH="/home/user/flutter/bin:$PATH"
 cd app_flutter && flutter pub get                 # install
 bash ../scripts/gen_version.sh                     # חובה לפני analyze — מייצר lib/version.g.dart (gitignored)
 flutter analyze --no-pub                           # lint — השער: 0 errors (warnings/infos קיימים, לא חוסמים)
-flutter test --reporter=compact                    # כל הטסטים (~10 דק')
+flutter test --reporter=compact                    # כל הטסטים: 6034 ✅ · 12 skip (~18 דק')
 flutter test test/<file>_test.dart                 # טסט בודד
 flutter build web --release                        # build (ה-deploy מוסיף --dart-define רבים — ראה web-deploy.yml)
 ```
