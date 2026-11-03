@@ -1,132 +1,108 @@
 # BuildSmart — הוראות לכל סשן
 
-## 🔴 חוק-על #0 — נחיל 9×9 לפני כל עבודה (חרוט · לא ניתן לעקיפה)
-**אסור להתחיל שום עבודה — ולו מילימטר — בלי להפעיל קודם את נחיל ה-9×9.**
-כל משימה (פיצ׳ר · באג · refactor · אפילו תיקון-שורה) **מתחילה** בהפעלת הנחיל השטוח:
-**9 תפקידים** (אדריכל · בונה · בודק · מנקה · מבקר · מאמת · מפקח · מייעץ · מדווח)
-**× 9 עדשות** (`orchestrator/lenses/registry.txt`).
-הזרימה: מבקרים-לפי-עדשה → מאמת → בונים-לפי-קובץ-דיסיונקטי → מפקח + `orchestrator/scripts/central-verify.sh` (השער).
-**אין "משימה קטנה" פטורה. בלי הנחיל — לא נוגעים בקוד.**
-המוח: `orchestrator/PLAYBOOK.md` · הארכיטקטורה: `orchestrator/FACTORY.md` (ב-Claude Code רץ flattened — האורקסטרייטור משגר את כל הצי ישירות; אין קינון-חי).
+## המוצר ולמי
+אפליקציית רכש, קטלוג ומשימות לאתרי בנייה — עם דגש על קטלוג אינסטלציה ומנוע תאימות "מה מתחבר למה".
+משתמשים (personas): 👷 קבלן · 🦺 עובד · 🏪 חנות ספק · 🛵 שליח · 👔 מנהל המערכת.
+עברית, RTL. חי ב-**buildsmart-il.com** (Firebase Hosting, פרויקט `buildsmart-b0b78`). מטרה: השקה בחנויות iOS/Android.
+בעלים ומאשר יחיד: **מאיר**.
 
----
+## 🔴 כללי עבודה (מחייבים)
+1. **עברית** — כל תשובה, סטטוס ודוח בעברית. קוד/מזהים באנגלית כרגיל.
+2. **מינימום 100%** — לא אומרים "גמור" בלי הוכחה: הפקודות בסעיף "פקודות" רצו ירוקות, ובשינוי UI — צילום מסך.
+   מדווחים כשל כפי שהוא, עם הפלט. לא מדלגים/משתיקים טסט כדי לקבל ירוק.
+3. **ענפים בלבד** — כל עבודה על ענף `claude/<שם>`. אין commit ישיר ל-main.
+4. **בלי אישור מפורש של מאיר — אסור:** push ל-`main` · מיזוג PR · פרסום (deploy, ריפו ציבורי, רשת) · מחיקה · שליחת מיילים/הודעות · תשלום.
+   ⚠️ push לענפים `main` או `claude/whats-happening-LyY9G` **מפעיל deploy לפרודקשן** (`web-deploy.yml`, `firebase-hosting.yml`, `deploy.yml`) — נחשב פרסום.
+5. PR נפתח כ-**draft**, ולא ממוזג על ידי Claude.
+6. עבודה רציפה: צעדים הפיכים (עריכה, טסט, commit בענף) — בלי לעצור לשאול.
+7. **נחיל 9×9** (חוק-על של הבעלים): משימות קוד מתחילות בנחיל — 9 תפקידים × 9 עדשות
+   (`orchestrator/lenses/registry.txt`), זרימה: מבקרים → מאמת → בונים לפי קבצים דיסיונקטיים → מפקח + השער
+   `orchestrator/scripts/central-verify.sh`. הפעלה: skill `swarm`. המוח: `orchestrator/PLAYBOOK.md`.
 
-## ענף עבודה
-`claude/whats-happening-LyY9G` — כל עבודה על ענף זה.
-אין push ל-main ללא אישור מפורש מהמשתמש.
-
----
-
-## ⚠️ שני פרויקטים מקבילים בריפו
-
-| תיקייה | סטאק | סטטוס |
+## Stack
+| תיקייה | מה | סטטוס |
 |---|---|---|
-| `app_flutter/` | Flutter 3.29 + Dart 3.7 + Riverpod | **🟢 פעיל לפיתוח חדש.** feature parity ל-Preact הושלמה (~270 leaves verbatim). נטיב iOS+Android+Web — מטרה ל-launch בחנויות. |
-| `app/` | Preact + TypeScript + Vite + PWA | 🟡 **חי בפרודקשן** ב-GitHub Pages. reference. תיקוני באגים בלבד עד שה-Flutter יוצב — אז cutover. |
+| `app_flutter/` | Flutter (Dart) + Riverpod, iOS/Android/Web | **🟢 הפעיל — כל פיצ'ר חדש כאן.** זה מה שחי ב-buildsmart-il.com |
+| `app/` | Preact + TypeScript + Vite + PWA (+Capacitor) | 🟡 legacy/reference (GitHub Pages). תיקוני באגים בלבד |
+| `functions/` | Firebase Cloud Functions v2, Node 20, TS strict, region `me-west1` | שרת: תפקידים, שלבי-הזמנה, R2, AI |
+| `edge-proxy/` | Cloudflare Worker (`api.buildsmart-il.com`) | מתווך לכל תעבורת Google |
+| `scripts/` | Python QA קטלוג + `gen_version.sh` | |
+| `firestore.rules` · `rules_test/` | חוקי אבטחה + טסטים שלהם | |
+| `orchestrator/` · `atom-engine/` · `tools/atom` | מנגנון הנחיל ומחולל ה-atoms | |
 
-**כללי עבודה:**
-1. כל פיצ׳ר חדש = `app_flutter/` בלבד.
-2. תיקון באג ב-`app/` מותר (זה ה-live).
-3. אם הוספת string חדש ב-`app/` — להעתיק verbatim ל-`app_flutter/`.
+גרסאות: CI בונה ב-**Flutter 3.44.0** (Dart 3.12); `protocol-enforce.yml` ו-`catalog-qa.yml` רצים על **3.29.3**. `pubspec`: `sdk: ^3.7.2`.
 
-**Flutter dev loop:**
+## פקודות (אומתו בסשן 2026-11-03)
+**Flutter** — אם אין Flutter מקומי:
 ```bash
-export PATH="/home/user/flutter/bin:$PATH"   # already extracted to /home/user/flutter
-cd app_flutter
-flutter pub get
-flutter analyze              # clean
-flutter test                 # 10/10 PASS
-flutter build web --release  # 2.0 MB main.dart.js
-flutter run -d chrome        # dev
+curl -sSfL -o /home/user/flutter.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.0-stable.tar.xz && tar xf /home/user/flutter.tar.xz -C /home/user
+```
+```bash
+export PATH="/home/user/flutter/bin:$PATH"
+cd app_flutter && flutter pub get                 # install
+bash ../scripts/gen_version.sh                     # חובה לפני analyze — מייצר lib/version.g.dart (gitignored)
+flutter analyze --no-pub                           # lint — השער: 0 errors (warnings/infos קיימים, לא חוסמים)
+flutter test --reporter=compact                    # כל הטסטים (~10 דק')
+flutter test test/<file>_test.dart                 # טסט בודד
+flutter build web --release                        # build (ה-deploy מוסיף --dart-define רבים — ראה web-deploy.yml)
+```
+השער המלא (pub get + codegen + analyze + test + build): `bash orchestrator/scripts/central-verify.sh app_flutter`
+
+**Preact (`app/`)**
+```bash
+cd app && npm ci                 # install
+npx tsc -b --noEmit              # typecheck
+npm run build                    # build → app/dist
+```
+smoke (מהשורש, אחרי build) — 21/21:
+```bash
+npx --yes http-server app/dist -p 8123 -s &
+node app/smoke-settings.mjs
+```
+⚠️ `smoke-settings.mjs` מקודד נתיב Chromium `/opt/pw-browsers/chromium-1194/...`; בסביבה הנוכחית הוא `chromium-1243/chrome-linux64/chrome` — יש להחליף בהעתק זמני (ראה STATUS.md).
+
+**Functions**
+```bash
+cd functions && npm ci && npm run typecheck && npm run selftest   # selftest 100/100
+```
+**קטלוג**
+```bash
+python3 scripts/catalog_qa.py selftest && python3 scripts/catalog_qa.py audit
 ```
 
----
+## ארכיטקטורה (Flutter) — בקצרה
+- כניסה: `lib/main.dart` → `MaterialApp` (he-IL, RTL) → `HomeShell` (`lib/screens/home_shell.dart`).
+- Shell: AppBar + 4 טאבים ב-`IndexedStack` — קטלוג · שיחות · התראות · חנות; FAB dials (BS / חיפוש / תפריט), אחד פתוח בכל פעם.
+- `lib/screens/` (~120 מסכים) · `lib/state/` (Riverpod providers, persist ב-SharedPreferences) ·
+  `lib/logic/` (לוגיקה טהורה) · `lib/data/` (קטלוג, מותגים) · `lib/services/` (Firebase, AI, R2) ·
+  `lib/features/` (פיצ'רים מגודרים בדגל) · `lib/theme/` (tokens, light+dark) · `lib/atoms/` (קוד מחולל).
+- פיצ'רים מגודרים ב-`--dart-define` (const, ברירת-מחדל OFF ⇒ ה-demo byte-identical). הדגלים החיים ב-`.github/workflows/web-deploy.yml`.
+- Backend: Firebase Auth + Firestore (`firestore.rules`) + Functions; תמונות מוצר ב-Cloudflare R2 (`lib/data/product_images.dart` — resolver יחיד).
+- פירוט: `app_flutter/knowledge/ARCHITECTURE.md` · חיווט: `app_flutter/WIRING.md` · מפת ידע: `app_flutter/knowledge/README.md`.
 
-## אם הגעת לכאן למשימת BuildSmart (תפריט / הגדרות / dial)
+## מוסכמות
+- Lints: `very_good_analysis` (`app_flutter/analysis_options.yaml`). אסור error אחד ב-analyze.
+- Commit: conventional (`feat:`/`fix:`/`docs:`…), ≥15 תווים, תיאורי (נאכף ב-`.githooks/commit-msg`).
+- Hooks: `.githooks/` (pre-commit עם שערי-פרוטוקול; בשינוי Dart דורש עדכון `WIRING.md`, `knowledge/STATUS.md` ועוד).
+  אסור `--no-verify`, force-push, או עריכת קבצי הגנה (`.claude/hooks`, `.githooks`, `protocol-enforce.yml`) — חסום ע"י `.claude/hooks/pre-tool.sh`.
+- גרסה: תווית `vX.YY` נקבעת **רק** בשורה הראשונה של `app_flutter/knowledge/STATUS.md`; `gen_version.sh` גוזר ממנה. לא לערוך את `version.g.dart`.
+- `known-failing: N` ב-`app_flutter/knowledge/STATUS.md` = baseline לכשלים; היעד 0.
+- טקסטים בעברית verbatim מה-legacy; string חדש ב-`app/` מועתק verbatim ל-`app_flutter/`.
+- Theme: צבעים רק דרך tokens של `lib/theme/` (לא hex קשיח); מסכים חייבים לתמוך light+dark.
+- כל טענת "תוקן" מגובה בטסט. באג = טסט רגרסיה.
 
-קרא בסדר הזה לפני שאתה נוגע בקוד:
-1. `app/knowledge/wip-menu-wiring.md` — מה בנוי
-3. `app/knowledge/inspector/checklist.md` — Inspector protocol
-4. הדוח האחרון: `app/knowledge/inspections/INSP-0040-*.md`
+## Preact `app/` — זרימת Inspector (רק בשינוי settings/menu/dial)
+typecheck + build + smoke 21/21 + סוכן Explore בלתי-תלוי (GO) → דוח `app/knowledge/inspections/INSP-NNNN-*.md`.
+אל תיגע בלי בקשה מפורשת: `app/src/components/menu/`, `app/src/components/bs/`, `app/src/store/{app-settings,bs-store,toast-store}.ts`, `app/knowledge/`, `app/RULES.md`.
+`app/knowledge/IMPLEMENTATION_PROTOCOL.md` — DEPRECATED, היסטורי בלבד.
 
-**כל commit צריך:** typecheck + build + Inspector subagent (לפני markdown) + smoke 21/21.
-
----
-
-## ⚠️ אסור לקרוא בתור הנחיה לעבודה
-
-- `app/knowledge/IMPLEMENTATION_PROTOCOL.md` — **DEPRECATED**. לקריאה היסטורית בלבד.
-
----
-
-## אם הגעת לכאן למשימה אחרת (לא BuildSmart)
-
-עבודת תפריט-וחיווט BuildSmart **בעיצומה** על ענף `claude/whats-happening-LyY9G`.
-
-**אל תיגע בקבצים האלה אלא אם התבקשת מפורשות:**
-- `app/src/components/menu/`
-- `app/src/components/bs/`
-- `app/src/store/app-settings.ts`
-- `app/src/store/bs-store.ts`
-- `app/src/store/toast-store.ts`
-- `app/knowledge/`
-- `app/RULES.md`
-
-לכל שאר המשימות (בגים, features אחרים, שאלות) — תחבור ישר לעבודה.
-
----
-
-## Inspector chain — לפני כל commit של settings/menu/dial (Preact `app/` בלבד)
-
-> ⚠️ זו זרימת ה-**Preact** (`app/`). לעבודת **Flutter** (`app_flutter/`, הפעיל לפיתוח):
-> `flutter analyze` (0 errors) + `flutter test` (כולל `knowledge_protocol_test`) +
-> עדכון `app_flutter/WIRING.md`. הידע ל-port: `app_flutter/knowledge/PARITY.md` +
-> `app_flutter/knowledge/port/` (proto/ + preact/). ראה `app_flutter/knowledge/README.md`.
-
-```bash
-cd app && npx tsc -b --noEmit       # typecheck
-cd app && npm run build              # build
-node app/smoke-settings.mjs          # 21/21 PASS חובה
-# spawn Explore subagent עם prompt פתוח (לא מצדיק)
-# המתן ל-GO לפני שכותבים markdown
-# כתוב דוח ל-app/knowledge/inspections/INSP-NNNN-*.md
-```
-
----
-
-## קבצי ליבה
-
+## קבצי מפתח
 | קובץ | תפקיד |
-|------|--------|
-| `app/src/store/app-settings.ts` | settings signal + persist + DOM effect |
-| `app/src/store/bs-store.ts` | persona + BS dial drill state |
-| `app/src/store/user-profile.ts` | user profile fields |
-| `app/src/store/toast-store.ts` | toast system |
-| `app/src/components/menu-speed-dial.tsx` | menu FAB dial — 4 tabs |
-| `app/src/components/bs/bs-dial.tsx` | BS FAB dial — 5 personas × sub-trees |
-| `app/src/components/menu/submenu-settings.tsx` | all submenu data + components |
-| `app/src/styles/tokens.css` · `global.css` | dark theme + dial styling |
-
----
-
-## מה עובד כרגע (Menu FAB · BS FAB · Settings tree — sealed)
-
-**Menu FAB — 4 tabs, כולם dial:**
-- 🏠 בית → 4 כלים (📐 / 📦 / 🤖 / 📋), כל אחד עם sub-tree
-- 🏗️ הפרויקטים → 3 פרויקטים + 📊 מרכז פיננסים (10 leaves)
-- 🛒 רכש → 🛒 הסל שלי + 📦 הזמנות → 6 שירותי שרשרת אספקה
-- ⚙️ הגדרות → פרופיל tree (כרטיס/דרגות + 🎮 מועדון 7 leaves) + הגדרות מתקדמות (10 קטגוריות, ~70 leaves)
-
-**Search FAB — 5 כלים, כולם dial:**
-- 🎤 קולי · 📷 ברקוד · ⚙️ פילטרים · ↕️ מיון · ▦ קטלוג (11 קטגוריות verbatim)
-
-**BS FAB — 5 personas, 4 מתוכן עם sub-trees:**
-- 👷 קבלן — (deferred — אין emoji verbatim)
-- 👔 מנהל המערכת — 4 sections (לוח בקרה 5 / הזמנות / לקוחות / ניהול 4)
-- 🏪 חנות ספק — 4 (בית 3 / הזמנות / מלאי / פורטל 8)
-- 🛵 שליח — 4 (הרכב 3 / pickup / active / פורטל 6)
-- 🦺 עובד — 3 task groups
-
-**6 מתוך 6 hubs של הלגאסי מוטמעים** (openAIHub · openSiteHub · openFinanceHub · openRewardsHub · openSecurityHub · openServiceHub).
-
-**~200+ leaves verbatim עם emoji מלגאסי.** INSP-0009 → INSP-0040, כולם GO.
+|---|---|
+| `STATUS.md` (שורש) | מצב נוכחי, בעיות פתוחות, Next |
+| `app_flutter/knowledge/STATUS.md` | יומן גרסאות מפורט + תווית הגרסה |
+| `app_flutter/WIRING.md` | מפת חיווט מסכים/providers |
+| `app_flutter/knowledge/GATE_REGISTRY.md` | רישום השערים (gates) |
+| `orchestrator/PLAYBOOK.md` · `FACTORY.md` | מנגנון הנחיל |
+| `CATALOG_PROTOCOL.md` | פרוטוקול נתוני הקטלוג |
+| `.github/workflows/` | CI + deploy (שים לב לענפי הטריגר) |
