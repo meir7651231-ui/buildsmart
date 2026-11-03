@@ -12,7 +12,8 @@
    מדווחים כשל כפי שהוא, עם הפלט. לא מדלגים/משתיקים טסט כדי לקבל ירוק.
 3. **ענפים בלבד** — כל עבודה על ענף `claude/<שם>`. אין commit ישיר ל-main.
 4. **בלי אישור מפורש של מאיר — אסור:** push ל-`main` · מיזוג PR · פרסום (deploy, ריפו ציבורי, רשת) · מחיקה · שליחת מיילים/הודעות · תשלום.
-   ⚠️ push לענפים `main` או `claude/whats-happening-LyY9G` **מפעיל deploy לפרודקשן** (`web-deploy.yml`, `firebase-hosting.yml`, `deploy.yml`) — נחשב פרסום.
+   ⚠️ push ל-`claude/whats-happening-LyY9G` **מפעיל deploy לפרודקשן** (`web-deploy.yml` + `firebase-hosting.yml` → Hosting live;
+   `firebase-deploy.yml` → rules+functions). push ל-`main` מפעיל `deploy.yml` (GitHub Pages). כל אלה = פרסום.
 5. PR נפתח כ-**draft**, ולא ממוזג על ידי Claude.
 6. עבודה רציפה: צעדים הפיכים (עריכה, טסט, commit בענף) — בלי לעצור לשאול.
 7. **נחיל 9×9** (חוק-על של הבעלים): משימות קוד מתחילות בנחיל — 9 תפקידים × 9 עדשות
@@ -72,7 +73,8 @@ python3 scripts/catalog_qa.py selftest && python3 scripts/catalog_qa.py audit
 
 ## ארכיטקטורה (Flutter) — בקצרה
 - כניסה: `lib/main.dart` → `MaterialApp` (he-IL, RTL) → `HomeShell` (`lib/screens/home_shell.dart`).
-- Shell: AppBar + 4 טאבים ב-`IndexedStack` — קטלוג · שיחות · התראות · חנות; FAB dials (BS / חיפוש / תפריט), אחד פתוח בכל פעם.
+- Shell: AppBar + 4 טאבים ב-`IndexedStack` — בית (`CatalogScreen`) · מחלקות · עדכונים (התראות+שיחות) · חנות; FAB עגלה (+ FAB מקלדת מגודר בדגל).
+  ה-dials הישנים (BS/חיפוש/תפריט) הוסרו — הפרסונות עברו ל-dashboards; `lib/state/dial_state.dart` נשאר ל-`mainTabProvider`/`activePersonaProvider`.
 - `lib/screens/` (~120 מסכים) · `lib/state/` (Riverpod providers, persist ב-SharedPreferences) ·
   `lib/logic/` (לוגיקה טהורה) · `lib/data/` (קטלוג, מותגים) · `lib/services/` (Firebase, AI, R2) ·
   `lib/features/` (פיצ'רים מגודרים בדגל) · `lib/theme/` (tokens, light+dark) · `lib/atoms/` (קוד מחולל).
@@ -82,10 +84,10 @@ python3 scripts/catalog_qa.py selftest && python3 scripts/catalog_qa.py audit
 
 ## מוסכמות
 - Lints: `very_good_analysis` (`app_flutter/analysis_options.yaml`). אסור error אחד ב-analyze.
-- Commit: conventional (`feat:`/`fix:`/`docs:`…), ≥15 תווים, תיאורי (נאכף ב-`.githooks/commit-msg`).
+- Commit: conventional (`feat:`/`fix:`/`docs:`…). `.githooks/commit-msg` אוכף ≥15 תווים וחוסם הודעות-זבל; הפורמט — אזהרה בלבד.
 - Hooks: `.githooks/` (pre-commit עם שערי-פרוטוקול; בשינוי Dart דורש עדכון `WIRING.md`, `knowledge/STATUS.md` ועוד).
   אסור `--no-verify`, force-push, או עריכת קבצי הגנה (`.claude/hooks`, `.githooks`, `protocol-enforce.yml`) — חסום ע"י `.claude/hooks/pre-tool.sh`.
-- גרסה: תווית `vX.YY` נקבעת **רק** בשורה הראשונה של `app_flutter/knowledge/STATUS.md`; `gen_version.sh` גוזר ממנה. לא לערוך את `version.g.dart`.
+- גרסה: תווית `vX.YY` נקבעת **רק** ב-`app_flutter/knowledge/STATUS.md` (ההופעה הראשונה של `vX.YY` בקובץ, כיום שורה 3); `gen_version.sh` גוזר ממנה. לא לערוך את `version.g.dart`.
 - `known-failing: N` ב-`app_flutter/knowledge/STATUS.md` = baseline לכשלים; היעד 0.
 - טקסטים בעברית verbatim מה-legacy; string חדש ב-`app/` מועתק verbatim ל-`app_flutter/`.
 - Theme: צבעים רק דרך tokens של `lib/theme/` (לא hex קשיח); מסכים חייבים לתמוך light+dark.
