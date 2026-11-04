@@ -5,6 +5,15 @@ Update **only here** on a deliberate release — build advances automatically (�
 
 _known-failing: 0 (2026-08-03, מאומת על Flutter 3.29.3 = toolchain של ה-CI: 5332 ✅ / 0 ✗ / 12 skip). **תיקון:** הרישום מ-2026-08-02 שסיווג 10× `product_journey` כ"סביבתי / ירוק ב-CI" היה שגוי — הם נכשלו גם על ה-runner (overflow אמיתי ~9-17px בעמודת-הצד 100px של גיליון-המוצר). **תוקנו, לא בוייסלנו:** (1) `product_journey_test` טוען Heebo האמיתי (משפחת-ברירת-המחדל) → מדידת-רוחב אמיתית במקום Ahem; (2) `lipskey_products_screen._side()` עוטף unit-toggle+stepper ב-FittedBox(scaleDown). P-15 היה flake-עומס — עבר בריצה-המלאה. גם org_setup (initialValue→value ל-3.29.3 + מעבר-מסך ללא-snapshot בטסט) תוקן. **אפס-סובלנות מוחזר** — כל כשל תוקן, הרשימה ריקה._
 
+
+## לילה 2026-11-04
+
+- **בסיס:** `flutter test` ירוק — 6034 ✅ / 0 ✗ / 12 skip (Flutter 3.29.3). `flutter analyze`: 0 שגיאות / 0 warnings (רק infos של סגנון).
+- **issues פתוחים עם תווית `claude`:** אין. אין טסטים אדומים → לא נבחרו משימות-קוד; לא נפתחו PR-ים (בכוונה: לא להמציא שינויים).
+- **הערת סביבה:** בריצה נקייה `lib/version.g.dart` חסר (מיוצר ע"י `bash scripts/gen_version.sh` בשורש) ולכן 238 טסטים נכשלים בקומפילציה עד שמריצים אותו. זה לא באג בקוד; ה-CI מריץ אותו.
+- **חסמים:** אין.
+- **החלטות שמחכות למאיר:** אין. הצעה למחר: להגדיר ב-STATUS רשימת "Next" מפורשת, או issues עם תווית `claude`, כדי שיהיה מה לבצע.
+
 ## v7.02 — הכרטיס הפנימי גלוי עכשיו גם באנדרואיד — 2026-08-12
 
 הכרטיס הפנימי המלא (שחי כבר ב-web) נדלק גם ב-builds הניידים: `INTERNAL_CARD=true`
