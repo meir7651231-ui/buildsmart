@@ -54,6 +54,8 @@
 
 **שער האיכות של הקטלוג** (Python בלבד, בלי התקנות):
 
+<div dir="ltr">
+
 ```bash
 python3 scripts/catalog_qa.py audit       # בדיקה מלאה — "אפס שגיאות חוסמות"
 python3 scripts/catalog_qa.py selftest    # מוכיח שכל חוק באמת יורה
@@ -63,7 +65,11 @@ python3 scripts/catalog_qa.py coverage    # כיסוי תמונה/מידה לפ�
 python3 scripts/catalog_qa.py report      # מדדי איכות: 923 מוצרים · 68 קטגוריות · 0 שגיאות
 ```
 
+</div>
+
 **האפליקציה (Flutter):**
+
+<div dir="ltr">
 
 ```bash
 bash scripts/gen_version.sh               # חובה לפני build — מייצר את lib/version.g.dart
@@ -75,13 +81,19 @@ flutter build web --release               # התוצר ב-build/web/
 flutter run -d chrome                     # הרצה מקומית בדפדפן
 ```
 
+</div>
+
 **הגרסה הקודמת (Preact):**
+
+<div dir="ltr">
 
 ```bash
 cd app
 npm ci
 npm run build
 ```
+
+</div>
 
 ## סטטוס
 
