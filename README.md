@@ -50,7 +50,7 @@
 
 ## הרצה מקומית
 
-כל הפקודות כאן הורצו ועברו (6.11.2026). צריך Python 3, ‏Node 22 ו-Flutter 3.44.
+הפקודות כאן הורצו ועברו (6.11.2026), חוץ מ-`flutter run` שהוא אינטראקטיבי. צריך Python 3, ‏Node 20 ומעלה (ה-CI משתמש ב-20) ו-Flutter 3.44 (שני workflows עדיין על 3.29.3).
 
 **שער האיכות של הקטלוג** (Python בלבד, בלי התקנות):
 
@@ -99,7 +99,7 @@ npm run build
 
 - **גרסה:** ‏`1.5.2+14` (לפי `app_flutter/pubspec.yaml`).
 - **חי עכשיו:** [GitHub Pages](https://meir7651231-ui.github.io/buildsmart/) (גרסת Preact) ו-[תצוגה מקדימה של Flutter](https://meir7651231-ui.github.io/buildsmart/flutter/).
-- **CI על `main`:** ‏Deploy to GitHub Pages ✅ · Protocol Enforcement ✅ · Atom Tools ❌ (כלי פיתוח, לא חוסם — [ריצה](https://github.com/meir7651231-ui/buildsmart/actions/runs/32666555496)).
+- **CI על `main`:** ‏Deploy to GitHub Pages ✅ · Protocol Enforcement ✅ · Atom Tools ❌ (כלי סוכני-הפיתוח, נפרד מה-CI הראשי — [ריצה](https://github.com/meir7651231-ui/buildsmart/actions/runs/32666555496)).
 - **בעבודה:** הכנה להשקה בחנויות (App Store ו-Google Play). פיצ'רים חדשים מוקפאים עד ההשקה.
 - **היסטוריה:** ראו [`CHANGELOG.md`](CHANGELOG.md).
 

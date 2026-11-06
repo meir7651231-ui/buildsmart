@@ -50,7 +50,7 @@ The app itself is Hebrew-first (right-to-left).
 
 ## Run it locally
 
-Every command below was run and passed (2026-11-06). You need Python 3, Node 22 and Flutter 3.44.
+The commands below were run and passed (2026-11-06), except the interactive `flutter run`. You need Python 3, Node 20+ (CI uses 20) and Flutter 3.44 (two workflows still pin 3.29.3).
 
 **Catalog quality gate** (Python only, nothing to install):
 
@@ -87,7 +87,7 @@ npm run build
 
 - **Version:** `1.5.2+14` (from `app_flutter/pubspec.yaml`).
 - **Live now:** [GitHub Pages](https://meir7651231-ui.github.io/buildsmart/) (Preact version) and a [Flutter preview](https://meir7651231-ui.github.io/buildsmart/flutter/).
-- **CI on `main`:** Deploy to GitHub Pages ✅ · Protocol Enforcement ✅ · Atom Tools ❌ (dev tooling, non-blocking — [run](https://github.com/meir7651231-ui/buildsmart/actions/runs/32666555496)).
+- **CI on `main`:** Deploy to GitHub Pages ✅ · Protocol Enforcement ✅ · Atom Tools ❌ (agent dev tooling, separate from the main CI — [run](https://github.com/meir7651231-ui/buildsmart/actions/runs/32666555496)).
 - **In progress:** preparing the App Store and Google Play launch. New features are frozen until launch.
 - **History:** see [`CHANGELOG.md`](CHANGELOG.md).
 

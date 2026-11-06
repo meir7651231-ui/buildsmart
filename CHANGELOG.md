@@ -23,7 +23,7 @@ The project does not use release tags yet; the app version is in `app_flutter/pu
 - `seed-catalog` workflow on `main` — manual catalog seeding to Firestore, dry-run by default (#23).
 
 ## 2026-07-08 / 07-09
-- Studio (no-code editor): owner-editable screen elements, wired in five coverage rounds; dormant by default (#6, #10–#22).
+- Studio (no-code editor): owner-editable screen elements, wired in five coverage rounds; dormant by default (#6, #10–#12, #14–#22).
 - Cloud Functions deploy fixes for the rollup schedulers (#7–#9).
 - Manager code-login for the web build (#13).
 
