@@ -32,7 +32,7 @@
 <rect x="724" y="74" width="240" height="92" rx="14" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".7" stroke-width="2"/>
 <text x="740" y="104" font-size="19" font-weight="800" fill="#F4EEE4">Auth</text>
 <text x="740" y="130" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13.5" fill="#B9AE9F">firebase_auth</text>
-<text x="740" y="152" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13.5" fill="#B9AE9F">email / Google</text>
+<text x="740" y="152" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13.5" fill="#B9AE9F">phone · email · Google</text>
 <rect x="976" y="74" width="240" height="92" rx="14" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".7" stroke-width="2"/>
 <text x="992" y="104" font-size="19" font-weight="800" fill="#F4EEE4">Firestore</text>
 <text x="992" y="130" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13.5" fill="#B9AE9F">firestore.rules</text>

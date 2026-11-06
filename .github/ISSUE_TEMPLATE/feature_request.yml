@@ -1,6 +1,6 @@
 name: "💡 Idea · הצעה"
 description: Suggest an improvement · הצעה לשיפור
-labels: ["idea"]
+labels: ["enhancement"]
 body:
   - type: markdown
     attributes:

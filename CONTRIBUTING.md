@@ -35,7 +35,7 @@ Changed catalog data (`app_flutter/lib/data/**`) or `scripts/catalog_qa.py`? Als
 
 ```bash
 python3 scripts/catalog_qa.py audit       # 0 blocking errors
-python3 scripts/catalog_qa.py selftest    # every rule fires
+python3 scripts/catalog_qa.py selftest    # the planted-error rules fire
 python3 scripts/test_catalog_qa.py        # unit tests
 ```
 

@@ -50,7 +50,7 @@ python3 scripts/catalog_qa.py selftest   # ✅ כל החוקים עובדים
 
 </div>
 
-<p align="center"><img src="assets/demo.gif" alt="הדגמה: מסך הבית, קטלוג, אביזרים עם וריאנטים, הוספה לסל" width="300"></p>
+<p align="center"><img src="assets/demo.gif" alt="הדגמה מהאתר החי: מסך הבית, קטלוג, אביזרים עם וריאנטים, הוספה לסל" width="300"><br><sub>הוקלט מהאתר החי, 6.11.2026</sub></p>
 
 ## איך זה עובד
 
@@ -67,7 +67,7 @@ python3 scripts/catalog_qa.py selftest   # ✅ כל החוקים עובדים
 
 <p align="center"><img src="assets/capabilities.svg" alt="קטלוג מאומת · מנוע תאימות · סטודיו התקנה · סל והזמנות · שיחות · 5 תפקידים · ברקוד ומצלמה · רשת מסוננת · קוד אחד" width="100%"></p>
 
-**צילומי מסך** — אמיתיים, מ-`flutter build web` במצב דמו (נתוני דוגמה, בלי התחברות). לחיצה פותחת בגודל מלא; הסבר לכל מסך ב[מדריך](docs/GUIDE.he.md).
+**צילומי מסך** — **מהאתר החי** ([meir7651231-ui.github.io/buildsmart/flutter](https://meir7651231-ui.github.io/buildsmart/flutter/), צולם 6.11.2026), במצב הדמו שהאתר מציע (נתוני דוגמה, בלי התחברות). לחיצה פותחת בגודל מלא; הסבר לכל מסך ב[מדריך](docs/GUIDE.he.md).
 
 <table>
 <tr>
@@ -83,6 +83,10 @@ python3 scripts/catalog_qa.py selftest   # ✅ כל החוקים עובדים
 <td align="center"><a href="docs/screenshots/09-orders-hub.png"><img src="docs/screenshots/thumbs/09-orders-hub.png" alt="מרכז הרכש: הסל, ההזמנות, מועדפים וכספים" width="150"></a><br><sub>רכש</sub></td>
 <td align="center"><a href="docs/screenshots/02-roles.png"><img src="docs/screenshots/thumbs/02-roles.png" alt="בחירת תפקיד: קבלן, מנהל, חנות ספק, שליח, עובד" width="150"></a><br><sub>תפקידים</sub></td>
 <td></td>
+</tr>
+<tr>
+<td align="center" colspan="3"><a href="docs/screenshots/desktop-01-home.png"><img src="docs/screenshots/thumbs/desktop-01-home.png" alt="מסך הבית בדסקטופ (1440×900)" width="240"></a><br><sub>בית · דסקטופ</sub></td>
+<td align="center" colspan="2"><a href="docs/screenshots/desktop-02-catalog.png"><img src="docs/screenshots/thumbs/desktop-02-catalog.png" alt="קטלוג האינסטלציה בדסקטופ (1440×900)" width="240"></a><br><sub>קטלוג · דסקטופ</sub></td>
 </tr>
 </table>
 
@@ -105,7 +109,7 @@ python3 scripts/catalog_qa.py selftest   # ✅ כל החוקים עובדים
 - **עדיין לא בחנויות.** אין עדיין גרסה ב-App Store או ב-Google Play — ההכנה להשקה בעבודה.
 - **לא סולק תשלומים.** אין באפליקציה חיבור לסליקת אשראי; הסל מחשב סכומים ואפשרויות משלוח.
 - **לא מציג מחירון.** בקטלוג המחיר מופיע כ"מחיר לפי ספק".
-- **שער האיכות מכסה קטלוג אחד.** `catalog_qa.py` בודק את קטלוג ליפסקי (`lipskey_catalog.dart`, ‏923 מוצרים) — לא את שאר קטלוגי המותגים.
+- **שער האיכות מכסה קטלוג אחד.** `catalog_qa.py` בודק את קטלוג ליפסקי ו-AQUATEC (`lipskey_catalog.dart`, ‏923 מוצרים) — לא את שאר קטלוגי המותגים.
 - **לא מחליף איש מקצוע.** המנוע מציע חיבורים לפי מפרטי הקטלוג; ההחלטה בשטח נשארת של המתקין.
 - **חלק מהיכולות כבויות כברירת מחדל.** הסטודיו ללא-קוד רדום עד שמפעילים אותו, ומצב הרשת המסוננת נדלק רק כשהמשתמש בוחר בו.
 
@@ -135,7 +139,7 @@ python3 scripts/catalog_qa.py selftest   # ✅ כל החוקים עובדים
 
 ```bash
 python3 scripts/catalog_qa.py audit       # בדיקה מלאה — "אפס שגיאות חוסמות"
-python3 scripts/catalog_qa.py selftest    # מוכיח שכל חוק באמת יורה
+python3 scripts/catalog_qa.py selftest    # נתון מורעל לכל חוק נבדק — מוכיח שהחוק יורה
 python3 scripts/test_catalog_qa.py        # בדיקות היחידה של המנוע — 12/12
 python3 scripts/catalog_qa.py truthcheck  # השוואה מול source_truth.json (דוח)
 python3 scripts/catalog_qa.py coverage    # כיסוי תמונה/מידה לפי מותג (דוח)
@@ -197,7 +201,7 @@ npm run build
 <details><summary><b>אפשר לנסות בלי חשבון?</b></summary>
 
 כן. במסך הפתיחה יש "המשך ללא רישום (דוגמה)" — מצב דמו עם נתוני דוגמה. כך צולמו המסכים וההדגמה כאן.
-תפקידים כמו חנות ספק דורשים חשבון.
+לחנות ספק, לשליח ולעובד יש מצב דמו משלהם; רק מנהל המערכת דורש חשבון אמיתי.
 </details>
 
 <details><summary><b>למה צריך מתווך-קצה?</b></summary>
@@ -207,7 +211,7 @@ npm run build
 
 <details><summary><b>איך יודעים שהקטלוג נקי?</b></summary>
 
-`catalog_qa.py audit` רץ ב-CI על כל שינוי בנתוני הקטלוג, ו-`selftest` מוכיח שכל חוק בודק באמת (חוק שלא יורה — נכשל).
+`catalog_qa.py audit` רץ ב-CI על כל שינוי בנתוני הקטלוג, ו-`selftest` שותל נתון שגוי לכל חוק נבדק (7 מתוך 8 החוקים החוסמים, ועוד שניים) ומוודא שהוא נתפס — חוק שהפסיק לעבוד נכשל.
 </details>
 
 <details><summary><b>איך אפשר לעזור?</b></summary>

@@ -43,10 +43,10 @@ The app itself is Hebrew-first (right-to-left).
 ```bash
 git clone --depth 1 https://github.com/meir7651231-ui/buildsmart.git && cd buildsmart
 python3 scripts/catalog_qa.py audit      # ✅ zero blocking errors
-python3 scripts/catalog_qa.py selftest   # ✅ every rule works
+python3 scripts/catalog_qa.py selftest   # ✅ "כל החוקים עובדים" (all rules work)
 ```
 
-<p align="center"><img src="assets/demo.gif" alt="Demo: home screen, catalog, fittings with variants, add to cart" width="300"></p>
+<p align="center"><img src="assets/demo.gif" alt="Demo from the live site: home screen, catalog, fittings with variants, add to cart" width="300"><br><sub>Recorded from the live site, 2026-11-06</sub></p>
 
 ## How it works
 
@@ -63,7 +63,7 @@ The full picture, including the key decisions: [`docs/ARCHITECTURE.md`](docs/ARC
 
 <p align="center"><img src="assets/capabilities.en.svg" alt="Verified catalog · compatibility engine · Install Studio · cart and orders · chat · 5 roles · barcode and camera · filtered networks · one codebase" width="100%"></p>
 
-**Screenshots** — real, from `flutter build web` in demo mode (sample data, no login; the UI is in Hebrew). Click for full size; each screen is explained in the [guide](docs/GUIDE.he.md) (Hebrew).
+**Screenshots** — **from the live site** ([meir7651231-ui.github.io/buildsmart/flutter](https://meir7651231-ui.github.io/buildsmart/flutter/), captured 2026-11-06), in the demo mode the site offers (sample data, no login; the UI is in Hebrew). Click for full size; each screen is explained in the [guide](docs/GUIDE.he.md) (Hebrew).
 
 <table>
 <tr>
@@ -79,6 +79,10 @@ The full picture, including the key decisions: [`docs/ARCHITECTURE.md`](docs/ARC
 <td align="center"><a href="docs/screenshots/09-orders-hub.png"><img src="docs/screenshots/thumbs/09-orders-hub.png" alt="Procurement hub: cart, orders, favorites and money" width="150"></a><br><sub>Procurement</sub></td>
 <td align="center"><a href="docs/screenshots/02-roles.png"><img src="docs/screenshots/thumbs/02-roles.png" alt="Role picker: contractor, manager, supplier store, courier, worker" width="150"></a><br><sub>Roles</sub></td>
 <td></td>
+</tr>
+<tr>
+<td align="center" colspan="3"><a href="docs/screenshots/desktop-01-home.png"><img src="docs/screenshots/thumbs/desktop-01-home.png" alt="Home screen on desktop (1440×900)" width="240"></a><br><sub>Home · desktop</sub></td>
+<td align="center" colspan="2"><a href="docs/screenshots/desktop-02-catalog.png"><img src="docs/screenshots/thumbs/desktop-02-catalog.png" alt="Plumbing catalog on desktop (1440×900)" width="240"></a><br><sub>Catalog · desktop</sub></td>
 </tr>
 </table>
 
@@ -101,7 +105,7 @@ The full picture, including the key decisions: [`docs/ARCHITECTURE.md`](docs/ARC
 - **Not in the stores yet.** There is no App Store or Google Play release yet — launch prep is in progress.
 - **No card payments.** The app has no payment-gateway integration; the cart computes totals and delivery options.
 - **No price list.** Catalog items show "price per supplier".
-- **The quality gate covers one catalog.** `catalog_qa.py` checks the Lipskey catalog (`lipskey_catalog.dart`, 923 products) — not the other brand catalogs.
+- **The quality gate covers one catalog.** `catalog_qa.py` checks the Lipskey + AQUATEC catalog (`lipskey_catalog.dart`, 923 products) — not the other brand catalogs.
 - **Not a substitute for a professional.** The engine suggests connections from catalog specs; the call on site stays with the installer.
 - **Some features are off by default.** The no-code Studio is dormant until enabled, and filtered-network mode turns on only when the user picks it.
 
@@ -129,7 +133,7 @@ Every command below was run and passed (2026-11-06). You need Python 3, Node 20+
 
 ```bash
 python3 scripts/catalog_qa.py audit       # full check — "zero blocking errors"
-python3 scripts/catalog_qa.py selftest    # proves every rule actually fires
+python3 scripts/catalog_qa.py selftest    # plants a bad record per tested rule — proves it fires
 python3 scripts/test_catalog_qa.py        # the engine's unit tests — 12/12
 python3 scripts/catalog_qa.py truthcheck  # compare against source_truth.json (report)
 python3 scripts/catalog_qa.py coverage    # image/size coverage per brand (report)
@@ -181,7 +185,7 @@ which connection route is possible, and what to order to complete it.
 <details><summary><b>Can I try it without an account?</b></summary>
 
 Yes. The welcome screen has "continue without registering (sample)" — demo mode with sample data. That is how the screenshots and the demo here were made.
-Roles such as the supplier store need an account.
+The supplier store, courier and worker roles have their own demo mode; only the system manager needs a real account.
 </details>
 
 <details><summary><b>Why an edge proxy?</b></summary>
@@ -191,7 +195,7 @@ On filtered networks in Israel (such as NetFree or Rimon) Google services are so
 
 <details><summary><b>How do you know the catalog is clean?</b></summary>
 
-`catalog_qa.py audit` runs in CI on every catalog-data change, and `selftest` proves each rule really checks something (a rule that doesn't fire fails).
+`catalog_qa.py audit` runs in CI on every catalog-data change, and `selftest` plants a bad record for each tested rule (7 of the 8 blocking rules, plus two others) and checks it is caught — a rule that stops working fails.
 </details>
 
 <details><summary><b>How can I help?</b></summary>
