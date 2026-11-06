@@ -1,4 +1,4 @@
-<p align="left"><a href="README.en.md">English</a> · <b>עברית</b> &nbsp;|&nbsp; ▶️ <a href="https://meir7651231-ui.github.io/buildsmart/flutter/"><b>נסו עכשיו באתר החי</b></a> · <a href="assets/demo.gif">הדגמה (GIF)</a></p>
+<p dir="rtl"><b>עברית</b> · <a href="README.en.md">English</a> &nbsp;|&nbsp; ▶️ <a href="https://meir7651231-ui.github.io/buildsmart/flutter/"><b>נסו עכשיו באתר החי</b></a> · <a href="assets/demo.gif">הדגמה מונפשת</a></p>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero.svg">

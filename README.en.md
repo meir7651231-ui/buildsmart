@@ -1,4 +1,4 @@
-<p align="left"><b>English</b> · <a href="README.md">עברית</a> &nbsp;|&nbsp; ▶️ <a href="https://meir7651231-ui.github.io/buildsmart/flutter/"><b>Try it now on the live site</b></a> · <a href="assets/demo.gif">Demo (GIF)</a></p>
+<p><b>English</b> · <a href="README.md">עברית</a> &nbsp;|&nbsp; ▶️ <a href="https://meir7651231-ui.github.io/buildsmart/flutter/"><b>Try it now on the live site</b></a> · <a href="assets/demo.gif">Animated demo</a></p>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero.svg">
