@@ -1,0 +1,186 @@
+name: Android release — signed AAB (Play upload)
+
+# W1-B1 · יעד: B1 — חתימת Android לחנות.
+#
+# Builds the Google-Play app bundle (AAB) SIGNED WITH THE REAL UPLOAD KEY.
+# The keystore NEVER lives in the repo: it arrives only as GitHub Actions
+# secrets, is written to the runner's temp dir for the build, and is wiped at
+# the end of the job (always). key.properties / *.jks are gitignored.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   ANDROID_KEYSTORE_BASE64   base64 of the upload keystore (.jks)
+#                             e.g. `base64 -w0 upload-keystore.jks`
+#   ANDROID_KEYSTORE_PASSWORD store password
+#   ANDROID_KEY_ALIAS         key alias inside the keystore
+#   ANDROID_KEY_PASSWORD      key password (optional — falls back to the store password)
+#
+# Strictness:
+#   • push to main / tag v* / manual run  → STRICT: missing secrets or a
+#     debug-signed bundle FAILS the job (a Play-rejected AAB is never shipped
+#     as an artifact that looks "releasable").
+#   • pull_request                        → VALIDATION: the workflow is exercised
+#     end-to-end; without secrets it builds debug-signed and says so loudly.
+#
+# Production triggers come from main only (see docs/launch/W1-B2-decision.md).
+# Nothing here uploads to Play — the AAB is a downloadable run artifact; upload
+# to Play Console is a manual owner step.
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'versionCode override (empty = github.run_number + offset)'
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'app_flutter/**'
+      - '.github/workflows/android-release.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app_flutter/android/**'
+      - 'app_flutter/pubspec.yaml'
+      - '.github/workflows/android-release.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # versionCode must strictly increase on Play. pubspec is 1.5.2+14 today; the
+  # offset keeps CI codes above every code already used by hand.
+  VERSION_CODE_OFFSET: '100'
+  STRICT: ${{ github.event_name != 'pull_request' }}
+
+jobs:
+  aab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configure release signing from secrets
+        id: signing
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          if [ -z "${KS_B64:-}" ] || [ -z "${KS_PW:-}" ] || [ -z "${KS_ALIAS:-}" ]; then
+            if [ "$STRICT" = "true" ]; then
+              echo "::error::Missing ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS secrets — a release AAB cannot be signed. Add them in repo Settings → Secrets."
+              exit 1
+            fi
+            echo "::warning::No signing secrets (PR validation run) — the AAB will be DEBUG-signed and is NOT Play-ready."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          KS_FILE="$RUNNER_TEMP/upload-keystore.jks"
+          printf '%s' "$KS_B64" | base64 -d > "$KS_FILE"
+          chmod 600 "$KS_FILE"
+          # storeFile is resolved relative to android/app → use an absolute path.
+          umask 077
+          {
+            printf 'storePassword=%s\n' "$KS_PW"
+            printf 'keyPassword=%s\n' "${KEY_PW:-$KS_PW}"
+            printf 'keyAlias=%s\n' "$KS_ALIAS"
+            printf 'storeFile=%s\n' "$KS_FILE"
+          } > android/key.properties
+          # Fail fast on a wrong password/alias instead of deep inside Gradle.
+          keytool -list -keystore "$KS_FILE" -storepass "$KS_PW" -alias "$KS_ALIAS" > /dev/null
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+          echo "✅ release signing configured from secrets"
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Analyze (GATE — 0 errors required)
+        working-directory: app_flutter
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Test (GATE — all green required)
+        working-directory: app_flutter
+        run: flutter test --reporter=compact
+
+      - name: Resolve versionCode
+        id: ver
+        env:
+          OVERRIDE: ${{ github.event.inputs.build_number }}
+        run: |
+          if [ -n "${OVERRIDE:-}" ]; then CODE="$OVERRIDE"; else CODE=$(( GITHUB_RUN_NUMBER + VERSION_CODE_OFFSET )); fi
+          case "$CODE" in (*[!0-9]*|'') echo "::error::build_number must be an integer"; exit 1;; esac
+          echo "code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "versionCode=$CODE"
+
+      - name: Build AAB (store build — same flags as android-package.yml)
+        working-directory: app_flutter
+        run: >
+          flutter build appbundle --release
+          --build-number=${{ steps.ver.outputs.code }}
+          --dart-define=INTERNAL_CARD=true
+          --dart-define=ACCESS_LOCK=true
+          --dart-define=ORG_CONFIG=true
+          --dart-define=ORG_CONFIG_LIVE=true
+
+      - name: Verify bundle signature
+        working-directory: app_flutter
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          CERT=$(keytool -printcert -jarfile "$AAB")
+          echo "$CERT" | grep -E 'Owner:|SHA1:|SHA256:' || true
+          if echo "$CERT" | grep -q 'CN=Android Debug'; then
+            if [ "$STRICT" = "true" ]; then
+              echo "::error::AAB is signed with the Android DEBUG key — Play will reject it."
+              exit 1
+            fi
+            echo "::warning::AAB is DEBUG-signed (expected on a PR run without secrets)."
+          else
+            echo "✅ AAB signed with a non-debug key"
+          fi
+          {
+            echo "### Android AAB"
+            echo "- versionCode: ${{ steps.ver.outputs.code }}"
+            echo "- signed with upload key: ${{ steps.signing.outputs.signed || 'true' }}"
+            echo "- size: $(du -h "$AAB" | cut -f1)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildsmart-release-aab-${{ steps.ver.outputs.code }}
+          path: app_flutter/build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Wipe signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload-keystore.jks" app_flutter/android/key.properties

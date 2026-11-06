@@ -1,0 +1,132 @@
+name: iOS — unsigned IPA (build proof)
+
+# W2-B1 · יעד: B2 — iOS נבנה ב-CI.
+#
+# Produces an UNSIGNED .ipa on a macOS runner (no Apple account, no
+# certificates, no provisioning profile, no secrets). It proves the iOS target
+# compiles + links with every plugin (Firebase, camera, mic, location…) and
+# gives a Payload/Runner.app archive that can later be re-signed. It cannot be
+# installed on a device or uploaded to App Store Connect as-is — signing is a
+# separate step once an Apple Developer account exists.
+#
+# The repo is public → macOS runner minutes are free (no billing).
+#
+# iOS deployment target: the Xcode project still says 12.0, but current
+# FlutterFire pods need iOS 15+. This job raises the target to IOS_MIN in the
+# runner's working copy only (Podfile + project.pbxproj) — nothing is
+# committed. Making it permanent in the repo is a separate owner decision.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app_flutter/**'
+      - '.github/workflows/ios-unsigned.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app_flutter/ios/**'
+      - 'app_flutter/pubspec.yaml'
+      - '.github/workflows/ios-unsigned.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-unsigned-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IOS_MIN: '15.0'
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    timeout-minutes: 75
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Toolchain info
+        run: |
+          xcodebuild -version
+          pod --version
+          flutter --version
+
+      - name: Flutter deps
+        working-directory: app_flutter
+        run: flutter pub get
+
+      - name: Generate version.g.dart (gitignored — לקח #72)
+        run: bash scripts/gen_version.sh
+
+      - name: Generate iOS config (creates Podfile if missing)
+        working-directory: app_flutter
+        run: flutter build ios --config-only --release --no-codesign
+
+      - name: Raise iOS deployment target (runner copy only)
+        working-directory: app_flutter/ios
+        run: |
+          set -euo pipefail
+          test -f Podfile
+          # platform line (commented or not) → IOS_MIN
+          if grep -qE "^\s*#?\s*platform :ios" Podfile; then
+            sed -i '' -E "s/^[[:space:]]*#?[[:space:]]*platform :ios.*/platform :ios, '${IOS_MIN}'/" Podfile
+          else
+            printf "platform :ios, '%s'\n%s" "$IOS_MIN" "$(cat Podfile)" > Podfile
+          fi
+          # Pods inherit the same minimum (avoids "built for newer iOS" link errors).
+          if ! grep -q "IPHONEOS_DEPLOYMENT_TARGET" Podfile; then
+            ruby -i -pe "sub(/flutter_additional_ios_build_settings\(target\)/, %Q{flutter_additional_ios_build_settings(target)\n    target.build_configurations.each { |c| c.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '${IOS_MIN}' }})" Podfile
+          fi
+          sed -i '' -E "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+;/IPHONEOS_DEPLOYMENT_TARGET = ${IOS_MIN};/" Runner.xcodeproj/project.pbxproj
+          grep -n "platform :ios\|IPHONEOS_DEPLOYMENT_TARGET" Podfile
+          grep -c "IPHONEOS_DEPLOYMENT_TARGET = ${IOS_MIN};" Runner.xcodeproj/project.pbxproj
+
+      - name: Build iOS (release, no codesign — store flags)
+        working-directory: app_flutter
+        run: >
+          flutter build ios --release --no-codesign
+          --dart-define=INTERNAL_CARD=true
+          --dart-define=ACCESS_LOCK=true
+          --dart-define=ORG_CONFIG=true
+          --dart-define=ORG_CONFIG_LIVE=true
+
+      - name: Package unsigned IPA
+        working-directory: app_flutter/build/ios
+        run: |
+          set -euo pipefail
+          test -d iphoneos/Runner.app
+          rm -rf Payload && mkdir Payload
+          cp -R iphoneos/Runner.app Payload/
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload buildsmart-unsigned.ipa
+          ls -lh buildsmart-unsigned.ipa
+          # sanity: it really is unsigned and contains the executable
+          test -f Payload/Runner.app/Runner
+          if codesign -dv Payload/Runner.app 2>&1 | grep -q 'Authority='; then
+            echo "::warning::Runner.app carries a signing authority (unexpected for --no-codesign)"
+          fi
+          {
+            echo "### iOS unsigned IPA"
+            echo "- bundle id: $(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' Payload/Runner.app/Info.plist)"
+            echo "- version: $(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' Payload/Runner.app/Info.plist) ($(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' Payload/Runner.app/Info.plist))"
+            echo "- min iOS: $(/usr/libexec/PlistBuddy -c 'Print MinimumOSVersion' Payload/Runner.app/Info.plist)"
+            echo "- size: $(du -h buildsmart-unsigned.ipa | cut -f1)"
+            echo "- ⚠️ unsigned — not installable / not uploadable until signed"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildsmart-ios-unsigned-ipa
+          path: app_flutter/build/ios/buildsmart-unsigned.ipa
+          retention-days: 30
+          if-no-files-found: error
