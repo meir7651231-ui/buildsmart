@@ -1,0 +1,61 @@
+diff --git a/.github/workflows/deploy.yml b/.github/workflows/deploy.yml
+index 2c88dfc6..f493679f 100644
+--- a/.github/workflows/deploy.yml
++++ b/.github/workflows/deploy.yml
+@@ -3,8 +3,7 @@ name: Deploy to GitHub Pages
+ on:
+   push:
+     branches:
+-      - main
+-      - claude/whats-happening-LyY9G
++      - main   # W1-B2: production from main only
+   workflow_dispatch:
+ 
+ permissions:
+diff --git a/.github/workflows/firebase-deploy.yml b/.github/workflows/firebase-deploy.yml
+index 39369118..ecde3fda 100644
+--- a/.github/workflows/firebase-deploy.yml
++++ b/.github/workflows/firebase-deploy.yml
+@@ -15,7 +15,7 @@ name: Deploy Firebase Rules + Functions
+ 
+ on:
+   push:
+-    branches: [ claude/whats-happening-LyY9G ]
++    branches: [ main ]   # W1-B2: production from main only
+     paths:
+       - 'firestore.rules'
+       - 'firestore.indexes.json'
+diff --git a/.github/workflows/firebase-hosting.yml b/.github/workflows/firebase-hosting.yml
+index 860fa9dc..0d565912 100644
+--- a/.github/workflows/firebase-hosting.yml
++++ b/.github/workflows/firebase-hosting.yml
+@@ -2,7 +2,7 @@ name: Deploy Flutter Web to Firebase Hosting
+ 
+ on:
+   push:
+-    branches: [ claude/whats-happening-LyY9G ]
++    branches: [ main ]   # W1-B2: production from main only
+   workflow_dispatch:
+ 
+ concurrency:
+diff --git a/.github/workflows/web-deploy.yml b/.github/workflows/web-deploy.yml
+index c0b75e37..fdedf941 100644
+--- a/.github/workflows/web-deploy.yml
++++ b/.github/workflows/web-deploy.yml
+@@ -11,14 +11,10 @@ name: Web — deploy to Firebase Hosting (always-latest, zero-install)
+ #    "כניסה עם Google" on web is a follow-up (create a Web OAuth client in the
+ #    Google Cloud console, then drop its id into web/index.html).
+ 
++# W1-B2: manual only — firebase-hosting.yml (from main) is the single automatic
++# writer of the live channel; two auto-deploys to one site raced each other.
+ on:
+   workflow_dispatch:
+-  push:
+-    branches: [ claude/whats-happening-LyY9G ]
+-    paths:
+-      - 'app_flutter/**'
+-      - 'firebase.json'
+-      - '.github/workflows/web-deploy.yml'
+ 
+ permissions:
+   contents: read
