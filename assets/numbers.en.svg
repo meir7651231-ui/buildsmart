@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-label="The numbers: 923 verified catalog products; 6,034 Flutter tests passing; 0 analyze errors; 0 blocking catalog errors">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient></defs>
+<rect width="1280" height="300" rx="24" fill="url(#bg)"/>
+<rect x="42" y="40" width="284" height="220" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".5" stroke-width="2"/>
+<text x="184" y="138" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="64" font-weight="800" fill="#F26B1D" text-anchor="middle">923</text>
+<text x="184" y="184" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="19" font-weight="600" fill="#F4EEE4" text-anchor="middle">verified catalog products</text>
+<text x="184" y="222" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="14" fill="#B9AE9F" text-anchor="middle" direction="ltr">catalog_qa.py report</text>
+<rect x="346" y="40" width="284" height="220" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".5" stroke-width="2"/>
+<text x="488" y="138" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="64" font-weight="800" fill="#F26B1D" text-anchor="middle">6,034</text>
+<text x="488" y="184" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="19" font-weight="600" fill="#F4EEE4" text-anchor="middle">Flutter tests passing</text>
+<text x="488" y="222" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="14" fill="#B9AE9F" text-anchor="middle" direction="ltr">flutter test</text>
+<rect x="650" y="40" width="284" height="220" rx="18" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".5" stroke-width="2"/>
+<text x="792" y="138" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="64" font-weight="800" fill="#1F9D57" text-anchor="middle">0</text>
+<text x="792" y="184" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="19" font-weight="600" fill="#F4EEE4" text-anchor="middle">analyze errors</text>
+<text x="792" y="222" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="14" fill="#B9AE9F" text-anchor="middle" direction="ltr">flutter analyze</text>
+<rect x="954" y="40" width="284" height="220" rx="18" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".5" stroke-width="2"/>
+<text x="1096" y="138" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="64" font-weight="800" fill="#1F9D57" text-anchor="middle">0</text>
+<text x="1096" y="184" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="19" font-weight="600" fill="#F4EEE4" text-anchor="middle">blocking catalog errors</text>
+<text x="1096" y="222" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="14" fill="#B9AE9F" text-anchor="middle" direction="ltr">catalog_qa.py audit</text>
+<text x="640" y="286" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="14" font-weight="400" fill="#8E8475" text-anchor="middle" direction="ltr">Measured on 2026-11-06 against the code in this repo</text>
+</svg>

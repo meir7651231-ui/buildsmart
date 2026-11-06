@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="לפני ואחרי: בלי BuildSmart / עם BuildSmart">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient></defs>
+<rect width="1280" height="400" rx="24" fill="url(#bg)"/>
+<rect x="660" y="36" width="580" height="328" rx="20" fill="#2A2319" stroke="#CE3A32" stroke-opacity=".6" stroke-width="2"/>
+<text x="1208" y="92" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="30" font-weight="800" fill="#CE3A32" text-anchor="start" direction="rtl">בלי BuildSmart</text>
+<circle cx="1196" cy="142" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M1191 137 l10 10 M1201 137 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="1170" y="150" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">הזמנה בטלפון ובוואטסאפ</text>
+<circle cx="1196" cy="194" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M1191 189 l10 10 M1201 189 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="1170" y="202" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">מידה ומק"ט — מהזיכרון</text>
+<circle cx="1196" cy="246" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M1191 241 l10 10 M1201 241 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="1170" y="254" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">אביזר שלא מתחבר = עוד נסיעה לחנות</text>
+<circle cx="1196" cy="298" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M1191 293 l10 10 M1201 293 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="1170" y="306" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">לא ברור מה הוזמן לאיזה פרויקט</text>
+<rect x="40" y="36" width="580" height="328" rx="20" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".6" stroke-width="2"/>
+<text x="588" y="92" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="30" font-weight="800" fill="#7CD6A2" text-anchor="start" direction="rtl">עם BuildSmart</text>
+<circle cx="576" cy="142" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M570 142 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="550" y="150" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">קטלוג אחד שנבדק אוטומטית</text>
+<circle cx="576" cy="194" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M570 194 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="550" y="202" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">בוחרים וריאנט לפי צורה ומידה</text>
+<circle cx="576" cy="246" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M570 246 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="550" y="254" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">המנוע מראה מה מתחבר למה</text>
+<circle cx="576" cy="298" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M570 298 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="550" y="306" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="rtl">כל הזמנה משויכת לפרויקט</text>
+<path d="M658 200 H626" stroke="#B9AE9F" stroke-width="4"/><path d="M626 190 L612 200 L626 210 z" fill="#B9AE9F"/>
+</svg>

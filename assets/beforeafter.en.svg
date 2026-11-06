@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="Before and after: Without BuildSmart / With BuildSmart">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient></defs>
+<rect width="1280" height="400" rx="24" fill="url(#bg)"/>
+<rect x="40" y="36" width="580" height="328" rx="20" fill="#2A2319" stroke="#CE3A32" stroke-opacity=".6" stroke-width="2"/>
+<text x="72" y="92" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="30" font-weight="800" fill="#CE3A32" text-anchor="start" direction="ltr">Without BuildSmart</text>
+<circle cx="84" cy="142" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M79 137 l10 10 M89 137 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="110" y="150" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">Orders by phone and WhatsApp</text>
+<circle cx="84" cy="194" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M79 189 l10 10 M89 189 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="110" y="202" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">Size and part number from memory</text>
+<circle cx="84" cy="246" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M79 241 l10 10 M89 241 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="110" y="254" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">A fitting that doesn't fit = another store run</text>
+<circle cx="84" cy="298" r="13" fill="#CE3A32" fill-opacity=".2" stroke="#CE3A32"/>
+<path d="M79 293 l10 10 M89 293 l-10 10" stroke="#F08A84" stroke-width="3" stroke-linecap="round"/>
+<text x="110" y="306" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">Unclear what was ordered for which project</text>
+<rect x="660" y="36" width="580" height="328" rx="20" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".6" stroke-width="2"/>
+<text x="692" y="92" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="30" font-weight="800" fill="#7CD6A2" text-anchor="start" direction="ltr">With BuildSmart</text>
+<circle cx="704" cy="142" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M698 142 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="730" y="150" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">One catalog, checked automatically</text>
+<circle cx="704" cy="194" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M698 194 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="730" y="202" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">Pick the variant by shape and size</text>
+<circle cx="704" cy="246" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M698 246 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="730" y="254" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">The engine shows what connects to what</text>
+<circle cx="704" cy="298" r="13" fill="#1F9D57" fill-opacity=".2" stroke="#1F9D57"/>
+<path d="M698 298 l4 4 l8 -8" fill="none" stroke="#7CD6A2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="730" y="306" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="22" font-weight="400" fill="#F4EEE4" text-anchor="start" direction="ltr">Every order is tied to a project</text>
+<path d="M622 200 H654" stroke="#B9AE9F" stroke-width="4"/><path d="M654 190 L668 200 L654 210 z" fill="#B9AE9F"/>
+</svg>

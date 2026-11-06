@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="470" viewBox="0 0 1280 470" role="img" aria-label="איך זה עובד: קטלוג ספקים → שער איכות → מנוע תאימות → האפליקציה — צד-שרת: Firebase (Firestore, Auth, Cloud Functions, חוקי אבטחה) ומתווך-קצה Cloudflare Worker">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#B9AE9F"/></marker></defs>
+<rect width="1280" height="470" rx="24" fill="url(#bg)"/>
+<g font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif'>
+<rect x="974" y="64" width="268" height="200" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".7" stroke-width="2"/>
+<rect x="974" y="64" width="268" height="8" rx="4" fill="#F26B1D"/>
+<circle cx="1108" cy="116" r="22" fill="#F26B1D" fill-opacity=".18" stroke="#F26B1D"/>
+<text x="1108" y="124" text-anchor="middle" font-size="22" font-weight="800" fill="#F26B1D">1</text>
+<text x="1108" y="176" text-anchor="middle" direction="rtl" font-size="25" font-weight="800" fill="#F4EEE4">קטלוג ספקים</text>
+<text x="1108" y="210" text-anchor="middle" direction="rtl" font-size="16" fill="#B9AE9F">ליפסקי ברקן · AQUATEC</text>
+<text x="1108" y="236" text-anchor="middle" direction="rtl" font-size="16" fill="#B9AE9F">923 מוצרים · 68 קטגוריות</text>
+<line x1="968" y1="164" x2="936" y2="164" stroke="#B9AE9F" stroke-width="3" marker-end="url(#ar)"/>
+<rect x="662" y="64" width="268" height="200" rx="18" fill="#2A2319" stroke="#F2A516" stroke-opacity=".7" stroke-width="2"/>
+<rect x="662" y="64" width="268" height="8" rx="4" fill="#F2A516"/>
+<circle cx="796" cy="116" r="22" fill="#F2A516" fill-opacity=".18" stroke="#F2A516"/>
+<text x="796" y="124" text-anchor="middle" font-size="22" font-weight="800" fill="#F2A516">2</text>
+<text x="796" y="176" text-anchor="middle" direction="rtl" font-size="25" font-weight="800" fill="#F4EEE4">שער איכות</text>
+<text x="796" y="210" text-anchor="middle" direction="ltr" font-size="16" fill="#B9AE9F">scripts/catalog_qa.py</text>
+<text x="796" y="236" text-anchor="middle" direction="ltr" font-size="16" fill="#B9AE9F">audit · selftest · truthcheck</text>
+<line x1="656" y1="164" x2="624" y2="164" stroke="#B9AE9F" stroke-width="3" marker-end="url(#ar)"/>
+<rect x="350" y="64" width="268" height="200" rx="18" fill="#2A2319" stroke="#1F9D57" stroke-opacity=".7" stroke-width="2"/>
+<rect x="350" y="64" width="268" height="8" rx="4" fill="#1F9D57"/>
+<circle cx="484" cy="116" r="22" fill="#1F9D57" fill-opacity=".18" stroke="#1F9D57"/>
+<text x="484" y="124" text-anchor="middle" font-size="22" font-weight="800" fill="#1F9D57">3</text>
+<text x="484" y="176" text-anchor="middle" direction="rtl" font-size="25" font-weight="800" fill="#F4EEE4">מנוע תאימות</text>
+<text x="484" y="210" text-anchor="middle" direction="rtl" font-size="16" fill="#B9AE9F">מה מתחבר למה</text>
+<text x="484" y="236" text-anchor="middle" direction="rtl" font-size="16" fill="#B9AE9F">גרף מפרטים · מסלול · BOM</text>
+<line x1="344" y1="164" x2="312" y2="164" stroke="#B9AE9F" stroke-width="3" marker-end="url(#ar)"/>
+<rect x="38" y="64" width="268" height="200" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".7" stroke-width="2"/>
+<rect x="38" y="64" width="268" height="8" rx="4" fill="#F26B1D"/>
+<circle cx="172" cy="116" r="22" fill="#F26B1D" fill-opacity=".18" stroke="#F26B1D"/>
+<text x="172" y="124" text-anchor="middle" font-size="22" font-weight="800" fill="#F26B1D">4</text>
+<text x="172" y="176" text-anchor="middle" direction="rtl" font-size="25" font-weight="800" fill="#F4EEE4">האפליקציה</text>
+<text x="172" y="210" text-anchor="middle" direction="ltr" font-size="16" fill="#B9AE9F">Flutter · iOS · Android · Web</text>
+<text x="172" y="236" text-anchor="middle" direction="rtl" font-size="16" fill="#B9AE9F">קטלוג · סל · הזמנות · צ'אט</text>
+<line x1="172" y1="270" x2="172" y2="328" stroke="#B9AE9F" stroke-width="3" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="38" y="334" width="1204" height="72" rx="16" fill="#F26B1D" fill-opacity=".10" stroke="#F26B1D" stroke-opacity=".55" stroke-width="2"/>
+<text x="1214" y="378" text-anchor="start" direction="rtl" font-size="20" font-weight="800" fill="#F4EEE4">צד-שרת</text>
+<text x="600" y="378" text-anchor="middle" direction="ltr" font-size="20" font-weight="600" fill="#FFB27A">Firebase — Firestore · Auth · Cloud Functions · Rules  |  Cloudflare Worker</text>
+<text x="640" y="442" text-anchor="middle" direction="rtl" font-size="15" fill="#8E8475">שער האיכות רץ ב-CI על כל שינוי בנתוני הקטלוג; מנוע התאימות בונה חיבורים מגרף מפרטים מאומת.</text>
+</g></svg>
