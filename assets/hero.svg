@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-label="BuildSmart — רכש ומשימות לאתר הבנייה, עם קטלוג שיודע מה מתחבר למה">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1F1A13"/>
+      <stop offset="1" stop-color="#141009"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="80%" cy="20%" r="60%">
+      <stop offset="0" stop-color="#F26B1D" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#F26B1D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF9A45"/>
+      <stop offset="1" stop-color="#F26B1D"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#F4EEE4" stroke-opacity=".045" stroke-width="1"/>
+    </pattern>
+    <style>
+      .he{font-family:Heebo,Rubik,"Segoe UI",Arial,sans-serif}
+      .en{font-family:Inter,"Segoe UI",Helvetica,Arial,sans-serif}
+      .pipe{fill:none;stroke-width:10;stroke-linecap:round}
+      .node{fill:#2A2319;stroke:#F26B1D;stroke-width:3}
+      .lbl{font-size:17px;fill:#F4EEE4;font-weight:600}
+      @keyframes flow{to{stroke-dashoffset:-48}}
+      .ok{stroke:#1F9D57;stroke-dasharray:18 6;animation:flow 2.4s linear infinite}
+      @media (prefers-reduced-motion:reduce){.ok{animation:none}}
+    </style>
+  </defs>
+
+  <rect width="1280" height="560" rx="28" fill="url(#bg)"/>
+  <rect width="1280" height="560" rx="28" fill="url(#grid)"/>
+  <rect width="1280" height="560" rx="28" fill="url(#glow)"/>
+
+  <!-- RIGHT (RTL start): logo + wordmark + key sentence -->
+  <g transform="translate(1104 64)">
+    <rect width="112" height="112" rx="26" fill="url(#tile)"/>
+    <g fill="#fff" transform="translate(56 58) scale(.2) translate(-256 -230)">
+      <circle cx="256" cy="88" r="22"/>
+      <path d="M138 302 C138 160 196 100 256 100 C316 100 374 160 374 302 Z"/>
+      <rect x="92" y="300" width="328" height="58" rx="29"/>
+    </g>
+  </g>
+  <text x="1076" y="140" text-anchor="end" class="en" font-size="64" font-weight="800" fill="#F4EEE4" direction="ltr">Build<tspan fill="#F26B1D">Smart</tspan></text>
+
+  <text x="1216" y="258" text-anchor="start" direction="rtl" class="he" font-size="42" font-weight="800" fill="#F4EEE4">רכש ומשימות לאתר הבנייה,</text>
+  <text x="1216" y="314" text-anchor="start" direction="rtl" class="he" font-size="42" font-weight="800" fill="#F26B1D">עם קטלוג שיודע מה מתחבר למה.</text>
+  <text x="1216" y="362" text-anchor="end" class="en" font-size="19" fill="#B9AE9F" direction="ltr">Site procurement &amp; tasks — with a catalog that knows what connects to what.</text>
+
+  <!-- chips -->
+  <g class="he" font-size="17" font-weight="600">
+    <g transform="translate(1036 420)">
+      <rect width="180" height="40" rx="20" fill="#F26B1D" fill-opacity=".14" stroke="#F26B1D" stroke-opacity=".55"/>
+      <text x="90" y="26" text-anchor="middle" fill="#FFB27A" class="en">iOS · Android · Web</text>
+    </g>
+    <g transform="translate(860 420)">
+      <rect width="160" height="40" rx="20" fill="#F26B1D" fill-opacity=".14" stroke="#F26B1D" stroke-opacity=".55"/>
+      <text x="80" y="26" text-anchor="middle" direction="rtl" fill="#FFB27A">עברית מימין לשמאל</text>
+    </g>
+    <g transform="translate(684 420)">
+      <rect width="160" height="40" rx="20" fill="#1F9D57" fill-opacity=".14" stroke="#1F9D57" stroke-opacity=".6"/>
+      <text x="80" y="26" text-anchor="middle" direction="rtl" fill="#7CD6A2">0 שגיאות חוסמות</text>
+    </g>
+  </g>
+
+  <!-- LEFT: "what connects to what" — a small fitting graph -->
+  <g transform="translate(60 138) scale(.84)">
+    <!-- pipes -->
+    <path class="pipe ok" d="M70 70 H250"/>
+    <path class="pipe ok" d="M250 70 V200"/>
+    <path class="pipe ok" d="M250 200 H430"/>
+    <path class="pipe ok" d="M250 200 V330"/>
+    <path class="pipe" d="M430 200 V330" stroke="#CE3A32" stroke-dasharray="10 10" stroke-opacity=".85"/>
+
+    <!-- nodes -->
+    <circle class="node" cx="70" cy="70" r="30"/>
+    <circle class="node" cx="250" cy="70" r="30"/>
+    <circle class="node" cx="250" cy="200" r="34"/>
+    <circle class="node" cx="430" cy="200" r="30"/>
+    <circle class="node" cx="250" cy="330" r="30"/>
+    <circle cx="430" cy="330" r="30" fill="#2A2319" stroke="#CE3A32" stroke-width="3"/>
+
+    <!-- node glyphs -->
+    <g fill="none" stroke="#F4EEE4" stroke-width="3" stroke-linecap="round">
+      <path d="M56 70 H84"/>                         <!-- pipe -->
+      <path d="M240 60 V72 Q240 80 248 80 H262"/>     <!-- elbow -->
+      <path d="M236 200 H264 M250 186 V214"/>         <!-- tee/cross -->
+      <path d="M420 194 H440 V206 H420 Z"/>           <!-- reducer -->
+      <path d="M240 322 Q250 344 260 322"/>            <!-- trap -->
+      <path d="M420 320 L440 340 M440 320 L420 340" stroke="#CE3A32"/>
+    </g>
+
+    <!-- labels (Hebrew, RTL) -->
+    <g class="he lbl" direction="rtl" text-anchor="middle">
+      <text x="70" y="128">צינור 110</text>
+      <text x="250" y="22">ברך</text>
+      <text x="320" y="252">הסתעפות</text>
+      <text x="430" y="152">מעבר</text>
+      <text x="250" y="388">סיפון</text>
+      <text x="430" y="388" fill="#F08A84">לא מתחבר</text>
+    </g>
+
+    <!-- check marks on valid links -->
+    <g fill="#1F9D57">
+      <circle cx="160" cy="70" r="13"/>
+      <circle cx="340" cy="200" r="13"/>
+    </g>
+    <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M154 70 l4 4 l8 -8"/>
+      <path d="M334 200 l4 4 l8 -8"/>
+    </g>
+  </g>
+</svg>
