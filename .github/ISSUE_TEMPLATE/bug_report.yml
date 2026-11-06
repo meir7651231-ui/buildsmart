@@ -1,0 +1,52 @@
+name: "🐞 Bug report · דיווח על באג"
+description: Something in the app or the repo doesn't work as expected · משהו לא עובד כמו שצריך
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Security problem? Don't open an issue — see SECURITY.md.** · **בעיית אבטחה? לא כאן — ראו SECURITY.md.**
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where · איפה
+      options:
+        - "app_flutter — mobile/web app"
+        - "app — Preact web app (live)"
+        - "functions / firestore.rules — backend"
+        - "catalog data / catalog_qa.py"
+        - "edge-proxy"
+        - "docs / repo"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened · מה קרה
+      description: What you did, what you expected, what you got · מה עשיתם, מה ציפיתם, מה קיבלתם
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce · צעדים לשחזור
+      placeholder: |
+        1. Open the app in demo mode
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version · גרסה
+      description: The build label under the BuildSmart wordmark (e.g. v7.02 · 0.1d09aa8) · התווית מתחת לכיתוב BuildSmart
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform · פלטפורמה
+      options: ["Web", "Android", "iOS", "N/A"]
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs · צילומים או לוגים
+      description: Please remove phone numbers, e-mails and any login codes first · נא להסיר טלפונים, אימיילים וקודי כניסה
