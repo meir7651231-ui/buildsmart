@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-label="What's inside: Verified catalog · Compatibility engine · Install Studio · Cart and orders · Chat · 5 roles · Barcode and camera · Filtered networks · One codebase">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient></defs>
+<rect width="1280" height="560" rx="24" fill="url(#bg)"/>
+<rect x="40" y="40" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="96" cy="114" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="96" y="125" font-size="30" text-anchor="middle">📦</text>
+<text x="146" y="106" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Verified catalog</text>
+<text x="146" y="140" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">923 products · variants · search</text>
+<rect x="448" y="40" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="504" cy="114" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="504" y="125" font-size="30" text-anchor="middle">🔗</text>
+<text x="554" y="106" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Compatibility engine</text>
+<text x="554" y="140" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">what connects to what · route · BOM</text>
+<rect x="856" y="40" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="912" cy="114" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="912" y="125" font-size="30" text-anchor="middle">🛠️</text>
+<text x="962" y="106" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Install Studio</text>
+<text x="962" y="140" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">build an install, get the material list</text>
+<rect x="40" y="212" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="96" cy="286" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="96" y="297" font-size="30" text-anchor="middle">🛒</text>
+<text x="146" y="278" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Cart and orders</text>
+<text x="146" y="312" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">tied to a project · delivery options</text>
+<rect x="448" y="212" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="504" cy="286" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="504" y="297" font-size="30" text-anchor="middle">💬</text>
+<text x="554" y="278" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Chat</text>
+<text x="554" y="312" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">customer, store and manager</text>
+<rect x="856" y="212" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="912" cy="286" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="912" y="297" font-size="30" text-anchor="middle">👷</text>
+<text x="962" y="272" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">5 roles</text>
+<text x="962" y="312" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">contractor · manager · store</text>
+<text x="962" y="334" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">courier · worker</text>
+<rect x="40" y="384" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="96" cy="458" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="96" y="469" font-size="30" text-anchor="middle">📷</text>
+<text x="146" y="450" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Barcode and camera</text>
+<text x="146" y="484" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">scan a product, snap a proof photo</text>
+<rect x="448" y="384" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="504" cy="458" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="504" y="469" font-size="30" text-anchor="middle">🛡️</text>
+<text x="554" y="450" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">Filtered networks</text>
+<text x="554" y="484" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">all traffic through one domain</text>
+<rect x="856" y="384" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="912" cy="458" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="912" y="469" font-size="30" text-anchor="middle">📱</text>
+<text x="962" y="450" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="ltr">One codebase</text>
+<text x="962" y="484" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="ltr">iOS · Android · Web · Hebrew RTL</text>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="380" viewBox="0 0 1280 380" role="img" aria-label="Run BuildSmart locally: catalog audit, generate version, flutter pub get, flutter build web, serve build/web">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient></defs>
+<rect width="1280" height="380" rx="24" fill="url(#bg)"/>
+<rect x="40" y="36" width="1200" height="308" rx="16" fill="#0B0906" stroke="#3A3127" stroke-width="2"/>
+<rect x="40" y="36" width="1200" height="40" rx="16" fill="#1F1A13"/><rect x="40" y="60" width="1200" height="16" fill="#1F1A13"/>
+<circle cx="68" cy="56" r="7" fill="#CE3A32"/>
+<circle cx="90" cy="56" r="7" fill="#F2A516"/>
+<circle cx="112" cy="56" r="7" fill="#1F9D57"/>
+<text x="640" y="62" font-family='Inter,"Segoe UI",Helvetica,Arial,sans-serif' font-size="15" fill="#B9AE9F" text-anchor="middle">BuildSmart — run it locally</text>
+<text x="72" y="116" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#8E8475" direction="ltr">#</text>
+<text x="100" y="116" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#8E8475" direction="ltr" unicode-bidi="embed">from a clone of the repo</text>
+<text x="72" y="150" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#F26B1D" direction="ltr">$</text>
+<text x="100" y="150" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#F4EEE4" direction="ltr" unicode-bidi="embed">python3 scripts/catalog_qa.py audit</text>
+<text x="72" y="184" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#F26B1D" direction="ltr">$</text>
+<text x="100" y="184" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#F4EEE4" direction="ltr" unicode-bidi="embed">bash scripts/gen_version.sh</text>
+<text x="72" y="218" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#F26B1D" direction="ltr">$</text>
+<text x="100" y="218" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#F4EEE4" direction="ltr" unicode-bidi="embed">cd app_flutter &amp;&amp; flutter pub get</text>
+<text x="72" y="252" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#F26B1D" direction="ltr">$</text>
+<text x="100" y="252" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#F4EEE4" direction="ltr" unicode-bidi="embed">flutter build web --release</text>
+<text x="72" y="286" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#F26B1D" direction="ltr">$</text>
+<text x="100" y="286" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#F4EEE4" direction="ltr" unicode-bidi="embed">cd build/web &amp;&amp; python3 -m http.server 8765</text>
+<text x="72" y="320" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="18" fill="#1F9D57" direction="ltr">→</text>
+<text x="100" y="320" font-family="ui-monospace,Menlo,Consolas,&quot;DejaVu Sans Mono&quot;,monospace" font-size="18" fill="#F4EEE4" direction="ltr" unicode-bidi="embed">open http://localhost:8765 — demo mode, no account needed</text>
+</svg>

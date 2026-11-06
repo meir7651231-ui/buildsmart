@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-label="מה יש בפנים: קטלוג מאומת · מנוע תאימות · סטודיו התקנה · סל והזמנות · שיחות · 5 תפקידים · ברקוד ומצלמה · רשת מסוננת · קוד אחד">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F1A13"/><stop offset="1" stop-color="#141009"/></linearGradient></defs>
+<rect width="1280" height="560" rx="24" fill="url(#bg)"/>
+<rect x="856" y="40" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="1184" cy="114" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="1184" y="125" font-size="30" text-anchor="middle">📦</text>
+<text x="1134" y="106" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">קטלוג מאומת</text>
+<text x="1134" y="140" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">923 מוצרים · וריאנטים · חיפוש סלחני</text>
+<rect x="448" y="40" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="776" cy="114" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="776" y="125" font-size="30" text-anchor="middle">🔗</text>
+<text x="726" y="106" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">מנוע תאימות</text>
+<text x="726" y="140" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">מה מתחבר למה · מסלול · BOM</text>
+<rect x="40" y="40" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="368" cy="114" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="368" y="125" font-size="30" text-anchor="middle">🛠️</text>
+<text x="318" y="106" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">סטודיו התקנה</text>
+<text x="318" y="140" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">בונים התקנה ומקבלים רשימת חומרים</text>
+<rect x="856" y="212" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="1184" cy="286" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="1184" y="297" font-size="30" text-anchor="middle">🛒</text>
+<text x="1134" y="278" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">סל והזמנות</text>
+<text x="1134" y="312" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">שיוך לפרויקט · אפשרויות משלוח</text>
+<rect x="448" y="212" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="776" cy="286" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="776" y="297" font-size="30" text-anchor="middle">💬</text>
+<text x="726" y="278" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">שיחות</text>
+<text x="726" y="312" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">צ'אט בין לקוח, חנות ומנהל</text>
+<rect x="40" y="212" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="368" cy="286" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="368" y="297" font-size="30" text-anchor="middle">👷</text>
+<text x="318" y="278" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">5 תפקידים</text>
+<text x="318" y="312" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">קבלן · מנהל · חנות · שליח · עובד</text>
+<rect x="856" y="384" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="1184" cy="458" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="1184" y="469" font-size="30" text-anchor="middle">📷</text>
+<text x="1134" y="450" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">ברקוד ומצלמה</text>
+<text x="1134" y="484" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">סריקת מוצר וצילום הוכחה</text>
+<rect x="448" y="384" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="776" cy="458" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="776" y="469" font-size="30" text-anchor="middle">🛡️</text>
+<text x="726" y="450" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">רשת מסוננת</text>
+<text x="726" y="484" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">כל התעבורה דרך דומיין אחד</text>
+<rect x="40" y="384" width="384" height="148" rx="18" fill="#2A2319" stroke="#F26B1D" stroke-opacity=".35" stroke-width="1.5"/>
+<circle cx="368" cy="458" r="30" fill="#F26B1D" fill-opacity=".16"/>
+<text x="368" y="469" font-size="30" text-anchor="middle">📱</text>
+<text x="318" y="450" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="24" font-weight="800" fill="#F4EEE4" text-anchor="start" direction="rtl">קוד אחד</text>
+<text x="318" y="484" font-family='Heebo,Rubik,"Segoe UI",Arial,sans-serif' font-size="16" font-weight="400" fill="#B9AE9F" text-anchor="start" direction="rtl">iOS · Android · Web · עברית RTL</text>
+</svg>
