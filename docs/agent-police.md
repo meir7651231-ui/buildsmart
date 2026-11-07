@@ -11,7 +11,7 @@
 | `.claude/settings.json` | נוספו hooks: `PreToolUse` (`*`), `UserPromptSubmit`, `PostToolUse` (AskUserQuestion), `Stop` (timeout 900s). ה-hooks הקיימים של הריפו (`session-start.sh`, `pre-tool.sh`) נשארו בלי שינוי. |
 | `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`, `.cursor/rules/agent-police.mdc` | הנחיות "Verification gate" לסוכנים. |
 | `.cursor/hooks.json`, `.codex/hooks.json`, `.github/hooks/agent-police.json` | אותו שער ב-Cursor, ב-Codex וב-Copilot. |
-| `.gitignore` | נוסף `.harness/` (מצב מקומי, לא נכנס ל-commit). |
+| `.gitignore` | נוסף `.harness/` (מצב מקומי, לא נכנס ל-commit). נוספה גם חריגה לתיקיית השופט: כללי השורש מתעלמים מ-`*.mjs` ומ-`package.json`, ובלי החריגה קוד השופט לא היה נכנס ל-git, וכל ה-hooks ב-clone אחר היו מפנים לקובץ שלא קיים. |
 
 ## מה **לא** נכנס, ובכוונה
 - **`.githooks/pre-commit` ו-`.githooks/pre-push` הוחזרו למצב המקורי.** ההתקנה הוסיפה בראש כל אחד מהם בלוק
