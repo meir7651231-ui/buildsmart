@@ -25,3 +25,12 @@ screenshots/
 # Android Kotlin compile (.kotlin); never source, always untracked noise.
 .firebase/
 .kotlin/
+
+# >>> agent-police >>>
+.harness/
+# <<< agent-police <<<
+
+# The judge's code must be committed: the root rules above ignore *.mjs and
+# package.json, which would leave every clone's agent hooks pointing at a
+# missing file. Re-include the whole judge folder.
+!.agent-police/**

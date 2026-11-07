@@ -1,0 +1,10 @@
+{
+  "name": "buildsmart",
+  "verify": "bash scripts/gen_version.sh && cd app_flutter && flutter test --reporter=compact test/knowledge_protocol_test.dart test/legal_screen_test.dart test/widget_test.dart",
+  "mandatory": [
+    "in_scope",
+    "verify"
+  ],
+  "state_dir": ".harness",
+  "timeout_s": 900
+}
