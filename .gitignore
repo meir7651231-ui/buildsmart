@@ -25,3 +25,7 @@ screenshots/
 # Android Kotlin compile (.kotlin); never source, always untracked noise.
 .firebase/
 .kotlin/
+
+# >>> agent-police >>>
+.harness/
+# <<< agent-police <<<
