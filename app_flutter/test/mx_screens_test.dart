@@ -69,6 +69,14 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
       await tester.pumpAndSettle();
       final f = find.byKey(Key(key));
+      // Long pages build lazily: scroll down to it like a user would.
+      if (f.evaluate().isEmpty) {
+        await tester.scrollUntilVisible(
+          f,
+          300,
+          scrollable: find.byType(Scrollable).last,
+        );
+      }
       await tester.ensureVisible(f);
       await tester.pumpAndSettle();
       await tester.tap(f);
@@ -207,7 +215,7 @@ void main() {
 
     // ── PM: mark an overdue legal check done ──
     await tab('תחזוקה');
-    expect(find.textContaining('⚖'), findsWidgets);
+    expect(find.textContaining('חובה:'), findsWidgets);
     await tapKey('pm-done-hotwater');
     expect(
       db().dueOf(db().pmRules.firstWhere((r) => r.id == 'hotwater'), now),
@@ -236,6 +244,55 @@ void main() {
     expect(find.text('מה לא עובד?'), findsOneWidget);
     handle.dispose();
   });
+
+  testWidgets(
+    'small phone (320×640): every role and tab renders without overflow',
+    (tester) async {
+      tester.view.physicalSize = const Size(640, 1280);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer(
+        overrides: [mxClockProvider.overrideWithValue(() => now)],
+      );
+      addTearDown(container.dispose);
+      // Some open work + orders so every screen has content to lay out.
+      final n = container.read(mxDbProvider.notifier);
+      final db0 = container.read(mxDbProvider);
+      n.report(db0.points.first.id, 'בדיקה', kMxStaffLabel);
+      n.assign(n.lastCreatedId!, kMxTechName);
+      n.requestPart(n.lastCreatedId!, 4, kMxTechName);
+      n.autoReorder();
+      n.approve(container.read(mxDbProvider).purchaseOrders.last.id);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(container: container, child: const MxApp()),
+      );
+      await tester.pumpAndSettle();
+      for (final role in MxRole.values) {
+        container.read(mxRoleProvider.notifier).state = role;
+        await tester.pumpAndSettle();
+        final bar = find.byType(NavigationBar);
+        final count =
+            bar.evaluate().isEmpty
+                ? 1
+                : tester.widget<NavigationBar>(bar).destinations.length;
+        for (var i = 0; i < count; i++) {
+          if (bar.evaluate().isNotEmpty) {
+            await tester.tap(
+              find
+                  .descendant(
+                    of: bar,
+                    matching: find.byType(NavigationDestination),
+                  )
+                  .at(i),
+            );
+            await tester.pumpAndSettle();
+          }
+          expect(tester.takeException(), isNull, reason: '$role tab $i');
+        }
+      }
+    },
+  );
 
   testWidgets('invalid store link shows an honest message', (tester) async {
     final container = ProviderContainer(

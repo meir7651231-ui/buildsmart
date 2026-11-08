@@ -341,51 +341,90 @@ class MxPrimaryButton extends StatelessWidget {
 /// A step of a progress timeline.
 typedef MxStep = (String label, bool done, bool current);
 
-/// Horizontal progress timeline ("נפתחה → אצל טכנאי → טופלה").
+/// Horizontal progress timeline ("נפתחה → אצל טכנאי → טופלה"). Every step
+/// takes an equal share of the width, so it never overflows on a narrow phone.
 class MxTimeline extends StatelessWidget {
   const MxTimeline(this.steps, {super.key});
   final List<MxStep> steps;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
-      children: [
-        for (var i = 0; i < steps.length; i++) ...[
-          if (i > 0)
-            Expanded(
-              child: Container(
-                height: 3,
-                color: steps[i].$2 || steps[i].$3 ? kMxPrimary : kMxLine,
-              ),
+  Widget build(BuildContext context) {
+    final reached = steps.lastIndexWhere((s) => s.$2 || s.$3);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Stack(
+        children: [
+          // The rail runs between the first and last dot centers.
+          Positioned.fill(
+            top: 13,
+            bottom: null,
+            child: LayoutBuilder(
+              builder: (context, c) {
+                final step = c.maxWidth / steps.length;
+                final done = reached <= 0 ? 0.0 : step * reached;
+                return SizedBox(
+                  height: 3,
+                  child: Stack(
+                    children: [
+                      PositionedDirectional(
+                        start: step / 2,
+                        end: step / 2,
+                        top: 0,
+                        height: 3,
+                        child: const ColoredBox(color: kMxLine),
+                      ),
+                      PositionedDirectional(
+                        start: step / 2,
+                        width: done,
+                        top: 0,
+                        height: 3,
+                        child: const ColoredBox(color: kMxPrimary),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 14,
-                backgroundColor:
-                    steps[i].$2 ? kMxPrimary : (steps[i].$3 ? kMxCta : kMxLine),
-                child: Icon(
-                  steps[i].$2 ? Icons.check : Icons.circle,
-                  size: steps[i].$2 ? 16 : 8,
-                  color: Colors.white,
+              for (final (label, done, current) in steps)
+                Expanded(
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor:
+                            done ? kMxPrimary : (current ? kMxCta : kMxLine),
+                        child: Icon(
+                          done ? Icons.check : Icons.circle,
+                          size: done ? 16 : 8,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.1,
+                          fontWeight:
+                              current ? FontWeight.w800 : FontWeight.w500,
+                          color: current ? kMxCta : kMxInk,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                steps[i].$1,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: steps[i].$3 ? FontWeight.w800 : FontWeight.w500,
-                  color: steps[i].$3 ? kMxCta : kMxInk,
-                ),
-              ),
             ],
           ),
         ],
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 /// Big, calm confirmation after an important action.
@@ -472,4 +511,191 @@ String mxGreeting(DateTime now) {
   if (h >= 12 && h < 17) return 'צהריים טובים';
   if (h >= 17 && h < 22) return 'ערב טוב';
   return 'לילה טוב';
+}
+
+// ── round 2 components ───────────────────────────────────────────────────────
+
+/// "היום" / "מחר" / "עוד 5 ימים" / "באיחור יום אחד" / "באיחור 3 ימים".
+String mxDaysLabel(DateTime due, DateTime now) {
+  final d =
+      DateTime(
+        due.year,
+        due.month,
+        due.day,
+      ).difference(DateTime(now.year, now.month, now.day)).inDays;
+  if (d == 0) return 'היום';
+  if (d == 1) return 'מחר';
+  if (d == -1) return 'באיחור יום אחד';
+  if (d < 0) return 'באיחור ${-d} ימים';
+  if (d < 31) return 'עוד $d ימים';
+  final m = (d / 30).round();
+  return m == 1 ? 'עוד כחודש' : 'עוד כ-$m חודשים';
+}
+
+/// Section title with an optional count bubble.
+class MxSectionTitle extends StatelessWidget {
+  const MxSectionTitle(
+    this.title, {
+    this.count,
+    this.color = kMxPrimary,
+    super.key,
+  });
+  final String title;
+  final int? count;
+  final Color color;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+    child: Row(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        ),
+        if (count != null) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+/// Icon + label + value row used on detail cards.
+class MxInfoRow extends StatelessWidget {
+  const MxInfoRow(this.icon, this.label, this.value, {super.key});
+  final IconData icon;
+  final String label;
+  final Widget value;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 7),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: kMxPrimary),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 84,
+          child: Text(
+            label,
+            style: const TextStyle(color: Colors.black54, fontSize: 14),
+          ),
+        ),
+        Expanded(
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            child: value,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Stock level bar: filled share of 2×min, red under min, green above.
+class MxStockBar extends StatelessWidget {
+  const MxStockBar({required this.qty, required this.min, super.key});
+  final int qty;
+  final int min;
+  @override
+  Widget build(BuildContext context) {
+    final target = (min * 2).clamp(1, 1 << 30);
+    final v = (qty / target).clamp(0.0, 1.0);
+    final c = qty < min ? kMxBad : kMxOk;
+    return Semantics(
+      label: 'במלאי $qty, מינימום $min',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: LinearProgressIndicator(
+          value: v,
+          minHeight: 6,
+          color: c,
+          backgroundColor: kMxLine,
+        ),
+      ),
+    );
+  }
+}
+
+/// Friendly empty state.
+class MxEmpty extends StatelessWidget {
+  const MxEmpty({
+    required this.icon,
+    required this.title,
+    this.body = '',
+    super.key,
+  });
+  final IconData icon;
+  final String title;
+  final String body;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+    child: Column(
+      children: [
+        CircleAvatar(
+          radius: 40,
+          backgroundColor: kMxPrimary.withValues(alpha: 0.08),
+          child: Icon(icon, size: 40, color: kMxPrimary),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        ),
+        if (body.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(
+            body,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.black54, fontSize: 15),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+/// A white rounded card with a colored start edge (status at a glance).
+class MxEdgeCard extends StatelessWidget {
+  const MxEdgeCard({required this.color, required this.child, super.key});
+  final Color color;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: kMxLine),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(width: 6, color: color),
+          Expanded(
+            child: Padding(padding: const EdgeInsets.all(14), child: child),
+          ),
+        ],
+      ),
+    ),
+  );
 }
