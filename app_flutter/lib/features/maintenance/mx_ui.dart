@@ -70,64 +70,114 @@ List<String> mxQuickReasons(String type) => switch (type) {
 
 // ── building blocks ──────────────────────────────────────────────────────────
 
+/// The signature header block: deep petrol, one big rounded corner and soft
+/// decorative circles — the shape language of the client's own site.
 class MxHero extends StatelessWidget {
   const MxHero({
     required this.title,
     required this.subtitle,
     this.trailing,
+    this.eyebrow = '',
     super.key,
   });
   final String title;
   final String subtitle;
+  final String eyebrow;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-    padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+    margin: const EdgeInsets.fromLTRB(14, 14, 14, 10),
     decoration: const BoxDecoration(
       color: kMxPrimary,
       borderRadius: BorderRadiusDirectional.only(
-        topStart: Radius.circular(18),
-        topEnd: Radius.circular(18),
-        bottomStart: Radius.circular(18),
-        bottomEnd: Radius.circular(44),
+        topStart: Radius.circular(24),
+        topEnd: Radius.circular(24),
+        bottomStart: Radius.circular(24),
+        bottomEnd: Radius.circular(56),
       ),
+      boxShadow: kMxShadow,
     ),
-    child: Row(
+    clipBehavior: Clip.antiAlias,
+    child: Stack(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        PositionedDirectional(
+          end: -40,
+          top: -50,
+          child: Container(
+            width: 170,
+            height: 170,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.06),
+            ),
+          ),
+        ),
+        PositionedDirectional(
+          end: 50,
+          bottom: -70,
+          child: Container(
+            width: 130,
+            height: 130,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: kMxAccent.withValues(alpha: 0.16),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
+          child: Row(
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  height: 1.1,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (eyebrow.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          eyebrow,
+                          style: const TextStyle(
+                            color: kMxAccent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        height: 1.05,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.88),
+                        fontSize: 16,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  height: 1.35,
-                ),
-              ),
+              if (trailing != null) ...[const SizedBox(width: 12), trailing!],
             ],
           ),
         ),
-        if (trailing != null) trailing!,
       ],
     ),
   );
 }
 
-/// A KPI card: icon chip, big number, label. Whole card is the tap target.
+/// A pastel KPI card (after the site's pink stat card): big number, label,
+/// icon in the corner. The whole card is the tap target.
 class MxStatCard extends StatelessWidget {
   const MxStatCard({
     required this.value,
@@ -144,61 +194,92 @@ class MxStatCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: '$value $label',
-    excludeSemantics: true,
-    onTap: onTap,
-    child: Material(
-      color: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(18)),
-        side: BorderSide(color: kMxLine),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
+  Widget build(BuildContext context) {
+    final calm = value == 0;
+    final c = calm ? kMxOk : color;
+    return Semantics(
+      button: true,
+      label: '$value $label',
+      excludeSemantics: true,
+      onTap: onTap,
+      child: _Pressable(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Row(
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 112),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+          decoration: BoxDecoration(
+            color: mxTintOf(c),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Stack(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: color.withValues(alpha: 0.12),
-                child: Icon(icon, color: color, size: 24),
+              PositionedDirectional(
+                end: 0,
+                top: 0,
+                child: Icon(icon, color: c.withValues(alpha: 0.75), size: 26),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$value',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: value == 0 ? kMxOk : color,
-                        height: 1,
-                      ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    '$value',
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.w800,
+                      color: c,
+                      height: 1,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      label,
-                      style: const TextStyle(fontSize: 14, height: 1.2),
-                      maxLines: 2,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                      color: kMxInk,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Gentle press feedback (scale 0.97) for custom tappable surfaces.
+class _Pressable extends StatefulWidget {
+  const _Pressable({required this.onTap, required this.child});
+  final VoidCallback onTap;
+  final Widget child;
+  @override
+  State<_Pressable> createState() => _PressableState();
+}
+
+class _PressableState extends State<_Pressable> {
+  bool _down = false;
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onTapDown: (_) => setState(() => _down = true),
+    onTapCancel: () => setState(() => _down = false),
+    onTapUp: (_) => setState(() => _down = false),
+    onTap: widget.onTap,
+    child: AnimatedScale(
+      scale: _down ? 0.97 : 1,
+      duration: const Duration(milliseconds: 110),
+      child: widget.child,
     ),
   );
 }
 
-/// A big square pick-tile (room / point). [alert] paints a red ring + dot.
+/// A big pick-tile (room / point): white, soft shadow, icon in a pastel
+/// circle, press feedback. [alert] = red ring + pink circle.
 class MxTile extends StatelessWidget {
   const MxTile({
     required this.icon,
@@ -218,7 +299,7 @@ class MxTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ring = selected ? kMxCta : (alert ? kMxBad : kMxLine);
+    final tone = alert ? kMxBad : kMxPrimary;
     return Semantics(
       button: true,
       selected: selected,
@@ -229,49 +310,78 @@ class MxTile extends StatelessWidget {
       ].join(', '),
       excludeSemantics: true,
       onTap: onTap,
-      child: Material(
-        color: selected ? kMxCta.withValues(alpha: 0.06) : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(18)),
-          side: BorderSide(color: ring, width: selected || alert ? 2 : 1),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 34, color: alert ? kMxBad : kMxPrimary),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    height: 1.15,
+      child: _Pressable(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: kMxShadow,
+            border:
+                alert || selected
+                    ? Border.all(color: selected ? kMxCta : kMxBad, width: 2)
+                    : null,
+          ),
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: alert ? kMxPink : kMxTealTint,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, size: 30, color: tone),
                   ),
-                ),
-                if (caption.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      caption,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
+                  if (alert)
+                    PositionedDirectional(
+                      end: -2,
+                      top: -2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: kMxBad,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2.5),
+                        ),
                       ),
                     ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w800,
+                  height: 1.15,
+                ),
+              ),
+              if (caption.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Text(
+                    caption,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: alert ? kMxBad : Colors.black54,
+                      fontWeight: alert ? FontWeight.w700 : FontWeight.w400,
+                    ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),
@@ -293,7 +403,7 @@ class MxTileGrid extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
-        childAspectRatio: 1.15,
+        childAspectRatio: 0.95,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         children: children,
       );
@@ -444,10 +554,30 @@ Future<void> mxShowSuccess(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircleAvatar(
-                radius: 36,
-                backgroundColor: kMxOk,
-                child: Icon(Icons.check_rounded, color: Colors.white, size: 46),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.4, end: 1),
+                duration: const Duration(milliseconds: 520),
+                curve: Curves.elasticOut,
+                builder:
+                    (_, v, child) => Transform.scale(scale: v, child: child),
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: const BoxDecoration(
+                    color: kMxGreenTint,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: const CircleAvatar(
+                    radius: 34,
+                    backgroundColor: kMxOk,
+                    child: Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 44,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -632,7 +762,7 @@ class MxStockBar extends StatelessWidget {
   }
 }
 
-/// Friendly empty state.
+/// Friendly empty state: layered circles, a calm title, one line of help.
 class MxEmpty extends StatelessWidget {
   const MxEmpty({
     required this.icon,
@@ -645,26 +775,44 @@ class MxEmpty extends StatelessWidget {
   final String body;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+    padding: const EdgeInsets.fromLTRB(28, 44, 28, 28),
     child: Column(
       children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: kMxPrimary.withValues(alpha: 0.08),
-          child: Icon(icon, size: 40, color: kMxPrimary),
+        Container(
+          width: 128,
+          height: 128,
+          decoration: const BoxDecoration(
+            color: kMxTealTint,
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Container(
+            width: 84,
+            height: 84,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: kMxShadow,
+            ),
+            child: Icon(icon, size: 40, color: kMxPrimary),
+          ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
         ),
         if (body.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             body,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.black54, fontSize: 15),
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 15.5,
+              height: 1.4,
+            ),
           ),
         ],
       ],
@@ -672,18 +820,18 @@ class MxEmpty extends StatelessWidget {
   );
 }
 
-/// A white rounded card with a colored start edge (status at a glance).
+/// A white card with soft depth and a colored start edge (status at a glance).
 class MxEdgeCard extends StatelessWidget {
   const MxEdgeCard({required this.color, required this.child, super.key});
   final Color color;
   final Widget child;
   @override
   Widget build(BuildContext context) => Container(
-    margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+    margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: kMxLine),
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: kMxShadow,
     ),
     clipBehavior: Clip.antiAlias,
     child: IntrinsicHeight(
@@ -692,10 +840,33 @@ class MxEdgeCard extends StatelessWidget {
         children: [
           Container(width: 6, color: color),
           Expanded(
-            child: Padding(padding: const EdgeInsets.all(14), child: child),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+              child: child,
+            ),
           ),
         ],
       ),
     ),
   );
+}
+
+/// "יום ראשון · 8 בנובמבר".
+String mxDateLabel(DateTime d) {
+  const days = ['שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת', 'ראשון'];
+  const months = [
+    'בינואר',
+    'בפברואר',
+    'במרץ',
+    'באפריל',
+    'במאי',
+    'ביוני',
+    'ביולי',
+    'באוגוסט',
+    'בספטמבר',
+    'באוקטובר',
+    'בנובמבר',
+    'בדצמבר',
+  ];
+  return 'יום ${days[d.weekday - 1]} · ${d.day} ${months[d.month - 1]}';
 }

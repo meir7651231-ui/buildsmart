@@ -57,7 +57,6 @@ ThemeData mxBrandTheme() {
     surface: Colors.white,
     error: kMxBad,
   );
-  const radius = BorderRadius.all(Radius.circular(18));
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
@@ -70,11 +69,12 @@ ThemeData mxBrandTheme() {
     ),
     cardTheme: const CardTheme(
       color: Colors.white,
-      elevation: 0,
-      margin: EdgeInsets.fromLTRB(12, 0, 12, 10),
+      elevation: 6,
+      shadowColor: Color(0x260D4151),
+      surfaceTintColor: Colors.transparent,
+      margin: EdgeInsets.fromLTRB(14, 0, 14, 14),
       shape: RoundedRectangleBorder(
-        borderRadius: radius,
-        side: BorderSide(color: kMxLine),
+        borderRadius: BorderRadius.all(Radius.circular(22)),
       ),
     ),
     dividerTheme: const DividerThemeData(color: kMxLine, space: 1),
@@ -109,12 +109,23 @@ ThemeData mxBrandTheme() {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,
-      indicatorColor: kMxPrimary.withValues(alpha: 0.12),
-      labelTextStyle: const WidgetStatePropertyAll(
-        TextStyle(
+      surfaceTintColor: Colors.transparent,
+      indicatorColor: kMxPrimary,
+      indicatorShape: const StadiumBorder(),
+      iconTheme: WidgetStateProperty.resolveWith(
+        (s) => IconThemeData(
+          color: s.contains(WidgetState.selected) ? Colors.white : kMxPrimary,
+          size: 24,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (s) => TextStyle(
           fontFamily: 'Heebo',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontSize: 12.5,
+          fontWeight:
+              s.contains(WidgetState.selected)
+                  ? FontWeight.w800
+                  : FontWeight.w600,
           color: kMxPrimary,
         ),
       ),
@@ -122,3 +133,24 @@ ThemeData mxBrandTheme() {
     snackBarTheme: const SnackBarThemeData(backgroundColor: kMxPrimary),
   );
 }
+
+// ── premium layer: pastel tints + soft tinted shadows ────────────────────────
+// Tints echo the site's pastel stat cards (the pink "50 שנות ניסיון" card).
+const Color kMxPink = kMxSiachSod ? Color(0xFFF6DDE2) : Color(0xFFFBE4E2);
+const Color kMxGoldTint = kMxSiachSod ? Color(0xFFF6EDCB) : Color(0xFFFCEFD6);
+const Color kMxTealTint = kMxSiachSod ? Color(0xFFDDEAEC) : Color(0xFFE2ECF7);
+const Color kMxGreenTint = kMxSiachSod ? Color(0xFFDDEFE2) : Color(0xFFDDF0E4);
+
+/// Tint for a status color (pastel background behind it).
+Color mxTintOf(Color c) {
+  if (c == kMxBad) return kMxPink;
+  if (c == kMxWarn) return kMxGoldTint;
+  if (c == kMxOk) return kMxGreenTint;
+  return kMxTealTint;
+}
+
+/// Soft shadow tinted with the primary color — depth without borders.
+const List<BoxShadow> kMxShadow = [
+  BoxShadow(color: Color(0x140D4151), blurRadius: 22, offset: Offset(0, 8)),
+  BoxShadow(color: Color(0x0A0D4151), blurRadius: 4, offset: Offset(0, 1)),
+];

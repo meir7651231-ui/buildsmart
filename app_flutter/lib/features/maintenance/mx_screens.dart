@@ -70,15 +70,24 @@ Widget _section(String title) => Padding(
   ),
 );
 
-Widget _listCard(List<Widget> tiles) => Card(
+Widget _listCard(List<Widget> tiles) => Container(
+  margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(22),
+    boxShadow: kMxShadow,
+  ),
   clipBehavior: Clip.antiAlias,
-  child: Column(
-    children: [
-      for (var i = 0; i < tiles.length; i++) ...[
-        if (i > 0) const Divider(height: 1),
-        tiles[i],
+  child: Material(
+    type: MaterialType.transparency,
+    child: Column(
+      children: [
+        for (var i = 0; i < tiles.length; i++) ...[
+          if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
+          tiles[i],
+        ],
       ],
-    ],
+    ),
   ),
 );
 
@@ -171,79 +180,137 @@ class _MxHomeState extends ConsumerState<MxHome> {
       _ => 0,
     };
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: _brand,
-        foregroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadiusDirectional.only(
-            bottomEnd: Radius.circular(36),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(128),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: _brand,
+            borderRadius: BorderRadiusDirectional.only(
+              bottomEnd: Radius.circular(44),
+            ),
           ),
-        ),
-        title: const Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: kMxWordmark,
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
-              ),
-              TextSpan(
-                text: '  ·  $kMxSubtitle',
-                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'איפוס הדגמה',
-            icon: const Icon(Icons.restart_alt),
-            onPressed: () {
-              ref.read(mxDbProvider.notifier).reset();
-              _toast(context, null, 'ההדגמה אופסה');
-            },
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            child: SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<MxRole>(
-                key: const Key('mx-roles'),
-                showSelectedIcon: false,
-                style: SegmentedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  selectedForegroundColor: _brand,
-                  selectedBackgroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white54),
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(18, 8, 6, 0),
+                  child: Row(
+                    children: [
+                      if (kMxSiachSod)
+                        const Padding(
+                          padding: EdgeInsetsDirectional.only(end: 6),
+                          child: Icon(
+                            Icons.local_florist,
+                            color: Color(0xFFD52C48),
+                            size: 22,
+                          ),
+                        ),
+                      const Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: kMxWordmark,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 23,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '   $kMxSubtitle',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                  color: Color(0xCCFFFFFF),
+                                ),
+                              ),
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'איפוס הדגמה',
+                        color: Colors.white70,
+                        icon: const Icon(Icons.restart_alt),
+                        onPressed: () {
+                          ref.read(mxDbProvider.notifier).reset();
+                          _toast(context, null, 'ההדגמה אופסה');
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                segments: const [
-                  ButtonSegment(
-                    value: MxRole.manager,
-                    label: Text('מנהל', maxLines: 1, softWrap: false),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<MxRole>(
+                        key: const Key('mx-roles'),
+                        showSelectedIcon: false,
+                        style: SegmentedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          selectedForegroundColor: _brand,
+                          selectedBackgroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.transparent),
+                          shape: const StadiumBorder(),
+                          textStyle: const TextStyle(
+                            fontFamily: 'Heebo',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
+                        segments: const [
+                          ButtonSegment(
+                            value: MxRole.manager,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('מנהל', maxLines: 1),
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: MxRole.tech,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('טכנאי', maxLines: 1),
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: MxRole.staff,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('מדריך', maxLines: 1),
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: MxRole.store,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('חנות', maxLines: 1),
+                            ),
+                          ),
+                        ],
+                        selected: {role},
+                        onSelectionChanged: (s) {
+                          ref.read(mxRoleProvider.notifier).state = s.first;
+                          setState(() => _tab = 0);
+                        },
+                      ),
+                    ),
                   ),
-                  ButtonSegment(
-                    value: MxRole.tech,
-                    label: Text('טכנאי', maxLines: 1, softWrap: false),
-                  ),
-                  ButtonSegment(
-                    value: MxRole.staff,
-                    label: Text('מדריך', maxLines: 1, softWrap: false),
-                  ),
-                  ButtonSegment(
-                    value: MxRole.store,
-                    label: Text('חנות', maxLines: 1, softWrap: false),
-                  ),
-                ],
-                selected: {role},
-                onSelectionChanged: (s) {
-                  ref.read(mxRoleProvider.notifier).state = s.first;
-                  setState(() => _tab = 0);
-                },
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -261,22 +328,35 @@ class _MxHomeState extends ConsumerState<MxHome> {
       bottomNavigationBar:
           tabs.length < 2
               ? null
-              : NavigationBar(
-                selectedIndex: tab,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                height: 64,
-                onDestinationSelected: (i) => setState(() => _tab = i),
-                destinations: [
-                  for (final t in tabs)
-                    NavigationDestination(
-                      icon: Badge(
-                        isLabelVisible: badge(t.$1) > 0,
-                        label: Text('${badge(t.$1)}'),
-                        child: Icon(t.$2),
-                      ),
-                      label: t.$3,
+              : SafeArea(
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: kMxShadow,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: NavigationBar(
+                      selectedIndex: tab,
+                      labelBehavior:
+                          NavigationDestinationLabelBehavior.alwaysShow,
+                      height: 68,
+                      onDestinationSelected: (i) => setState(() => _tab = i),
+                      destinations: [
+                        for (final t in tabs)
+                          NavigationDestination(
+                            icon: Badge(
+                              isLabelVisible: badge(t.$1) > 0,
+                              label: Text('${badge(t.$1)}'),
+                              child: Icon(t.$2),
+                            ),
+                            label: t.$3,
+                          ),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
     );
   }
@@ -331,7 +411,11 @@ class _Dashboard extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        MxHero(title: mxGreeting(now), subtitle: summary),
+        MxHero(
+          eyebrow: mxDateLabel(now),
+          title: mxGreeting(now),
+          subtitle: summary,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
@@ -454,9 +538,18 @@ void _open(BuildContext context, Widget page) =>
 
 Scaffold _page(String title, Widget body) => Scaffold(
   appBar: AppBar(
-    title: Text(title),
+    title: Text(
+      title,
+      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+    ),
+    toolbarHeight: 66,
     backgroundColor: _brand,
     foregroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadiusDirectional.only(
+        bottomEnd: Radius.circular(36),
+      ),
+    ),
   ),
   body: body,
 );
@@ -1160,37 +1253,58 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
             ),
           ),
         ),
-        if (_step == 1)
-          MxTileGrid(
-            children: [
-              for (final r in db.roomsOf(kMxStaffUnit))
-                MxTile(
-                  key: Key('rep-room-${r.id}'),
-                  icon: mxRoomIcon(r.name),
-                  label: r.name,
-                  caption: '${db.pointsOf(r.id).length} פריטים',
-                  alert: db
-                      .pointsOf(r.id)
-                      .any((p) => p.status == MxPointStatus.faulty),
-                  onTap: () => setState(() => _room = r.id),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 260),
+          switchInCurve: Curves.easeOutCubic,
+          transitionBuilder:
+              (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween(
+                    begin: const Offset(0, 0.04),
+                    end: Offset.zero,
+                  ).animate(anim),
+                  child: child,
                 ),
+              ),
+          child: Column(
+            key: ValueKey(_step),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_step == 1)
+                MxTileGrid(
+                  children: [
+                    for (final r in db.roomsOf(kMxStaffUnit))
+                      MxTile(
+                        key: Key('rep-room-${r.id}'),
+                        icon: mxRoomIcon(r.name),
+                        label: r.name,
+                        caption: '${db.pointsOf(r.id).length} פריטים',
+                        alert: db
+                            .pointsOf(r.id)
+                            .any((p) => p.status == MxPointStatus.faulty),
+                        onTap: () => setState(() => _room = r.id),
+                      ),
+                  ],
+                ),
+              if (_step == 2)
+                MxTileGrid(
+                  children: [
+                    for (final p in db.pointsOf(_room!))
+                      MxTile(
+                        key: Key('rep-point-${p.id}'),
+                        icon: mxPointIcon(p.type),
+                        label: '${p.type} ${p.num}',
+                        caption: p.loc,
+                        alert: p.status == MxPointStatus.faulty,
+                        onTap: () => setState(() => _point = p.id),
+                      ),
+                  ],
+                ),
+              if (_step == 3) ..._details(db),
             ],
           ),
-        if (_step == 2)
-          MxTileGrid(
-            children: [
-              for (final p in db.pointsOf(_room!))
-                MxTile(
-                  key: Key('rep-point-${p.id}'),
-                  icon: mxPointIcon(p.type),
-                  label: '${p.type} ${p.num}',
-                  caption: p.loc,
-                  alert: p.status == MxPointStatus.faulty,
-                  onTap: () => setState(() => _point = p.id),
-                ),
-            ],
-          ),
-        if (_step == 3) ..._details(db),
+        ),
       ],
     );
   }
