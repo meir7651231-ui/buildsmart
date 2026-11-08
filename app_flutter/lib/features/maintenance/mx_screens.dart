@@ -1,8 +1,16 @@
 /// Maintenance module — screens (Hebrew, RTL, light, phone-first).
 ///
-/// [MxHome] is the whole module: a role switch (manager / tech / staff /
+/// [MxHome] is the whole module: a role switch (manager / tech / home staff /
 /// store) and per-role tabs. Drill-downs are pushed routes that watch
 /// [mxDbProvider], so every screen updates live after any action.
+///
+/// UX rules applied everywhere (after the 3-designer critique):
+/// * the main action of a page sits in a sticky bottom bar ([MxBottomBar]);
+/// * safety faults are urgent: red banner, what to do now, a call button;
+/// * nothing irreversible happens in one tap — local steps get "בטל" in the
+///   toast, steps that reach the store / BuildSmart ask to confirm first;
+/// * toasts stay 6 s and are announced to screen readers;
+/// * no internal codes in the UI ("קריאה 1001", never "WO-1001").
 library;
 
 import 'package:buildsmart/features/maintenance/mx_brand.dart';
@@ -11,18 +19,22 @@ import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_state.dart';
 import 'package:buildsmart/features/maintenance/mx_store_link.dart';
+import 'package:buildsmart/features/maintenance/mx_templates.dart';
 import 'package:buildsmart/features/maintenance/mx_ui.dart';
+import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/url_launcher_seam.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Demo identities (real auth maps users to these).
 const String kMxTechName = 'יוסי – טכנאי';
 const String kMxStaffUnit = 'jrs-3';
-const String kMxStaffLabel = 'מדריך – דירה 3';
+const String kMxStaffLabel = 'צוות הבית – דירה 3';
 const String kMxStoreId = 'st-tambur';
+const String kMxManagerName = 'מנהל האחזקה';
 
 const Color _brand = kMxPrimary;
 const Color _bad = kMxBad;
@@ -31,50 +43,99 @@ const Color _ok = kMxOk;
 
 ThemeData mxTheme() => mxBrandTheme();
 
-void _toast(BuildContext context, String? error, String success) {
+/// A 6-second toast, announced to screen readers. [undo] adds "בטל".
+void _toast(
+  BuildContext context,
+  String? error,
+  String success, {
+  VoidCallback? undo,
+}) {
+  final msg = error ?? success;
+  if (msg.isEmpty) return;
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(error ?? success),
-        duration: const Duration(milliseconds: 2500),
+        content: Text(msg),
+        duration: const Duration(seconds: 6),
         backgroundColor: error == null ? null : _bad,
         behavior: SnackBarBehavior.floating,
+        action:
+            error == null && undo != null
+                ? SnackBarAction(
+                  key: const Key('toast-undo'),
+                  label: 'בטל',
+                  onPressed: undo,
+                )
+                : null,
       ),
     );
+  SemanticsService.announce(msg, TextDirection.rtl);
 }
 
-class _Tag extends StatelessWidget {
-  const _Tag(this.text, this.color);
-  final String text;
-  final Color color;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Text(
-      text,
-      style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 12),
-    ),
-  );
-}
-
-Widget _section(String title) => Padding(
-  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-  child: Text(
-    title,
-    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-  ),
+/// Toast for a local step that can be undone.
+void _undoable(
+  BuildContext context,
+  WidgetRef ref,
+  String? error,
+  String success,
+) => _toast(
+  context,
+  error,
+  success,
+  undo: () {
+    if (ref.read(mxDbProvider.notifier).undo() && context.mounted) {
+      _toast(context, null, 'הפעולה בוטלה');
+    }
+  },
 );
+
+/// Yes/no confirmation before a step that reaches outside the app.
+Future<bool> _confirm(
+  BuildContext context, {
+  required String title,
+  required String body,
+  required String ok,
+  bool danger = false,
+}) async =>
+    await showDialog<bool>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(title),
+            content: Text(body, style: const TextStyle(fontSize: 16)),
+            actions: [
+              TextButton(
+                key: const Key('confirm-no'),
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('ביטול'),
+              ),
+              FilledButton(
+                key: const Key('confirm-yes'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: danger ? _bad : _brand,
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(ok),
+              ),
+            ],
+          ),
+    ) ??
+    false;
+
+Future<void> _call(WidgetRef ref, BuildContext context, String phone) async {
+  final ok = await ref.read(urlLauncherProvider)(
+    Uri(scheme: 'tel', path: phone.replaceAll(RegExp('[^0-9+]'), '')),
+  );
+  if (!ok && context.mounted) _toast(context, 'לא ניתן לחייג מהמכשיר', '');
+}
 
 Widget _listCard(List<Widget> tiles) => Container(
   margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
   decoration: BoxDecoration(
     color: Colors.white,
-    borderRadius: BorderRadius.circular(22),
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(color: kMxLine),
     boxShadow: kMxShadow,
   ),
   clipBehavior: Clip.antiAlias,
@@ -88,6 +149,62 @@ Widget _listCard(List<Widget> tiles) => Container(
         ],
       ],
     ),
+  ),
+);
+
+/// Light page title for tab bodies (the dark hero lives only on the board).
+Widget _pageTitle(String title, [String sub = '']) => Padding(
+  padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+      ),
+      if (sub.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            sub,
+            style: const TextStyle(color: Colors.black54, fontSize: 14),
+          ),
+        ),
+    ],
+  ),
+);
+
+/// Filter chips row (solid petrol when selected).
+Widget _chips(
+  String keyPrefix,
+  List<(String key, String label)> items,
+  String selected,
+  ValueChanged<String> onSelect,
+) => SingleChildScrollView(
+  scrollDirection: Axis.horizontal,
+  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  child: Row(
+    children: [
+      for (final (k, label) in items)
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 8),
+          child: ChoiceChip(
+            key: Key('$keyPrefix-$k'),
+            label: Text(label),
+            selected: selected == k,
+            showCheckmark: false,
+            shape: const StadiumBorder(),
+            selectedColor: kMxPrimary,
+            backgroundColor: Colors.white,
+            side: BorderSide(color: selected == k ? kMxPrimary : kMxLine),
+            labelStyle: TextStyle(
+              color: selected == k ? Colors.white : kMxInk,
+              fontWeight: FontWeight.w600,
+            ),
+            onSelected: (_) => onSelect(k),
+          ),
+        ),
+    ],
   ),
 );
 
@@ -107,16 +224,19 @@ Color _woColor(MxWoStatus s) => switch (s) {
 
 String _poStatus(MxPoStatus s) => switch (s) {
   MxPoStatus.pendingApproval => 'ממתין לאישור',
+  MxPoStatus.approved => 'אושר – טרם נשלח',
   MxPoStatus.sent => 'נשלח לחנות',
   MxPoStatus.storeConfirmed => 'החנות אישרה',
   MxPoStatus.storePartial => 'חסרים פריטים',
-  MxPoStatus.ready => 'מוכן לאיסוף',
+  MxPoStatus.ready => 'מוכן',
   MxPoStatus.received => 'התקבל',
   MxPoStatus.rejected => 'נדחה',
 };
 
 Color _poColor(MxPoStatus s) => switch (s) {
-  MxPoStatus.pendingApproval || MxPoStatus.storePartial => _warn,
+  MxPoStatus.pendingApproval ||
+  MxPoStatus.approved ||
+  MxPoStatus.storePartial => _warn,
   MxPoStatus.received => _ok,
   MxPoStatus.rejected => _bad,
   _ => _brand,
@@ -124,6 +244,15 @@ Color _poColor(MxPoStatus s) => switch (s) {
 
 String _date(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+String _time(DateTime d) =>
+    '${_date(d)}, ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
+String _byRole(MxRole role) => switch (role) {
+  MxRole.staff => kMxStaffLabel,
+  MxRole.tech => kMxTechName,
+  _ => kMxManagerName,
+};
 
 // ── shell ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +264,14 @@ class MxHome extends ConsumerStatefulWidget {
 
 typedef _Tab = (String key, IconData icon, String label);
 
+const List<MxRole> _roles = [
+  MxRole.manager,
+  MxRole.tech,
+  MxRole.staff,
+  MxRole.store,
+];
+const List<String> _roleLabels = ['מנהל', 'טכנאי', 'צוות בית', 'חנות'];
+
 class _MxHomeState extends ConsumerState<MxHome> {
   int _tab = 0;
 
@@ -144,14 +281,12 @@ class _MxHomeState extends ConsumerState<MxHome> {
       ('sites', Icons.apartment_outlined, 'מסגרות'),
       ('wo', Icons.build_outlined, 'קריאות'),
       ('pm', Icons.event_available_outlined, 'תחזוקה'),
-      ('stock', Icons.inventory_2_outlined, 'מלאי'),
-      ('po', Icons.shopping_cart_outlined, 'הזמנות'),
+      ('buy', Icons.shopping_cart_outlined, 'רכש'),
     ],
     MxRole.tech => const [
       ('wo', Icons.build_outlined, 'המשימות שלי'),
       ('sites', Icons.apartment_outlined, 'מסגרות'),
-      ('stock', Icons.inventory_2_outlined, 'מלאי'),
-      ('po', Icons.shopping_cart_outlined, 'בקשות'),
+      ('buy', Icons.shopping_cart_outlined, 'רכש'),
     ],
     MxRole.staff => const [
       ('report', Icons.campaign_outlined, 'דיווח תקלה'),
@@ -162,9 +297,45 @@ class _MxHomeState extends ConsumerState<MxHome> {
     ],
   };
 
-  void _go(String key) {
+  void _go(String key, {String? sub}) {
     final i = _tabs(ref.read(mxRoleProvider)).indexWhere((t) => t.$1 == key);
+    if (sub != null) ref.read(_buySectionProvider.notifier).state = sub;
     if (i >= 0) setState(() => _tab = i);
+  }
+
+  /// Role-scoped badge: only what this person has to act on.
+  int _badge(MxDb db, MxRole role, String key) => switch ((role, key)) {
+    (MxRole.manager, 'wo') =>
+      db.workOrders.where((w) => w.status == MxWoStatus.open).length,
+    (MxRole.manager, 'buy') => db.pendingApproval.length,
+    (MxRole.tech, 'wo') =>
+      db.workOrders
+          .where(
+            (w) =>
+                w.isOpen &&
+                (w.assignee == kMxTechName ||
+                    (w.status == MxWoStatus.open && w.urgent)),
+          )
+          .length,
+    (MxRole.staff, 'wo') =>
+      db.workOrders
+          .where((w) => w.isOpen && w.reportedBy == kMxStaffLabel)
+          .length,
+    _ => 0,
+  };
+
+  Future<void> _reset() async {
+    final yes = await _confirm(
+      context,
+      title: 'לאפס את ההדגמה?',
+      body:
+          'כל הקריאות, ההזמנות והשינויים שנעשו כאן יימחקו ויחזרו לנתוני הדוגמה.',
+      ok: 'אפס',
+      danger: true,
+    );
+    if (!yes || !mounted) return;
+    ref.read(mxDbProvider.notifier).reset();
+    _toast(context, null, 'ההדגמה אופסה');
   }
 
   @override
@@ -173,141 +344,69 @@ class _MxHomeState extends ConsumerState<MxHome> {
     final db = ref.watch(mxDbProvider);
     final tabs = _tabs(role);
     final tab = _tab.clamp(0, tabs.length - 1);
-    int badge(String key) => switch (key) {
-      'wo' => db.openWorkOrders.length,
-      'stock' => db.lowStock.length,
-      'po' => role == MxRole.manager ? db.pendingApproval.length : 0,
-      _ => 0,
-    };
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(128),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: _brand,
-            borderRadius: BorderRadiusDirectional.only(
-              bottomEnd: Radius.circular(44),
-            ),
-          ),
+        preferredSize: const Size.fromHeight(108),
+        child: ColoredBox(
+          color: _brand,
           child: SafeArea(
             bottom: false,
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(18, 8, 6, 0),
-                  child: Row(
-                    children: [
-                      if (kMxSiachSod)
-                        const Padding(
-                          padding: EdgeInsetsDirectional.only(end: 6),
-                          child: Icon(
-                            Icons.local_florist,
-                            color: Color(0xFFD52C48),
-                            size: 22,
+                SizedBox(
+                  height: 48,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(18, 0, 4, 0),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: kMxWordmark,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '  $kMxSubtitle',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14,
+                                    color: kMxAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      const Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: kMxWordmark,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 23,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '   $kMxSubtitle',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 15,
-                                  color: Color(0xCCFFFFFF),
-                                ),
-                              ),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        IconButton(
+                          key: const Key('mx-reset'),
+                          tooltip: 'איפוס הדגמה',
+                          color: Colors.white70,
+                          icon: const Icon(Icons.restart_alt),
+                          onPressed: _reset,
                         ),
-                      ),
-                      IconButton(
-                        tooltip: 'איפוס הדגמה',
-                        color: Colors.white70,
-                        icon: const Icon(Icons.restart_alt),
-                        onPressed: () {
-                          ref.read(mxDbProvider.notifier).reset();
-                          _toast(context, null, 'ההדגמה אופסה');
-                        },
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<MxRole>(
-                        key: const Key('mx-roles'),
-                        showSelectedIcon: false,
-                        style: SegmentedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          selectedForegroundColor: _brand,
-                          selectedBackgroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.transparent),
-                          shape: const StadiumBorder(),
-                          textStyle: const TextStyle(
-                            fontFamily: 'Heebo',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                        ),
-                        segments: const [
-                          ButtonSegment(
-                            value: MxRole.manager,
-                            label: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('מנהל', maxLines: 1),
-                            ),
-                          ),
-                          ButtonSegment(
-                            value: MxRole.tech,
-                            label: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('טכנאי', maxLines: 1),
-                            ),
-                          ),
-                          ButtonSegment(
-                            value: MxRole.staff,
-                            label: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('מדריך', maxLines: 1),
-                            ),
-                          ),
-                          ButtonSegment(
-                            value: MxRole.store,
-                            label: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('חנות', maxLines: 1),
-                            ),
-                          ),
-                        ],
-                        selected: {role},
-                        onSelectionChanged: (s) {
-                          ref.read(mxRoleProvider.notifier).state = s.first;
-                          setState(() => _tab = 0);
-                        },
-                      ),
-                    ),
+                  padding: const EdgeInsets.fromLTRB(14, 2, 14, 12),
+                  child: MxRolePill<MxRole>(
+                    key: const Key('mx-roles'),
+                    values: _roles,
+                    labels: _roleLabels,
+                    selected: role,
+                    onChanged: (r) {
+                      ref.read(mxRoleProvider.notifier).state = r;
+                      setState(() => _tab = 0);
+                    },
                   ),
                 ),
               ],
@@ -320,53 +419,42 @@ class _MxHomeState extends ConsumerState<MxHome> {
         'sites' => const _SitesPage(),
         'wo' => const _WorkOrdersPage(),
         'pm' => const _PmPage(),
-        'stock' => const _StockPage(),
-        'po' => const _OrdersPage(),
+        'buy' => const _BuyPage(),
         'report' => _ReportPage(onSent: () => _go('wo')),
         _ => const _StoreInbox(),
       },
       bottomNavigationBar:
           tabs.length < 2
               ? null
-              : SafeArea(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: kMxShadow,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: NavigationBar(
-                      selectedIndex: tab,
-                      labelBehavior:
-                          NavigationDestinationLabelBehavior.alwaysShow,
-                      height: 68,
-                      onDestinationSelected: (i) => setState(() => _tab = i),
-                      destinations: [
-                        for (final t in tabs)
-                          NavigationDestination(
-                            icon: Badge(
-                              isLabelVisible: badge(t.$1) > 0,
-                              label: Text('${badge(t.$1)}'),
-                              child: Icon(t.$2),
-                            ),
-                            label: t.$3,
-                          ),
-                      ],
+              : NavigationBar(
+                selectedIndex: tab,
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                height: 68,
+                onDestinationSelected: (i) => setState(() => _tab = i),
+                destinations: [
+                  for (final t in tabs)
+                    NavigationDestination(
+                      icon: Badge(
+                        isLabelVisible: _badge(db, role, t.$1) > 0,
+                        label: Text('${_badge(db, role, t.$1)}'),
+                        child: Icon(t.$2),
+                      ),
+                      label: t.$3,
                     ),
-                  ),
-                ),
+                ],
               ),
     );
   }
 }
 
+/// Which section of the "רכש" tab is open ('orders' / 'stock').
+final _buySectionProvider = StateProvider<String>((_) => 'orders');
+
 // ── dashboard ────────────────────────────────────────────────────────────────
 
 class _Dashboard extends ConsumerWidget {
   const _Dashboard({required this.onGo});
-  final void Function(String) onGo;
+  final void Function(String, {String? sub}) onGo;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -375,9 +463,13 @@ class _Dashboard extends ConsumerWidget {
     final due = db.pmDue(now);
     final overdue = due.where((d) => d.$2 == MxDue.overdue).length;
     final soon = due.where((d) => d.$2 == MxDue.soon).length;
-    final open = db.openWorkOrders.length;
+    final openList = mxSortedOpen(db.openWorkOrders);
+    final urgent = openList.where((w) => w.urgent).toList();
+    final open = openList.length;
     final pending = db.pendingApproval.length;
     final parts = <String>[
+      if (urgent.isNotEmpty)
+        urgent.length == 1 ? 'תקלה דחופה אחת' : '${urgent.length} תקלות דחופות',
       if (open > 0) open == 1 ? 'קריאה פתוחה אחת' : '$open קריאות פתוחות',
       if (overdue > 0)
         overdue == 1 ? 'בדיקה אחת באיחור' : '$overdue בדיקות באיחור',
@@ -389,14 +481,14 @@ class _Dashboard extends ConsumerWidget {
     final summary =
         parts.isEmpty
             ? 'הכול תקין. אין משימות דחופות היום.'
-            : parts.join(' · ');
+            : '${parts.join(', ')}.';
     Widget stat(
       String key,
       int v,
       String label,
       IconData icon,
       Color c,
-      String go,
+      VoidCallback go,
     ) => Expanded(
       child: MxStatCard(
         key: Key('kpi-$key'),
@@ -404,7 +496,7 @@ class _Dashboard extends ConsumerWidget {
         label: label,
         icon: icon,
         color: c,
-        onTap: () => onGo(go),
+        onTap: go,
       ),
     );
     const gap = SizedBox(width: 10, height: 10);
@@ -416,6 +508,34 @@ class _Dashboard extends ConsumerWidget {
           title: mxGreeting(now),
           subtitle: summary,
         ),
+        for (final w in urgent)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+            child: Material(
+              color: kMxPink,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+                side: const BorderSide(color: _bad, width: 1.5),
+              ),
+              child: ListTile(
+                key: Key('urgent-${w.id}'),
+                minVerticalPadding: 12,
+                leading: const Icon(Icons.warning_amber_rounded, color: _bad),
+                title: Text(
+                  'דחוף: ${w.desc}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: _bad,
+                  ),
+                ),
+                subtitle: Text(
+                  '${db.pointPath(w.pointId)} · ${_woStatus(w.status)}',
+                ),
+                trailing: const Icon(Icons.chevron_left, color: _bad),
+                onTap: () => _open(context, _WorkOrderPage(w.id)),
+              ),
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
@@ -423,21 +543,21 @@ class _Dashboard extends ConsumerWidget {
               Row(
                 children: [
                   stat(
+                    'urgent',
+                    urgent.length,
+                    'תקלות דחופות',
+                    Icons.warning_amber_rounded,
+                    _bad,
+                    () => onGo('wo'),
+                  ),
+                  gap,
+                  stat(
                     'wo',
                     open,
                     'קריאות פתוחות',
                     Icons.build_outlined,
                     _bad,
-                    'wo',
-                  ),
-                  gap,
-                  stat(
-                    'po',
-                    pending,
-                    'הזמנות לאישור',
-                    Icons.shopping_cart_outlined,
-                    _warn,
-                    'po',
+                    () => onGo('wo'),
                   ),
                 ],
               ),
@@ -450,7 +570,7 @@ class _Dashboard extends ConsumerWidget {
                     'בדיקות באיחור',
                     Icons.event_busy_outlined,
                     _bad,
-                    'pm',
+                    () => onGo('pm'),
                   ),
                   gap,
                   stat(
@@ -459,7 +579,7 @@ class _Dashboard extends ConsumerWidget {
                     'בדיקות השבוע',
                     Icons.event_outlined,
                     _warn,
-                    'pm',
+                    () => onGo('pm'),
                   ),
                 ],
               ),
@@ -467,30 +587,28 @@ class _Dashboard extends ConsumerWidget {
               Row(
                 children: [
                   stat(
+                    'po',
+                    pending,
+                    'הזמנות לאישור',
+                    Icons.shopping_cart_outlined,
+                    _warn,
+                    () => onGo('buy', sub: 'orders'),
+                  ),
+                  gap,
+                  stat(
                     'low',
                     db.lowStock.length,
                     'חלקים להזמין',
                     Icons.inventory_2_outlined,
                     _warn,
-                    'stock',
-                  ),
-                  gap,
-                  Expanded(
-                    child: MxStatCard(
-                      key: const Key('kpi-points'),
-                      value: db.points.length,
-                      label: 'נקודות במעקב',
-                      icon: Icons.apartment_outlined,
-                      color: _brand,
-                      onTap: () => onGo('sites'),
-                    ),
+                    () => onGo('buy', sub: 'stock'),
                   ),
                 ],
               ),
             ],
           ),
         ),
-        _section('דחוף עכשיו'),
+        const MxSectionTitle('מה לטפל היום'),
         _listCard([
           for (final (r, d) in due.where((d) => d.$2 != MxDue.ok))
             ListTile(
@@ -504,28 +622,31 @@ class _Dashboard extends ConsumerWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text('${r.scope} · ${_date(r.nextDue)}'),
-              trailing: _Tag(
+              trailing: MxTag(
                 d == MxDue.overdue ? 'באיחור' : 'השבוע',
                 d == MxDue.overdue ? _bad : _warn,
               ),
               onTap: () => onGo('pm'),
             ),
-          for (final w in db.openWorkOrders)
+          for (final w in openList.where((w) => !w.urgent))
             ListTile(
               minVerticalPadding: 12,
-              leading: Icon(mxPointIcon(db.point(w.pointId).type), color: _bad),
+              leading: Icon(
+                mxPointIcon(db.point(w.pointId).type),
+                color: _woColor(w.status),
+              ),
               title: Text(
                 w.desc,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(db.pointPath(w.pointId)),
-              trailing: _Tag(_woStatus(w.status), _woColor(w.status)),
+              trailing: MxTag(_woStatus(w.status), _woColor(w.status)),
               onTap: () => _open(context, _WorkOrderPage(w.id)),
             ),
-          if (db.openWorkOrders.isEmpty && overdue + soon == 0)
+          if (open == 0 && overdue + soon == 0)
             const ListTile(
               leading: Icon(Icons.check_circle_outline, color: _ok),
-              title: Text('אין משימות דחופות'),
+              title: Text('אין משימות להיום'),
             ),
         ]),
       ],
@@ -536,51 +657,101 @@ class _Dashboard extends ConsumerWidget {
 void _open(BuildContext context, Widget page) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 
-Scaffold _page(String title, Widget body) => Scaffold(
-  appBar: AppBar(
-    title: Text(
-      title,
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-    ),
-    toolbarHeight: 66,
-    backgroundColor: _brand,
-    foregroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadiusDirectional.only(
-        bottomEnd: Radius.circular(36),
+/// A pushed page: light title bar, optional sticky bottom action bar.
+Scaffold _page(String title, Widget body, {Widget? bottom, bool back = true}) =>
+    Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: back,
+        title: Text(title),
+        toolbarHeight: 60,
+        shape: const Border(bottom: BorderSide(color: kMxLine)),
       ),
-    ),
-  ),
-  body: body,
-);
+      body: body,
+      bottomNavigationBar: bottom,
+    );
 
 // ── sites → unit → room → point ──────────────────────────────────────────────
 
-class _SitesPage extends ConsumerWidget {
+class _SitesPage extends ConsumerStatefulWidget {
   const _SitesPage();
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_SitesPage> createState() => _SitesPageState();
+}
+
+class _SitesPageState extends ConsumerState<_SitesPage> {
+  String _q = '';
+
+  @override
+  Widget build(BuildContext context) {
     final db = ref.watch(mxDbProvider);
     int faulty(String siteId) => [
       for (final u in db.unitsOf(siteId)) db.faultyCountOfUnit(u.id),
     ].fold(0, (a, b) => a + b);
+    final q = _q.trim();
+    bool hit(String s) => q.isNotEmpty && s.contains(q);
+    final sites =
+        q.isEmpty
+            ? db.sites
+            : db.sites
+                .where((s) => hit('${s.city} ${s.name} ${s.address}'))
+                .toList();
+    final points =
+        q.isEmpty
+            ? const <MxPoint>[]
+            : db.points
+                .where((p) => hit('${p.label} ${db.pointPath(p.id)}'))
+                .take(40)
+                .toList();
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        MxSectionTitle('המסגרות', count: db.sites.length),
-        MxTileGrid(
-          children: [
-            for (final s in db.sites)
-              MxTile(
-                key: Key('site-${s.id}'),
-                icon: Icons.apartment_outlined,
-                label: '${s.city} – ${s.name}',
-                caption: '${db.unitsOf(s.id).length} דירות',
-                alert: faulty(s.id) > 0,
-                onTap: () => _open(context, _SitePage(s.id)),
-              ),
-          ],
+        _pageTitle(
+          'המסגרות',
+          '${db.sites.length} מסגרות · ${db.points.length} נקודות במעקב',
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 4, 14, 10),
+          child: TextField(
+            key: const Key('site-search'),
+            onChanged: (v) => setState(() => _q = v),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              hintText: 'חיפוש מסגרת, דירה או נקודה (למשל: שקע)',
+            ),
+          ),
+        ),
+        if (sites.isNotEmpty)
+          MxTileGrid(
+            children: [
+              for (final s in sites)
+                MxTile(
+                  key: Key('site-${s.id}'),
+                  icon: Icons.apartment_outlined,
+                  label: '${s.city} – ${s.name}',
+                  caption: '${db.unitsOf(s.id).length} דירות',
+                  alert: faulty(s.id) > 0,
+                  onTap: () => _open(context, _SitePage(s.id)),
+                ),
+            ],
+          ),
+        if (points.isNotEmpty) ...[
+          MxSectionTitle('נקודות', count: points.length),
+          _listCard([
+            for (final p in points)
+              ListTile(
+                key: Key('find-${p.id}'),
+                leading: Icon(
+                  mxPointIcon(p.type),
+                  color: p.status == MxPointStatus.faulty ? _bad : _brand,
+                ),
+                title: Text(p.label),
+                subtitle: Text(db.pointPath(p.id)),
+                onTap: () => _open(context, _PointPage(p.id)),
+              ),
+          ]),
+        ],
+        if (q.isNotEmpty && sites.isEmpty && points.isEmpty)
+          const MxEmpty(icon: Icons.search_off, title: 'לא נמצא'),
       ],
     );
   }
@@ -609,7 +780,7 @@ class _SitePage extends ConsumerWidget {
                   caption:
                       db.faultyCountOfUnit(u.id) > 0
                           ? '${db.faultyCountOfUnit(u.id)} תקלות פתוחות'
-                          : '${db.pointCountOfUnit(u.id)} נקודות · תקין',
+                          : '${db.pointCountOfUnit(u.id)} נקודות, תקין',
                   alert: db.faultyCountOfUnit(u.id) > 0,
                   onTap: () => _open(context, _UnitPage(u.id)),
                 ),
@@ -655,6 +826,8 @@ class _UnitPage extends ConsumerWidget {
   }
 }
 
+/// A room's points as a compact list grouped by type (25 kitchen points fit
+/// on two screens instead of six).
 class _RoomPage extends ConsumerWidget {
   const _RoomPage(this.roomId);
   final String roomId;
@@ -665,56 +838,94 @@ class _RoomPage extends ConsumerWidget {
     final u = db.unit(r.unitId);
     final pts = db.pointsOf(roomId);
     final bad = pts.where((p) => p.status == MxPointStatus.faulty).length;
+    final types = <String>{for (final p in pts) p.type}.toList();
     return _page(
       '${u.name} · ${r.name}',
       ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          MxHero(
-            title: r.name,
-            subtitle:
-                bad == 0
-                    ? '${pts.length} נקודות · הכול תקין'
-                    : '${pts.length} נקודות · $bad תקולות',
-            trailing: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.qr_code_2,
-                size: 52,
-                color: kMxPrimary,
-                semanticLabel: 'מדבקת QR של החדר',
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    bad == 0
+                        ? '${pts.length} נקודות, הכול תקין'
+                        : '${pts.length} נקודות, $bad תקולות',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: bad == 0 ? kMxInk : _bad,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.qr_code_2,
+                  size: 32,
+                  color: kMxPrimary,
+                  semanticLabel: 'מדבקת QR של החדר',
+                ),
+              ],
             ),
           ),
           const Padding(
-            padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Text(
               'מדבקת QR על דלת החדר פותחת את המסך הזה ישירות.',
-              style: TextStyle(color: Colors.black54),
+              style: TextStyle(color: Colors.black54, fontSize: 14),
             ),
           ),
-          MxTileGrid(
-            children: [
-              for (final p in pts)
-                MxTile(
+          for (final t in types) ...[
+            MxSectionTitle(t, count: pts.where((p) => p.type == t).length),
+            _listCard([
+              for (final p in pts.where((p) => p.type == t))
+                ListTile(
                   key: Key('pt-${p.id}'),
-                  icon: mxPointIcon(p.type),
-                  label: '${p.type} ${p.num}',
-                  caption: p.status == MxPointStatus.faulty ? 'תקול' : p.loc,
-                  alert: p.status == MxPointStatus.faulty,
+                  leading: Icon(
+                    mxPointIcon(p.type),
+                    color: p.status == MxPointStatus.faulty ? _bad : kMxPrimary,
+                  ),
+                  title: Text(
+                    '${p.type} ${p.num}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(p.loc),
+                  trailing:
+                      p.status == MxPointStatus.faulty
+                          ? const MxTag('תקול', _bad)
+                          : const Icon(Icons.chevron_left, color: kMxLine),
                   onTap: () => _open(context, _PointPage(p.id)),
                 ),
-            ],
-          ),
+            ]),
+          ],
         ],
       ),
     );
   }
 }
+
+/// After an urgent report: what to do right now + call the manager.
+Future<void> _showSafety(
+  BuildContext context,
+  WidgetRef ref,
+  MxWorkOrder w,
+  String type, {
+  VoidCallback? onMine,
+}) => mxShowSuccess(
+  context,
+  title: 'הדיווח נשלח כדחוף',
+  body: mxSafetyInstruction(type, w.desc),
+  urgent: true,
+  actions: [
+    (
+      'התקשרו למנהל האחזקה',
+      const Key('urgent-call'),
+      () => _call(ref, context, kMxManagerPhone),
+    ),
+    ('הבנתי', const Key('success-mine'), onMine ?? () {}),
+  ],
+);
 
 class _PointPage extends ConsumerWidget {
   const _PointPage(this.pointId);
@@ -727,6 +938,7 @@ class _PointPage extends ConsumerWidget {
     final role = ref.watch(mxRoleProvider);
     final faulty = p.status == MxPointStatus.faulty;
     final low = db.qty(p.sku) < part.min;
+    final openWo = mxOpenOnPoint(db, pointId);
     return _page(
       p.label,
       ListView(
@@ -741,13 +953,11 @@ class _PointPage extends ConsumerWidget {
                   Row(
                     children: [
                       CircleAvatar(
-                        radius: 30,
-                        backgroundColor: (faulty ? _bad : _brand).withValues(
-                          alpha: 0.1,
-                        ),
+                        radius: 28,
+                        backgroundColor: faulty ? kMxPink : kMxTealTint,
                         child: Icon(
                           mxPointIcon(p.type),
-                          size: 32,
+                          size: 30,
                           color: faulty ? _bad : _brand,
                         ),
                       ),
@@ -771,9 +981,9 @@ class _PointPage extends ConsumerWidget {
                         ),
                       ),
                       if (faulty)
-                        const _Tag('תקול', _bad)
+                        const MxTag('תקול', _bad)
                       else
-                        const _Tag('תקין', _ok),
+                        const MxTag('תקין', _ok),
                     ],
                   ),
                   const Divider(height: 24),
@@ -785,28 +995,45 @@ class _PointPage extends ConsumerWidget {
                   MxInfoRow(
                     Icons.build_circle_outlined,
                     'חלק החלפה',
-                    Text('${part.name} · ${part.sku}'),
+                    Text(part.name),
                   ),
                   MxInfoRow(
                     Icons.inventory_2_outlined,
                     'במלאי',
-                    Row(
+                    Wrap(
+                      spacing: 8,
                       children: [
                         Text('${db.qty(p.sku)} יח׳'),
-                        const SizedBox(width: 8),
-                        if (low) const _Tag('מתחת למינימום', _warn),
+                        if (low) const MxTag('מתחת למינימום', _warn),
                       ],
                     ),
                   ),
                   MxInfoRow(
                     Icons.event_repeat_outlined,
                     'תחזוקה',
-                    Text(p.pm.isEmpty ? '—' : p.pm),
+                    Text(p.pm.isEmpty ? 'אין' : p.pm),
                   ),
                 ],
               ),
             ),
           ),
+          if (openWo != null)
+            _listCard([
+              ListTile(
+                key: const Key('point-open-wo'),
+                leading: Icon(
+                  openWo.urgent ? Icons.warning_amber_rounded : Icons.build,
+                  color: _bad,
+                ),
+                title: Text(
+                  '${mxWoLabel(openWo.id)} פתוחה: ${openWo.desc}',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(_woStatus(openWo.status)),
+                trailing: const Icon(Icons.chevron_left),
+                onTap: () => _open(context, _WorkOrderPage(openWo.id)),
+              ),
+            ]),
           MxSectionTitle('היסטוריה', count: p.history.length),
           if (p.history.isEmpty)
             const Padding(
@@ -830,25 +1057,53 @@ class _PointPage extends ConsumerWidget {
                   ),
                 ),
             ]),
-          const SizedBox(height: 8),
-          MxPrimaryButton(
-            key: const Key('report-point'),
-            label: 'דווח תקלה בנקודה הזו',
-            icon: Icons.campaign_outlined,
-            onPressed: () async {
-              final text = await _askFault(context, p.type);
-              if (text == null || !context.mounted) return;
-              final n = ref.read(mxDbProvider.notifier);
-              final by =
-                  role == MxRole.staff
-                      ? kMxStaffLabel
-                      : role == MxRole.tech
-                      ? kMxTechName
-                      : 'מנהל אחזקה';
-              final err = n.report(pointId, text, by);
-              _toast(context, err, 'נפתחה קריאה ${n.lastCreatedId}');
-            },
-          ),
+        ],
+      ),
+      bottom: MxBottomBar(
+        children: [
+          if (openWo != null)
+            MxPrimaryButton(
+              key: const Key('report-point'),
+              label: 'כבר דווח – הוסיפו הערה לקריאה',
+              icon: Icons.add_comment_outlined,
+              color: kMxPrimary,
+              onPressed: () async {
+                final text = await _askText(
+                  context,
+                  'הערה ל${mxWoLabel(openWo.id)}',
+                  'מה עוד חשוב לדעת?',
+                );
+                if (text == null || text.trim().isEmpty || !context.mounted) {
+                  return;
+                }
+                _toast(
+                  context,
+                  ref
+                      .read(mxDbProvider.notifier)
+                      .comment(openWo.id, text, _byRole(role)),
+                  'ההערה נוספה ל${mxWoLabel(openWo.id)}',
+                );
+              },
+            )
+          else
+            MxPrimaryButton(
+              key: const Key('report-point'),
+              label: 'דווחו על תקלה בנקודה הזו',
+              icon: Icons.campaign_outlined,
+              onPressed: () async {
+                final text = await _askFault(context, p.type);
+                if (text == null || !context.mounted) return;
+                final n = ref.read(mxDbProvider.notifier);
+                final err = n.report(pointId, text, _byRole(role));
+                if (err != null) return _toast(context, err, '');
+                final w = ref.read(mxDbProvider).workOrder(n.lastCreatedId!);
+                if (w.urgent) {
+                  await _showSafety(context, ref, w, p.type);
+                } else {
+                  _toast(context, null, 'נפתחה ${mxWoLabel(w.id)}');
+                }
+              },
+            ),
         ],
       ),
     );
@@ -864,7 +1119,6 @@ Future<String?> _askFault(BuildContext context, String type) {
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: Colors.white,
     builder:
         (ctx) => StatefulBuilder(
           builder:
@@ -882,40 +1136,16 @@ Future<String?> _askFault(BuildContext context, String type) {
                     const Text(
                       'מה קרה?',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 24,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final (i, r) in mxQuickReasons(type).indexed)
-                          ChoiceChip(
-                            key: Key('fault-reason-$i'),
-                            label: Text(
-                              r,
-                              style: const TextStyle(fontSize: 15),
-                            ),
-                            selected: reason == r,
-                            showCheckmark: false,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 10,
-                            ),
-                            selectedColor: kMxCta.withValues(alpha: 0.12),
-                            side: BorderSide(
-                              color: reason == r ? kMxCta : kMxLine,
-                              width: reason == r ? 2 : 1,
-                            ),
-                            shape: const StadiumBorder(),
-                            onSelected:
-                                (_) => setSheet(
-                                  () => reason = reason == r ? '' : r,
-                                ),
-                          ),
-                      ],
+                    _reasonChips(
+                      'fault-reason',
+                      type,
+                      reason,
+                      (r) => setSheet(() => reason = reason == r ? '' : r),
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -928,7 +1158,7 @@ Future<String?> _askFault(BuildContext context, String type) {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 54,
+                      height: 56,
                       child: FilledButton(
                         key: const Key('fault-send'),
                         onPressed:
@@ -941,7 +1171,7 @@ Future<String?> _askFault(BuildContext context, String type) {
                                     text.text.trim(),
                                   ].where((x) => x.isNotEmpty).join(' – '),
                                 ),
-                        child: const Text('פתח קריאה'),
+                        child: const Text('פתחו קריאה'),
                       ),
                     ),
                   ],
@@ -951,133 +1181,371 @@ Future<String?> _askFault(BuildContext context, String type) {
   );
 }
 
-/// Quantity picker for a part request — big buttons, no keyboard.
-Future<int?> _askQty(BuildContext context, String partName) =>
-    showModalBottomSheet<int>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: Colors.white,
-      builder:
-          (ctx) => Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'כמה להזמין?',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-                ),
-                Text(
-                  partName,
-                  style: const TextStyle(color: Colors.black54, fontSize: 15),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    for (final q in const [1, 2, 4, 10]) ...[
-                      if (q != 1) const SizedBox(width: 8),
-                      Expanded(
-                        child: SizedBox(
-                          height: 64,
-                          child: OutlinedButton(
-                            key: Key('qty-$q'),
-                            onPressed: () => Navigator.pop(ctx, q),
-                            child: Text(
-                              '$q',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
+/// Ready-made fault reasons as chips; urgent ones carry a warning icon.
+Widget _reasonChips(
+  String keyPrefix,
+  String type,
+  String selected,
+  ValueChanged<String> onTap,
+) => Wrap(
+  spacing: 8,
+  runSpacing: 8,
+  children: [
+    for (final (i, r) in mxQuickReasons(type).indexed)
+      ChoiceChip(
+        key: Key('$keyPrefix-$i'),
+        avatar:
+            mxIsUrgentText(r)
+                ? Icon(
+                  Icons.warning_amber_rounded,
+                  size: 18,
+                  color: selected == r ? Colors.white : _bad,
+                )
+                : null,
+        label: Text(r, style: const TextStyle(fontSize: 16)),
+        selected: selected == r,
+        showCheckmark: false,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        selectedColor: kMxPrimary,
+        backgroundColor: Colors.white,
+        labelStyle: TextStyle(
+          color: selected == r ? Colors.white : kMxInk,
+          fontWeight: FontWeight.w600,
+        ),
+        side: BorderSide(color: selected == r ? kMxPrimary : kMxLine),
+        shape: const StadiumBorder(),
+        onSelected: (_) => onTap(r),
+      ),
+  ],
+);
+
+/// Quantity for a part request: quick presets (one tap) or − / + and confirm.
+Future<int?> _askQty(BuildContext context, String partName) {
+  var q = 1;
+  return showModalBottomSheet<int>(
+    context: context,
+    showDragHandle: true,
+    builder:
+        (ctx) => StatefulBuilder(
+          builder:
+              (ctx, setSheet) => SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'כמה להזמין?',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        partName,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          for (final v in const [1, 2, 4, 10]) ...[
+                            if (v != 1) const SizedBox(width: 8),
+                            Expanded(
+                              child: SizedBox(
+                                height: 56,
+                                child: OutlinedButton(
+                                  key: Key('qty-$v'),
+                                  onPressed: () => Navigator.pop(ctx, v),
+                                  child: Text(
+                                    '$v',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      const Text(
+                        'או כמות אחרת:',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          MxStepper(
+                            keyPrefix: 'qty',
+                            value: q,
+                            min: 1,
+                            onChanged: (v) => setSheet(() => q = v),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: FilledButton(
+                                key: const Key('qty-ok'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: kMxPrimary,
+                                ),
+                                onPressed: () => Navigator.pop(ctx, q),
+                                child: Text('הזמינו $q'),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-    );
+              ),
+        ),
+  );
+}
 
+/// A short text question (comment, rejection reason, price list).
 Future<String?> _askText(
   BuildContext context,
   String title,
   String hint, {
   String initial = '',
+  List<String> quick = const [],
+  String ok = 'אישור',
+  int maxLines = 3,
 }) {
   final c = TextEditingController(text: initial);
-  return showDialog<String>(
+  return showModalBottomSheet<String>(
     context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
     builder:
-        (ctx) => AlertDialog(
-          title: Text(title),
-          content: TextField(
-            key: const Key('ask-text'),
-            controller: c,
-            autofocus: true,
-            maxLines: 3,
-            minLines: 1,
-            decoration: InputDecoration(hintText: hint),
+        (ctx) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            16 + MediaQuery.viewInsetsOf(ctx).bottom,
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('ביטול'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, c.text),
-              child: const Text('אישור'),
-            ),
-          ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (quick.isNotEmpty) ...[
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final (i, s) in quick.indexed)
+                      ActionChip(
+                        key: Key('ask-quick-$i'),
+                        label: Text(s),
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: kMxLine),
+                        shape: const StadiumBorder(),
+                        onPressed: () => c.text = s,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+              TextField(
+                key: const Key('ask-text'),
+                controller: c,
+                autofocus: quick.isEmpty,
+                maxLines: maxLines,
+                minLines: 1,
+                decoration: InputDecoration(hintText: hint),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('ביטול'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      height: 52,
+                      child: FilledButton(
+                        key: const Key('ask-ok'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: kMxPrimary,
+                        ),
+                        onPressed: () => Navigator.pop(ctx, c.text),
+                        child: Text(ok),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
   );
 }
 
+String _load(int n) => switch (n) {
+  0 => 'פנוי, אין קריאות פתוחות',
+  1 => 'קריאה פתוחה אחת',
+  _ => '$n קריאות פתוחות',
+};
+
+/// Pick a technician; each row shows how many open jobs they already hold.
+Future<String?> _askTech(BuildContext context, MxDb db) =>
+    showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder:
+          (ctx) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    'למי לשייך?',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                  ),
+                ),
+                for (final (i, t) in kMxTechs.indexed)
+                  ListTile(
+                    key: Key('tech-$i'),
+                    minVerticalPadding: 12,
+                    leading: const CircleAvatar(
+                      backgroundColor: kMxTealTint,
+                      child: Icon(Icons.engineering_outlined, color: _brand),
+                    ),
+                    title: Text(
+                      t,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(_load(mxOpenCountFor(db, t))),
+                    onTap: () => Navigator.pop(ctx, t),
+                  ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+    );
+
 // ── work orders ──────────────────────────────────────────────────────────────
 
-class _WorkOrdersPage extends ConsumerWidget {
+class _WorkOrdersPage extends ConsumerStatefulWidget {
   const _WorkOrdersPage();
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_WorkOrdersPage> createState() => _WorkOrdersPageState();
+}
+
+class _WorkOrdersPageState extends ConsumerState<_WorkOrdersPage> {
+  String _filter = 'open';
+
+  @override
+  Widget build(BuildContext context) {
     final db = ref.watch(mxDbProvider);
     final role = ref.watch(mxRoleProvider);
-    final list = switch (role) {
-      MxRole.staff =>
-        db.workOrders.where((w) => w.reportedBy == kMxStaffLabel).toList(),
-      MxRole.tech =>
-        db.workOrders
-            .where(
-              (w) => w.assignee == kMxTechName || w.status == MxWoStatus.open,
-            )
-            .toList(),
+    final mine = switch (role) {
+      MxRole.staff => db.workOrders.where((w) => w.reportedBy == kMxStaffLabel),
+      MxRole.tech => db.workOrders.where(
+        (w) => w.assignee == kMxTechName || w.status == MxWoStatus.open,
+      ),
       _ => db.workOrders,
     };
+    final open = mxSortedOpen(mine.where((w) => w.isOpen));
+    final closed = mine.where((w) => !w.isOpen).toList().reversed.toList();
+    final list = switch (_filter) {
+      'urgent' => open.where((w) => w.urgent).toList(),
+      'new' => open.where((w) => w.status == MxWoStatus.open).toList(),
+      'waiting' =>
+        open.where((w) => w.status == MxWoStatus.waitingPart).toList(),
+      'done' => closed,
+      'all' => [...open, ...closed],
+      _ => open,
+    };
+    final title = switch (role) {
+      MxRole.tech => 'המשימות שלי',
+      MxRole.staff => 'הדיווחים שלי',
+      _ => 'קריאות שירות',
+    };
     return ListView(
+      padding: const EdgeInsets.only(bottom: 24),
       children: [
-        _section(
-          role == MxRole.tech
-              ? 'המשימות שלי'
-              : role == MxRole.staff
-              ? 'הדיווחים שלי'
-              : 'קריאות שירות',
+        _pageTitle(
+          title,
+          open.isEmpty ? 'אין קריאות פתוחות' : '${open.length} פתוחות',
         ),
-        _listCard([
-          if (list.isEmpty) const ListTile(title: Text('אין קריאות')),
-          for (final w in list)
-            ListTile(
-              key: Key('wo-${w.id}'),
-              leading: Icon(
-                mxPointIcon(db.point(w.pointId).type),
-                color: _woColor(w.status),
+        _chips(
+          'wo-filter',
+          [
+            ('open', 'פתוחות (${open.length})'),
+            ('urgent', 'דחופות (${open.where((w) => w.urgent).length})'),
+            if (role != MxRole.staff) ('new', 'חדשות'),
+            ('waiting', 'ממתינות לחלק'),
+            ('done', 'טופלו'),
+            ('all', 'הכול'),
+          ],
+          _filter,
+          (k) => setState(() => _filter = k),
+        ),
+        if (list.isEmpty)
+          const MxEmpty(
+            icon: Icons.check_circle_outline,
+            title: 'אין כאן קריאות',
+          )
+        else
+          _listCard([
+            for (final w in list)
+              ListTile(
+                key: Key('wo-${w.id}'),
+                minVerticalPadding: 12,
+                leading: Icon(
+                  w.urgent && w.isOpen
+                      ? Icons.warning_amber_rounded
+                      : mxPointIcon(db.point(w.pointId).type),
+                  color: w.urgent && w.isOpen ? _bad : _woColor(w.status),
+                ),
+                title: Text(
+                  w.desc,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                subtitle: Text(
+                  '${mxWoLabel(w.id)} · ${db.pointPath(w.pointId)}',
+                ),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (w.urgent && w.isOpen) const MxTag('דחוף', _bad),
+                    if (w.urgent && w.isOpen) const SizedBox(height: 4),
+                    MxTag(_woStatus(w.status), _woColor(w.status)),
+                  ],
+                ),
+                onTap: () => _open(context, _WorkOrderPage(w.id)),
               ),
-              title: Text('${w.id} · ${w.desc}'),
-              subtitle: Text(db.pointPath(w.pointId)),
-              trailing: _Tag(_woStatus(w.status), _woColor(w.status)),
-              onTap: () => _open(context, _WorkOrderPage(w.id)),
-            ),
-        ]),
+          ]),
       ],
     );
   }
@@ -1112,24 +1580,188 @@ class _WorkOrderPage extends ConsumerWidget {
     final p = db.point(w.pointId);
     final part = db.part(p.sku);
     final inStock = db.qty(p.sku);
+    final po = w.poId.isEmpty ? null : db.po(w.poId);
+    final worker = role == MxRole.tech || role == MxRole.manager;
     final canWork =
         role == MxRole.tech &&
         (w.status == MxWoStatus.open || w.status == MxWoStatus.assigned);
-    Widget info(IconData icon, String text) => Padding(
+    final waiting = worker && w.status == MxWoStatus.waitingPart;
+    final rejected =
+        w.isOpen && w.status != MxWoStatus.waitingPart
+            ? w.log
+                .where((e) => e.text.startsWith('בקשת החלק נדחתה'))
+                .firstOrNull
+            : null;
+    Widget info(IconData icon, String text, {Color? color}) => Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.black54),
+          Icon(icon, size: 18, color: color ?? Colors.black54),
           const SizedBox(width: 8),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 15))),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                color: color,
+                fontWeight: color == null ? null : FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
+    final actions = <Widget>[
+      if (role == MxRole.manager && w.status == MxWoStatus.open)
+        MxPrimaryButton(
+          key: const Key('wo-assign'),
+          label: 'שייכו לטכנאי',
+          icon: Icons.engineering_outlined,
+          color: kMxPrimary,
+          onPressed: () async {
+            final t = await _askTech(context, db);
+            if (t == null || !context.mounted) return;
+            _toast(context, n.assign(woId, t), 'שויך ל$t');
+          },
+        ),
+      if (canWork) ...[
+        MxPrimaryButton(
+          key: const Key('wo-fix'),
+          label:
+              inStock < 1
+                  ? 'החלק חסר במלאי – הזמינו חלק'
+                  : 'תוקן, השתמשתי בחלק אחד',
+          icon: Icons.check_circle_outline,
+          color: kMxPrimary,
+          onPressed:
+              inStock < 1
+                  ? null
+                  : () => _undoable(
+                    context,
+                    ref,
+                    n.closeWithPart(woId, kMxTechName),
+                    'כל הכבוד! הקריאה נסגרה וירד חלק אחד מהמלאי',
+                  ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    key: const Key('wo-fix-nopart'),
+                    onPressed:
+                        () => _undoable(
+                          context,
+                          ref,
+                          n.closeNoPart(woId, kMxTechName),
+                          'הקריאה נסגרה בלי חלק',
+                        ),
+                    child: const Text('תוקן בלי חלק'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    key: const Key('wo-need'),
+                    onPressed: () async {
+                      final qty = await _askQty(context, part.name);
+                      if (qty == null || !context.mounted) return;
+                      final err = n.requestPart(woId, qty, kMxTechName);
+                      _toast(
+                        context,
+                        err,
+                        'הבקשה נשלחה למנהל לאישור (${mxPoLabel(n.lastCreatedId ?? '')})',
+                      );
+                    },
+                    child: const Text('צריך חלק'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      if (waiting)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: FilledButton(
+                    key: const Key('wo-found'),
+                    style: FilledButton.styleFrom(backgroundColor: kMxPrimary),
+                    onPressed: () async {
+                      final yes = await _confirm(
+                        context,
+                        title: 'מצאתם את החלק?',
+                        body:
+                            'הקריאה תיסגר כמתוקנת, ובקשת החלק שעוד לא נשלחה לחנות תבוטל.',
+                        ok: 'כן, תוקן',
+                      );
+                      if (!yes || !context.mounted) return;
+                      _toast(
+                        context,
+                        n.foundPart(woId, _byRole(role)),
+                        'הקריאה נסגרה',
+                      );
+                    },
+                    child: const Text('מצאתי חלק ותיקנתי'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: OutlinedButton(
+                    key: const Key('wo-cancel-req'),
+                    onPressed: () async {
+                      final yes = await _confirm(
+                        context,
+                        title: 'לבטל את בקשת החלק?',
+                        body: 'הקריאה תחזור לטכנאי, ובקשת החלק תבוטל.',
+                        ok: 'בטלו בקשה',
+                        danger: true,
+                      );
+                      if (!yes || !context.mounted) return;
+                      _toast(
+                        context,
+                        n.cancelRequest(woId, _byRole(role)),
+                        'בקשת החלק בוטלה',
+                      );
+                    },
+                    child: const Text('בטל בקשה'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+    ];
     return _page(
-      'קריאה ${w.id}',
+      mxWoLabel(w.id),
       ListView(
-        padding: const EdgeInsets.only(top: 12, bottom: 24),
+        padding: const EdgeInsets.only(bottom: 24),
         children: [
+          if (w.urgent && w.isOpen)
+            MxUrgentBanner(
+              title: 'תקלה דחופה – בטיחות',
+              body: mxSafetyInstruction(p.type, w.desc),
+              onCall:
+                  role == MxRole.manager
+                      ? null
+                      : () => _call(ref, context, kMxManagerPhone),
+            ),
+          const SizedBox(height: 12),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -1140,7 +1772,7 @@ class _WorkOrderPage extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 24,
-                        backgroundColor: _bad.withValues(alpha: 0.1),
+                        backgroundColor: kMxPink,
                         child: Icon(mxPointIcon(p.type), color: _bad, size: 26),
                       ),
                       const SizedBox(width: 12),
@@ -1148,122 +1780,43 @@ class _WorkOrderPage extends ConsumerWidget {
                         child: Text(
                           w.desc,
                           style: const TextStyle(
-                            fontSize: 19,
+                            fontSize: 20,
                             fontWeight: FontWeight.w800,
                             height: 1.2,
                           ),
                         ),
                       ),
-                      _Tag(_woStatus(w.status), _woColor(w.status)),
+                      MxTag(_woStatus(w.status), _woColor(w.status)),
                     ],
                   ),
                   const SizedBox(height: 6),
                   info(Icons.place_outlined, db.pointPath(w.pointId)),
                   info(
                     Icons.person_outline,
-                    'דווח: ${w.reportedBy} · ${_date(w.createdAt)}',
+                    'דיווח: ${w.reportedBy}, ${_date(w.createdAt)}',
                   ),
                   if (w.assignee.isNotEmpty)
                     info(Icons.engineering_outlined, 'טכנאי: ${w.assignee}'),
                   info(
                     Icons.inventory_2_outlined,
-                    'חלק: ${part.name} · במלאי $inStock',
+                    'חלק: ${part.name}, במלאי $inStock',
                   ),
-                  if (w.poId.isNotEmpty)
+                  if (po != null)
                     info(
                       Icons.local_shipping_outlined,
-                      'הזמנה ${w.poId}: ${_poStatus(db.po(w.poId).status)}',
+                      '${mxPoLabel(po.id)}: ${_poStatus(po.status)}',
                     ),
+                  if (rejected != null)
+                    info(Icons.info_outline, rejected.text, color: _bad),
                   if (w.hasPhoto)
                     info(Icons.photo_camera_outlined, 'צורפה תמונה מהדירה'),
                 ],
               ),
             ),
           ),
-          MxTimeline(_steps(w)),
-          const SizedBox(height: 8),
-          if (role == MxRole.manager && w.status == MxWoStatus.open) ...[
-            MxPrimaryButton(
-              key: const Key('wo-assign'),
-              label: 'שייך ליוסי – טכנאי',
-              icon: Icons.engineering_outlined,
-              color: kMxPrimary,
-              onPressed:
-                  () => _toast(
-                    context,
-                    n.assign(woId, kMxTechName),
-                    'שויך ל$kMxTechName · נשלחה לו התראה',
-                  ),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: Text(
-                'טיפ להדגמה: עברו ל"טכנאי" למעלה כדי לראות את הצד שלו',
-                style: TextStyle(color: Colors.black54),
-              ),
-            ),
-          ],
-          if (canWork) ...[
-            MxPrimaryButton(
-              key: const Key('wo-fix'),
-              label: inStock < 1 ? 'החלק חסר במלאי' : 'תוקן · השתמשתי בחלק אחד',
-              icon: Icons.check_circle_outline,
-              color: _ok,
-              onPressed:
-                  inStock < 1
-                      ? null
-                      : () => _toast(
-                        context,
-                        n.closeWithPart(woId, kMxTechName),
-                        'כל הכבוד! הקריאה נסגרה · ירד 1 מהמלאי · נרשם בהיסטוריה',
-                      ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 2, 12, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 52,
-                      child: OutlinedButton(
-                        key: const Key('wo-fix-nopart'),
-                        onPressed:
-                            () => _toast(
-                              context,
-                              n.closeNoPart(woId, kMxTechName),
-                              'נסגר ללא חלק',
-                            ),
-                        child: const Text('תוקן ללא חלק'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: SizedBox(
-                      height: 52,
-                      child: OutlinedButton(
-                        key: const Key('wo-need'),
-                        onPressed: () async {
-                          final qty = await _askQty(context, part.name);
-                          if (qty == null || !context.mounted) return;
-                          final err = n.requestPart(woId, qty, kMxTechName);
-                          _toast(
-                            context,
-                            err,
-                            'נשלחה בקשה ${n.lastCreatedId} לאישור המנהל',
-                          );
-                        },
-                        child: const Text('צריך חלק'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
           if (w.status == MxWoStatus.done)
             const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
                   Icon(Icons.verified_outlined, color: _ok),
@@ -1275,13 +1828,65 @@ class _WorkOrderPage extends ConsumerWidget {
                 ],
               ),
             ),
+          MxTimeline(_steps(w)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 8, 8),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'יומן הקריאה',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  ),
+                ),
+                TextButton.icon(
+                  key: const Key('wo-comment'),
+                  icon: const Icon(Icons.add_comment_outlined),
+                  label: const Text('הוספת הערה'),
+                  onPressed: () async {
+                    final text = await _askText(
+                      context,
+                      'הערה ל${mxWoLabel(w.id)}',
+                      'מה חשוב לדעת?',
+                    );
+                    if (text == null ||
+                        text.trim().isEmpty ||
+                        !context.mounted) {
+                      return;
+                    }
+                    _toast(
+                      context,
+                      n.comment(woId, text, _byRole(role)),
+                      'ההערה נוספה',
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          _listCard([
+            for (final e in w.log)
+              ListTile(
+                dense: true,
+                leading: const Icon(Icons.circle, size: 10, color: _brand),
+                title: Text(e.text, style: const TextStyle(fontSize: 16)),
+                subtitle: Text('${_time(e.at)} · ${e.by}'),
+              ),
+            ListTile(
+              dense: true,
+              leading: const Icon(Icons.circle, size: 10, color: _brand),
+              title: const Text('הקריאה נפתחה', style: TextStyle(fontSize: 16)),
+              subtitle: Text('${_time(w.createdAt)} · ${w.reportedBy}'),
+            ),
+          ]),
         ],
       ),
+      bottom: actions.isEmpty ? null : MxBottomBar(children: actions),
     );
   }
 }
 
-// ── staff report ─────────────────────────────────────────────────────────────
+// ── home-staff report ────────────────────────────────────────────────────────
 
 class _ReportPage extends ConsumerStatefulWidget {
   const _ReportPage({required this.onSent});
@@ -1294,7 +1899,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
   String? _room;
   String? _point;
   String _reason = '';
-  bool _photo = false;
+  String _photo = '';
   final _text = TextEditingController();
 
   int get _step => _room == null ? 1 : (_point == null ? 2 : 3);
@@ -1314,30 +1919,57 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
     }
   });
 
-  void _send() {
+  void _clear() => setState(() {
+    _room = null;
+    _point = null;
+    _reason = '';
+    _photo = '';
+    _text.clear();
+  });
+
+  Future<void> _takePhoto() async {
+    final shot = await ref.read(taskPhotoPickerProvider)(context);
+    if (shot == null || shot.isEmpty || !mounted) return;
+    setState(() => _photo = shot);
+  }
+
+  String get _desc =>
+      [_reason, _text.text.trim()].where((s) => s.isNotEmpty).join(' – ');
+
+  Future<void> _send() async {
     final n = ref.read(mxDbProvider.notifier);
-    final desc = [
-      _reason,
-      _text.text.trim(),
-    ].where((s) => s.isNotEmpty).join(' – ');
-    final err = n.report(_point!, desc, kMxStaffLabel, photo: _photo);
-    if (err != null) {
-      _toast(context, err, '');
+    final existing = mxOpenOnPoint(ref.read(mxDbProvider), _point!);
+    if (existing != null) {
+      final err = n.comment(existing.id, _desc, kMxStaffLabel);
+      if (err != null) return _toast(context, err, '');
+      _clear();
+      _toast(
+        context,
+        null,
+        'נוסף ל${mxWoLabel(existing.id)} שכבר פתוחה על הנקודה הזו',
+      );
       return;
     }
-    final id = n.lastCreatedId;
-    setState(() {
-      _room = null;
-      _point = null;
-      _reason = '';
-      _photo = false;
-      _text.clear();
-    });
-    mxShowSuccess(
+    final type = ref.read(mxDbProvider).point(_point!).type;
+    final err = n.report(
+      _point!,
+      _desc,
+      kMxStaffLabel,
+      photo: _photo.isNotEmpty,
+      photoData: _photo,
+    );
+    if (err != null) return _toast(context, err, '');
+    final w = ref.read(mxDbProvider).workOrder(n.lastCreatedId!);
+    _clear();
+    if (w.urgent) {
+      await _showSafety(context, ref, w, type, onMine: widget.onSent);
+      return;
+    }
+    await mxShowSuccess(
       context,
       title: 'הדיווח נשלח',
       body:
-          'מנהל האחזקה קיבל את הדיווח $id ויטפל בו.\nאפשר לעקוב אחריו ב"הדיווחים שלי".',
+          'מנהל האחזקה קיבל את ${mxWoLabel(w.id)} ויטפל בה.\nאפשר לעקוב ב"הדיווחים שלי".',
       actions: [
         ('לדיווחים שלי', const Key('success-mine'), widget.onSent),
         ('דיווח נוסף', const Key('success-again'), () {}),
@@ -1350,7 +1982,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
     final db = ref.watch(mxDbProvider);
     final u = db.unit(kMxStaffUnit);
     final titles = ['איפה התקלה?', 'מה לא עובד?', 'מה קרה?'];
-    return ListView(
+    final list = ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
         Padding(
@@ -1361,7 +1993,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
                 IconButton(
                   key: const Key('rep-back'),
                   tooltip: 'חזרה',
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_forward),
                   onPressed: _back,
                 ),
               Expanded(
@@ -1392,7 +2024,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
             child: LinearProgressIndicator(
               value: _step / 3,
               minHeight: 6,
-              color: kMxCta,
+              color: kMxPrimary,
               backgroundColor: kMxLine,
             ),
           ),
@@ -1439,7 +2071,10 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
                         key: Key('rep-point-${p.id}'),
                         icon: mxPointIcon(p.type),
                         label: '${p.type} ${p.num}',
-                        caption: p.loc,
+                        caption:
+                            mxOpenOnPoint(db, p.id) != null
+                                ? 'כבר דווח'
+                                : p.loc,
                         alert: p.status == MxPointStatus.faulty,
                         onTap: () => setState(() => _point = p.id),
                       ),
@@ -1451,55 +2086,74 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
         ),
       ],
     );
+    if (_step < 3) return list;
+    final existing = mxOpenOnPoint(db, _point!);
+    return Column(
+      children: [
+        Expanded(child: list),
+        MxBottomBar(
+          children: [
+            MxPrimaryButton(
+              key: const Key('rep-send'),
+              label: existing == null ? 'שלחו דיווח' : 'הוסיפו לקריאה הקיימת',
+              icon: Icons.send_rounded,
+              onPressed: _desc.isEmpty ? null : _send,
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   List<Widget> _details(MxDb db) {
     final p = db.point(_point!);
+    final existing = mxOpenOnPoint(db, p.id);
     return [
       Card(
         child: ListTile(
           minVerticalPadding: 14,
           leading: CircleAvatar(
-            backgroundColor: kMxPrimary.withValues(alpha: 0.1),
+            backgroundColor: kMxTealTint,
             child: Icon(mxPointIcon(p.type), color: kMxPrimary),
           ),
           title: Text(
             p.label,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
           ),
           subtitle: Text(db.room(p.roomId).name),
         ),
       ),
+      if (existing != null)
+        Container(
+          key: const Key('rep-existing'),
+          margin: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: kMxGoldTint,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            'כבר דווח על הנקודה הזו (${mxWoLabel(existing.id)}: ${existing.desc}). '
+            'מה שתכתבו יתווסף לקריאה הקיימת.',
+            style: const TextStyle(fontSize: 16, height: 1.4),
+          ),
+        ),
       Padding(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final (i, r) in mxQuickReasons(p.type).indexed)
-              ChoiceChip(
-                key: Key('rep-reason-$i'),
-                label: Text(r, style: const TextStyle(fontSize: 15)),
-                selected: _reason == r,
-                showCheckmark: false,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 10,
-                ),
-                selectedColor: kMxCta.withValues(alpha: 0.12),
-                side: BorderSide(
-                  color: _reason == r ? kMxCta : kMxLine,
-                  width: _reason == r ? 2 : 1,
-                ),
-                shape: const StadiumBorder(),
-                onSelected:
-                    (_) => setState(() => _reason = _reason == r ? '' : r),
-              ),
-          ],
+        child: _reasonChips(
+          'rep-reason',
+          p.type,
+          _reason,
+          (r) => setState(() => _reason = _reason == r ? '' : r),
         ),
       ),
+      if (mxIsUrgentText(_desc))
+        MxUrgentBanner(
+          title: 'זו תקלה דחופה',
+          body: mxSafetyInstruction(p.type, _desc),
+        ),
       Padding(
-        padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
         child: TextField(
           key: const Key('rep-text'),
           controller: _text,
@@ -1518,19 +2172,18 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
           child: OutlinedButton.icon(
             key: const Key('rep-photo'),
             icon: Icon(
-              _photo ? Icons.check_circle : Icons.photo_camera_outlined,
-              color: _photo ? _ok : null,
+              _photo.isNotEmpty
+                  ? Icons.check_circle
+                  : Icons.photo_camera_outlined,
             ),
-            label: Text(_photo ? 'התמונה צורפה' : 'צלמו תמונה (עוזר לטכנאי)'),
-            onPressed: () => setState(() => _photo = true),
+            label: Text(
+              _photo.isNotEmpty
+                  ? 'התמונה צורפה (לחצו לצילום מחדש)'
+                  : 'צלמו תמונה (עוזר לטכנאי)',
+            ),
+            onPressed: _takePhoto,
           ),
         ),
-      ),
-      MxPrimaryButton(
-        key: const Key('rep-send'),
-        label: 'שלח דיווח',
-        icon: Icons.send_rounded,
-        onPressed: _reason.isEmpty && _text.text.trim().isEmpty ? null : _send,
       ),
     ];
   }
@@ -1567,28 +2220,28 @@ class _PmPage extends ConsumerWidget {
                   ),
                 ),
               ),
-              _Tag(mxDaysLabel(r.nextDue, now), c),
+              MxTag(mxDaysLabel(r.nextDue, now), c),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             '${r.scope} · יעד ${_date(r.nextDue)}',
-            style: const TextStyle(color: Colors.black54),
+            style: const TextStyle(color: Colors.black54, fontSize: 14),
           ),
           if (r.isLegal)
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Row(
                 children: [
-                  const Icon(Icons.gavel_outlined, size: 16, color: _bad),
+                  const Icon(Icons.gavel_outlined, size: 16, color: _brand),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       'חובה: ${r.legalBasis}',
                       style: const TextStyle(
-                        color: _bad,
+                        color: _brand,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -1600,19 +2253,18 @@ class _PmPage extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 10),
               child: SizedBox(
                 width: double.infinity,
-                height: 46,
+                height: 48,
                 child: FilledButton.icon(
                   key: Key('pm-done-${r.id}'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: d == MxDue.overdue ? _bad : _brand,
-                  ),
+                  style: FilledButton.styleFrom(backgroundColor: _brand),
                   icon: const Icon(Icons.task_alt),
-                  label: const Text('סמן כבוצע'),
+                  label: const Text('סמנו כבוצע'),
                   onPressed:
-                      () => _toast(
+                      () => _undoable(
                         context,
+                        ref,
                         ref.read(mxDbProvider.notifier).completePm(r.id),
-                        'נרשם כבוצע · המועד הבא נקבע אוטומטית',
+                        'נרשם כבוצע, והמועד הבא נקבע',
                       ),
                 ),
               ),
@@ -1624,10 +2276,9 @@ class _PmPage extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        MxHero(
-          title: 'בדיקות ותחזוקה',
-          subtitle:
-              '$legal בדיקות חובה בחוק · המערכת זוכרת את המועד הבא של כל אחת',
+        _pageTitle(
+          'בדיקות ותחזוקה',
+          '$legal בדיקות חובה בחוק. המערכת זוכרת את המועד הבא של כל אחת.',
         ),
         for (final (title, due, color) in groups)
           if (all.any((x) => x.$2 == due)) ...[
@@ -1639,6 +2290,61 @@ class _PmPage extends ConsumerWidget {
             for (final (r, d) in all.where((x) => x.$2 == due))
               card(r, d, color),
           ],
+      ],
+    );
+  }
+}
+
+// ── purchasing: orders + stock in one tab ────────────────────────────────────
+
+class _BuyPage extends ConsumerWidget {
+  const _BuyPage();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final section = ref.watch(_buySectionProvider);
+    final db = ref.watch(mxDbProvider);
+    final pending = db.pendingApproval.length;
+    final low = db.lowStock.length;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 0),
+          child: SegmentedButton<String>(
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: kMxPrimary,
+              selectedForegroundColor: Colors.white,
+              foregroundColor: kMxPrimary,
+              side: const BorderSide(color: kMxLine),
+            ),
+            segments: [
+              ButtonSegment(
+                value: 'orders',
+                label: Text(
+                  pending > 0 ? 'הזמנות ($pending לאישור)' : 'הזמנות',
+                  key: const Key('buy-orders'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              ButtonSegment(
+                value: 'stock',
+                label: Text(
+                  low > 0 ? 'מלאי ($low להזמין)' : 'מלאי',
+                  key: const Key('buy-stock'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+            selected: {section},
+            onSelectionChanged:
+                (s) => ref.read(_buySectionProvider.notifier).state = s.first,
+          ),
+        ),
+        Expanded(
+          child: section == 'stock' ? const _StockPage() : const _OrdersPage(),
+        ),
       ],
     );
   }
@@ -1674,26 +2380,32 @@ class _StockPageState extends ConsumerState<_StockPage> {
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        MxHero(
-          title: low == 0 ? 'המלאי מלא' : '$low חלקים להזמין',
-          subtitle:
-              low == 0
-                  ? 'כל החלקים מעל המינימום.'
-                  : 'לחיצה אחת – והזמנה יוצאת לכל חנות בנפרד, לאישורך.',
+        _pageTitle(
+          low == 0 ? 'המלאי מלא' : '$low חלקים להזמין',
+          low == 0
+              ? 'כל החלקים מעל המינימום.'
+              : 'לחיצה אחת יוצרת הזמנה נפרדת לכל חנות, לאישורך.',
         ),
         if (role == MxRole.manager) ...[
           MxPrimaryButton(
             key: const Key('auto-reorder'),
-            label: 'הזמן את כל מה שחסר ($low)',
+            label: low == 0 ? 'אין מה להזמין' : 'הזמינו את כל מה שחסר ($low)',
             icon: Icons.add_shopping_cart,
+            color: kMxPrimary,
             onPressed:
                 low == 0
                     ? null
-                    : () => _toast(
-                      context,
-                      ref.read(mxDbProvider.notifier).autoReorder(),
-                      'נוצרו בקשות הזמנה – אחת לכל חנות. מחכות לאישורך ב"הזמנות"',
-                    ),
+                    : () {
+                      final err = ref.read(mxDbProvider.notifier).autoReorder();
+                      _toast(
+                        context,
+                        err,
+                        'נוצרו בקשות הזמנה, אחת לכל חנות. הן מחכות לאישורך ב"הזמנות".',
+                      );
+                      if (err == null) {
+                        ref.read(_buySectionProvider.notifier).state = 'orders';
+                      }
+                    },
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
@@ -1703,37 +2415,17 @@ class _StockPageState extends ConsumerState<_StockPage> {
               child: OutlinedButton.icon(
                 key: const Key('import-prices'),
                 icon: const Icon(Icons.upload_file),
-                label: const Text('קבלתי מחירון מהחנות (אקסל / CSV)'),
+                label: const Text('קיבלתי מחירון מהחנות (אקסל או CSV)'),
                 onPressed: _importPrices,
               ),
             ),
           ),
         ],
-        SizedBox(
-          height: 56,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            children: [
-              for (final t in types)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 8),
-                  child: ChoiceChip(
-                    key: Key('stock-filter-$t'),
-                    label: Text(t == 'להזמין' ? 'להזמין ($low)' : t),
-                    selected: _filter == t,
-                    showCheckmark: false,
-                    shape: const StadiumBorder(),
-                    selectedColor: kMxPrimary,
-                    labelStyle: TextStyle(
-                      color: _filter == t ? Colors.white : kMxInk,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    onSelected: (_) => setState(() => _filter = t),
-                  ),
-                ),
-            ],
-          ),
+        _chips(
+          'stock-filter',
+          [for (final t in types) (t, t == 'להזמין' ? 'להזמין ($low)' : t)],
+          _filter,
+          (k) => setState(() => _filter = k),
         ),
         if (shown.isEmpty)
           const MxEmpty(
@@ -1755,7 +2447,7 @@ class _StockPageState extends ConsumerState<_StockPage> {
                             p.name,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 15,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -1763,7 +2455,7 @@ class _StockPageState extends ConsumerState<_StockPage> {
                           '${db.qty(p.sku)}',
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            fontSize: 18,
+                            fontSize: 20,
                             color: db.qty(p.sku) < p.min ? _bad : kMxInk,
                           ),
                         ),
@@ -1777,7 +2469,7 @@ class _StockPageState extends ConsumerState<_StockPage> {
                       '${db.onOrder(p.sku) > 0 ? ' · בהזמנה ${db.onOrder(p.sku)}' : ''}',
                       style: const TextStyle(
                         color: Colors.black54,
-                        fontSize: 13,
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -1793,9 +2485,11 @@ class _StockPageState extends ConsumerState<_StockPage> {
         'מק"ט,שם,מחיר\nEL-T8,פלורסנט LED T8,19.90\nEL-SK16,מנגנון שקע 16A,16.50\nHW-WSTOP,מעצור חלון,29\n';
     final csv = await _askText(
       context,
-      'הדביקו את המחירון (עמודות: מק"ט, שם, מחיר)',
-      'מק"ט,שם,מחיר',
+      'הדביקו את המחירון שקיבלתם',
+      'עמודות: מק״ט, שם, מחיר',
       initial: sample,
+      ok: 'קלטו מחירים',
+      maxLines: 8,
     );
     if (csv == null || !mounted) return;
     final (err, imp) = ref
@@ -1804,11 +2498,11 @@ class _StockPageState extends ConsumerState<_StockPage> {
     final extra =
         imp == null || imp.errors.isEmpty
             ? ''
-            : ' · ${imp.errors.length} שורות לא נקלטו';
+            : ', ${imp.errors.length} שורות לא נקלטו';
     _toast(
       context,
       err,
-      'נקלטו ${imp?.matched.length ?? 0} מחירים לטמבור$extra',
+      'נקלטו ${imp?.matched.length ?? 0} מחירים מ${ref.read(mxDbProvider).store(kMxStoreId).name}$extra',
     );
   }
 }
@@ -1816,11 +2510,12 @@ class _StockPageState extends ConsumerState<_StockPage> {
 // ── purchase orders (manager / tech) ─────────────────────────────────────────
 
 List<MxStep> _poSteps(MxPurchaseOrder o) {
-  final s = o.status;
-  final rank = switch (s) {
+  final rank = switch (o.status) {
     MxPoStatus.pendingApproval => 0,
-    MxPoStatus.sent => 1,
-    MxPoStatus.storeConfirmed || MxPoStatus.storePartial => 2,
+    MxPoStatus.approved => 1,
+    MxPoStatus.sent ||
+    MxPoStatus.storeConfirmed ||
+    MxPoStatus.storePartial => 2,
     MxPoStatus.ready => 3,
     MxPoStatus.received => 4,
     MxPoStatus.rejected => -1,
@@ -1832,10 +2527,43 @@ List<MxStep> _poSteps(MxPurchaseOrder o) {
   ];
 }
 
-class _OrdersPage extends ConsumerWidget {
+/// Open WhatsApp with the order; on success mark it sent. Returns whether
+/// WhatsApp opened.
+Future<bool> _sendWhatsApp(
+  BuildContext context,
+  WidgetRef ref,
+  String poId,
+) async {
+  final n = ref.read(mxDbProvider.notifier);
+  try {
+    final uri = mxWhatsAppUri(
+      ref.read(mxDbProvider),
+      ref.read(mxDbProvider).po(poId),
+      baseUrl: kMxStoreBaseUrl,
+      orgName: kMxOrgName,
+    );
+    final ok = await ref.read(urlLauncherProvider)(uri);
+    if (ok && ref.read(mxDbProvider).po(poId).status == MxPoStatus.approved) {
+      n.markSent(poId);
+    }
+    return ok;
+  } on MxError catch (e) {
+    if (context.mounted) _toast(context, e.message, '');
+    return false;
+  }
+}
+
+class _OrdersPage extends ConsumerStatefulWidget {
   const _OrdersPage();
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_OrdersPage> createState() => _OrdersPageState();
+}
+
+class _OrdersPageState extends ConsumerState<_OrdersPage> {
+  String _filter = 'open';
+
+  @override
+  Widget build(BuildContext context) {
     final db = ref.watch(mxDbProvider);
     final role = ref.watch(mxRoleProvider);
     final n = ref.read(mxDbProvider.notifier);
@@ -1845,142 +2573,182 @@ class _OrdersPage extends ConsumerWidget {
       return const MxEmpty(
         icon: Icons.shopping_cart_outlined,
         title: 'אין הזמנות עדיין',
-        body: 'הזמנה נוצרת כשטכנאי מבקש חלק, או מלשונית המלאי בלחיצה אחת.',
+        body: 'הזמנה נוצרת כשטכנאי מבקש חלק, או מהמלאי בלחיצה אחת.',
       );
     }
     final pending = db.pendingApproval.length;
+    final all = db.purchaseOrders.reversed.toList();
+    final list = switch (_filter) {
+      'pending' =>
+        all.where((o) => o.status == MxPoStatus.pendingApproval).toList(),
+      'closed' => all.where((o) => !o.isOpen).toList(),
+      'all' => all,
+      _ => all.where((o) => o.isOpen).toList(),
+    };
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        MxHero(
-          title: pending == 0 ? 'הזמנות לחנויות' : '$pending מחכות לאישורך',
-          subtitle: 'כל הזמנה מאושרת נשלחת לטמבור בוואטסאפ ומופיעה בלוח החנות.',
+        _pageTitle(
+          pending == 0 ? 'הזמנות לחנויות' : '$pending מחכות לאישורך',
+          'הזמנה מאושרת נשלחת לחנות בוואטסאפ, ומופיעה גם בלוח החנות.',
         ),
-        for (final o in db.purchaseOrders)
-          MxEdgeCard(
-            key: Key('po-${o.id}'),
-            color: _poColor(o.status),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        _chips(
+          'po-filter',
+          [
+            ('open', 'פתוחות'),
+            ('pending', 'לאישור ($pending)'),
+            ('closed', 'סגורות'),
+            ('all', 'הכול'),
+          ],
+          _filter,
+          (k) => setState(() => _filter = k),
+        ),
+        if (list.isEmpty)
+          const MxEmpty(icon: Icons.inbox_outlined, title: 'אין כאן הזמנות'),
+        for (final o in list) _poCard(context, db, n, role, o),
+      ],
+    );
+  }
+
+  Widget _poCard(
+    BuildContext context,
+    MxDb db,
+    MxNotifier n,
+    MxRole role,
+    MxPurchaseOrder o,
+  ) {
+    final stage = n.storeStageOf(o);
+    return MxEdgeCard(
+      key: Key('po-${o.id}'),
+      color: _poColor(o.status),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const CircleAvatar(
+                radius: 20,
+                backgroundColor: kMxTealTint,
+                child: Icon(Icons.storefront_outlined, color: _brand),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const CircleAvatar(
-                      radius: 20,
-                      backgroundColor: kMxPanel,
-                      child: Icon(Icons.storefront_outlined, color: _brand),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            db.store(o.storeId).name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            '${o.id} · ${o.requestedBy}',
-                            style: const TextStyle(
-                              color: Colors.black54,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    _Tag(_poStatus(o.status), _poColor(o.status)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                for (final l in o.lines)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(
-                      children: [
-                        Icon(
-                          l.missing
-                              ? Icons.remove_circle_outline
-                              : Icons.check_circle_outline,
-                          size: 16,
-                          color: l.missing ? _bad : _ok,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            '${l.qty} × ${db.part(l.sku).name}${l.missing ? ' – חסר בחנות' : ''}',
-                            style: TextStyle(color: l.missing ? _bad : null),
-                          ),
-                        ),
-                        Text(
-                          mxShekels(l.totalAgorot),
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                      ],
-                    ),
-                  ),
-                const Divider(height: 18),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'סה"כ לפני מע"מ',
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                    ),
                     Text(
-                      mxShekels(o.totalAgorot),
+                      db.store(o.storeId).name,
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                       ),
                     ),
+                    Text(
+                      '${mxPoLabel(o.id)} · ${o.requestedBy}',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
-                if (o.status != MxPoStatus.rejected) MxTimeline(_poSteps(o)),
-                if (o.orderId.isNotEmpty)
-                  Text(
-                    'לוח החנות ב-BuildSmart: ${o.orderId} · ${mxStageLabel(n.storeStageOf(o) ?? 'new')}',
-                    key: Key('po-bs-${o.id}'),
-                    style: const TextStyle(
-                      color: _brand,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  )
-                else if (o.matReqId.isNotEmpty)
-                  const Text(
-                    'ממתין בתור הבקשות של BuildSmart',
-                    style: TextStyle(color: _brand, fontSize: 13),
-                  ),
-                if (o.invoiceNo.isNotEmpty)
-                  Text(
-                    'חשבונית ${o.invoiceNo}${o.allocationNo.isEmpty ? '' : ' · הקצאה ${o.allocationNo}'}',
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                if (role == MxRole.manager)
-                  ..._poActions(context, ref, n, db, o),
-              ],
-            ),
+              ),
+              MxTag(_poStatus(o.status), _poColor(o.status)),
+            ],
           ),
-      ],
+          const SizedBox(height: 10),
+          for (final l in o.lines)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                children: [
+                  Icon(
+                    l.missing
+                        ? Icons.remove_circle_outline
+                        : Icons.check_circle_outline,
+                    size: 16,
+                    color: l.missing ? _bad : _ok,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      l.missing
+                          ? '${db.part(l.sku).name}: יש ${l.supplied} מתוך ${l.qty}'
+                          : '${l.qty} × ${db.part(l.sku).name}',
+                      style: TextStyle(color: l.missing ? _bad : null),
+                    ),
+                  ),
+                  Text(
+                    mxShekels(l.totalAgorot),
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+          const Divider(height: 18),
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'סה״כ לפני מע״מ',
+                  style: TextStyle(color: Colors.black54),
+                ),
+              ),
+              Text(
+                mxShekels(o.totalAgorot),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          if (o.status == MxPoStatus.rejected && o.note.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                'סיבת הדחייה: ${o.note}',
+                style: const TextStyle(color: _bad),
+              ),
+            ),
+          if (o.status != MxPoStatus.rejected) MxTimeline(_poSteps(o)),
+          if (stage != null)
+            Text(
+              'בלוח החנות: ${mxStageLabel(stage)}',
+              key: Key('po-bs-${o.id}'),
+              style: const TextStyle(
+                color: _brand,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          if (o.fulfil == MxFulfil.delivery && o.status == MxPoStatus.ready)
+            const Text(
+              'החנות שלחה את ההזמנה במשלוח',
+              style: TextStyle(fontSize: 14),
+            ),
+          if (o.invoiceNo.isNotEmpty)
+            Text(
+              'חשבונית ${o.invoiceNo}${o.allocationNo.isEmpty ? '' : ', מספר הקצאה ${o.allocationNo}'}',
+              style: const TextStyle(fontSize: 14),
+            ),
+          if (role == MxRole.manager) ..._poActions(context, db, n, o),
+        ],
+      ),
     );
   }
 
   List<Widget> _poActions(
     BuildContext context,
-    WidgetRef ref,
-    MxNotifier n,
     MxDb db,
+    MxNotifier n,
     MxPurchaseOrder o,
   ) {
     Widget wide(Widget b) => Padding(
       padding: const EdgeInsets.only(top: 8),
       child: SizedBox(width: double.infinity, height: 48, child: b),
     );
+    final store = db.store(o.storeId).name;
     return [
       if (o.status == MxPoStatus.pendingApproval)
         Padding(
@@ -1993,15 +2761,22 @@ class _OrdersPage extends ConsumerWidget {
                   height: 48,
                   child: FilledButton.icon(
                     key: Key('po-approve-${o.id}'),
-                    style: FilledButton.styleFrom(backgroundColor: _ok),
-                    icon: const Icon(Icons.check),
-                    label: const Text('אשר'),
-                    onPressed:
-                        () => _toast(
-                          context,
-                          n.approve(o.id),
-                          'אושר · עכשיו שלחו לחנות בוואטסאפ',
-                        ),
+                    style: FilledButton.styleFrom(backgroundColor: _brand),
+                    icon: const Icon(Icons.send_rounded),
+                    label: const FittedBox(child: Text('אשרו ושלחו בוואטסאפ')),
+                    onPressed: () async {
+                      final err = n.approve(o.id);
+                      if (err != null) return _toast(context, err, '');
+                      final sent = await _sendWhatsApp(context, ref, o.id);
+                      if (!context.mounted) return;
+                      _toast(
+                        context,
+                        null,
+                        sent
+                            ? 'אושר ונפתח וואטסאפ אל $store. לחצו שם "שלח".'
+                            : 'אושר, אבל טרם נשלח. אפשר לשלוח שוב מהכרטיס.',
+                      );
+                    },
                   ),
                 ),
               ),
@@ -2010,9 +2785,27 @@ class _OrdersPage extends ConsumerWidget {
                 child: SizedBox(
                   height: 48,
                   child: OutlinedButton(
-                    onPressed:
-                        () => _toast(context, n.reject(o.id), 'ההזמנה נדחתה'),
-                    child: const Text('דחה'),
+                    key: Key('po-reject-${o.id}'),
+                    onPressed: () async {
+                      final why = await _askText(
+                        context,
+                        'למה לדחות?',
+                        'הסיבה תוצג לטכנאי',
+                        quick: const [
+                          'יש במחסן',
+                          'יקר מדי – לבדוק חנות אחרת',
+                          'לא דחוף עכשיו',
+                        ],
+                        ok: 'דחו בקשה',
+                      );
+                      if (why == null || !context.mounted) return;
+                      _toast(
+                        context,
+                        n.reject(o.id, reason: why),
+                        'הבקשה נדחתה, והטכנאי רואה את הסיבה',
+                      );
+                    },
+                    child: const Text('דחו'),
                   ),
                 ),
               ),
@@ -2020,44 +2813,39 @@ class _OrdersPage extends ConsumerWidget {
           ),
         ),
       if (o.token.isNotEmpty && o.isOpen) ...[
-        wide(
-          FilledButton.icon(
-            key: Key('po-wa-${o.id}'),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF1F8F4E),
-            ),
-            icon: const Icon(Icons.chat_outlined),
-            label: const Text('שלח לחנות בוואטסאפ'),
-            onPressed: () async {
-              try {
-                final uri = mxWhatsAppUri(
-                  db,
-                  o,
-                  baseUrl: kMxStoreBaseUrl,
-                  orgName: kMxOrgName,
+        if (o.status == MxPoStatus.approved)
+          wide(
+            FilledButton.icon(
+              key: Key('po-wa-${o.id}'),
+              style: FilledButton.styleFrom(backgroundColor: _brand),
+              icon: const Icon(Icons.chat_outlined),
+              label: const Text('שלחו לחנות בוואטסאפ'),
+              onPressed: () async {
+                final ok = await _sendWhatsApp(context, ref, o.id);
+                if (!context.mounted) return;
+                _toast(
+                  context,
+                  ok ? null : 'לא ניתן לפתוח וואטסאפ',
+                  'נפתח וואטסאפ עם ההזמנה',
                 );
-                final ok = await ref.read(urlLauncherProvider)(uri);
-                if (context.mounted) {
-                  _toast(
-                    context,
-                    ok ? null : 'לא ניתן לפתוח וואטסאפ',
-                    'נפתח וואטסאפ עם ההזמנה',
-                  );
-                }
-              } on MxError catch (e) {
-                if (context.mounted) _toast(context, e.message, '');
-              }
-            },
+              },
+            ),
           ),
-        ),
         Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Wrap(
             spacing: 4,
             children: [
+              if (o.status != MxPoStatus.approved)
+                TextButton.icon(
+                  key: Key('po-wa-${o.id}'),
+                  icon: const Icon(Icons.chat_outlined, size: 18),
+                  label: const Text('שלחו שוב בוואטסאפ'),
+                  onPressed: () => _sendWhatsApp(context, ref, o.id),
+                ),
               TextButton.icon(
                 icon: const Icon(Icons.link, size: 18),
-                label: const Text('העתק קישור'),
+                label: const Text('העתקת קישור'),
                 onPressed: () async {
                   await Clipboard.setData(
                     ClipboardData(text: mxStoreLink(kMxStoreBaseUrl, o.token)),
@@ -2075,30 +2863,47 @@ class _OrdersPage extends ConsumerWidget {
                 TextButton.icon(
                   key: Key('po-reroute-${o.id}'),
                   icon: const Icon(Icons.alt_route, size: 18),
-                  label: const Text('חוסרים לחנות אחרת'),
+                  label: const Text('החוסרים לחנות אחרת'),
                   onPressed:
                       () => _toast(
                         context,
                         n.reroute(o.id),
-                        'החוסרים נשלחו לאישור מול חנות חלופית',
+                        'נוצרה הזמנה לחנות חלופית, והיא מחכה לאישורך',
                       ),
                 ),
             ],
           ),
         ),
-        wide(
-          OutlinedButton.icon(
-            key: Key('po-receive-${o.id}'),
-            icon: const Icon(Icons.inventory_outlined),
-            label: const Text('קיבלתי את הסחורה'),
-            onPressed:
-                () => _toast(
+        if (o.status != MxPoStatus.approved)
+          wide(
+            OutlinedButton.icon(
+              key: Key('po-receive-${o.id}'),
+              icon: const Icon(Icons.inventory_outlined),
+              label: const Text('קיבלתי את הסחורה'),
+              onPressed: () async {
+                final arriving = [
+                  for (final l in o.lines)
+                    if (l.supplied > 0)
+                      '${l.supplied} × ${db.part(l.sku).name}',
+                ];
+                final yes = await _confirm(
+                  context,
+                  title: 'לקלוט את הסחורה למלאי?',
+                  body:
+                      arriving.isEmpty
+                          ? 'לא סומנו פריטים שהגיעו.'
+                          : 'יתווספו למלאי:\n${arriving.join('\n')}',
+                  ok: 'קלטו למלאי',
+                );
+                if (!yes || !context.mounted) return;
+                _toast(
                   context,
                   n.receive(o.id),
-                  'התקבל · המלאי עודכן · קריאות שחיכו חזרו לטכנאי',
-                ),
+                  'המלאי עודכן. קריאות שחיכו לחלק חזרו לטכנאי.',
+                );
+              },
+            ),
           ),
-        ),
       ],
     ];
   }
@@ -2114,25 +2919,26 @@ class _StoreInbox extends ConsumerWidget {
     final mine =
         db.purchaseOrders
             .where((o) => o.storeId == kMxStoreId && o.token.isNotEmpty)
+            .toList()
+            .reversed
             .toList();
     final open = mine.where((o) => o.isOpen).length;
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
-        MxHero(
-          title: db.store(kMxStoreId).name,
-          subtitle:
-              open == 0
-                  ? 'אין הזמנות פתוחות כרגע.'
-                  : open == 1
-                  ? 'הזמנה אחת מחכה לך'
-                  : '$open הזמנות מחכות לך',
+        _pageTitle(
+          db.store(kMxStoreId).name,
+          open == 0
+              ? 'אין הזמנות פתוחות כרגע.'
+              : open == 1
+              ? 'הזמנה אחת מחכה לך'
+              : '$open הזמנות מחכות לך',
         ),
         if (mine.isEmpty)
           const MxEmpty(
             icon: Icons.storefront_outlined,
             title: 'עוד אין הזמנות',
-            body: 'כשמנהל האחזקה יאשר הזמנה, היא תופיע כאן ותגיע גם בוואטסאפ.',
+            body: 'כשמחלקת האחזקה תאשר הזמנה, היא תופיע כאן ותגיע גם בוואטסאפ.',
           )
         else
           _listCard([
@@ -2141,17 +2947,17 @@ class _StoreInbox extends ConsumerWidget {
                 key: Key('inbox-${o.id}'),
                 minVerticalPadding: 14,
                 leading: const CircleAvatar(
-                  backgroundColor: kMxPanel,
+                  backgroundColor: kMxTealTint,
                   child: Icon(Icons.receipt_long_outlined, color: _brand),
                 ),
                 title: Text(
-                  '${o.id} · ${o.lines.length} פריטים',
+                  '${mxPoLabel(o.id)} · ${o.lines.length} פריטים',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 subtitle: Text(
                   '${mxShekels(o.totalAgorot)} · ${_date(o.createdAt)}',
                 ),
-                trailing: _Tag(_poStatus(o.status), _poColor(o.status)),
+                trailing: MxTag(_poStatus(o.status), _poColor(o.status)),
                 onTap: () => _open(context, MxStorePage(token: o.token)),
               ),
           ]),
@@ -2162,9 +2968,11 @@ class _StoreInbox extends ConsumerWidget {
 
 /// The page a store owner reaches from the WhatsApp link `/s/<token>` —
 /// no login; the token is the only key. Also used from the store dashboard.
+/// [fromLink]: opened directly from WhatsApp, so there is nowhere to go back.
 class MxStorePage extends ConsumerStatefulWidget {
-  const MxStorePage({required this.token, super.key});
+  const MxStorePage({required this.token, this.fromLink = false, super.key});
   final String token;
+  final bool fromLink;
   @override
   ConsumerState<MxStorePage> createState() => _MxStorePageState();
 }
@@ -2180,6 +2988,22 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
     super.dispose();
   }
 
+  void _ready(MxFulfil how) {
+    final n = ref.read(mxDbProvider.notifier);
+    _toast(
+      context,
+      n.storeReady(
+        widget.token,
+        invoiceNo: _invoice.text,
+        allocationNo: _alloc.text,
+        fulfil: how,
+      ),
+      how == MxFulfil.delivery
+          ? 'סומן שיצא למשלוח. מחלקת האחזקה קיבלה עדכון.'
+          : 'סומן מוכן לאיסוף. מחלקת האחזקה קיבלה עדכון.',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(mxDbProvider);
@@ -2188,6 +3012,7 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
     if (o == null) {
       return _page(
         'הזמנה',
+        back: !widget.fromLink,
         const MxEmpty(
           icon: Icons.link_off,
           title: 'הקישור לא תקף',
@@ -2197,86 +3022,158 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
     }
     final closed = !o.isOpen;
     final needsAlloc = mxNeedsAllocation(o);
+    final site = mxPoDeliverySite(db, o);
+    final anyMissing = o.lines.any((l) => l.missing);
+    final unconfirmed =
+        o.status == MxPoStatus.sent || o.status == MxPoStatus.approved;
     return _page(
-      'הזמנה ${o.id}',
+      mxPoLabel(o.id),
+      back: !widget.fromLink,
       ListView(
-        padding: const EdgeInsets.only(bottom: 120),
+        padding: const EdgeInsets.only(bottom: 24),
         children: [
-          MxHero(
-            title: mxShekels(o.totalAgorot),
-            subtitle:
-                'הזמנה מ$kMxOrgName · ${o.lines.length} פריטים · לפני מע"מ',
-            trailing: _Tag(_poStatus(o.status), Colors.white),
+          Card(
+            margin: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          mxShekels(o.totalAgorot),
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: kMxPrimary,
+                          ),
+                        ),
+                      ),
+                      MxTag(_poStatus(o.status), _poColor(o.status)),
+                    ],
+                  ),
+                  Text(
+                    'הזמנה מ$kMxOrgName · ${o.lines.length} פריטים · לפני מע״מ',
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  const Divider(height: 20),
+                  MxInfoRow(
+                    Icons.place_outlined,
+                    'כתובת',
+                    Text(
+                      site.address.isEmpty
+                          ? '${site.city} – ${site.name}'
+                          : site.address,
+                    ),
+                  ),
+                  const MxInfoRow(
+                    Icons.person_outline,
+                    'איש קשר',
+                    Text('מחלקת האחזקה, $kMxManagerPhone'),
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton.icon(
+                      key: const Key('store-call'),
+                      icon: const Icon(Icons.call),
+                      label: const Text('התקשרו למחלקת האחזקה'),
+                      onPressed: () => _call(ref, context, kMxManagerPhone),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           if (!closed)
             const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
               child: Text(
-                'אם פריט חסר לכם – לחצו "אין לי" לידו. השאר יוזמן כרגיל.',
-                style: TextStyle(color: Colors.black54, fontSize: 15),
+                'חסר לכם משהו? שנו את הכמות שיש לכם עם − ו־+, או לחצו "אין לי".',
+                style: TextStyle(color: Colors.black54, fontSize: 16),
               ),
             ),
           _listCard([
             for (final l in o.lines)
-              ListTile(
+              Padding(
                 key: Key('store-line-${l.sku}'),
-                minVerticalPadding: 12,
-                leading: CircleAvatar(
-                  backgroundColor: (l.missing ? _bad : _ok).withValues(
-                    alpha: 0.1,
-                  ),
-                  child: Text(
-                    '${l.qty}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: l.missing ? _bad : _ok,
-                    ),
-                  ),
-                ),
-                title: Text(
-                  db.part(l.sku).name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    decoration: l.missing ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                subtitle: Text('${mxShekels(l.unitAgorot)} ליח׳ · ${l.sku}'),
-                trailing:
-                    l.missing
-                        ? const _Tag('חסר', _bad)
-                        : closed
-                        ? null
-                        : OutlinedButton(
-                          key: Key('store-missing-${l.sku}'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: _bad,
-                            side: const BorderSide(color: _bad),
-                            minimumSize: const Size(72, 40),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            db.part(l.sku).name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              decoration:
+                                  l.supplied == 0
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                            ),
                           ),
-                          onPressed:
-                              () => _toast(
-                                context,
-                                n.storeMissing(widget.token, l.sku),
-                                'סומן כחסר',
-                              ),
-                          child: const Text('אין לי'),
                         ),
+                        if (l.missing)
+                          MxTag(
+                            l.supplied == 0
+                                ? 'אין'
+                                : 'יש ${l.supplied} מתוך ${l.qty}',
+                            _warn,
+                          ),
+                      ],
+                    ),
+                    Text(
+                      'הוזמנו ${l.qty} · ${mxShekels(l.unitAgorot)} ליח׳',
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (!closed)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Row(
+                          children: [
+                            MxStepper(
+                              keyPrefix: 'store-sup-${l.sku}',
+                              value: l.supplied,
+                              max: l.qty,
+                              onChanged:
+                                  (v) => _undoable(
+                                    context,
+                                    ref,
+                                    n.storeSupplied(widget.token, l.sku, v),
+                                    'עודכן: יש $v מתוך ${l.qty}',
+                                  ),
+                            ),
+                            const Spacer(),
+                            if (l.supplied > 0)
+                              TextButton(
+                                key: Key('store-missing-${l.sku}'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.black54,
+                                ),
+                                onPressed:
+                                    () => _undoable(
+                                      context,
+                                      ref,
+                                      n.storeMissing(widget.token, l.sku),
+                                      'סומן שאין לכם את הפריט',
+                                    ),
+                                child: const Text('אין לי'),
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
           ]),
           if (!closed) ...[
-            if (o.status == MxPoStatus.sent)
-              MxPrimaryButton(
-                key: const Key('store-confirm'),
-                label: 'מאשר – יש לי הכול',
-                icon: Icons.thumb_up_alt_outlined,
-                color: _ok,
-                onPressed:
-                    () => _toast(
-                      context,
-                      n.storeConfirm(widget.token),
-                      'תודה! אישרת את ההזמנה',
-                    ),
-              ),
             const MxSectionTitle('כשההזמנה מוכנה'),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -2298,26 +3195,10 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                 decoration: InputDecoration(
                   labelText:
                       needsAlloc
-                          ? 'מספר הקצאה (חובה – מעל 5,000 ₪)'
+                          ? 'מספר הקצאה (חובה מעל 5,000 ₪)'
                           : 'מספר הקצאה (אם יש)',
                 ),
               ),
-            ),
-            MxPrimaryButton(
-              key: const Key('store-ready'),
-              label: 'מוכן לאיסוף / נשלח',
-              icon: Icons.local_shipping_outlined,
-              color: kMxPrimary,
-              onPressed:
-                  () => _toast(
-                    context,
-                    n.storeReady(
-                      widget.token,
-                      invoiceNo: _invoice.text,
-                      allocationNo: _alloc.text,
-                    ),
-                    'סומן מוכן – מחלקת האחזקה קיבלה עדכון',
-                  ),
             ),
           ] else
             const MxEmpty(
@@ -2327,6 +3208,58 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
             ),
         ],
       ),
+      bottom:
+          closed
+              ? null
+              : MxBottomBar(
+                children: [
+                  if (unconfirmed)
+                    MxPrimaryButton(
+                      key: const Key('store-confirm'),
+                      label: anyMissing ? 'מאשר את מה שיש' : 'מאשר, יש לי הכול',
+                      icon: Icons.thumb_up_alt_outlined,
+                      color: kMxPrimary,
+                      onPressed:
+                          () => _toast(
+                            context,
+                            n.storeConfirm(widget.token),
+                            'תודה! ההזמנה אושרה',
+                          ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: OutlinedButton.icon(
+                              key: const Key('store-ready'),
+                              icon: const Icon(Icons.storefront_outlined),
+                              label: const FittedBox(
+                                child: Text('מוכן לאיסוף'),
+                              ),
+                              onPressed: () => _ready(MxFulfil.pickup),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: SizedBox(
+                            height: 52,
+                            child: OutlinedButton.icon(
+                              key: const Key('store-ship'),
+                              icon: const Icon(Icons.local_shipping_outlined),
+                              label: const FittedBox(child: Text('יצא למשלוח')),
+                              onPressed: () => _ready(MxFulfil.delivery),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 }

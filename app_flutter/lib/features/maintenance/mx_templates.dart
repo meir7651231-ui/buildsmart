@@ -36,7 +36,7 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
       'ברז',
       'כיור בשרי',
       1,
-      'ברז מטבח, קרטוש 40 מ"מ',
+      'ברז מטבח, קרטוש 40 מ״מ',
       'PL-CRT40',
       'מסננת – רבעוני',
     ),
@@ -44,7 +44,7 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
       'ברז',
       'כיור חלבי',
       1,
-      'ברז מטבח, קרטוש 40 מ"מ',
+      'ברז מטבח, קרטוש 40 מ״מ',
       'PL-CRT40',
       'מסננת – רבעוני',
     ),
@@ -69,7 +69,7 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
       'PL-FLUSH',
       'בדיקת דליפה חודשית',
     ),
-    ('ברז', 'כיור', 1, 'ברז כיור, קרטוש 35 מ"מ', 'PL-CRT35', 'מסננת – רבעוני'),
+    ('ברז', 'כיור', 1, 'ברז כיור, קרטוש 35 מ״מ', 'PL-CRT35', 'מסננת – רבעוני'),
     ('סוללת מקלחת', '', 1, 'סוללה + ראש מקלחת', 'PL-SHWR', 'אבנית – רבעוני'),
     (
       'מגביל טמפרטורה',
@@ -81,7 +81,7 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
     ),
     ('מאחז יד', 'אסלה / מקלחת', 3, 'מאחז נירוסטה', 'HW-GRAB', 'חיזוק רבעוני'),
     ('מחסום רצפה', '', 1, 'מחסום רצפה', 'PL-FLR', 'ניקוי חודשי'),
-    ('מאוורר', 'וונטה', 1, 'מאוורר 100 מ"מ', 'EL-FAN', 'ניקוי רבעוני'),
+    ('מאוורר', 'וונטה', 1, 'מאוורר 100 מ״מ', 'EL-FAN', 'ניקוי רבעוני'),
   ],
   'חדר שינה': [
     ('שקע', '', 4, 'שקע 16A עם מכסה מוגן', 'EL-SK16', 'בדיקה חודשית'),
@@ -89,11 +89,11 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
       'מזגן',
       'מאייד',
       1,
-      'מזגן עילי 1.25 כ"ס',
+      'מזגן עילי 1.25 כ״ס',
       'AC-FLT',
       'מסננים חודשי · טכנאי חצי-שנתי',
     ),
-    ('מעצור חלון', '', 2, 'מעצור 10 ס"מ', 'HW-WSTOP', 'בדיקה חודשית'),
+    ('מעצור חלון', '', 2, 'מעצור 10 ס״מ', 'HW-WSTOP', 'בדיקה חודשית'),
     ('תריס', '', 2, 'רצועת תריס', 'HW-STRAP', 'חצי-שנתי'),
     ('מזוזה', '', 1, 'מזוזה', 'JD-MZ', 'בדיקת סופר כל 3.5 שנים'),
   ],
@@ -104,7 +104,7 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
       'דוד שמש',
       '',
       1,
-      "דוד 150 ל' + אנודה",
+      "דוד 150 ל׳ + אנודה",
       'PL-ANODE',
       'אנודה ואבנית כל שנתיים',
     ),
@@ -119,10 +119,24 @@ const Map<String, List<MxTemplateLine>> kMxRoomTemplates = {
       'EL-RCD',
       'לחיצת בדיקה חודשית',
     ),
-    ('מאמ"ת', 'לוח ראשי', 12, 'מאמ"ת 16A', 'EL-MCB16', ''),
+    ('מאמ״ת', 'לוח ראשי', 12, 'מאמ״ת 16A', 'EL-MCB16', ''),
     ('חיישן יציאה', 'דלת כניסה', 1, 'חיישן מגנטי', 'SF-DOOR', 'בדיקה שבועית'),
     ('תאורת חירום', 'מסדרון', 1, 'גוף חירום LED', 'SF-EML', 'בדיקה חודשית'),
-    ('מטף', '', 1, 'מטף אבקה 6 ק"ג', 'SF-EXT', 'בדיקה שנתית'),
+    ('מטף', '', 1, 'מטף אבקה 6 ק״ג', 'SF-EXT', 'בדיקה שנתית'),
+  ],
+  'כללי – דלתות, קירות ועוד': [
+    ('דלת', 'פנימית', 1, 'דלת, ידית וצירים', 'HW-HINGE', ''),
+    ('קיר / תקרה', 'רטיבות, סדק, צבע', 1, 'קיר או תקרה', 'GEN-MISC', ''),
+    ('ריהוט', 'מיטה, ארון, כיסא', 1, 'ריהוט', 'GEN-MISC', ''),
+    (
+      'מזיקים',
+      'ג׳וקים, נמלים, מכרסמים',
+      1,
+      'הדברה',
+      'GEN-MISC',
+      'הדברה רבעונית',
+    ),
+    ('משהו אחר', 'לא ברשימה', 1, 'תקלה כללית', 'GEN-MISC', ''),
   ],
 };
 
@@ -145,14 +159,14 @@ const List<MxPart> kMxParts = [
   ),
   MxPart(
     sku: 'EL-T8',
-    name: 'פלורסנט LED T8 120 ס"מ',
+    name: 'פלורסנט LED T8 120 ס״מ',
     storeType: 'חשמל',
     min: 10,
     priceAgorot: 2200,
   ),
   MxPart(
     sku: 'EL-FAN',
-    name: 'מאוורר וונטה 100 מ"מ',
+    name: 'מאוורר וונטה 100 מ״מ',
     storeType: 'חשמל',
     min: 2,
     priceAgorot: 8500,
@@ -166,7 +180,7 @@ const List<MxPart> kMxParts = [
   ),
   MxPart(
     sku: 'EL-MCB16',
-    name: 'מאמ"ת 16A',
+    name: 'מאמ״ת 16A',
     storeType: 'חשמל',
     min: 6,
     priceAgorot: 2400,
@@ -180,14 +194,14 @@ const List<MxPart> kMxParts = [
   ),
   MxPart(
     sku: 'PL-CRT40',
-    name: 'קרטוש 40 מ"מ',
+    name: 'קרטוש 40 מ״מ',
     storeType: 'אינסטלציה',
     min: 4,
     priceAgorot: 4500,
   ),
   MxPart(
     sku: 'PL-CRT35',
-    name: 'קרטוש 35 מ"מ',
+    name: 'קרטוש 35 מ״מ',
     storeType: 'אינסטלציה',
     min: 4,
     priceAgorot: 4200,
@@ -250,21 +264,21 @@ const List<MxPart> kMxParts = [
   ),
   MxPart(
     sku: 'HW-GRAB',
-    name: 'מאחז יד נירוסטה 60 ס"מ',
+    name: 'מאחז יד נירוסטה 60 ס״מ',
     storeType: 'פרזול',
     min: 2,
     priceAgorot: 12000,
   ),
   MxPart(
     sku: 'HW-WSTOP',
-    name: 'מעצור חלון 10 ס"מ',
+    name: 'מעצור חלון 10 ס״מ',
     storeType: 'פרזול',
     min: 8,
     priceAgorot: 3500,
   ),
   MxPart(
     sku: 'HW-STRAP',
-    name: "רצועת תריס 6 מ'",
+    name: "רצועת תריס 6 מ׳",
     storeType: 'פרזול',
     min: 4,
     priceAgorot: 2000,
@@ -299,18 +313,42 @@ const List<MxPart> kMxParts = [
   ),
   MxPart(
     sku: 'SF-EXT',
-    name: 'מטף אבקה 6 ק"ג',
+    name: 'מטף אבקה 6 ק״ג',
     storeType: 'בטיחות',
     min: 2,
     priceAgorot: 19000,
   ),
   MxPart(
     sku: 'JD-MZ',
-    name: 'מזוזה כשרה 12 ס"מ',
+    name: 'מזוזה כשרה 12 ס״מ',
     storeType: 'יודאיקה',
     min: 3,
     priceAgorot: 15000,
   ),
+  MxPart(
+    sku: 'HW-HINGE',
+    name: 'ציר דלת + ידית',
+    storeType: 'פרזול',
+    min: 2,
+    priceAgorot: 4500,
+  ),
+  MxPart(
+    sku: 'GEN-MISC',
+    name: 'חומרים כלליים',
+    storeType: 'פרזול',
+    min: 0,
+    priceAgorot: 5000,
+  ),
+];
+
+/// Demo technicians (the picker shows each one's open jobs).
+/// Demo phone of the maintenance manager (urgent call, store contact).
+const String kMxManagerPhone = '02-000-0000';
+
+const List<String> kMxTechs = [
+  'יוסי – טכנאי',
+  'משה – טכנאי',
+  'אבי – קבלן חשמל',
 ];
 
 /// Mandatory / recurring inspections: (id, title, intervalDays, legal basis).
@@ -331,8 +369,8 @@ const List<(String, String, int, String)> kMxPmCatalog = [
     'פקודת הבטיחות בעבודה · כל 14 חודשים',
   ),
   ('gas', 'בדיקת מתקן גז תקופתית', 1826, 'חוק הגז (בטיחות ורישוי) · כל 5 שנים'),
-  ('extinguisher', 'בדיקת מטפים שנתית', 365, 'ת"י 129 חלק 1'),
-  ('mezuza', 'בדיקת מזוזות – סופר', 1278, 'שו"ע יו"ד רצ"א · פעמיים בשבע שנים'),
+  ('extinguisher', 'בדיקת מטפים שנתית', 365, 'ת״י 129 חלק 1'),
+  ('mezuza', 'בדיקת מזוזות – סופר', 1278, 'שו״ע יו״ד רצ״א · פעמיים בשבע שנים'),
   ('windows', 'בדיקת מעצורי חלונות', 30, ''),
   ('ac', 'טיפול מזגנים עונתי', 182, ''),
 ];
@@ -377,8 +415,18 @@ const List<(String, String, int, String)> kMxPmCatalog = [
 /// A small, clearly fictional demo organization: 2 sites, 5 units, 2 stores.
 MxDb mxDemoSeed(DateTime now) {
   const sites = [
-    MxSite(id: 'jrs', name: 'מסגרת דיור א׳', city: 'ירושלים'),
-    MxSite(id: 'bsh', name: 'מסגרת דיור ב׳', city: 'בית שמש'),
+    MxSite(
+      id: 'jrs',
+      name: 'מסגרת דיור א׳',
+      city: 'ירושלים',
+      address: 'רח׳ הדוגמה 1, ירושלים',
+    ),
+    MxSite(
+      id: 'bsh',
+      name: 'מסגרת דיור ב׳',
+      city: 'בית שמש',
+      address: 'רח׳ הדוגמה 5, בית שמש',
+    ),
   ];
   const units = [
     MxUnit(id: 'jrs-1', siteId: 'jrs', name: 'דירה 1'),
@@ -410,7 +458,7 @@ MxDb mxDemoSeed(DateTime now) {
     ),
     MxStore(
       id: 'st-judaica',
-      name: 'סת"ם ויודאיקה (דוגמה)',
+      name: 'סת״ם ויודאיקה (דוגמה)',
       types: {'יודאיקה'},
       phone: '052-0000000',
       channel: MxStoreChannel.whatsapp,
@@ -444,6 +492,8 @@ MxDb mxDemoSeed(DateTime now) {
     'SF-EML': 2,
     'SF-EXT': 2,
     'JD-MZ': 4,
+    'HW-HINGE': 3,
+    'GEN-MISC': 0,
   };
   // Each rule's lastDone is set so the dashboard shows a mix of overdue /
   // due-soon / fine (offsets in days relative to its interval).

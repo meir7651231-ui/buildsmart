@@ -19,11 +19,15 @@ enum MxPointStatus { ok, faulty }
 /// Work order (קריאת שירות) lifecycle.
 enum MxWoStatus { open, assigned, waitingPart, done, cancelled }
 
+/// How the store hands the goods over.
+enum MxFulfil { pickup, delivery }
+
 /// Purchase order lifecycle. A store answers through its link (WhatsApp) or
 /// its dashboard; the manager approves and receives.
 enum MxPoStatus {
   pendingApproval, // requested by a tech / by the low-stock rule
-  sent, // approved by the manager and sent to the store
+  approved, // approved by the manager — NOT yet sent to the store
+  sent, // sent to the store (WhatsApp opened / link delivered)
   storeConfirmed, // the store confirmed it can supply everything
   storePartial, // the store marked one or more lines missing
   ready, // ready for pickup / out for delivery
@@ -45,18 +49,32 @@ T _enumByName<T extends Enum>(List<T> values, Object? raw, T fallback) {
 DateTime? _date(Object? raw) => raw is String ? DateTime.tryParse(raw) : null;
 
 class MxSite {
-  const MxSite({required this.id, required this.name, required this.city});
+  const MxSite({
+    required this.id,
+    required this.name,
+    required this.city,
+    this.address = '',
+  });
 
   factory MxSite.fromJson(Map<String, Object?> j) => MxSite(
     id: j['id']! as String,
     name: j['name']! as String,
     city: (j['city'] ?? '') as String,
+    address: (j['address'] ?? '') as String,
   );
   final String id;
   final String name;
   final String city;
 
-  Map<String, Object?> toJson() => {'id': id, 'name': name, 'city': city};
+  /// Street address — goes into the store's order message.
+  final String address;
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'name': name,
+    'city': city,
+    'address': address,
+  };
 }
 
 /// An apartment / unit inside a site.
@@ -289,6 +307,9 @@ class MxWorkOrder {
     this.hasPhoto = false,
     this.poId = '',
     this.closedAt,
+    this.urgent = false,
+    this.log = const [],
+    this.photo = '',
   });
 
   factory MxWorkOrder.fromJson(Map<String, Object?> j) => MxWorkOrder(
@@ -302,12 +323,18 @@ class MxWorkOrder {
     hasPhoto: (j['photo'] ?? false) as bool,
     poId: (j['poId'] ?? '') as String,
     closedAt: _date(j['closedAt']),
+    urgent: (j['urgent'] ?? false) as bool,
+    log: [
+      for (final e in (j['log'] as List? ?? const []))
+        MxEvent.fromJson((e as Map).cast<String, Object?>()),
+    ],
+    photo: (j['photoData'] ?? '') as String,
   );
   final String id;
   final String pointId;
   final String desc;
 
-  /// Role label only (e.g. 'מדריך – דירה 3') — never a resident's name.
+  /// Role label only (e.g. 'צוות בית – דירה 3') — never a resident's name.
   final String reportedBy;
   final DateTime createdAt;
   final MxWoStatus status;
@@ -318,6 +345,15 @@ class MxWorkOrder {
   final String poId;
   final DateTime? closedAt;
 
+  /// Safety-critical (sparks, open window stop, missing smoke detector…).
+  final bool urgent;
+
+  /// Activity log: who did what, when (newest first).
+  final List<MxEvent> log;
+
+  /// The photo itself (data URL / https URL), '' when none.
+  final String photo;
+
   bool get isOpen =>
       status != MxWoStatus.done && status != MxWoStatus.cancelled;
 
@@ -326,6 +362,7 @@ class MxWorkOrder {
     String? assignee,
     String? poId,
     DateTime? closedAt,
+    List<MxEvent>? log,
   }) => MxWorkOrder(
     id: id,
     pointId: pointId,
@@ -337,6 +374,9 @@ class MxWorkOrder {
     hasPhoto: hasPhoto,
     poId: poId ?? this.poId,
     closedAt: closedAt ?? this.closedAt,
+    urgent: urgent,
+    log: log ?? this.log,
+    photo: photo,
   );
 
   Map<String, Object?> toJson() => {
@@ -350,6 +390,9 @@ class MxWorkOrder {
     'photo': hasPhoto,
     'poId': poId,
     'closedAt': closedAt?.toIso8601String(),
+    'urgent': urgent,
+    'log': [for (final e in log) e.toJson()],
+    'photoData': photo,
   };
 }
 
@@ -410,36 +453,49 @@ class MxPoLine {
     required this.sku,
     required this.qty,
     required this.unitAgorot,
-    this.missing = false,
-  });
+    int? supplied,
+  }) : supplied = supplied ?? qty;
 
-  factory MxPoLine.fromJson(Map<String, Object?> j) => MxPoLine(
-    sku: j['sku']! as String,
-    qty: (j['qty'] ?? 0) as int,
-    unitAgorot: (j['unit'] ?? 0) as int,
-    missing: (j['missing'] ?? false) as bool,
-  );
+  factory MxPoLine.fromJson(Map<String, Object?> j) {
+    final qty = (j['qty'] ?? 0) as int;
+    // Back-compat: older blobs carried only `missing: true|false`.
+    final legacyMissing = (j['missing'] ?? false) as bool;
+    return MxPoLine(
+      sku: j['sku']! as String,
+      qty: qty,
+      unitAgorot: (j['unit'] ?? 0) as int,
+      supplied: (j['supplied'] as int?) ?? (legacyMissing ? 0 : qty),
+    );
+  }
   final String sku;
+
+  /// Ordered quantity.
   final int qty;
   final int unitAgorot;
 
-  /// Marked by the store: cannot supply this line.
-  final bool missing;
+  /// How many the store can actually supply (0..qty). Defaults to [qty].
+  final int supplied;
 
-  int get totalAgorot => missing ? 0 : qty * unitAgorot;
+  /// The store cannot supply the full quantity of this line.
+  bool get missing => supplied < qty;
 
-  MxPoLine copyWith({bool? missing}) => MxPoLine(
+  /// Units still to source elsewhere.
+  int get shortfall => qty - supplied;
+
+  int get totalAgorot => supplied * unitAgorot;
+
+  MxPoLine copyWith({int? supplied}) => MxPoLine(
     sku: sku,
     qty: qty,
     unitAgorot: unitAgorot,
-    missing: missing ?? this.missing,
+    supplied: supplied ?? this.supplied,
   );
 
   Map<String, Object?> toJson() => {
     'sku': sku,
     'qty': qty,
     'unit': unitAgorot,
-    'missing': missing,
+    'supplied': supplied,
   };
 }
 
@@ -457,6 +513,7 @@ class MxPurchaseOrder {
     this.note = '',
     this.matReqId = '',
     this.orderId = '',
+    this.fulfil = MxFulfil.pickup,
   });
 
   factory MxPurchaseOrder.fromJson(Map<String, Object?> j) => MxPurchaseOrder(
@@ -479,6 +536,7 @@ class MxPurchaseOrder {
     note: (j['note'] ?? '') as String,
     matReqId: (j['matReqId'] ?? '') as String,
     orderId: (j['orderId'] ?? '') as String,
+    fulfil: _enumByName(MxFulfil.values, j['fulfil'], MxFulfil.pickup),
   );
   final String id;
   final String storeId;
@@ -501,6 +559,9 @@ class MxPurchaseOrder {
   /// BuildSmart order id (`BS-####`, the store dashboard) — '' until approved.
   final String orderId;
 
+  /// Pickup by our staff, or the store delivers.
+  final MxFulfil fulfil;
+
   int get totalAgorot => lines.fold(0, (a, l) => a + l.totalAgorot);
   bool get isOpen =>
       status != MxPoStatus.received && status != MxPoStatus.rejected;
@@ -514,6 +575,7 @@ class MxPurchaseOrder {
     String? note,
     String? matReqId,
     String? orderId,
+    MxFulfil? fulfil,
   }) => MxPurchaseOrder(
     id: id,
     storeId: storeId,
@@ -527,6 +589,7 @@ class MxPurchaseOrder {
     note: note ?? this.note,
     matReqId: matReqId ?? this.matReqId,
     orderId: orderId ?? this.orderId,
+    fulfil: fulfil ?? this.fulfil,
   );
 
   Map<String, Object?> toJson() => {
@@ -542,6 +605,7 @@ class MxPurchaseOrder {
     'note': note,
     'matReqId': matReqId,
     'orderId': orderId,
+    'fulfil': fulfil.name,
   };
 }
 

@@ -9,6 +9,7 @@ import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_screens.dart';
 import 'package:buildsmart/features/maintenance/mx_state.dart';
+import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/material_requests_engine.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/url_launcher_seam.dart';
@@ -46,6 +47,9 @@ void main() {
           launched.add(uri);
           return true;
         }),
+        taskPhotoPickerProvider.overrideWithValue(
+          (_) async => 'data:image/png;base64,iVBORw0KGgo=',
+        ),
       ],
     );
     addTearDown(c.dispose);
@@ -64,7 +68,7 @@ void main() {
     await tester.pumpAndSettle();
 
     Future<void> settle() async {
-      await tester.pump(const Duration(seconds: 3)); // let toasts clear
+      await tester.pump(const Duration(seconds: 7)); // let toasts clear
       await tester.pumpAndSettle();
     }
 
@@ -156,21 +160,20 @@ void main() {
     }
 
     // ── 1 · shell: roles + nav ─────────────────────────────────────────────
-    ok('מנהל: 6 לשוניות', navCount() == 6);
-    for (final (i, t)
-        in ['לוח', 'מסגרות', 'קריאות', 'תחזוקה', 'מלאי', 'הזמנות'].indexed) {
+    ok('מנהל: 5 לשוניות (מלאי והזמנות אוחדו ל"רכש")', navCount() == 5);
+    for (final (i, t) in ['לוח', 'מסגרות', 'קריאות', 'תחזוקה', 'רכש'].indexed) {
       await nav(t);
       ok('לשונית "$t" נפתחת', navIndex() == i);
     }
     await nav('לוח');
     ok(
-      'לוח: כותרת "דחוף עכשיו"',
-      find.text('דחוף עכשיו').evaluate().isNotEmpty,
+      'לוח: כותרת "מה לטפל היום"',
+      find.text('מה לטפל היום').evaluate().isNotEmpty,
     );
     await role('טכנאי');
-    ok('טכנאי: 4 לשוניות', navCount() == 4);
-    await role('מדריך');
-    ok('מדריך: 2 לשוניות', navCount() == 2);
+    ok('טכנאי: 3 לשוניות', navCount() == 3);
+    await role('צוות בית');
+    ok('צוות בית: 2 לשוניות', navCount() == 2);
     await role('חנות');
     ok(
       'חנות: מסך אחד בלי בר-ניווט',
@@ -180,16 +183,19 @@ void main() {
 
     // ── 2 · dashboard KPI cards → their tab ────────────────────────────────
     for (final (k, idx) in [
+      ('urgent', 2),
       ('wo', 2),
-      ('po', 5),
+      ('po', 4),
       ('overdue', 3),
       ('soon', 3),
       ('low', 4),
-      ('points', 1),
     ]) {
       await nav('לוח');
       await tapKey('kpi-$k');
       ok('כרטיס-מדד "$k" פותח לשונית $idx', navIndex() == idx);
+      if (k == 'low') {
+        ok('"חלקים להזמין" פותח את המלאי בתוך "רכש"', present('auto-reorder'));
+      }
     }
     await nav('לוח');
     await tapText('מדידת טמפרטורת מים חמים (TMV)');
@@ -212,8 +218,9 @@ void main() {
     final outlet = db().pointsOf(kitchen.id).first;
     await tapKey('pt-${outlet.id}');
     ok(
-      'כרטיס-נקודה נפתח (חלק החלפה)',
-      find.textContaining('EL-SK16').evaluate().isNotEmpty,
+      'כרטיס-נקודה נפתח (חלק החלפה, בלי קוד פנימי)',
+      find.text(db().part(outlet.sku).name).evaluate().isNotEmpty &&
+          find.textContaining('EL-SK16').evaluate().isEmpty,
     );
     await tapKey('report-point');
     ok('גיליון סיבות נפתח, "פתח קריאה" כבוי', !enabledButton('fault-send'));
@@ -221,10 +228,22 @@ void main() {
     ok('סיבה נבחרה → "פתח קריאה" פעיל', enabledButton('fault-send'));
     await tester.enterText(find.byKey(const Key('fault-text')), 'ליד הכיור');
     await tapKey('fault-send');
+    ok(
+      'ניצוצות = דחוף → גיליון בטיחות עם הוראה וחיוג',
+      find.text('הדיווח נשלח כדחוף').evaluate().isNotEmpty &&
+          present('urgent-call'),
+    );
+    await tapKey('success-mine');
     final wo1 = db().openWorkOrders.single;
     ok(
       'קריאה נפתחה מכרטיס-הנקודה',
-      wo1.pointId == outlet.id && wo1.desc == 'ניצוצות / ריח שרוף – ליד הכיור',
+      wo1.pointId == outlet.id &&
+          wo1.desc == 'ניצוצות / ריח שרוף – ליד הכיור' &&
+          wo1.urgent,
+    );
+    ok(
+      'נקודה שכבר דווחה: הכפתור מציע הערה במקום דיווח כפול',
+      find.text('כבר דווח – הוסיפו הערה לקריאה').evaluate().isNotEmpty,
     );
     ok(
       'הנקודה מסומנת תקולה',
@@ -239,12 +258,14 @@ void main() {
 
     // ── 4 · reset ───────────────────────────────────────────────────────────
     await tapFinder(find.byTooltip('איפוס הדגמה'));
+    ok('"איפוס הדגמה" שואל לפני מחיקה', present('confirm-yes'));
+    await tapKey('confirm-yes');
     ok('"איפוס הדגמה" מחזיר את נתוני ההדגמה', db().openWorkOrders.isEmpty);
 
     // ── 5 · staff report: every control ────────────────────────────────────
-    await role('מדריך');
+    await role('צוות בית');
     ok(
-      'מדריך: שלב 1 "איפה התקלה?"',
+      'צוות בית: שלב 1 "איפה התקלה?"',
       find.text('איפה התקלה?').evaluate().isNotEmpty,
     );
     final sRooms = db().roomsOf(kMxStaffUnit);
@@ -270,15 +291,17 @@ void main() {
     await tapKey('rep-reason-0');
     await tapKey('rep-photo');
     ok(
-      '"צלמו תמונה" → "התמונה צורפה"',
-      find.text('התמונה צורפה').evaluate().isNotEmpty,
+      '"צלמו תמונה" (מצלמה אמיתית) → "התמונה צורפה"',
+      find.textContaining('התמונה צורפה').evaluate().isNotEmpty,
     );
     await tapKey('rep-send');
     ok('גיליון הצלחה מוצג', find.text('הדיווח נשלח').evaluate().isNotEmpty);
     final wo2 = db().openWorkOrders.single;
     ok(
       'הדיווח נשמר: סיבה + תמונה + תפקיד בלבד',
-      wo2.desc == 'מטפטף' && wo2.hasPhoto && wo2.reportedBy == kMxStaffLabel,
+      wo2.desc == 'מטפטף' &&
+          wo2.photo.startsWith('data:image/') &&
+          wo2.reportedBy == kMxStaffLabel,
     );
     await tapKey('success-again');
     ok(
@@ -306,8 +329,15 @@ void main() {
     );
     await tapKey('wo-${wo2.id}');
     ok(
-      'מדריך רואה קריאה בלי כפתורי פעולה',
+      'צוות בית רואה קריאה בלי כפתורי פעולה',
       !present('wo-assign') && !present('wo-fix'),
+    );
+    await tapKey('wo-comment');
+    await tester.enterText(find.byKey(const Key('ask-text')), 'עדיין מטפטף');
+    await tapKey('ask-ok');
+    ok(
+      'צוות בית מוסיף הערה ליומן הקריאה',
+      db().workOrder(wo2.id).log.first.text == 'הערה: עדיין מטפטף',
     );
     await back();
 
@@ -322,8 +352,10 @@ void main() {
     for (final w in [wo2, wo3]) {
       await tapKey('wo-${w.id}');
       await tapKey('wo-assign');
+      ok('בחירת טכנאי מציגה עומס', present('tech-0') && present('tech-2'));
+      await tapKey('tech-0');
       ok(
-        '"שייך ליוסי" (${w.id})',
+        '"שייכו לטכנאי" (${w.id})',
         db().workOrder(w.id).assignee == kMxTechName,
       );
       await back();
@@ -394,7 +426,7 @@ void main() {
     ok(
       'אין במלאי → "תוקן" כבוי ומציג "החלק חסר במלאי"',
       !enabledButton('wo-fix') &&
-          find.text('החלק חסר במלאי').evaluate().isNotEmpty,
+          find.text('החלק חסר במלאי – הזמינו חלק').evaluate().isNotEmpty,
     );
     await back();
     c.read(mxDbProvider.notifier).state = db().copyWith(
@@ -428,7 +460,8 @@ void main() {
     );
 
     // ── 8 · stock: filters, price import (cancel + apply), auto-reorder ────
-    await nav('מלאי');
+    await nav('רכש');
+    await tapKey('buy-stock');
     for (final t in [
       'להזמין',
       'חשמל',
@@ -461,7 +494,7 @@ void main() {
     await tapText('ביטול');
     ok('"ביטול" לא משנה מחירים', db().storePrices.isEmpty);
     await tapKey('import-prices');
-    await tapText('אישור');
+    await tapKey('ask-ok');
     ok(
       '"אישור" קולט 3 מחירים לטמבור',
       db().storePrices['st-tambur']?.length == 3 &&
@@ -491,6 +524,8 @@ void main() {
           .where((l) => l.sku == 'EL-T8')
           .every((l) => l.unitAgorot == 1990),
     );
+    ok('אחרי הזמנה עוברים להזמנות', present('po-filter-open'));
+    await tapKey('buy-stock');
     await tapKey('auto-reorder');
     ok(
       'לחיצה חוזרת לא מכפילה הזמנות',
@@ -498,33 +533,33 @@ void main() {
     );
 
     // ── 9 · orders: approve, WhatsApp, copy link, store view, reject ───────
-    await nav('הזמנות');
+    await tapKey('buy-orders');
     final tamburPo = db().pendingApproval.firstWhere(
       (o) => o.storeId == 'st-tambur' && o.lines.length > 1,
     );
     await tapKey('po-approve-${tamburPo.id}');
     final approved = db().po(tamburPo.id);
     ok(
-      '"אשר" → נשלח לחנות + הזמנה בלוח BuildSmart',
+      '"אשרו ושלחו בוואטסאפ" (לחיצה אחת) → wa.me נפתח, נשלח, הזמנה בלוח BuildSmart',
       approved.status == MxPoStatus.sent &&
+          launched.isNotEmpty &&
+          launched.last.host == 'wa.me' &&
+          launched.last.queryParameters['text']!.contains(approved.token) &&
           approved.orderId.isNotEmpty &&
           c.read(ordersEngineProvider).any((o) => o.id == approved.orderId),
     );
     ok(
-      'כרטיס ההזמנה מציג את מספר ההזמנה בלוח החנות',
-      present('po-bs-${tamburPo.id}'),
+      'כרטיס ההזמנה מציג את שלב ההזמנה בלוח החנות (בלי קוד פנימי)',
+      present('po-bs-${tamburPo.id}') &&
+          find.textContaining('BS-').evaluate().isEmpty,
     );
+    final sentBefore = launched.length;
     await tapKey('po-wa-${tamburPo.id}');
-    ok(
-      '"שלח לחנות בוואטסאפ" פותח wa.me עם ההודעה והקישור',
-      launched.isNotEmpty &&
-          launched.last.host == 'wa.me' &&
-          launched.last.queryParameters['text']!.contains(approved.token),
-    );
+    ok('"שלחו שוב בוואטסאפ" פותח שוב', launched.length == sentBefore + 1);
     await tapFinder(
       find.descendant(
         of: find.byKey(Key('po-${tamburPo.id}')),
-        matching: find.text('העתק קישור'),
+        matching: find.text('העתקת קישור'),
       ),
     );
     ok(
@@ -534,7 +569,7 @@ void main() {
     await tapKey('po-storeview-${tamburPo.id}');
     ok(
       '"מה החנות רואה" פותח את דף החנות',
-      find.text('הזמנה ${tamburPo.id}').evaluate().isNotEmpty &&
+      find.text(mxPoLabel(tamburPo.id)).evaluate().isNotEmpty &&
           present('store-line-${approved.lines.first.sku}'),
     );
     await back();
@@ -547,14 +582,16 @@ void main() {
       ..requestPart(rwo, 1, kMxTechName);
     await tester.pumpAndSettle();
     final other = db().po(n.lastCreatedId!);
-    await tapFinder(
-      find.descendant(
-        of: find.byKey(Key('po-${other.id}')),
-        matching: find.text('דחה'),
-      ),
+    await tapKey('po-reject-${other.id}');
+    ok('"דחו" מבקש סיבה', present('ask-quick-0'));
+    await tapKey('ask-quick-1');
+    await tapKey('ask-ok');
+    ok(
+      'הסיבה נשמרת ומגיעה ליומן הקריאה של הטכנאי',
+      db().workOrder(rwo).log.first.text.contains('יקר מדי'),
     );
     ok(
-      '"דחה" → נדחתה + הבקשה ב-BuildSmart נדחתה',
+      '"דחו" → נדחתה + הבקשה ב-BuildSmart נדחתה',
       db().po(other.id).status == MxPoStatus.rejected &&
           c
                   .read(materialRequestsProvider)
@@ -574,7 +611,22 @@ void main() {
       db().po(tamburPo.id).lines.first.missing &&
           db().po(tamburPo.id).status == MxPoStatus.storePartial,
     );
-    ok('אחרי "חסר": "מאשר – יש לי הכול" לא מוצג', !present('store-confirm'));
+    ok('אחרי "חסר": "מאשר, יש לי הכול" לא מוצג', !present('store-confirm'));
+    ok(
+      '"אין לי" הוא כפתור טקסט אפור (לא אדום)',
+      find
+          .byWidgetPredicate(
+            (w) =>
+                w is TextButton &&
+                w.key is ValueKey<String> &&
+                (w.key! as ValueKey<String>).value.startsWith(
+                  'store-missing-',
+                ) &&
+                w.style?.foregroundColor?.resolve({}) == Colors.black54,
+          )
+          .evaluate()
+          .isNotEmpty,
+    );
     // Real-browser bug: marking the rest ready used to hide the reroute.
     await tapKey('store-ready');
     ok(
@@ -585,7 +637,7 @@ void main() {
 
     // reroute (manager) — the electrical shop is the alternative.
     await role('מנהל');
-    await nav('הזמנות');
+    await nav('רכש');
     final posBeforeReroute = db().purchaseOrders.length;
     await tapKey('po-reroute-${tamburPo.id}');
     final reroute = db().purchaseOrders.first;
@@ -615,7 +667,7 @@ void main() {
     await tester.pumpAndSettle();
     await tapKey('store-confirm');
     ok(
-      '"מאשר – יש לי הכול" → החנות אישרה + שלב "בהכנה" בלוח',
+      '"מאשר, יש לי הכול" → החנות אישרה + שלב "בהכנה" בלוח',
       db().po(conf.id).status == MxPoStatus.storeConfirmed &&
           c
                   .read(ordersEngineProvider)
@@ -633,8 +685,9 @@ void main() {
           db().po(conf.id).allocationNo == '123456789',
     );
     ok(
-      'דף החנות לאחר "מוכן" מציג "מוכן לאיסוף"',
-      find.text('מוכן לאיסוף').evaluate().isNotEmpty,
+      'דף החנות לאחר "מוכן" מציג סטטוס "מוכן" ואיסוף',
+      find.text('מוכן').evaluate().isNotEmpty &&
+          db().po(conf.id).fulfil == MxFulfil.pickup,
     );
 
     // back to the app as manager → receive both
@@ -643,18 +696,18 @@ void main() {
     );
     await tester.pumpAndSettle();
     await role('מנהל');
-    await nav('הזמנות');
+    await nav('רכש');
     for (final id in [tamburPo.id, conf.id]) {
       final o = db().po(id);
       final before = {for (final l in o.lines) l.sku: db().qty(l.sku)};
       await tapKey('po-receive-$id');
+      await tapKey('confirm-yes');
       final r = db().po(id);
       ok(
         '"קיבלתי את הסחורה" ($id) → התקבל, מלאי עודכן לשורות שסופקו',
         r.status == MxPoStatus.received &&
             r.lines.every(
-              (l) =>
-                  db().qty(l.sku) == before[l.sku]! + (l.missing ? 0 : l.qty),
+              (l) => db().qty(l.sku) == before[l.sku]! + l.supplied,
             ),
       );
       ok(
@@ -674,6 +727,7 @@ void main() {
     // the tech's waiting job returns after its PO is received
     await tapKey('po-approve-${need.id}');
     await tapKey('po-receive-${need.id}');
+    await tapKey('confirm-yes');
     ok(
       'קריאה שחיכתה לחלק חוזרת לטכנאי',
       db().workOrder(wo3.id).status == MxWoStatus.assigned,

@@ -35,8 +35,10 @@ const Color kMxAccent = kMxSiachSod ? Color(0xFFD7B42C) : Color(0xFFF0A83A);
 
 /// Status colors (AA contrast on the light surfaces).
 const Color kMxBad = kMxCta;
-const Color kMxWarn = kMxSiachSod ? Color(0xFF8A6A00) : Color(0xFFB86E00);
-const Color kMxOk = kMxSiachSod ? Color(0xFF248440) : Color(0xFF1E8A4C);
+// Brand-only palette: "attention" is the dark shade of the gold accent (AA on
+// white), "done / OK" is the petrol primary itself — no off-brand green.
+const Color kMxWarn = kMxSiachSod ? Color(0xFF7A5F00) : Color(0xFFB86E00);
+const Color kMxOk = kMxSiachSod ? Color(0xFF0D4151) : Color(0xFF1E8A4C);
 
 /// Page background and soft panels.
 const Color kMxSurface = kMxSiachSod ? Color(0xFFF5F5F0) : Color(0xFFF4F6F8);
@@ -69,7 +71,7 @@ ThemeData mxBrandTheme() {
     ),
     cardTheme: const CardTheme(
       color: Colors.white,
-      elevation: 6,
+      elevation: 2,
       shadowColor: Color(0x260D4151),
       surfaceTintColor: Colors.transparent,
       margin: EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -121,7 +123,7 @@ ThemeData mxBrandTheme() {
       labelTextStyle: WidgetStateProperty.resolveWith(
         (s) => TextStyle(
           fontFamily: 'Heebo',
-          fontSize: 12.5,
+          fontSize: 12,
           fontWeight:
               s.contains(WidgetState.selected)
                   ? FontWeight.w800
@@ -130,7 +132,48 @@ ThemeData mxBrandTheme() {
         ),
       ),
     ),
-    snackBarTheme: const SnackBarThemeData(backgroundColor: kMxPrimary),
+    snackBarTheme: const SnackBarThemeData(
+      backgroundColor: kMxPrimary,
+      actionTextColor: kMxAccent,
+      contentTextStyle: TextStyle(
+        fontFamily: 'Heebo',
+        fontSize: 16,
+        color: Colors.white,
+      ),
+    ),
+    dialogTheme: const DialogTheme(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(24)),
+      ),
+      titleTextStyle: TextStyle(
+        fontFamily: 'Heebo',
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        color: kMxInk,
+      ),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: kMxSurface,
+      foregroundColor: kMxPrimary,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      titleTextStyle: TextStyle(
+        fontFamily: 'Heebo',
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        color: kMxInk,
+      ),
+    ),
   );
 }
 
@@ -145,12 +188,12 @@ const Color kMxGreenTint = kMxSiachSod ? Color(0xFFDDEFE2) : Color(0xFFDDF0E4);
 Color mxTintOf(Color c) {
   if (c == kMxBad) return kMxPink;
   if (c == kMxWarn) return kMxGoldTint;
-  if (c == kMxOk) return kMxGreenTint;
+  if (c == kMxOk || c == kMxPrimary) return kMxTealTint;
   return kMxTealTint;
 }
 
 /// Soft shadow tinted with the primary color — depth without borders.
 const List<BoxShadow> kMxShadow = [
-  BoxShadow(color: Color(0x140D4151), blurRadius: 22, offset: Offset(0, 8)),
-  BoxShadow(color: Color(0x0A0D4151), blurRadius: 4, offset: Offset(0, 1)),
+  BoxShadow(color: Color(0x0F0D4151), blurRadius: 14, offset: Offset(0, 4)),
+  BoxShadow(color: Color(0x0A0D4151), blurRadius: 2, offset: Offset(0, 1)),
 ];

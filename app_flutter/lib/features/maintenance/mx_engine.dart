@@ -187,9 +187,85 @@ String mxNewToken([Random? rng]) {
   ).join();
 }
 
+// ── labels (no internal codes in front of users) ─────────────────────────────
+
+/// "WO-1001" → "קריאה 1001".
+String mxWoLabel(String id) => 'קריאה ${id.split('-').last}';
+
+/// "PO-1003" → "הזמנה 1003".
+String mxPoLabel(String id) => 'הזמנה ${id.split('-').last}';
+
+// ── urgency ──────────────────────────────────────────────────────────────────
+
+/// Fault words that mean a life-safety risk in housing for people with
+/// intellectual disabilities: open immediately, top of every list.
+const List<String> kMxUrgentWords = [
+  'ניצוצות',
+  'ריח שרוף',
+  'נפתח יותר מדי',
+  'מצפצף',
+  'נפל / חסר',
+  'חשמל',
+  'גז',
+  'הצפה',
+  'עשן',
+];
+
+bool mxIsUrgentText(String text) => kMxUrgentWords.any(text.contains);
+
+/// What staff should do right now for an urgent fault (shown on screen).
+String mxSafetyInstruction(String type, String desc) {
+  if (desc.contains('ניצוצות') || desc.contains('ריח שרוף') || type == 'שקע') {
+    return 'לא לגעת בשקע. לנתק את המפסק בלוח החשמל, להרחיק את הדיירים מהאזור ולהתקשר למנהל האחזקה.';
+  }
+  if (type == 'מעצור חלון' || desc.contains('נפתח יותר מדי')) {
+    return 'לסגור את החלון ולנעול אותו, להרחיק את הדיירים מהחלון ולהתקשר למנהל האחזקה.';
+  }
+  if (type == 'גלאי עשן') {
+    return 'להגביר ערנות במטבח, לוודא שהמטף במקומו ולהתקשר למנהל האחזקה.';
+  }
+  return 'להרחיק את הדיירים מהמקום ולהתקשר למנהל האחזקה.';
+}
+
+/// Where a PO is delivered: the site of the job that needs it, else the
+/// first site (the maintenance store room).
+MxSite mxPoDeliverySite(MxDb db, MxPurchaseOrder o) {
+  for (final w in db.workOrders) {
+    if (w.poId == o.id) {
+      return db.site(
+        db.unit(db.room(db.point(w.pointId).roomId).unitId).siteId,
+      );
+    }
+  }
+  return db.sites.first;
+}
+
+/// Open work orders: urgent first, then newest first.
+List<MxWorkOrder> mxSortedOpen(Iterable<MxWorkOrder> list) {
+  final l =
+      list.toList()..sort((a, b) {
+        if (a.urgent != b.urgent) return a.urgent ? -1 : 1;
+        return b.createdAt.compareTo(a.createdAt);
+      });
+  return l;
+}
+
 // ── work orders ──────────────────────────────────────────────────────────────
 
+MxWorkOrder _logged(MxWorkOrder w, DateTime at, String text, String by) =>
+    w.copyWith(log: [MxEvent(at: at, text: text, by: by), ...w.log]);
+
+/// The open work order already on [pointId], if any (duplicate guard).
+MxWorkOrder? mxOpenOnPoint(MxDb db, String pointId) {
+  for (final w in db.workOrders) {
+    if (w.pointId == pointId && w.isOpen) return w;
+  }
+  return null;
+}
+
 /// Open a work order on a point. Returns the new db and the work-order id.
+/// Safety words make it urgent automatically. A point that already has an
+/// open job is rejected — add a comment to that job instead ([commentOn]).
 (MxDb, String) reportFault(
   MxDb db, {
   required String pointId,
@@ -197,10 +273,16 @@ String mxNewToken([Random? rng]) {
   required String reportedBy,
   required DateTime now,
   bool hasPhoto = false,
+  bool? urgent,
+  String photo = '',
 }) {
   db.point(pointId); // validates
   final text = desc.trim();
   if (text.isEmpty) throw const MxError('צריך לתאר מה קרה');
+  final dup = mxOpenOnPoint(db, pointId);
+  if (dup != null) {
+    throw MxError('כבר דווח – ${mxWoLabel(dup.id)} פתוחה על הנקודה הזו');
+  }
   final seq = db.seq + 1;
   final id = 'WO-$seq';
   final wo = MxWorkOrder(
@@ -209,7 +291,10 @@ String mxNewToken([Random? rng]) {
     desc: text,
     reportedBy: reportedBy,
     createdAt: now,
-    hasPhoto: hasPhoto,
+    hasPhoto: hasPhoto || photo.isNotEmpty,
+    photo: photo,
+    urgent: urgent ?? mxIsUrgentText(text),
+    log: [MxEvent(at: now, text: 'דיווח: $text', by: reportedBy)],
   );
   var next = db.copyWith(workOrders: [wo, ...db.workOrders], seq: seq);
   next = _setPoint(
@@ -220,16 +305,52 @@ String mxNewToken([Random? rng]) {
   return (next, id);
 }
 
-MxDb assignWorkOrder(MxDb db, String woId, String tech) {
+/// Add a comment to an existing job (e.g. "it got worse").
+MxDb commentOn(
+  MxDb db,
+  String woId,
+  String text, {
+  required String by,
+  required DateTime now,
+}) {
+  final w = db.workOrder(woId);
+  final t = text.trim();
+  if (t.isEmpty) throw const MxError('צריך לכתוב הערה');
+  if (!w.isOpen) throw const MxError('הקריאה כבר סגורה');
+  return _setWo(db, woId, (w) => _logged(w, now, 'הערה: $t', by));
+}
+
+MxDb assignWorkOrder(
+  MxDb db,
+  String woId,
+  String tech, {
+  DateTime? now,
+  String by = 'מנהל אחזקה',
+}) {
   final w = db.workOrder(woId);
   if (!w.isOpen) throw const MxError('הקריאה כבר סגורה');
   if (tech.trim().isEmpty) throw const MxError('צריך לבחור טכנאי');
   return _setWo(
     db,
     woId,
-    (w) => w.copyWith(status: MxWoStatus.assigned, assignee: tech.trim()),
+    (w) => _logged(
+      w.copyWith(
+        status:
+            w.status == MxWoStatus.waitingPart
+                ? MxWoStatus.waitingPart
+                : MxWoStatus.assigned,
+        assignee: tech.trim(),
+      ),
+      now ?? w.createdAt,
+      'שויך ל${tech.trim()}',
+      by,
+    ),
   );
 }
+
+/// Open jobs assigned to [tech] (workload in the picker).
+int mxOpenCountFor(MxDb db, String tech) =>
+    db.workOrders.where((w) => w.isOpen && w.assignee == tech).length;
 
 /// Close a job using one unit of the point's part from stock.
 MxDb closeWithPart(
@@ -248,7 +369,12 @@ MxDb closeWithPart(
   next = _setWo(
     next,
     woId,
-    (w) => w.copyWith(status: MxWoStatus.done, closedAt: now),
+    (w) => _logged(
+      w.copyWith(status: MxWoStatus.done, closedAt: now),
+      now,
+      'תוקן – הוחלף ${part.name}',
+      by,
+    ),
   );
   next = _setPoint(
     next,
@@ -258,7 +384,7 @@ MxDb closeWithPart(
       history: [
         MxEvent(
           at: now,
-          text: 'תוקן – הוחלף ${part.name} ($woId)',
+          text: 'תוקן – הוחלף ${part.name} (${mxWoLabel(woId)})',
           by: by,
           costAgorot: part.priceAgorot,
         ),
@@ -269,7 +395,8 @@ MxDb closeWithPart(
   return next;
 }
 
-/// Close a job that needed no part (adjustment, cleaning…).
+/// Close a job that needed no part (adjustment, cleaning, part found
+/// elsewhere…). A pending part request for it is cancelled.
 MxDb closeNoPart(
   MxDb db,
   String woId, {
@@ -279,54 +406,114 @@ MxDb closeNoPart(
 }) {
   final w = db.workOrder(woId);
   if (!w.isOpen) throw const MxError('הקריאה כבר סגורה');
-  final next = _setWo(
-    db,
+  var next = db;
+  if (w.poId.isNotEmpty && db.po(w.poId).status == MxPoStatus.pendingApproval) {
+    next = _setPo(
+      next,
+      w.poId,
+      (o) => o.copyWith(status: MxPoStatus.rejected, note: 'בוטל – $note'),
+    );
+  }
+  next = _setWo(
+    next,
     woId,
-    (w) => w.copyWith(status: MxWoStatus.done, closedAt: now),
+    (w) => _logged(
+      w.copyWith(status: MxWoStatus.done, closedAt: now),
+      now,
+      note,
+      by,
+    ),
   );
   return _setPoint(
     next,
     w.pointId,
     (p) => p.copyWith(
       status: MxPointStatus.ok,
-      history: [MxEvent(at: now, text: '$note ($woId)', by: by), ...p.history],
+      history: [
+        MxEvent(at: now, text: '$note (${mxWoLabel(woId)})', by: by),
+        ...p.history,
+      ],
     ),
   );
 }
 
-/// The tech asks for the point's part: opens a PO (pending approval) to the
-/// matching store and parks the job as waiting-for-part.
+/// The tech asks for a part (default: the point's own part): opens a PO
+/// (pending approval) to the matching store and parks the job.
 (MxDb, String) requestPart(
   MxDb db,
   String woId, {
   required int qty,
   required String by,
   required DateTime now,
+  String? sku,
 }) {
   final w = db.workOrder(woId);
   if (!w.isOpen) throw const MxError('הקריאה כבר סגורה');
   if (qty < 1) throw const MxError('כמות חייבת להיות לפחות 1');
-  final sku = db.point(w.pointId).sku;
-  final store = db.storeFor(sku);
-  if (store == null) throw MxError('אין חנות שמוכרת ${db.part(sku).storeType}');
+  if (w.status == MxWoStatus.waitingPart) {
+    throw const MxError('כבר יש בקשת חלק פתוחה לקריאה הזו');
+  }
+  final part = sku ?? db.point(w.pointId).sku;
+  db.part(part); // validates
+  final store = db.storeFor(part);
+  if (store == null)
+    throw MxError('אין חנות שמוכרת ${db.part(part).storeType}');
   final (next, poId) = _newPo(
     db,
     storeId: store.id,
     lines: [
-      MxPoLine(sku: sku, qty: qty, unitAgorot: db.priceAt(store.id, sku)),
+      MxPoLine(sku: part, qty: qty, unitAgorot: db.priceAt(store.id, part)),
     ],
     by: by,
     now: now,
-    note: 'עבור $woId',
+    note: 'עבור ${mxWoLabel(woId)}',
   );
   return (
     _setWo(
       next,
       woId,
-      (w) => w.copyWith(status: MxWoStatus.waitingPart, poId: poId),
+      (w) => _logged(
+        w.copyWith(status: MxWoStatus.waitingPart, poId: poId),
+        now,
+        'ביקש $qty × ${db.part(part).name} (${mxPoLabel(poId)})',
+        by,
+      ),
     ),
     poId,
   );
+}
+
+/// The tech cancels a part request that was not approved yet.
+MxDb cancelPartRequest(
+  MxDb db,
+  String woId, {
+  required String by,
+  required DateTime now,
+}) {
+  final w = db.workOrder(woId);
+  if (w.status != MxWoStatus.waitingPart || w.poId.isEmpty) {
+    throw const MxError('אין בקשת חלק פתוחה');
+  }
+  final o = db.po(w.poId);
+  if (o.status != MxPoStatus.pendingApproval) {
+    throw const MxError('ההזמנה כבר אושרה – אי אפשר לבטל');
+  }
+  var next = _setPo(
+    db,
+    o.id,
+    (o) => o.copyWith(status: MxPoStatus.rejected, note: 'בוטל ע״י הטכנאי'),
+  );
+  next = _setWo(
+    next,
+    woId,
+    (w) => _logged(
+      w.copyWith(status: MxWoStatus.assigned, poId: ''),
+      now,
+      'ביטל את בקשת החלק',
+      by,
+    ),
+  );
+  return next;
 }
 
 // ── purchasing ───────────────────────────────────────────────────────────────
@@ -384,7 +571,8 @@ MxDb closeNoPart(
   return (next, ids);
 }
 
-/// Manager approval: the PO is sent and gets its store-link token.
+/// Manager approval: the PO gets its store-link token. It is NOT "sent" until
+/// it actually leaves ([markSent]) — no false "נשלח לחנות".
 MxDb approvePo(MxDb db, String poId, {Random? rng}) {
   final o = db.po(poId);
   if (o.status != MxPoStatus.pendingApproval) {
@@ -393,26 +581,42 @@ MxDb approvePo(MxDb db, String poId, {Random? rng}) {
   return _setPo(
     db,
     poId,
-    (o) => o.copyWith(status: MxPoStatus.sent, token: mxNewToken(rng)),
+    (o) => o.copyWith(status: MxPoStatus.approved, token: mxNewToken(rng)),
   );
 }
 
-MxDb rejectPo(MxDb db, String poId, {String reason = ''}) {
+/// The order really left: WhatsApp was opened / the link was delivered.
+MxDb mxMarkSent(MxDb db, String poId) {
+  final o = db.po(poId);
+  if (o.status == MxPoStatus.pendingApproval)
+    throw const MxError('ההזמנה עוד לא אושרה');
+  if (o.status != MxPoStatus.approved) return db; // already further along
+  return _setPo(db, poId, (o) => o.copyWith(status: MxPoStatus.sent));
+}
+
+/// Reject with a reason; jobs that waited on it go back to the tech's queue
+/// with the reason in their log (the tech sees why).
+MxDb rejectPo(MxDb db, String poId, {String reason = '', DateTime? now}) {
   final o = db.po(poId);
   if (o.status != MxPoStatus.pendingApproval) {
     throw const MxError('ההזמנה לא ממתינה לאישור');
   }
+  final why = reason.trim();
   var next = _setPo(
     db,
     poId,
-    (o) => o.copyWith(status: MxPoStatus.rejected, note: reason),
+    (o) => o.copyWith(status: MxPoStatus.rejected, note: why),
   );
-  // Jobs that waited on it go back to the tech's queue.
   for (final w in next.workOrders.where((w) => w.poId == poId && w.isOpen)) {
     next = _setWo(
       next,
       w.id,
-      (w) => w.copyWith(status: MxWoStatus.assigned, poId: ''),
+      (w) => _logged(
+        w.copyWith(status: MxWoStatus.assigned, poId: ''),
+        now ?? o.createdAt,
+        'בקשת החלק נדחתה${why.isEmpty ? '' : ': $why'}',
+        'מנהל אחזקה',
+      ),
     );
   }
   return next;
@@ -428,19 +632,23 @@ void _assertStoreCanAct(MxPurchaseOrder o) {
 }
 
 /// Store answer by link token (WhatsApp) — the same call the dashboard uses.
+/// Any store action proves the order arrived, so `approved` counts as sent.
 MxDb storeAct(
   MxDb db,
   String token,
   MxStoreAction action, {
   String invoiceNo = '',
   String allocationNo = '',
+  MxFulfil? fulfil,
 }) {
   final o = db.poByToken(token);
   if (o == null) throw const MxError('הקישור לא תקף');
   _assertStoreCanAct(o);
   switch (action) {
     case MxStoreAction.confirm:
-      if (o.status != MxPoStatus.sent) throw const MxError('ההזמנה כבר אושרה');
+      if (o.status != MxPoStatus.sent && o.status != MxPoStatus.approved) {
+        throw const MxError('ההזמנה כבר אושרה');
+      }
       return _setPo(
         db,
         o.id,
@@ -452,6 +660,7 @@ MxDb storeAct(
         o.id,
         (o) => o.copyWith(
           status: MxPoStatus.ready,
+          fulfil: fulfil ?? o.fulfil,
           invoiceNo: invoiceNo.trim().isEmpty ? o.invoiceNo : invoiceNo.trim(),
           allocationNo:
               allocationNo.trim().isEmpty
@@ -462,26 +671,39 @@ MxDb storeAct(
   }
 }
 
-/// Store marks one line it cannot supply.
-MxDb storeMarkMissing(MxDb db, String token, String sku) {
+/// Store sets how many of a line it can supply (0 = none, qty = all).
+MxDb storeSetSupplied(MxDb db, String token, String sku, int supplied) {
   final o = db.poByToken(token);
   if (o == null) throw const MxError('הקישור לא תקף');
   _assertStoreCanAct(o);
-  if (!o.lines.any((l) => l.sku == sku)) throw MxError('הפריט לא בהזמנה: $sku');
+  final line = o.lines.where((l) => l.sku == sku).firstOrNull;
+  if (line == null) throw MxError('הפריט לא בהזמנה: $sku');
+  final n = supplied.clamp(0, line.qty);
+  final lines = [
+    for (final l in o.lines) l.sku == sku ? l.copyWith(supplied: n) : l,
+  ];
+  final anyMissing = lines.any((l) => l.missing);
   return _setPo(
     db,
     o.id,
     (o) => o.copyWith(
-      status: MxPoStatus.storePartial,
-      lines: [
-        for (final l in o.lines) l.sku == sku ? l.copyWith(missing: true) : l,
-      ],
+      lines: lines,
+      status: switch (o.status) {
+        MxPoStatus.ready => MxPoStatus.ready,
+        _ when anyMissing => MxPoStatus.storePartial,
+        MxPoStatus.storePartial => MxPoStatus.storeConfirmed,
+        final s => s,
+      },
     ),
   );
 }
 
+/// Store marks a whole line as unavailable.
+MxDb storeMarkMissing(MxDb db, String token, String sku) =>
+    storeSetSupplied(db, token, sku, 0);
+
 /// Note stamped on a PO created by [rerouteMissing] for [poId].
-String mxRerouteNote(String poId) => 'פריטים שחסרו ב-$poId';
+String mxRerouteNote(String poId) => 'פריטים שחסרו ב${mxPoLabel(poId)}';
 
 /// True once the missing lines of [poId] were already sent to another store.
 bool mxRerouted(MxDb db, String poId) => db.purchaseOrders.any(
@@ -493,7 +715,8 @@ bool mxRerouted(MxDb db, String poId) => db.purchaseOrders.any(
 bool mxCanReroute(MxDb db, MxPurchaseOrder o) =>
     o.isOpen && o.lines.any((l) => l.missing) && !mxRerouted(db, o.id);
 
-/// Send the missing lines of [poId] to another store (pending approval).
+/// Send the shortfall of [poId] to another store (pending approval). Jobs
+/// waiting for a rerouted part follow it to the new PO.
 (MxDb, String?) rerouteMissing(MxDb db, String poId, {required DateTime now}) {
   final o = db.po(poId);
   final missing = o.lines.where((l) => l.missing).toList();
@@ -503,17 +726,38 @@ bool mxCanReroute(MxDb db, MxPurchaseOrder o) =>
   }
   final alt = db.storeFor(missing.first.sku, exclude: {o.storeId});
   if (alt == null) throw const MxError('אין חנות חלופית לפריטים החסרים');
-  return _newPo(
+  final (next0, newId) = _newPo(
     db,
     storeId: alt.id,
     lines: [
       for (final l in missing)
-        MxPoLine(sku: l.sku, qty: l.qty, unitAgorot: db.priceAt(alt.id, l.sku)),
+        MxPoLine(
+          sku: l.sku,
+          qty: l.shortfall,
+          unitAgorot: db.priceAt(alt.id, l.sku),
+        ),
     ],
-    by: 'הפניה מ-$poId',
+    by: 'הפניה מ${mxPoLabel(poId)}',
     now: now,
     note: mxRerouteNote(poId),
   );
+  var next = next0;
+  final reroutedSkus = {for (final l in missing) l.sku};
+  for (final w in next.workOrders.where((w) => w.poId == poId && w.isOpen)) {
+    if (reroutedSkus.contains(next.point(w.pointId).sku)) {
+      next = _setWo(
+        next,
+        w.id,
+        (w) => _logged(
+          w.copyWith(poId: newId),
+          now,
+          'החלק הועבר ל${mxPoLabel(newId)}',
+          'מנהל אחזקה',
+        ),
+      );
+    }
+  }
+  return (next, newId);
 }
 
 /// Above this (agorot, before VAT) a supplier tax invoice must carry an
@@ -523,9 +767,9 @@ const int kMxAllocationThresholdAgorot = 500000;
 bool mxNeedsAllocation(MxPurchaseOrder o) =>
     o.totalAgorot > kMxAllocationThresholdAgorot;
 
-/// Goods received: stock += supplied lines; jobs waiting on this PO go back to
-/// "assigned" so the tech can finish them.
-MxDb receivePo(MxDb db, String poId) {
+/// Goods received: stock += supplied quantities; jobs waiting on this PO whose
+/// part actually arrived go back to "assigned" so the tech can finish them.
+MxDb receivePo(MxDb db, String poId, {DateTime? now}) {
   final o = db.po(poId);
   if (o.status == MxPoStatus.pendingApproval ||
       o.status == MxPoStatus.rejected) {
@@ -533,21 +777,35 @@ MxDb receivePo(MxDb db, String poId) {
   }
   if (o.status == MxPoStatus.received) throw const MxError('ההזמנה כבר התקבלה');
   if (mxNeedsAllocation(o) && o.allocationNo.isEmpty) {
-    throw const MxError('חשבונית מעל הסף – חסר מספר הקצאה');
+    throw const MxError('חשבונית מעל ‎5,000 ₪ – חסר מספר הקצאה מרשות המסים');
   }
   final stock = {...db.stock};
-  for (final l in o.lines.where((l) => !l.missing)) {
-    stock[l.sku] = (stock[l.sku] ?? 0) + l.qty;
+  for (final l in o.lines) {
+    if (l.supplied > 0) stock[l.sku] = (stock[l.sku] ?? 0) + l.supplied;
   }
   var next = _setPo(
     db.copyWith(stock: stock),
     poId,
     (o) => o.copyWith(status: MxPoStatus.received),
   );
+  final arrived = {
+    for (final l in o.lines)
+      if (l.supplied > 0) l.sku,
+  };
   for (final w in next.workOrders.where(
     (w) => w.poId == poId && w.status == MxWoStatus.waitingPart,
   )) {
-    next = _setWo(next, w.id, (w) => w.copyWith(status: MxWoStatus.assigned));
+    if (!arrived.contains(next.point(w.pointId).sku)) continue;
+    next = _setWo(
+      next,
+      w.id,
+      (w) => _logged(
+        w.copyWith(status: MxWoStatus.assigned),
+        now ?? o.createdAt,
+        'החלק הגיע למחסן',
+        'מנהל אחזקה',
+      ),
+    );
   }
   return next;
 }

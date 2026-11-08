@@ -59,6 +59,19 @@ class MxNotifier extends StateNotifier<MxDb> {
   final DateTime Function() _now;
   final bool _persist;
   final MxPurchasingPort _port;
+  MxDb? _undo;
+
+  /// Undo the last local step (fix / found part / inspection done / store
+  /// marks). Steps that touched BuildSmart's engines use a confirm instead.
+  bool undo() {
+    final prev = _undo;
+    if (prev == null) return false;
+    _undo = null;
+    state = prev;
+    _save();
+    return true;
+  }
+
   bool _touched = false;
 
   Future<void> _load() async {
@@ -87,6 +100,7 @@ class MxNotifier extends StateNotifier<MxDb> {
     try {
       final next = step(state, _now());
       _touched = true;
+      _undo = state;
       state = next;
       _save();
       return null;
@@ -109,6 +123,7 @@ class MxNotifier extends StateNotifier<MxDb> {
     String desc,
     String by, {
     bool photo = false,
+    String photoData = '',
   }) => _run((db, now) {
     final (n, id) = reportFault(
       db,
@@ -117,13 +132,40 @@ class MxNotifier extends StateNotifier<MxDb> {
       reportedBy: by,
       now: now,
       hasPhoto: photo,
+      photo: photoData,
     );
     lastCreatedId = id;
     return n;
   });
 
   String? assign(String woId, String tech) =>
-      _run((db, _) => assignWorkOrder(db, woId, tech));
+      _run((db, now) => assignWorkOrder(db, woId, tech, now: now));
+  String? comment(String woId, String text, String by) =>
+      _run((db, now) => commentOn(db, woId, text, by: by, now: now));
+  String? cancelRequest(String woId, String by) {
+    final po = state.workOrder(woId).poId;
+    final err = _run(
+      (db, now) => cancelPartRequest(db, woId, by: by, now: now),
+    );
+    if (err == null && po.isNotEmpty) _port.reject(state.po(po));
+    return err;
+  }
+
+  /// Part found elsewhere: close the job, cancel the pending request.
+  String? foundPart(String woId, String by) {
+    final po = state.workOrder(woId).poId;
+    final err = _run(
+      (db, now) =>
+          _closeNoPartNote(db, woId, by, now, 'תוקן – החלק נמצא ממקור אחר'),
+    );
+    if (err == null &&
+        po.isNotEmpty &&
+        state.po(po).status == MxPoStatus.rejected) {
+      _port.reject(state.po(po));
+    }
+    return err;
+  }
+
   String? closeWithPart(String woId, String by) =>
       _run((db, now) => _closeWithPart(db, woId, by, now));
   String? closeNoPart(String woId, String by) =>
@@ -142,9 +184,9 @@ class MxNotifier extends StateNotifier<MxDb> {
     }
   }
 
-  String? requestPart(String woId, int qty, String by) {
+  String? requestPart(String woId, int qty, String by, {String? sku}) {
     final err = _run((db, now) {
-      final (n, id) = _requestPart(db, woId, qty, by, now);
+      final (n, id) = requestPart_(db, woId, qty, by, now, sku);
       lastCreatedId = id;
       return n;
     });
@@ -181,14 +223,17 @@ class MxNotifier extends StateNotifier<MxDb> {
     return null;
   }
 
-  String? reject(String poId) {
-    final err = _run((db, _) => rejectPo(db, poId));
+  String? reject(String poId, {String reason = ''}) {
+    final err = _run((db, now) => rejectPo(db, poId, reason: reason, now: now));
     if (err == null) _port.reject(state.po(poId));
     return err;
   }
 
+  /// The order actually left (WhatsApp opened / link delivered).
+  String? markSent(String poId) => _run((db, _) => mxMarkSent(db, poId));
+
   String? receive(String poId) {
-    final err = _run((db, _) => receivePo(db, poId));
+    final err = _run((db, now) => receivePo(db, poId, now: now));
     if (err == null) _port.received(state.po(poId));
     return err;
   }
@@ -239,6 +284,7 @@ class MxNotifier extends StateNotifier<MxDb> {
     String token, {
     String invoiceNo = '',
     String allocationNo = '',
+    MxFulfil? fulfil,
   }) => _store(
     token,
     (db) => storeAct(
@@ -247,11 +293,14 @@ class MxNotifier extends StateNotifier<MxDb> {
       MxStoreAction.ready,
       invoiceNo: invoiceNo,
       allocationNo: allocationNo,
+      fulfil: fulfil,
     ),
-    'ready',
+    fulfil == MxFulfil.delivery ? 'transit' : 'ready',
   );
   String? storeMissing(String token, String sku) =>
       _run((db, _) => storeMarkMissing(db, token, sku));
+  String? storeSupplied(String token, String sku, int n) =>
+      _run((db, _) => storeSetSupplied(db, token, sku, n));
 
   /// BuildSmart stage of a PO's store order (null = not placed / unknown).
   String? storeStageOf(MxPurchaseOrder po) =>
@@ -276,15 +325,23 @@ class MxNotifier extends StateNotifier<MxDb> {
 // Top-level aliases so the notifier's method names can mirror the engine's.
 MxDb _closeWithPart(MxDb db, String id, String by, DateTime now) =>
     closeWithPart(db, id, by: by, now: now);
+MxDb _closeNoPartNote(
+  MxDb db,
+  String id,
+  String by,
+  DateTime now,
+  String note,
+) => closeNoPart(db, id, by: by, now: now, note: note);
 MxDb _closeNoPart(MxDb db, String id, String by, DateTime now) =>
     closeNoPart(db, id, by: by, now: now);
-(MxDb, String) _requestPart(
+(MxDb, String) requestPart_(
   MxDb db,
   String id,
   int qty,
   String by,
   DateTime now,
-) => requestPart(db, id, qty: qty, by: by, now: now);
+  String? sku,
+) => requestPart(db, id, qty: qty, by: by, now: now, sku: sku);
 (MxDb, List<String>) _autoReorder(MxDb db, DateTime now) =>
     autoReorder(db, now: now);
 MxDb _completePm(MxDb db, String id, DateTime now) =>

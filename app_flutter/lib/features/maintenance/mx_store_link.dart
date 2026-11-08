@@ -16,6 +16,7 @@ import 'package:buildsmart/data/csv_kernel.dart';
 
 import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
+import 'package:buildsmart/features/maintenance/mx_templates.dart';
 
 /// Normalize an Israeli phone to international digits for wa.me:
 /// '050-123 4567' / '+972 50 1234567' / '0501234567' → '972501234567'.
@@ -52,19 +53,24 @@ String mxStoreMessage(
 }) {
   if (o.token.isEmpty) throw const MxError('ההזמנה עוד לא אושרה');
   final s = db.store(o.storeId);
+  final site = mxPoDeliverySite(db, o);
   final b =
       StringBuffer()
         ..writeln('שלום ${s.name},')
-        ..writeln('הזמנה ${o.id} מ$orgName:')
+        ..writeln('${mxPoLabel(o.id)} מ$orgName:')
         ..writeln();
   for (final l in o.lines) {
     b.writeln('• ${l.qty} × ${db.part(l.sku).name}');
   }
   b
     ..writeln()
-    ..writeln('סה"כ משוער: ${mxShekels(o.totalAgorot)} לפני מע"מ')
+    ..writeln('סה״כ משוער: ${mxShekels(o.totalAgorot)} לפני מע״מ')
+    ..writeln(
+      'כתובת: ${site.address.isEmpty ? '${site.city} – ${site.name}' : site.address}',
+    )
+    ..writeln('איש קשר: מחלקת האחזקה, $kMxManagerPhone')
     ..writeln()
-    ..writeln('לאישור / סימון חוסר / מוכן לאיסוף:')
+    ..writeln('לאישור, לסימון מה חסר ולעדכון שההזמנה מוכנה:')
     ..write(mxStoreLink(baseUrl, o.token));
   return b.toString();
 }
@@ -186,7 +192,7 @@ MxPriceImport mxParsePriceList(String text, List<MxPart> parts) {
   }
 
   final bySku = {for (final p in parts) p.sku.toLowerCase(): p.sku};
-  final byName = {for (final p in parts) p.name.trim(): p.sku};
+  final byName = {for (final p in parts) _normName(p.name): p.sku};
   final rows = <MxPriceRow>[];
   for (var i = h + 1; i < records.length; i++) {
     final cells = records[i].cells;
@@ -206,7 +212,7 @@ MxPriceImport mxParsePriceList(String text, List<MxPart> parts) {
       ours = bySku[explicit.toLowerCase()] ?? '';
       if (ours.isEmpty) errors.add('שורה $line: מק"ט שלנו לא קיים "$explicit"');
     } else {
-      ours = bySku[storeSku.toLowerCase()] ?? byName[name] ?? '';
+      ours = bySku[storeSku.toLowerCase()] ?? byName[_normName(name)] ?? '';
     }
     rows.add(
       MxPriceRow(storeSku: storeSku, ourSku: ours, name: name, agorot: price),
@@ -214,6 +220,15 @@ MxPriceImport mxParsePriceList(String text, List<MxPart> parts) {
   }
   return MxPriceImport(rows: rows, errors: errors);
 }
+
+/// Name key tolerant to how stores type Hebrew marks: ״/" and ׳/' are
+/// equivalent, extra spaces ignored.
+String _normName(String s) =>
+    s
+        .replaceAll('״', '"')
+        .replaceAll('׳', "'")
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
 
 /// Store the matched prices on the db for [storeId] (replaces that store's list).
 MxDb mxApplyPrices(MxDb db, String storeId, MxPriceImport imp) {

@@ -101,27 +101,18 @@ class MxHero extends StatelessWidget {
     clipBehavior: Clip.antiAlias,
     child: Stack(
       children: [
-        PositionedDirectional(
-          end: -40,
-          top: -50,
-          child: Container(
-            width: 170,
-            height: 170,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.06),
-            ),
-          ),
-        ),
-        PositionedDirectional(
-          end: 50,
-          bottom: -70,
-          child: Container(
-            width: 130,
-            height: 130,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: kMxAccent.withValues(alpha: 0.16),
+        // One solid gold circle — the brand accent, nothing translucent.
+        const PositionedDirectional(
+          end: -28,
+          bottom: -28,
+          child: SizedBox(
+            width: 88,
+            height: 88,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: kMxAccent,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
         ),
@@ -140,9 +131,8 @@ class MxHero extends StatelessWidget {
                           eyebrow,
                           style: const TextStyle(
                             color: kMxAccent,
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w800,
-                            letterSpacing: 0.3,
                           ),
                         ),
                       ),
@@ -150,9 +140,9 @@ class MxHero extends StatelessWidget {
                       title,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 30,
+                        fontSize: 32,
                         fontWeight: FontWeight.w800,
-                        height: 1.05,
+                        height: 1.1,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -225,7 +215,7 @@ class MxStatCard extends StatelessWidget {
                   Text(
                     '$value',
                     style: TextStyle(
-                      fontSize: 38,
+                      fontSize: 32,
                       fontWeight: FontWeight.w800,
                       color: c,
                       height: 1,
@@ -237,7 +227,7 @@ class MxStatCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: kMxInk,
                     ),
@@ -361,7 +351,7 @@ class MxTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 15.5,
+                  fontSize: 16,
                   fontWeight: FontWeight.w800,
                   height: 1.15,
                 ),
@@ -375,7 +365,7 @@ class MxTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: 12,
                       color: alert ? kMxBad : Colors.black54,
                       fontWeight: alert ? FontWeight.w700 : FontWeight.w400,
                     ),
@@ -543,92 +533,98 @@ Future<void> mxShowSuccess(
   required String title,
   required String body,
   required List<(String label, Key key, VoidCallback onTap)> actions,
+  bool urgent = false,
 }) => showModalBottomSheet<void>(
   context: context,
   showDragHandle: true,
+  isScrollControlled: true,
   backgroundColor: Colors.white,
   builder:
       (ctx) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.4, end: 1),
-                duration: const Duration(milliseconds: 520),
-                curve: Curves.elasticOut,
-                builder:
-                    (_, v, child) => Transform.scale(scale: v, child: child),
-                child: Container(
-                  width: 96,
-                  height: 96,
-                  decoration: const BoxDecoration(
-                    color: kMxGreenTint,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: const CircleAvatar(
-                    radius: 34,
-                    backgroundColor: kMxOk,
-                    child: Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 44,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.4, end: 1),
+                  duration: const Duration(milliseconds: 520),
+                  curve: Curves.elasticOut,
+                  builder:
+                      (_, v, child) => Transform.scale(scale: v, child: child),
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      color: urgent ? kMxPink : kMxTealTint,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: CircleAvatar(
+                      radius: 34,
+                      backgroundColor: urgent ? kMxBad : kMxOk,
+                      child: Icon(
+                        urgent
+                            ? Icons.warning_amber_rounded
+                            : Icons.check_rounded,
+                        color: Colors.white,
+                        size: 44,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                body,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 18),
-              for (final (i, (label, key, onTap)) in actions.indexed)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child:
-                        i == 0
-                            ? FilledButton(
-                              key: key,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: kMxPrimary,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(ctx);
-                                onTap();
-                              },
-                              child: Text(label),
-                            )
-                            : OutlinedButton(
-                              key: key,
-                              onPressed: () {
-                                Navigator.pop(ctx);
-                                onTap();
-                              },
-                              child: Text(label),
-                            ),
+                const SizedBox(height: 14),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-            ],
+                const SizedBox(height: 6),
+                Text(
+                  body,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                for (final (i, (label, key, onTap)) in actions.indexed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child:
+                          i == 0
+                              ? FilledButton(
+                                key: key,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: urgent ? kMxBad : kMxPrimary,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  onTap();
+                                },
+                                child: Text(label),
+                              )
+                              : OutlinedButton(
+                                key: key,
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  onTap();
+                                },
+                                child: Text(label),
+                              ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -680,7 +676,7 @@ class MxSectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
         ),
         if (count != null) ...[
           const SizedBox(width: 8),
@@ -810,7 +806,7 @@ class MxEmpty extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.black54,
-              fontSize: 15.5,
+              fontSize: 16,
               height: 1.4,
             ),
           ),
@@ -820,7 +816,7 @@ class MxEmpty extends StatelessWidget {
   );
 }
 
-/// A white card with soft depth and a colored start edge (status at a glance).
+/// A white card whose status shows as a tinted border (no edge stripes).
 class MxEdgeCard extends StatelessWidget {
   const MxEdgeCard({required this.color, required this.child, super.key});
   final Color color;
@@ -828,25 +824,226 @@ class MxEdgeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     margin: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: color.withValues(alpha: 0.35), width: 1.5),
       boxShadow: kMxShadow,
     ),
-    clipBehavior: Clip.antiAlias,
-    child: IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(width: 6, color: color),
+    child: child,
+  );
+}
+
+/// Small status chip ("ממתין לאישור").
+class MxTag extends StatelessWidget {
+  const MxTag(this.text, this.color, {super.key});
+  final String text;
+  final Color color;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+    decoration: BoxDecoration(
+      color: color == Colors.white ? Colors.white24 : mxTintOf(color),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 12),
+    ),
+  );
+}
+
+/// The role switch: a custom stadium pill, one radio-like segment per role.
+class MxRolePill<T> extends StatelessWidget {
+  const MxRolePill({
+    required this.values,
+    required this.labels,
+    required this.selected,
+    required this.onChanged,
+    super.key,
+  });
+  final List<T> values;
+  final List<String> labels;
+  final T selected;
+  final ValueChanged<T> onChanged;
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 44,
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.14),
+      borderRadius: BorderRadius.circular(22),
+    ),
+    child: Row(
+      children: [
+        for (var i = 0; i < values.length; i++)
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-              child: child,
+            child: Semantics(
+              inMutuallyExclusiveGroup: true,
+              checked: values[i] == selected,
+              button: true,
+              label: labels[i],
+              excludeSemantics: true,
+              onTap: () => onChanged(values[i]),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onChanged(values[i]),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color:
+                        values[i] == selected
+                            ? Colors.white
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        labels[i],
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color:
+                              values[i] == selected ? kMxPrimary : Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+/// Sticky action area at the bottom of a page — the main button is always
+/// visible, never hidden under the navigation bar or the keyboard.
+class MxBottomBar extends StatelessWidget {
+  const MxBottomBar({required this.children, super.key});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: const BoxDecoration(
+      color: Colors.white,
+      border: Border(top: BorderSide(color: kMxLine)),
+    ),
+    child: SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 4, bottom: 4),
+        child: Column(mainAxisSize: MainAxisSize.min, children: children),
+      ),
+    ),
+  );
+}
+
+/// − n + stepper with 48 dp targets.
+class MxStepper extends StatelessWidget {
+  const MxStepper({
+    required this.value,
+    required this.onChanged,
+    this.min = 0,
+    this.max = 999,
+    this.keyPrefix = 'step',
+    super.key,
+  });
+  final int value;
+  final int min;
+  final int max;
+  final String keyPrefix;
+  final ValueChanged<int> onChanged;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      IconButton.outlined(
+        key: Key('$keyPrefix-minus'),
+        tooltip: 'פחות',
+        onPressed: value > min ? () => onChanged(value - 1) : null,
+        icon: const Icon(Icons.remove),
+      ),
+      SizedBox(
+        width: 44,
+        child: Text(
+          '$value',
+          key: Key('$keyPrefix-value'),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        ),
+      ),
+      IconButton.outlined(
+        key: Key('$keyPrefix-plus'),
+        tooltip: 'יותר',
+        onPressed: value < max ? () => onChanged(value + 1) : null,
+        icon: const Icon(Icons.add),
+      ),
+    ],
+  );
+}
+
+/// Red safety banner for urgent faults: what to do now + a call button.
+class MxUrgentBanner extends StatelessWidget {
+  const MxUrgentBanner({
+    required this.title,
+    required this.body,
+    this.onCall,
+    super.key,
+  });
+  final String title;
+  final String body;
+  final VoidCallback? onCall;
+  @override
+  Widget build(BuildContext context) => Container(
+    margin: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+    decoration: BoxDecoration(
+      color: kMxPink,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: kMxBad, width: 1.5),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: kMxBad),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: kMxBad,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(body, style: const TextStyle(fontSize: 16, height: 1.4)),
+        if (onCall != null) ...[
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 48,
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('urgent-call'),
+              onPressed: onCall,
+              icon: const Icon(Icons.call),
+              label: const Text('התקשרו למנהל האחזקה'),
             ),
           ),
         ],
-      ),
+      ],
     ),
   );
 }

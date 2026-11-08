@@ -42,7 +42,9 @@ void main() {
         orgName: 'הארגון',
       );
       expect(msg, startsWith('שלום טמבור השכונה (דוגמה),'));
-      expect(msg, contains('הזמנה ${o.id} מהארגון'));
+      expect(msg, contains('${mxPoLabel(o.id)} מהארגון'));
+      expect(msg, contains('כתובת: '));
+      expect(msg, contains(kMxManagerPhone));
       for (final l in o.lines) {
         expect(msg, contains('• ${l.qty} × ${db.part(l.sku).name}'));
       }

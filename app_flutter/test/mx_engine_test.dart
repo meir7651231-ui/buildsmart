@@ -129,7 +129,7 @@ void main() {
         expect(db.qty('EL-SK16'), before - 1);
         final p = db.point(db.workOrder(id).pointId);
         expect(p.status, MxPointStatus.ok);
-        expect(p.history.first.text, contains(id));
+        expect(p.history.first.text, contains(mxWoLabel(id)));
         expect(p.history.first.costAgorot, 1800);
         expect(db.workOrder(id).status, MxWoStatus.done);
         expect(
@@ -199,6 +199,12 @@ void main() {
       db = approvePo(db, po, rng: Random(1));
       final token = db.po(po).token;
       expect(token.length, 20);
+      expect(
+        db.po(po).status,
+        MxPoStatus.approved,
+        reason: 'approved is NOT sent until it actually leaves',
+      );
+      db = mxMarkSent(db, po);
       expect(db.po(po).status, MxPoStatus.sent);
 
       db = storeAct(db, token, MxStoreAction.confirm);
@@ -386,6 +392,196 @@ void main() {
       expect(mxCanReroute(db3, db3.po(po.id)), isTrue);
     },
   );
+
+  group('critique fixes', () {
+    String pointOf(MxDb db, String type) {
+      final k = db.roomsOf('jrs-3').firstWhere((r) => r.name == 'מטבח');
+      return db.pointsOf(k.id).firstWhere((p) => p.type == type).id;
+    }
+
+    test('safety words make a job urgent; urgent sorts first', () {
+      var db = seed();
+      final (db1, drip) = reportFault(
+        db,
+        pointId: pointOf(db, 'ברז'),
+        desc: 'מטפטף',
+        reportedBy: 'x',
+        now: now,
+      );
+      final (db2, sparks) = reportFault(
+        db1,
+        pointId: pointOf(db1, 'שקע'),
+        desc: 'ניצוצות / ריח שרוף',
+        reportedBy: 'x',
+        now: now.subtract(const Duration(hours: 1)),
+      );
+      db = db2;
+      expect(db.workOrder(sparks).urgent, isTrue);
+      expect(db.workOrder(drip).urgent, isFalse);
+      expect(
+        mxSortedOpen(db.openWorkOrders).first.id,
+        sparks,
+        reason: 'older but urgent',
+      );
+      expect(mxSafetyInstruction('שקע', 'ניצוצות'), contains('המפסק'));
+    });
+
+    test('duplicate report on the same point is refused; comment instead', () {
+      final (db, id) = reportFault(
+        seed(),
+        pointId: pointOf(seed(), 'סיפון'),
+        desc: 'סתום',
+        reportedBy: 'a',
+        now: now,
+      );
+      expect(
+        () => reportFault(
+          db,
+          pointId: db.workOrder(id).pointId,
+          desc: 'שוב',
+          reportedBy: 'b',
+          now: now,
+        ),
+        throwsA(
+          isA<MxError>().having(
+            (e) => e.message,
+            'msg',
+            contains(mxWoLabel(id)),
+          ),
+        ),
+      );
+      final db2 = commentOn(db, id, 'החמיר', by: 'b', now: now);
+      expect(db2.workOrder(id).log.first.text, 'הערה: החמיר');
+      expect(db2.workOrder(id).log.length, 2, reason: 'report + comment');
+    });
+
+    test('reject reason reaches the tech log', () {
+      var db = seed();
+      final (db1, wo) = reportFault(
+        db,
+        pointId: pointOf(db, 'שקע'),
+        desc: 'x',
+        reportedBy: 'm',
+        now: now,
+      );
+      final (db2, po) = requestPart(
+        assignWorkOrder(db1, wo, 't'),
+        wo,
+        qty: 1,
+        by: 't',
+        now: now,
+      );
+      db = rejectPo(db2, po, reason: 'יש במחסן המרכזי', now: now);
+      expect(
+        db.workOrder(wo).log.first.text,
+        'בקשת החלק נדחתה: יש במחסן המרכזי',
+      );
+    });
+
+    test('cancel request / found part', () {
+      var db = seed();
+      final (db1, wo) = reportFault(
+        db,
+        pointId: pointOf(db, 'שקע'),
+        desc: 'x',
+        reportedBy: 'm',
+        now: now,
+      );
+      final (db2, po) = requestPart(
+        assignWorkOrder(db1, wo, 't'),
+        wo,
+        qty: 2,
+        by: 't',
+        now: now,
+      );
+      expect(
+        () => requestPart(db2, wo, qty: 1, by: 't', now: now),
+        throwsA(isA<MxError>()),
+        reason: 'one request at a time',
+      );
+      db = cancelPartRequest(db2, wo, by: 't', now: now);
+      expect(db.po(po).status, MxPoStatus.rejected);
+      expect(db.workOrder(wo).status, MxWoStatus.assigned);
+      final (db3, po2) = requestPart(db, wo, qty: 1, by: 't', now: now);
+      db = closeNoPart(
+        db3,
+        wo,
+        by: 't',
+        now: now,
+        note: 'תוקן – החלק נמצא ממקור אחר',
+      );
+      expect(db.workOrder(wo).status, MxWoStatus.done);
+      expect(
+        db.po(po2).status,
+        MxPoStatus.rejected,
+        reason: 'pending request cancelled',
+      );
+    });
+
+    test(
+      'partial supply: receive adds only supplied; reroute takes the shortfall and moves the job',
+      () {
+        var db = seed();
+        final (db1, wo) = reportFault(
+          db,
+          pointId: pointOf(db, 'שקע'),
+          desc: 'x',
+          reportedBy: 'm',
+          now: now,
+        );
+        final (db2, po) = requestPart(
+          assignWorkOrder(db1, wo, 't'),
+          wo,
+          qty: 10,
+          by: 't',
+          now: now,
+        );
+        db = approvePo(db2, po);
+        final token = db.po(po).token;
+        db = storeSetSupplied(db, token, 'EL-SK16', 0);
+        expect(db.po(po).status, MxPoStatus.storePartial);
+        final (db3, alt) = rerouteMissing(db, po, now: now);
+        db = db3;
+        expect(db.po(alt!).lines.single.qty, 10);
+        expect(
+          db.workOrder(wo).poId,
+          alt,
+          reason: 'the waiting job follows the rerouted part',
+        );
+        final before = db.qty('EL-SK16');
+        db = receivePo(db, po);
+        expect(db.qty('EL-SK16'), before);
+        expect(
+          db.workOrder(wo).status,
+          MxWoStatus.waitingPart,
+          reason: 'part did not arrive yet',
+        );
+
+        // partial quantity on another order
+        final (db4, ids) = autoReorder(seed(), now: now);
+        var d = approvePo(db4, ids.first);
+        final o = d.po(ids.first);
+        final l = o.lines.first;
+        d = storeSetSupplied(d, o.token, l.sku, l.qty - 2);
+        expect(d.po(o.id).lines.first.shortfall, 2);
+        final had = d.qty(l.sku);
+        d = receivePo(d, o.id);
+        expect(d.qty(l.sku), had + l.qty - 2);
+      },
+    );
+
+    test('store may act on an approved (not yet marked sent) order', () {
+      final (db0, ids) = autoReorder(seed(), now: now);
+      var db = approvePo(db0, ids.first);
+      db = storeAct(db, db.po(ids.first).token, MxStoreAction.confirm);
+      expect(db.po(ids.first).status, MxPoStatus.storeConfirmed);
+    });
+
+    test('labels hide internal codes', () {
+      expect(mxWoLabel('WO-1001'), 'קריאה 1001');
+      expect(mxPoLabel('PO-1003'), 'הזמנה 1003');
+    });
+  });
 
   group('stock — auto reorder', () {
     test('one PO per store, every low line topped up to 2×min', () {
