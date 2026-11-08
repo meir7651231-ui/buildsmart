@@ -5,10 +5,13 @@
 /// [mxDbProvider], so every screen updates live after any action.
 library;
 
+import 'package:buildsmart/features/maintenance/mx_brand.dart';
+import 'package:buildsmart/features/maintenance/mx_bridge.dart';
 import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_state.dart';
 import 'package:buildsmart/features/maintenance/mx_store_link.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/url_launcher_seam.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,17 +23,12 @@ const String kMxStaffUnit = 'jrs-3';
 const String kMxStaffLabel = 'מדריך – דירה 3';
 const String kMxStoreId = 'st-tambur';
 
-const Color _brand = Color(0xFF1F5FA8);
-const Color _bad = Color(0xFFC0362C);
-const Color _warn = Color(0xFFB86E00);
-const Color _ok = Color(0xFF1E8A4C);
+const Color _brand = kMxPrimary;
+const Color _bad = kMxBad;
+const Color _warn = kMxWarn;
+const Color _ok = kMxOk;
 
-ThemeData mxTheme() => ThemeData(
-  useMaterial3: true,
-  colorScheme: ColorScheme.fromSeed(seedColor: _brand),
-  scaffoldBackgroundColor: const Color(0xFFF4F6F8),
-  cardTheme: const CardTheme(margin: EdgeInsets.fromLTRB(12, 0, 12, 10)),
-);
+ThemeData mxTheme() => mxBrandTheme();
 
 void _toast(BuildContext context, String? error, String success) {
   ScaffoldMessenger.of(context)
@@ -54,7 +52,7 @@ class _Tag extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(
       color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(20),
     ),
     child: Text(
       text,
@@ -175,9 +173,24 @@ class _MxHomeState extends ConsumerState<MxHome> {
       appBar: AppBar(
         backgroundColor: _brand,
         foregroundColor: Colors.white,
-        title: const Text(
-          'ניהול אחזקה ורכש',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.only(
+            bottomEnd: Radius.circular(36),
+          ),
+        ),
+        title: const Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: kMxWordmark,
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
+              ),
+              TextSpan(
+                text: '  ·  $kMxSubtitle',
+                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
+              ),
+            ],
+          ),
         ),
         actions: [
           IconButton(
@@ -1142,6 +1155,8 @@ class _OrdersPage extends ConsumerWidget {
     final db = ref.watch(mxDbProvider);
     final role = ref.watch(mxRoleProvider);
     final n = ref.read(mxDbProvider.notifier);
+    // Rebuild when the store moves its order on the BuildSmart dashboard.
+    ref.watch(ordersEngineProvider);
     if (db.purchaseOrders.isEmpty) {
       return ListView(
         children: [
@@ -1185,6 +1200,27 @@ class _OrdersPage extends ConsumerWidget {
                     Text(
                       '${l.missing ? '✖ ' : '• '}${l.qty} × ${db.part(l.sku).name}${l.missing ? ' (חסר בחנות)' : ''}',
                       style: TextStyle(color: l.missing ? _bad : null),
+                    ),
+                  if (o.orderId.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        'לוח החנות ב-BuildSmart: ${o.orderId} · '
+                        '${mxStageLabel(n.storeStageOf(o) ?? 'new')}',
+                        key: Key('po-bs-${o.id}'),
+                        style: const TextStyle(
+                          color: _brand,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    )
+                  else if (o.matReqId.isNotEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4),
+                      child: Text(
+                        'ממתין בתור הבקשות של BuildSmart',
+                        style: TextStyle(color: _brand),
+                      ),
                     ),
                   if (o.invoiceNo.isNotEmpty)
                     Text(

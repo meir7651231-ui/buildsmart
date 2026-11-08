@@ -565,3 +565,43 @@ String mxShekels(int agorot) {
   final s = cents == 0 ? whole : '$whole.${cents.toString().padLeft(2, '0')}';
   return '${neg ? '-' : ''}$s ₪';
 }
+
+// ── BuildSmart link ──────────────────────────────────────────────────────────
+
+/// Record which BuildSmart request / order a PO rides on.
+MxDb linkPo(MxDb db, String poId, {String? matReqId, String? orderId}) {
+  db.po(poId); // validates
+  return _setPo(
+    db,
+    poId,
+    (o) => o.copyWith(matReqId: matReqId, orderId: orderId),
+  );
+}
+
+/// BuildSmart order stage → the PO status it implies (null = no change).
+/// `delivered` deliberately maps to `ready`: stock is only added when the
+/// manager confirms receipt ([receivePo]) — a store tap never moves stock.
+MxPoStatus? mxStatusForStage(String stage) => switch (stage) {
+  'preparing' => MxPoStatus.storeConfirmed,
+  'ready' || 'pickup' || 'transit' || 'delivered' => MxPoStatus.ready,
+  _ => null,
+};
+
+/// Adopt a stage the store set on its own BuildSmart dashboard. Only moves a
+/// PO FORWARD (never undoes a manager action, never touches closed POs, never
+/// overrides a store's "missing" marks with a plain confirm).
+MxDb syncPoFromStage(MxDb db, String poId, String stage) {
+  final o = db.po(poId);
+  final next = mxStatusForStage(stage);
+  if (next == null || !o.isOpen || o.status == MxPoStatus.pendingApproval) {
+    return db;
+  }
+  const rank = {
+    MxPoStatus.sent: 0,
+    MxPoStatus.storeConfirmed: 1,
+    MxPoStatus.storePartial: 1,
+    MxPoStatus.ready: 2,
+  };
+  if ((rank[next] ?? 0) <= (rank[o.status] ?? 0)) return db;
+  return _setPo(db, poId, (o) => o.copyWith(status: next));
+}

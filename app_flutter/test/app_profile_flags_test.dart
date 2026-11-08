@@ -137,6 +137,8 @@ const Set<String> kPassthrough = {
   // messages. Inert outside the standalone maintenance demo entry.
   'MX_STORE_BASE',
   'MX_ORG_NAME',
+  // maintenance module client branding ('siachsod' | 'neutral') — a VALUE.
+  'MX_BRAND',
 };
 
 /// The profile define itself.

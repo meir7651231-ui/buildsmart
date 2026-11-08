@@ -8,10 +8,13 @@ import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_screens.dart';
 import 'package:buildsmart/features/maintenance/mx_state.dart';
 import 'package:buildsmart/features/maintenance/mx_templates.dart';
+import 'package:buildsmart/state/material_requests_engine.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/url_launcher_seam.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   final now = DateTime(2026, 11, 8, 10);
@@ -22,13 +25,11 @@ void main() {
     addTearDown(tester.view.reset);
 
     final launched = <Uri>[];
+    // REAL providers end-to-end: purchasing rides BuildSmart's own engines.
+    SharedPreferences.setMockInitialValues({});
     final container = ProviderContainer(
       overrides: [
         mxClockProvider.overrideWithValue(() => now),
-        mxDbProvider.overrideWith(
-          (ref) =>
-              MxNotifier(() => now, persist: false, initial: mxDemoSeed(now)),
-        ),
         urlLauncherProvider.overrideWithValue((uri) async {
           launched.add(uri);
           return true;
@@ -127,6 +128,20 @@ void main() {
     await tab('הזמנות');
     await tapKey('po-approve-${po.id}');
     expect(db().po(po.id).status, MxPoStatus.sent);
+    // The approval rode BuildSmart: request ordered + a real store order.
+    final orderId = db().po(po.id).orderId;
+    expect(
+      container.read(ordersEngineProvider).any((o) => o.id == orderId),
+      isTrue,
+    );
+    expect(
+      container
+          .read(materialRequestsProvider)
+          .firstWhere((r) => r.id == db().po(po.id).matReqId)
+          .status,
+      kMatReqOrdered,
+    );
+    expect(find.byKey(Key('po-bs-${po.id}')), findsOneWidget);
     await tapKey('po-wa-${po.id}');
     expect(launched.single.host, 'wa.me');
     expect(launched.single.queryParameters['text'], contains(po.id));
@@ -155,6 +170,13 @@ void main() {
     await tapKey('po-receive-${po.id}');
     expect(db().po(po.id).status, MxPoStatus.received);
     expect(db().qty(line.sku), had + line.qty);
+    expect(
+      container
+          .read(ordersEngineProvider)
+          .firstWhere((o) => o.id == orderId)
+          .stage,
+      'delivered',
+    );
 
     // ── PM: mark an overdue legal check done ──
     await tab('תחזוקה');

@@ -5,16 +5,23 @@
 /// engine [MxError]s into a returned message for the UI (null = success).
 /// The clock is injectable ([mxClockProvider]) so widget tests are stable.
 ///
-/// SERVER-SWAP: a Firestore repo (orgs/{org}/mx/*) replaces the prefs blob in
-/// the pilot; the engine and screens do not change.
+/// Purchasing is NOT a parallel pipeline: every PO is mirrored into
+/// BuildSmart's own engines through [MxPurchasingPort] (see `mx_bridge.dart`)
+/// — the approval queue (`materialRequestsProvider`) and the store dashboard
+/// (`ordersEngineProvider`), both Firestore-backed when the backend is on.
+///
+/// SERVER-SWAP: the register / PM / stock blob moves to Firestore
+/// (orgs/{org}/mx/*) in the pilot; the engine and screens do not change.
 library;
 
 import 'dart:convert';
 
+import 'package:buildsmart/features/maintenance/mx_bridge.dart';
 import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_store_link.dart';
 import 'package:buildsmart/features/maintenance/mx_templates.dart';
+import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,14 +45,20 @@ final mxClockProvider = Provider<DateTime Function()>((_) => DateTime.now);
 final mxRoleProvider = StateProvider<MxRole>((_) => MxRole.manager);
 
 class MxNotifier extends StateNotifier<MxDb> {
-  MxNotifier(this._now, {bool persist = true, MxDb? initial})
-    : _persist = persist,
-      super(initial ?? mxDemoSeed(_now())) {
+  MxNotifier(
+    this._now, {
+    bool persist = true,
+    MxDb? initial,
+    MxPurchasingPort port = const MxNoPort(),
+  }) : _persist = persist,
+       _port = port,
+       super(initial ?? mxDemoSeed(_now())) {
     if (persist) _load();
   }
 
   final DateTime Function() _now;
   final bool _persist;
+  final MxPurchasingPort _port;
   bool _touched = false;
 
   Future<void> _load() async {
@@ -116,50 +129,133 @@ class MxNotifier extends StateNotifier<MxDb> {
   String? closeNoPart(String woId, String by) =>
       _run((db, now) => _closeNoPart(db, woId, by, now));
 
-  String? requestPart(String woId, int qty, String by) => _run((db, now) {
-    final (n, id) = _requestPart(db, woId, qty, by, now);
-    lastCreatedId = id;
-    return n;
-  });
-
-  String? autoReorder() => _run((db, now) {
-    final (n, ids) = _autoReorder(db, now);
-    if (ids.isEmpty) {
-      throw const MxError(
-        'אין פריטים להזמין – הכול מעל המינימום או כבר בהזמנה',
-      );
+  /// File every PO in [poIds] into BuildSmart's approval queue.
+  void _submit(List<String> poIds, String techName) {
+    var db = state;
+    for (final id in poIds) {
+      final reqId = _port.submitRequest(db, db.po(id), techName: techName);
+      if (reqId.isNotEmpty) db = linkPo(db, id, matReqId: reqId);
     }
-    lastCreatedId = ids.first;
-    return n;
-  });
+    if (!identical(db, state)) {
+      state = db;
+      _save();
+    }
+  }
 
-  String? approve(String poId) => _run((db, _) => approvePo(db, poId));
-  String? reject(String poId) => _run((db, _) => rejectPo(db, poId));
-  String? receive(String poId) => _run((db, _) => receivePo(db, poId));
-  String? reroute(String poId) => _run((db, now) {
-    final (n, id) = rerouteMissing(db, poId, now: now);
-    if (id == null) throw const MxError('אין פריטים חסרים');
-    lastCreatedId = id;
-    return n;
-  });
+  String? requestPart(String woId, int qty, String by) {
+    final err = _run((db, now) {
+      final (n, id) = _requestPart(db, woId, qty, by, now);
+      lastCreatedId = id;
+      return n;
+    });
+    if (err == null) _submit([lastCreatedId!], by);
+    return err;
+  }
 
-  String? storeConfirm(String token) =>
-      _run((db, _) => storeAct(db, token, MxStoreAction.confirm));
+  String? autoReorder() {
+    var ids = <String>[];
+    final err = _run((db, now) {
+      final (n, created) = _autoReorder(db, now);
+      if (created.isEmpty) {
+        throw const MxError(
+          'אין פריטים להזמין – הכול מעל המינימום או כבר בהזמנה',
+        );
+      }
+      ids = created;
+      lastCreatedId = created.first;
+      return n;
+    });
+    if (err == null) _submit(ids, 'המערכת · מינימום מלאי');
+    return err;
+  }
+
+  String? approve(String poId) {
+    final err = _run((db, _) => approvePo(db, poId));
+    if (err != null) return err;
+    final po = state.po(poId);
+    final orderId = _port.approve(state, po, site: mxPoSite(state, po));
+    if (orderId.isNotEmpty) {
+      state = linkPo(state, poId, orderId: orderId);
+      _save();
+    }
+    return null;
+  }
+
+  String? reject(String poId) {
+    final err = _run((db, _) => rejectPo(db, poId));
+    if (err == null) _port.reject(state.po(poId));
+    return err;
+  }
+
+  String? receive(String poId) {
+    final err = _run((db, _) => receivePo(db, poId));
+    if (err == null) _port.received(state.po(poId));
+    return err;
+  }
+
+  String? reroute(String poId) {
+    final err = _run((db, now) {
+      final (n, id) = rerouteMissing(db, poId, now: now);
+      if (id == null) throw const MxError('אין פריטים חסרים');
+      lastCreatedId = id;
+      return n;
+    });
+    if (err == null) _submit([lastCreatedId!], 'הפניית חוסרים');
+    return err;
+  }
+
+  /// Adopt stages a store set on its BuildSmart dashboard.
+  void syncFromOrders(List<Order> orders) {
+    final byId = {for (final o in orders) o.id: o.stage};
+    var db = state;
+    for (final po in db.purchaseOrders) {
+      final stage = byId[po.orderId];
+      if (po.orderId.isNotEmpty && stage != null) {
+        db = syncPoFromStage(db, po.id, stage);
+      }
+    }
+    if (!identical(db, state)) {
+      state = db;
+      _save();
+    }
+  }
+
+  /// The store's link actions also move its BuildSmart order.
+  String? _store(String token, MxDb Function(MxDb) step, String stage) {
+    final err = _run((db, _) => step(db));
+    if (err == null) {
+      final po = state.poByToken(token);
+      if (po != null) _port.storeStage(po, stage);
+    }
+    return err;
+  }
+
+  String? storeConfirm(String token) => _store(
+    token,
+    (db) => storeAct(db, token, MxStoreAction.confirm),
+    'preparing',
+  );
   String? storeReady(
     String token, {
     String invoiceNo = '',
     String allocationNo = '',
-  }) => _run(
-    (db, _) => storeAct(
+  }) => _store(
+    token,
+    (db) => storeAct(
       db,
       token,
       MxStoreAction.ready,
       invoiceNo: invoiceNo,
       allocationNo: allocationNo,
     ),
+    'ready',
   );
   String? storeMissing(String token, String sku) =>
       _run((db, _) => storeMarkMissing(db, token, sku));
+
+  /// BuildSmart stage of a PO's store order (null = not placed / unknown).
+  String? storeStageOf(MxPurchaseOrder po) =>
+      po.orderId.isEmpty ? null : _port.stageOf(po.orderId);
 
   String? completePm(String ruleId) =>
       _run((db, now) => _completePm(db, ruleId, now));
@@ -194,6 +290,21 @@ MxDb _closeNoPart(MxDb db, String id, String by, DateTime now) =>
 MxDb _completePm(MxDb db, String id, DateTime now) =>
     completePm(db, id, now: now);
 
-final mxDbProvider = StateNotifierProvider<MxNotifier, MxDb>(
-  (ref) => MxNotifier(ref.watch(mxClockProvider)),
+/// The seam to BuildSmart's engines (tests may override with [MxNoPort]).
+final mxPurchasingPortProvider = Provider<MxPurchasingPort>(
+  MxBuildSmartPort.new,
 );
+
+final mxDbProvider = StateNotifierProvider<MxNotifier, MxDb>((ref) {
+  final n = MxNotifier(
+    ref.watch(mxClockProvider),
+    port: ref.watch(mxPurchasingPortProvider),
+  );
+  // A store that advances the order on its own BuildSmart dashboard moves the
+  // PO forward here too.
+  ref.listen<List<Order>>(
+    ordersEngineProvider,
+    (_, orders) => n.syncFromOrders(orders),
+  );
+  return n;
+});

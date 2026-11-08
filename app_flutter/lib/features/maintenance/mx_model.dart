@@ -455,6 +455,8 @@ class MxPurchaseOrder {
     this.invoiceNo = '',
     this.allocationNo = '',
     this.note = '',
+    this.matReqId = '',
+    this.orderId = '',
   });
 
   factory MxPurchaseOrder.fromJson(Map<String, Object?> j) => MxPurchaseOrder(
@@ -475,6 +477,8 @@ class MxPurchaseOrder {
     invoiceNo: (j['invoiceNo'] ?? '') as String,
     allocationNo: (j['allocationNo'] ?? '') as String,
     note: (j['note'] ?? '') as String,
+    matReqId: (j['matReqId'] ?? '') as String,
+    orderId: (j['orderId'] ?? '') as String,
   );
   final String id;
   final String storeId;
@@ -491,6 +495,12 @@ class MxPurchaseOrder {
   final String allocationNo;
   final String note;
 
+  /// BuildSmart material-request id (the approval queue) — '' until submitted.
+  final String matReqId;
+
+  /// BuildSmart order id (`BS-####`, the store dashboard) — '' until approved.
+  final String orderId;
+
   int get totalAgorot => lines.fold(0, (a, l) => a + l.totalAgorot);
   bool get isOpen =>
       status != MxPoStatus.received && status != MxPoStatus.rejected;
@@ -502,6 +512,8 @@ class MxPurchaseOrder {
     String? invoiceNo,
     String? allocationNo,
     String? note,
+    String? matReqId,
+    String? orderId,
   }) => MxPurchaseOrder(
     id: id,
     storeId: storeId,
@@ -513,6 +525,8 @@ class MxPurchaseOrder {
     invoiceNo: invoiceNo ?? this.invoiceNo,
     allocationNo: allocationNo ?? this.allocationNo,
     note: note ?? this.note,
+    matReqId: matReqId ?? this.matReqId,
+    orderId: orderId ?? this.orderId,
   );
 
   Map<String, Object?> toJson() => {
@@ -526,6 +540,8 @@ class MxPurchaseOrder {
     'invoiceNo': invoiceNo,
     'allocationNo': allocationNo,
     'note': note,
+    'matReqId': matReqId,
+    'orderId': orderId,
   };
 }
 
