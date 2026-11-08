@@ -836,11 +836,7 @@ class _PointPage extends ConsumerWidget {
             label: 'דווח תקלה בנקודה הזו',
             icon: Icons.campaign_outlined,
             onPressed: () async {
-              final text = await _askText(
-                context,
-                'מה קרה?',
-                'לדוגמה: השקע מעלה ניצוצות',
-              );
+              final text = await _askFault(context, p.type);
               if (text == null || !context.mounted) return;
               final n = ref.read(mxDbProvider.notifier);
               final by =
@@ -858,6 +854,152 @@ class _PointPage extends ConsumerWidget {
     );
   }
 }
+
+/// Same ready-made reasons as the staff report, in a sheet: tap a reason
+/// (optionally add a word) instead of typing a free-text description.
+Future<String?> _askFault(BuildContext context, String type) {
+  final text = TextEditingController();
+  var reason = '';
+  return showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: Colors.white,
+    builder:
+        (ctx) => StatefulBuilder(
+          builder:
+              (ctx, setSheet) => Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  0,
+                  16,
+                  16 + MediaQuery.viewInsetsOf(ctx).bottom,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'מה קרה?',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final (i, r) in mxQuickReasons(type).indexed)
+                          ChoiceChip(
+                            key: Key('fault-reason-$i'),
+                            label: Text(
+                              r,
+                              style: const TextStyle(fontSize: 15),
+                            ),
+                            selected: reason == r,
+                            showCheckmark: false,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                            selectedColor: kMxCta.withValues(alpha: 0.12),
+                            side: BorderSide(
+                              color: reason == r ? kMxCta : kMxLine,
+                              width: reason == r ? 2 : 1,
+                            ),
+                            shape: const StadiumBorder(),
+                            onSelected:
+                                (_) => setSheet(
+                                  () => reason = reason == r ? '' : r,
+                                ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const Key('fault-text'),
+                      controller: text,
+                      onChanged: (_) => setSheet(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'פרטים נוספים (לא חובה)',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 54,
+                      child: FilledButton(
+                        key: const Key('fault-send'),
+                        onPressed:
+                            reason.isEmpty && text.text.trim().isEmpty
+                                ? null
+                                : () => Navigator.pop(
+                                  ctx,
+                                  [
+                                    reason,
+                                    text.text.trim(),
+                                  ].where((x) => x.isNotEmpty).join(' – '),
+                                ),
+                        child: const Text('פתח קריאה'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+        ),
+  );
+}
+
+/// Quantity picker for a part request — big buttons, no keyboard.
+Future<int?> _askQty(BuildContext context, String partName) =>
+    showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: Colors.white,
+      builder:
+          (ctx) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'כמה להזמין?',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                ),
+                Text(
+                  partName,
+                  style: const TextStyle(color: Colors.black54, fontSize: 15),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    for (final q in const [1, 2, 4, 10]) ...[
+                      if (q != 1) const SizedBox(width: 8),
+                      Expanded(
+                        child: SizedBox(
+                          height: 64,
+                          child: OutlinedButton(
+                            key: Key('qty-$q'),
+                            onPressed: () => Navigator.pop(ctx, q),
+                            child: Text(
+                              '$q',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+    );
 
 Future<String?> _askText(
   BuildContext context,
@@ -1101,8 +1243,10 @@ class _WorkOrderPage extends ConsumerWidget {
                       height: 52,
                       child: OutlinedButton(
                         key: const Key('wo-need'),
-                        onPressed: () {
-                          final err = n.requestPart(woId, 4, kMxTechName);
+                        onPressed: () async {
+                          final qty = await _askQty(context, part.name);
+                          if (qty == null || !context.mounted) return;
+                          final err = n.requestPart(woId, qty, kMxTechName);
                           _toast(
                             context,
                             err,

@@ -294,6 +294,82 @@ void main() {
     },
   );
 
+  testWidgets('point card: report by quick reason; tech picks part quantity', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer(
+      overrides: [mxClockProvider.overrideWithValue(() => now)],
+    );
+    addTearDown(container.dispose);
+    MxDb db() => container.read(mxDbProvider);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const MxApp()),
+    );
+    await tester.pumpAndSettle();
+    Future<void> tapKey(String key) async {
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      final f = find.byKey(Key(key));
+      if (f.evaluate().isEmpty) {
+        await tester.scrollUntilVisible(
+          f,
+          300,
+          scrollable: find.byType(Scrollable).last,
+        );
+      }
+      await tester.ensureVisible(f);
+      await tester.pumpAndSettle();
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+    }
+
+    final kitchen = db().roomsOf('jrs-3').firstWhere((r) => r.name == 'מטבח');
+    final faucet = db().pointsOf(kitchen.id).firstWhere((p) => p.type == 'ברז');
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('מסגרות'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tapKey('site-jrs');
+    await tapKey('unit-jrs-3');
+    await tapKey('room-${kitchen.id}');
+    await tapKey('pt-${faucet.id}');
+    await tapKey('report-point');
+    await tapKey('fault-reason-0'); // 'מטפטף'
+    await tapKey('fault-send');
+    final wo = db().openWorkOrders.single;
+    expect(wo.pointId, faucet.id);
+    expect(wo.desc, 'מטפטף');
+
+    container.read(mxDbProvider.notifier).assign(wo.id, kMxTechName);
+    // Back to the root and switch to the tech the way a user does.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    while (find.byType(BackButton).evaluate().isNotEmpty) {
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('mx-roles')),
+        matching: find.text('טכנאי'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tapKey('wo-${wo.id}');
+    await tapKey('wo-need');
+    await tapKey('qty-2');
+    final po = db().po(db().workOrder(wo.id).poId);
+    expect(po.lines.single.qty, 2);
+    expect(po.lines.single.sku, faucet.sku);
+  });
+
   testWidgets('invalid store link shows an honest message', (tester) async {
     final container = ProviderContainer(
       overrides: [
