@@ -37,7 +37,7 @@ const Color kMxAccent = kMxSiachSod ? Color(0xFFD7B42C) : Color(0xFFF0A83A);
 const Color kMxBad = kMxCta;
 // Brand-only palette: "attention" is the dark shade of the gold accent (AA on
 // white), "done / OK" is the petrol primary itself — no off-brand green.
-const Color kMxWarn = kMxSiachSod ? Color(0xFF7A5F00) : Color(0xFFB86E00);
+const Color kMxWarn = kMxSiachSod ? Color(0xFF6B5200) : Color(0xFFB86E00);
 const Color kMxOk = kMxSiachSod ? Color(0xFF0D4151) : Color(0xFF1E8A4C);
 
 /// Page background and soft panels.
@@ -50,14 +50,41 @@ const Color kMxInk = kMxSiachSod ? Color(0xFF323232) : Color(0xFF16202A);
 const String kMxWordmark = kMxSiachSod ? 'שיח סוד' : 'ניהול אחזקה';
 const String kMxSubtitle = kMxSiachSod ? 'אחזקה ורכש' : 'ורכש';
 
+/// Design tokens (design round 2): one radius scale, three weights, a 4/8
+/// spacing grid, and semantic color roles — red is ONLY safety / overdue /
+/// destructive; every primary action is petrol; waiting is gold.
+const double kMxR6 = 6; // status badge
+const double kMxR12 = 12; // input, chip, tile, segmented
+const double kMxR16 = 16; // card, toast, list group
+const double kMxR24 = 24; // sheet top, dialog
+const BorderRadius kMxCardRadius = BorderRadius.all(Radius.circular(kMxR16));
+
+/// Secondary text and "zero / nothing to do" numbers.
+const Color kMxMuted = Color(0xFF5C5C55);
+const Color kMxZero = Color(0xFF9A9A90);
+
+/// Input border (quiet) — focus turns petrol.
+const Color kMxField = Color(0xFFD9D7C8);
+
+/// Tabular figures for every number, price and date.
+const List<FontFeature> kMxTabular = [FontFeature.tabularFigures()];
+
 ThemeData mxBrandTheme() {
   final scheme = ColorScheme.fromSeed(
     seedColor: kMxPrimary,
     primary: kMxPrimary,
-    secondary: kMxCta,
+    secondary: kMxAccent,
     tertiary: kMxAccent,
     surface: Colors.white,
     error: kMxBad,
+  );
+  const btnShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(14)),
+  );
+  const label = TextStyle(
+    fontFamily: 'Heebo',
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
   );
   return ThemeData(
     useMaterial3: true,
@@ -69,54 +96,104 @@ ThemeData mxBrandTheme() {
       displayColor: kMxInk,
       fontFamily: 'Heebo',
     ),
+    iconTheme: const IconThemeData(color: kMxPrimary),
     cardTheme: const CardTheme(
       color: Colors.white,
-      elevation: 2,
-      shadowColor: Color(0x260D4151),
+      elevation: 0,
       surfaceTintColor: Colors.transparent,
-      margin: EdgeInsets.fromLTRB(14, 0, 14, 14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(22)),
-      ),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, 12),
+      shape: RoundedRectangleBorder(borderRadius: kMxCardRadius),
     ),
     dividerTheme: const DividerThemeData(color: kMxLine, space: 1),
     filledButtonTheme: FilledButtonThemeData(
-      style: FilledButton.styleFrom(
-        backgroundColor: kMxCta,
-        foregroundColor: Colors.white,
-        shape: const StadiumBorder(),
-        textStyle: const TextStyle(
-          fontFamily: 'Heebo',
-          fontWeight: FontWeight.w700,
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (s) =>
+              s.contains(WidgetState.disabled)
+                  ? kMxPrimary.withValues(alpha: 0.3)
+                  : kMxPrimary,
+        ),
+        foregroundColor: const WidgetStatePropertyAll(Colors.white),
+        minimumSize: const WidgetStatePropertyAll(Size(64, 48)),
+        shape: const WidgetStatePropertyAll(btnShape),
+        textStyle: const WidgetStatePropertyAll(label),
+        overlayColor: WidgetStatePropertyAll(
+          Colors.white.withValues(alpha: 0.08),
         ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: kMxPrimary,
+        disabledForegroundColor: kMxPrimary.withValues(alpha: 0.35),
         side: const BorderSide(color: kMxPrimary),
-        shape: const StadiumBorder(),
-        textStyle: const TextStyle(
-          fontFamily: 'Heebo',
-          fontWeight: FontWeight.w600,
-        ),
+        minimumSize: const Size(64, 44),
+        shape: btnShape,
+        textStyle: label.copyWith(fontWeight: FontWeight.w600),
       ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: kMxPrimary,
+        minimumSize: const Size(44, 44),
+        shape: btnShape,
+        textStyle: label.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        foregroundColor: kMxPrimary,
+        disabledForegroundColor: kMxPrimary.withValues(alpha: 0.35),
+        minimumSize: const Size(44, 44),
+      ),
+    ),
+    chipTheme: const ChipThemeData(
+      backgroundColor: Colors.white,
+      selectedColor: kMxPrimary,
+      side: BorderSide(color: Color(0xFFC9C7B4)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
+      ),
+      labelStyle: TextStyle(
+        fontFamily: 'Heebo',
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: kMxInk,
+      ),
+      showCheckmark: false,
+      padding: EdgeInsets.symmetric(horizontal: 12),
     ),
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      hintStyle: TextStyle(color: kMxZero, fontSize: 16),
+      labelStyle: TextStyle(color: kMxMuted, fontSize: 16),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(14)),
+        borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
+        borderSide: BorderSide(color: kMxField),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
+        borderSide: BorderSide(color: kMxField),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
+        borderSide: BorderSide(color: kMxPrimary, width: 2),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
-      indicatorColor: kMxPrimary,
-      indicatorShape: const StadiumBorder(),
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      indicatorColor: kMxTealTint,
+      indicatorShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
+      ),
       iconTheme: WidgetStateProperty.resolveWith(
         (s) => IconThemeData(
-          color: s.contains(WidgetState.selected) ? Colors.white : kMxPrimary,
+          color: s.contains(WidgetState.selected) ? kMxPrimary : kMxMuted,
           size: 24,
         ),
       ),
@@ -126,18 +203,22 @@ ThemeData mxBrandTheme() {
           fontSize: 12,
           fontWeight:
               s.contains(WidgetState.selected)
-                  ? FontWeight.w800
-                  : FontWeight.w600,
-          color: kMxPrimary,
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+          color: s.contains(WidgetState.selected) ? kMxPrimary : kMxMuted,
         ),
       ),
     ),
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: kMxPrimary,
-      actionTextColor: kMxAccent,
+      behavior: SnackBarBehavior.floating,
+      insetPadding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: kMxCardRadius),
       contentTextStyle: TextStyle(
         fontFamily: 'Heebo',
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
         color: Colors.white,
       ),
     ),
@@ -145,34 +226,43 @@ ThemeData mxBrandTheme() {
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(24)),
+        borderRadius: BorderRadius.all(Radius.circular(kMxR24)),
       ),
       titleTextStyle: TextStyle(
         fontFamily: 'Heebo',
         fontSize: 20,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w700,
         color: kMxInk,
       ),
     ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
+      modalBarrierColor: Color(0x660D2730),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kMxR24)),
       ),
     ),
+    // One chrome everywhere: petrol bar, white title (design round 2).
     appBarTheme: const AppBarTheme(
-      backgroundColor: kMxSurface,
-      foregroundColor: kMxPrimary,
+      backgroundColor: kMxPrimary,
+      foregroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
+      toolbarHeight: 56,
       titleTextStyle: TextStyle(
         fontFamily: 'Heebo',
         fontSize: 20,
-        fontWeight: FontWeight.w800,
-        color: kMxInk,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
       ),
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      },
     ),
   );
 }
@@ -180,7 +270,7 @@ ThemeData mxBrandTheme() {
 // ── premium layer: pastel tints + soft tinted shadows ────────────────────────
 // Tints echo the site's pastel stat cards (the pink "50 שנות ניסיון" card).
 const Color kMxPink = kMxSiachSod ? Color(0xFFF6DDE2) : Color(0xFFFBE4E2);
-const Color kMxGoldTint = kMxSiachSod ? Color(0xFFF6EDCB) : Color(0xFFFCEFD6);
+const Color kMxGoldTint = kMxSiachSod ? Color(0xFFFBF4DA) : Color(0xFFFCEFD6);
 const Color kMxTealTint = kMxSiachSod ? Color(0xFFDDEAEC) : Color(0xFFE2ECF7);
 const Color kMxGreenTint = kMxSiachSod ? Color(0xFFDDEFE2) : Color(0xFFDDF0E4);
 
@@ -192,8 +282,18 @@ Color mxTintOf(Color c) {
   return kMxTealTint;
 }
 
-/// Soft shadow tinted with the primary color — depth without borders.
+/// Elevation 1 (cards): border OR shadow, never both.
 const List<BoxShadow> kMxShadow = [
-  BoxShadow(color: Color(0x0F0D4151), blurRadius: 14, offset: Offset(0, 4)),
-  BoxShadow(color: Color(0x0A0D4151), blurRadius: 2, offset: Offset(0, 1)),
+  BoxShadow(color: Color(0x140D4151), blurRadius: 3, offset: Offset(0, 1)),
+  BoxShadow(color: Color(0x0F0D4151), blurRadius: 12, offset: Offset(0, 4)),
+];
+
+/// Elevation 2 (sticky bars, navigation).
+const List<BoxShadow> kMxShadow2 = [
+  BoxShadow(color: Color(0x1A0D4151), blurRadius: 12, offset: Offset(0, -2)),
+];
+
+/// Elevation 3 (toast, floating).
+const List<BoxShadow> kMxShadow3 = [
+  BoxShadow(color: Color(0x290D4151), blurRadius: 24, offset: Offset(0, 8)),
 ];

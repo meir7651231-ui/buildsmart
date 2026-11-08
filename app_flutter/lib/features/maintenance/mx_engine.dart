@@ -83,7 +83,7 @@ extension MxQueries on MxDb {
     final r = room(p.roomId);
     final u = unit(r.unitId);
     final s = site(u.siteId);
-    return '${s.city} · ${u.name} · ${r.name} · ${p.label}';
+    return '${s.city}\u00A0· ${u.name}\u00A0· ${r.name}\u00A0· ${p.label}';
   }
 
   List<MxRoom> roomsOf(String unitId) =>
@@ -238,6 +238,48 @@ MxSite mxPoDeliverySite(MxDb db, MxPurchaseOrder o) {
     }
   }
   return db.sites.first;
+}
+
+/// Headline of the safety takeover ("עצרו. סכנת חשמל").
+String mxSafetyTitle(String type, String desc) {
+  if (desc.contains('ניצוצות') || desc.contains('ריח שרוף') || type == 'שקע') {
+    return 'עצרו. סכנת חשמל';
+  }
+  if (type == 'מעצור חלון' || desc.contains('נפתח יותר מדי')) {
+    return 'עצרו. סכנת נפילה';
+  }
+  if (type == 'גלאי עשן') return 'שימו לב: גלאי העשן לא תקין';
+  return 'עצרו. סכנת בטיחות';
+}
+
+/// The same instruction as three numbered, tickable steps.
+List<String> mxSafetySteps(String type, String desc) {
+  if (desc.contains('ניצוצות') || desc.contains('ריח שרוף') || type == 'שקע') {
+    return const [
+      'לנתק את המפסק בלוח החשמל',
+      'לא לגעת בשקע ובמכשיר שמחובר אליו',
+      'להרחיק את הדיירים מהאזור',
+    ];
+  }
+  if (type == 'מעצור חלון' || desc.contains('נפתח יותר מדי')) {
+    return const [
+      'לסגור את החלון ולנעול אותו',
+      'להרחיק את הדיירים מהחלון',
+      'לא להשאיר את החדר בלי השגחה',
+    ];
+  }
+  if (type == 'גלאי עשן') {
+    return const [
+      'להגביר ערנות במטבח ובחדרים',
+      'לוודא שהמטף במקומו',
+      'לא להשאיר בישול בלי השגחה',
+    ];
+  }
+  return const [
+    'להרחיק את הדיירים מהמקום',
+    'לסמן את המקום שלא יתקרבו',
+    'לחכות לטכנאי',
+  ];
 }
 
 /// Open work orders: urgent first, then newest first.

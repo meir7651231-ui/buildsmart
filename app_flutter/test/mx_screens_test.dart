@@ -79,12 +79,19 @@ class _H {
       await tester.pageBack();
       await tester.pumpAndSettle();
     }
-    await tester.tap(
-      find.descendant(
-        of: find.byKey(const Key('mx-roles')),
-        matching: find.text(label),
-      ),
-    );
+    await tester.tap(find.byKey(const Key('mx-roles')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('role-$label')));
+    await tester.pumpAndSettle();
+  }
+
+  /// Tick every step on the safety takeover, then "הבנתי".
+  Future<void> safetyDone() async {
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.byKey(Key('safety-step-$i')));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byKey(const Key('success-mine')));
     await tester.pumpAndSettle();
   }
 
@@ -121,8 +128,30 @@ class _H {
     await tester.pumpAndSettle();
   }
 
+  /// Type into a field, scrolling to it first (long pages build lazily).
+  Future<void> enter(String key, String text) async {
+    final f = find.byKey(Key(key));
+    if (f.evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        f,
+        300,
+        scrollable:
+            find
+                .byWidgetPredicate(
+                  (w) =>
+                      w is Scrollable && w.axisDirection == AxisDirection.down,
+                )
+                .last,
+      );
+    }
+    await tester.enterText(f, text);
+    await tester.pumpAndSettle();
+  }
+
   /// The button under [key] is enabled.
   bool enabled(String key) {
+    final self = tester.widget(find.byKey(Key(key)));
+    if (self is ButtonStyleButton) return self.onPressed != null;
     final b = tester.widget<ButtonStyleButton>(
       find.descendant(
         of: find.byKey(Key(key)),
@@ -162,11 +191,18 @@ void main() {
     );
     await h.tap('rep-photo');
     await h.tap('rep-send');
-    expect(find.text('הדיווח נשלח כדחוף'), findsOneWidget);
-    expect(find.textContaining('לנתק את המפסק'), findsOneWidget);
+    expect(find.text('עצרו. סכנת חשמל'), findsOneWidget);
+    expect(find.text('לנתק את המפסק בלוח החשמל'), findsOneWidget);
+    expect(
+      h.enabled('success-mine'),
+      isFalse,
+      reason: '"הבנתי" only after every step is ticked',
+    );
     // The call button dials the manager.
     await h.tap('urgent-call', wait: false);
     expect(h.launched.last.scheme, 'tel');
+    await h.safetyDone();
+    expect(find.text('הדיווחים שלי'), findsWidgets);
     final wo = h.db.openWorkOrders.single;
     expect(wo.desc, 'ניצוצות / ריח שרוף – מהשקע ליד הכיור');
     expect(wo.urgent, isTrue);
@@ -228,11 +264,13 @@ void main() {
     await h.tap('store-sup-${l0.sku}-minus');
     expect(h.db.po(po.id).lines.first.supplied, l0.qty - 1);
     expect(h.db.po(po.id).status, MxPoStatus.storePartial);
-    await tester.enterText(find.byKey(const Key('store-invoice')), '5531');
+    await h.enter('store-invoice', '5531');
     await h.tap('store-ready');
     expect(h.db.po(po.id).status, MxPoStatus.ready);
     expect(h.db.po(po.id).fulfil, MxFulfil.pickup);
     expect(h.db.po(po.id).invoiceNo, '5531');
+    expect(find.text('תודה רבה!'), findsOneWidget, reason: 'thank-you moment');
+    await h.tap('store-thanks-ok', wait: false);
 
     // ── manager receives (with a confirm) → stock up by what was supplied ──
     await h.role('מנהל');
@@ -386,7 +424,7 @@ void main() {
         .where((r) => r.name.startsWith('כללי'));
     expect(general, hasLength(1));
     await h.tap('rep-room-${general.single.id}');
-    expect(find.text('משהו אחר 1'), findsOneWidget);
+    expect(find.text('משהו אחר\u00A01'), findsOneWidget);
   });
 
   testWidgets('sites search finds points across apartments', (tester) async {
@@ -418,9 +456,11 @@ void main() {
       tester,
       seed: (n, db) => n.report(db().points.first.id, 'לא עובד', 'x'),
     );
+    await h.tap('mx-roles', wait: false);
     await h.tap('mx-reset', wait: false);
     await h.tap('confirm-no', wait: false);
     expect(h.db.openWorkOrders, hasLength(1));
+    await h.tap('mx-roles', wait: false);
     await h.tap('mx-reset', wait: false);
     await h.tap('confirm-yes', wait: false);
     expect(h.db.openWorkOrders, isEmpty);
@@ -436,7 +476,9 @@ void main() {
     tester.semantics.tap(find.semantics.byLabel(RegExp('^מטבח, ')));
     await tester.pumpAndSettle();
     expect(find.text('מה לא עובד?'), findsOneWidget);
-    tester.semantics.tap(find.semantics.byLabel('מנהל'));
+    tester.semantics.tap(find.semantics.byLabel(RegExp('^תפקיד: ')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('role-מנהל')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('kpi-urgent')), findsOneWidget);
     handle.dispose();

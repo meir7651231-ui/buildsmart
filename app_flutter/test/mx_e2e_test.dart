@@ -110,12 +110,9 @@ void main() {
         await tester.pageBack();
         await tester.pumpAndSettle();
       }
-      await tester.tap(
-        find.descendant(
-          of: find.byKey(const Key('mx-roles')),
-          matching: find.text(label),
-        ),
-      );
+      await tester.tap(find.byKey(const Key('mx-roles')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('role-$label')));
       await tester.pumpAndSettle();
     }
 
@@ -229,10 +226,16 @@ void main() {
     await tester.enterText(find.byKey(const Key('fault-text')), 'ליד הכיור');
     await tapKey('fault-send');
     ok(
-      'ניצוצות = דחוף → גיליון בטיחות עם הוראה וחיוג',
-      find.text('הדיווח נשלח כדחוף').evaluate().isNotEmpty &&
-          present('urgent-call'),
+      'ניצוצות = דחוף → מסך בטיחות מלא: "עצרו", צעדים ממוספרים וחיוג',
+      find.text('עצרו. סכנת חשמל').evaluate().isNotEmpty &&
+          present('urgent-call') &&
+          present('safety-step-2'),
     );
+    ok('"הבנתי" נעול עד שמסמנים את כל הצעדים', !enabledButton('success-mine'));
+    for (var i = 0; i < 3; i++) {
+      await tapKey('safety-step-$i');
+    }
+    ok('אחרי סימון הצעדים "הבנתי" פתוח', enabledButton('success-mine'));
     await tapKey('success-mine');
     final wo1 = db().openWorkOrders.single;
     ok(
@@ -257,8 +260,12 @@ void main() {
     ok('חזרה עד לרשימת המסגרות', find.text('המסגרות').evaluate().isNotEmpty);
 
     // ── 4 · reset ───────────────────────────────────────────────────────────
-    await tapFinder(find.byTooltip('איפוס הדגמה'));
-    ok('"איפוס הדגמה" שואל לפני מחיקה', present('confirm-yes'));
+    await tapKey('mx-roles');
+    await tapKey('mx-reset');
+    ok(
+      '"איפוס הדגמה" (בגיליון התפקידים) שואל לפני מחיקה',
+      present('confirm-yes'),
+    );
     await tapKey('confirm-yes');
     ok('"איפוס הדגמה" מחזיר את נתוני ההדגמה', db().openWorkOrders.isEmpty);
 
@@ -569,7 +576,7 @@ void main() {
     await tapKey('po-storeview-${tamburPo.id}');
     ok(
       '"מה החנות רואה" פותח את דף החנות',
-      find.text(mxPoLabel(tamburPo.id)).evaluate().isNotEmpty &&
+      find.textContaining(mxPoLabel(tamburPo.id)).evaluate().isNotEmpty &&
           present('store-line-${approved.lines.first.sku}'),
     );
     await back();
@@ -633,6 +640,11 @@ void main() {
       'החנות סימנה את השאר "מוכן"',
       db().po(tamburPo.id).status == MxPoStatus.ready,
     );
+    ok(
+      'מסך "תודה" מלא לבעל החנות',
+      find.text('תודה רבה!').evaluate().isNotEmpty,
+    );
+    await tapKey('store-thanks-ok');
     await back();
 
     // reroute (manager) — the electrical shop is the alternative.
@@ -675,9 +687,12 @@ void main() {
                   .stage ==
               'preparing',
     );
+    await tapKey('store-invoice');
     await tester.enterText(find.byKey(const Key('store-invoice')), '7788');
+    await tapKey('store-alloc');
     await tester.enterText(find.byKey(const Key('store-alloc')), '123456789');
     await tapKey('store-ready');
+    await tapKey('store-thanks-ok');
     ok(
       '"מוכן לאיסוף" + חשבונית + הקצאה נשמרים',
       db().po(conf.id).status == MxPoStatus.ready &&
