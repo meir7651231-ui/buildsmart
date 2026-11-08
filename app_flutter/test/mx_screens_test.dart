@@ -80,21 +80,48 @@ void main() {
 
     // ── staff reports a kitchen outlet ──
     await role('מדריך');
-    await tapKey('rep-room');
-    await tester.tap(find.text('מטבח').last);
-    await tester.pumpAndSettle();
-    await tapKey('rep-point');
-    await tester.tap(find.text('שקע 1 – מעל משטח').last);
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('rep-text')), 'ניצוצות מהשקע');
+    // 3 taps, no typing: room tile → point tile → quick reason chip.
+    final kitchen = db()
+        .roomsOf(kMxStaffUnit)
+        .firstWhere((r) => r.name == 'מטבח');
+    final outlet = db().pointsOf(kitchen.id).first;
+    await tapKey('rep-room-${kitchen.id}');
+    await tapKey('rep-point-${outlet.id}');
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.descendant(
+              of: find.byKey(const Key('rep-send')),
+              matching: find.byWidgetPredicate((w) => w is FilledButton),
+            ),
+          )
+          .onPressed,
+      isNull,
+      reason: 'send stays disabled until something is said',
+    );
+    await tapKey('rep-reason-1'); // 'ניצוצות / ריח שרוף'
+    await tester.enterText(
+      find.byKey(const Key('rep-text')),
+      'מהשקע ליד הכיור',
+    );
     await tapKey('rep-photo');
     await tapKey('rep-send');
-    expect(db().openWorkOrders.single.desc, 'ניצוצות מהשקע');
+    expect(
+      find.text('הדיווח נשלח'),
+      findsOneWidget,
+      reason: 'calm success sheet',
+    );
+    await tapKey('success-mine');
+    expect(
+      db().openWorkOrders.single.desc,
+      'ניצוצות / ריח שרוף – מהשקע ליד הכיור',
+    );
+    expect(db().openWorkOrders.single.pointId, outlet.id);
     expect(db().openWorkOrders.single.reportedBy, kMxStaffLabel);
     expect(db().openWorkOrders.single.hasPhoto, isTrue);
     final woId = db().openWorkOrders.single.id;
     expect(
-      find.text('$woId · ניצוצות מהשקע'),
+      find.text('$woId · ניצוצות / ריח שרוף – מהשקע ליד הכיור'),
       findsOneWidget,
       reason: 'staff lands on "my reports"',
     );
@@ -186,6 +213,28 @@ void main() {
       db().dueOf(db().pmRules.firstWhere((r) => r.id == 'hotwater'), now),
       MxDue.ok,
     );
+  });
+
+  testWidgets('a11y: tiles are operable by a screen reader (semantic tap)', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer(
+      overrides: [mxClockProvider.overrideWithValue(() => now)],
+    );
+    addTearDown(container.dispose);
+    container.read(mxRoleProvider.notifier).state = MxRole.staff;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const MxApp()),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('איפה התקלה?'), findsOneWidget);
+    // Activate the kitchen tile the way TalkBack/VoiceOver does.
+    tester.semantics.tap(find.semantics.byLabel(RegExp(r'^מטבח, ')));
+    await tester.pumpAndSettle();
+    expect(find.text('מה לא עובד?'), findsOneWidget);
+    handle.dispose();
   });
 
   testWidgets('invalid store link shows an honest message', (tester) async {
