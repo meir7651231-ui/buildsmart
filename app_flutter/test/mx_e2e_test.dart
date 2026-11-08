@@ -10,6 +10,7 @@ import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_screens.dart';
 import 'package:buildsmart/features/maintenance/mx_state.dart';
+import 'package:buildsmart/features/maintenance/mx_ui.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/material_requests_engine.dart';
 import 'package:buildsmart/state/orders_engine.dart';
@@ -118,20 +119,12 @@ void main() {
     }
 
     int navIndex() =>
-        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex;
+        tester.widget<MxNavBar>(find.byType(MxNavBar)).selectedIndex;
     int navCount() =>
-        tester
-            .widget<NavigationBar>(find.byType(NavigationBar))
-            .destinations
-            .length;
+        tester.widget<MxNavBar>(find.byType(MxNavBar)).items.length;
     Future<void> nav(String label) async {
       await settle();
-      await tester.tap(
-        find.descendant(
-          of: find.byType(NavigationBar),
-          matching: find.text(label),
-        ),
-      );
+      await tester.tap(find.byKey(Key('nav-$label')));
       await tester.pumpAndSettle();
     }
 
@@ -174,10 +167,7 @@ void main() {
     await role('צוות בית');
     ok('צוות בית: 2 לשוניות', navCount() == 2);
     await role('חנות');
-    ok(
-      'חנות: מסך אחד בלי בר-ניווט',
-      find.byType(NavigationBar).evaluate().isEmpty,
-    );
+    ok('חנות: מסך אחד בלי בר-ניווט', find.byType(MxNavBar).evaluate().isEmpty);
     await role('מנהל');
 
     // ── 2 · dashboard KPI cards → their tab ────────────────────────────────
@@ -317,7 +307,7 @@ void main() {
       find.textContaining('התמונה צורפה').evaluate().isNotEmpty,
     );
     await tapKey('rep-send');
-    ok('גיליון הצלחה מוצג', find.text('הדיווח נשלח').evaluate().isNotEmpty);
+    ok('גיליון הצלחה מוצג', find.text('תודה שדיווחת.').evaluate().isNotEmpty);
     final wo2 = db().openWorkOrders.single;
     ok(
       'הדיווח נשמר: סיבה + תמונה + תפקיד בלבד',
@@ -639,16 +629,16 @@ void main() {
     );
     ok('אחרי "חסר": "מאשר, יש לי הכול" לא מוצג', !present('store-confirm'));
     ok(
-      '"אין לי" הוא כפתור משני אמיתי בצבע הטקסט (לא אדום)',
+      '"אין לי" הוא כפתור משני אמיתי בפטרול (לא אדום)',
       find
           .byWidgetPredicate(
             (w) =>
-                w is OutlinedButton &&
+                w is TextButton &&
                 w.key is ValueKey<String> &&
                 (w.key! as ValueKey<String>).value.startsWith(
                   'store-missing-',
                 ) &&
-                w.style?.foregroundColor?.resolve({}) == kMxInk,
+                w.style?.foregroundColor?.resolve({}) == kMxPrimary,
           )
           .evaluate()
           .isNotEmpty,

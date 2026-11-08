@@ -306,11 +306,17 @@ Widget _dot(Object icon, {Color color = kMxPrimary}) => MxArchBadge(
   icon,
   color: switch (color) {
     kMxBad => kMxBad,
-    kMxWarn => kMxPrimary,
+    kMxWarn => kMxWarn,
+    kMxOk => kMxOk,
     kMxMuted => const Color(0xFFC9C6B5),
-    _ => kMxAccent,
+    _ => kMxPrimary,
   },
-  iconColor: color == kMxBad ? kMxBad : kMxPrimary,
+  iconColor: switch (color) {
+    kMxBad => kMxBad,
+    kMxWarn => kMxWarn,
+    kMxMuted => kMxMuted,
+    _ => kMxPrimary,
+  },
 );
 
 /// The delivery truck, mirrored so it drives "forward" in RTL.
@@ -570,7 +576,7 @@ class _MxHomeState extends ConsumerState<MxHome> {
             Text(
               'ב״ה',
               style: TextStyle(
-                color: kMxAccent,
+                color: kMxWarn,
                 fontSize: 10,
                 height: 1.2,
                 fontWeight: FontWeight.w600,
@@ -581,14 +587,18 @@ class _MxHomeState extends ConsumerState<MxHome> {
                 children: [
                   TextSpan(
                     text: kMxWordmark,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: kMxPrimary,
+                    ),
                   ),
                   TextSpan(
                     text: '  $kMxSubtitle',
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xB3FFFFFF),
+                      fontWeight: FontWeight.w500,
+                      color: kMxMuted,
                     ),
                   ),
                 ],
@@ -616,36 +626,16 @@ class _MxHomeState extends ConsumerState<MxHome> {
         'report' => _ReportPage(onSent: () => _go('wo')),
         _ => const _StoreInbox(),
       },
+      extendBody: true,
       bottomNavigationBar:
           tabs.length < 2 || wizard
               ? null
-              : DecoratedBox(
-                decoration: const BoxDecoration(boxShadow: kMxShadow2),
-                child: NavigationBar(
-                  selectedIndex: tab,
-                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                  height: 68,
-                  onDestinationSelected: (i) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _tab = i);
-                  },
-                  destinations: [
-                    for (final t in tabs)
-                      NavigationDestination(
-                        icon: Badge(
-                          isLabelVisible: _badge(db, role, t.$1) > 0,
-                          label: Text('${_badge(db, role, t.$1)}'),
-                          child: MxNavIcon(t.$2),
-                        ),
-                        selectedIcon: Badge(
-                          isLabelVisible: _badge(db, role, t.$1) > 0,
-                          label: Text('${_badge(db, role, t.$1)}'),
-                          child: MxNavIcon(t.$2, selected: true),
-                        ),
-                        label: t.$3,
-                      ),
-                  ],
-                ),
+              : MxNavBar(
+                selectedIndex: tab,
+                onSelect: (i) => setState(() => _tab = i),
+                items: [
+                  for (final t in tabs) (t.$2, t.$3, _badge(db, role, t.$1)),
+                ],
               ),
     );
   }
@@ -770,7 +760,7 @@ class _Dashboard extends ConsumerWidget {
     final street = [
       for (final site in db.sites)
         (
-          '${site.city} – ${site.name}',
+          site.city,
           [
             for (final u in db.unitsOf(site.id))
               (
@@ -825,52 +815,256 @@ class _Dashboard extends ConsumerWidget {
             ),
           ),
         );
+    final counts = [0, 0, 0];
+    for (final g in street) {
+      for (final h in g.$2) {
+        counts[h.$3]++;
+      }
+    }
     return ListView(
-      padding: const EdgeInsets.only(bottom: 96),
+      padding: const EdgeInsets.only(bottom: 120),
       children: [
+        // Greeting: the day (civil + Hebrew), then one human sentence.
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(22, 6, 22, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${mxDateLabel(now)}$_sep${mxHebrewDate(now)}',
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: kMxWarn,
+                  fontFeatures: kMxTabular,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                mxGreeting(now),
+                style: const TextStyle(
+                  fontSize: 30,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: kMxPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              if (urgent.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    mxNb(summary),
+                    style: const TextStyle(fontSize: 15, color: kMxMuted),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        // The street: every apartment as a house, in the morning sky.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: MxAppear(
+            child: MxScene(
+              height: 244,
+              sun: const Offset(0.16, 0.4),
+              night: shabbat ? 1 : 0,
+              child: Stack(
+                children: [
+                  PositionedDirectional(
+                    top: 16,
+                    start: 18,
+                    end: 14,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                shabbat ? 'הבית בסדר. שבת שלום.' : 'הבתים שלנו',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: kMxPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text.rich(
+                                TextSpan(
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF7B6A58),
+                                    fontFeatures: kMxTabular,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          allGood
+                                              ? 'כל ${counts[0]} הבתים בסדר'
+                                              : '${counts[0]} בסדר',
+                                    ),
+                                    if (counts[1] > 0)
+                                      TextSpan(
+                                        text: '$_sep${counts[1]} בטיפול',
+                                      ),
+                                    if (counts[2] > 0)
+                                      TextSpan(
+                                        text: '$_sep${counts[2]} דחוף',
+                                        style: const TextStyle(
+                                          color: _bad,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Semantics(
+                          button: true,
+                          child: GestureDetector(
+                            key: const Key('street-all'),
+                            onTap: () => onGo('sites'),
+                            child: Container(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                10,
+                                6,
+                                6,
+                                6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'כל המסגרות',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: kMxPrimary,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.chevron_left_rounded,
+                                    size: 18,
+                                    color: kMxPrimary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 6,
+                    child: MxStreetFit(
+                      groups: street,
+                      celebrate: shabbat,
+                      onTap: (id) => _open(context, _UnitPage(id)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
         for (final w in urgent)
           MxAppear(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Material(
-                color: kMxPink,
+            index: 1,
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+              decoration: BoxDecoration(
+                color: Colors.white,
                 borderRadius: kMxCardRadius,
-                clipBehavior: Clip.antiAlias,
+                border: Border.all(color: kMxPink, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: _bad.withValues(alpha: 0.14),
+                    blurRadius: 26,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Material(
+                type: MaterialType.transparency,
                 child: InkWell(
                   key: Key('urgent-${w.id}'),
                   onTap: () => _open(context, _WorkOrderPage(w.id)),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      14,
+                      14,
+                      12,
+                      14,
+                    ),
                     child: Row(
                       children: [
-                        _dot(MxGlyphs.warning, color: _bad),
+                        MxIconBox(
+                          mxPointGlyph(db.point(w.pointId).type),
+                          size: 48,
+                          color: Colors.white,
+                          background: _bad,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'דחוף: ${w.desc}',
+                                w.desc.split(' – ').first,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 16.5,
+                                  height: 1.25,
                                   fontWeight: FontWeight.w700,
-                                  color: _bad,
+                                  color: Color(0xFFA3262F),
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 3),
                               Text(
-                                '${db.pointPath(w.pointId)}$_sep${_woStatus(w.status)}',
+                                mxNb(
+                                  '${unitOf(w)}$_sep${mxAgo(w.createdAt, now)}',
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                  fontSize: 14,
-                                  color: kMxInk,
+                                  fontSize: 13.5,
+                                  color: kMxMuted,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right_rounded, color: _bad),
+                        const SizedBox(width: 8),
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: _bad,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Text(
+                            'לטיפול',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -878,15 +1072,7 @@ class _Dashboard extends ConsumerWidget {
               ),
             ),
           ),
-        MxHero(
-          eyebrow: mxHebrewDate(now),
-          eyebrow2: mxDateLabel(now),
-          title: urgent.isNotEmpty ? 'תקלה דחופה' : mxGreeting(now),
-          subtitle: summary,
-          count: open,
-          countLabel: 'קריאות\nפתוחות',
-          alert: urgent.isNotEmpty,
-        ),
+        const SizedBox(height: 14),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
@@ -923,30 +1109,42 @@ class _Dashboard extends ConsumerWidget {
                     onTap: x.$6,
                     child: InkWell(
                       key: Key('kpi-${x.$1}'),
-                      borderRadius: BorderRadius.circular(kMxR12),
+                      borderRadius: BorderRadius.circular(16),
                       onTap: x.$6,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                          8,
+                          6,
+                          12,
+                          6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(kMxR12),
+                          color: Colors.white.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: kMxLine),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const MxIcon(
-                              MxGlyphs.check,
-                              size: 16,
-                              color: kMxAccent,
+                            Container(
+                              width: 18,
+                              height: 18,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                color: kMxSage,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const MxIcon(
+                                MxGlyphs.check,
+                                size: 12,
+                                color: Colors.white,
+                              ),
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              x.$3,
+                              'אין ${x.$3}',
                               style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: kMxMuted,
                               ),
                             ),
@@ -958,25 +1156,7 @@ class _Dashboard extends ConsumerWidget {
               ],
             ),
           ),
-        MxSectionTitle(
-          shabbat
-              ? 'הבית בסדר. שבת שלום.'
-              : allGood
-              ? 'הבתים · הכול בסדר'
-              : 'הבתים',
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: MxCard(
-            margin: EdgeInsets.zero,
-            child: MxStreet(
-              groups: street,
-              celebrate: shabbat,
-              onTap: (id) => _open(context, _UnitPage(id)),
-            ),
-          ),
-        ),
-        const MxSectionTitle('מה לטפל היום'),
+        MxSectionTitle('היום', count: todo.length),
         if (todo.isEmpty)
           const MxEmpty(
             icon: MxGlyphs.check,
@@ -1147,79 +1327,115 @@ class _UnitPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final db = ref.watch(mxDbProvider);
     final u = db.unit(unitId);
+    final site = db.site(u.siteId);
+    final open = db.openWorkOrders.where((w) => _inUnit(db, w, u.id)).toList();
+    final urgent = open.where((w) => w.urgent).length;
+    final rooms = db.roomsOf(unitId);
+    final points = rooms.fold(0, (a, r) => a + db.pointsOf(r.id).length);
+    final state =
+        urgent > 0
+            ? MxHouseState.urgent
+            : open.isNotEmpty
+            ? MxHouseState.job
+            : MxHouseState.ok;
+    final (statusText, statusColor) = switch (state) {
+      MxHouseState.urgent => (
+        urgent == 1 ? 'תקלה דחופה אחת' : '$urgent תקלות דחופות',
+        _bad,
+      ),
+      MxHouseState.job => (
+        mxCount(open.length, 'קריאה פתוחה אחת', 'קריאות פתוחות'),
+        _brand,
+      ),
+      MxHouseState.ok => ('הכול תקין בדירה', _ok),
+    };
     return _page(
-      '${db.site(u.siteId).city}$_sep${u.name}',
+      '${site.city}$_sep${u.name}',
       ListView(
         padding: const EdgeInsets.only(bottom: 96),
         children: [
-          () {
-            final open = db.openWorkOrders.where((w) => _inUnit(db, w, u.id));
-            final urgent = open.any((w) => w.urgent);
-            return MxCard(
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Row(
-                children: [
-                  Hero(
-                    tag: 'house-${u.id}',
-                    child: Container(
-                      width: 32,
-                      height: 42,
-                      decoration: ShapeDecoration(
-                        color:
-                            urgent
-                                ? kMxBad
-                                : open.isNotEmpty
-                                ? kMxTealTint
-                                : kMxGoldTint,
-                        shape: MxArchBorder(
-                          side: BorderSide(
-                            color: mxArchTone(
-                              fault: urgent,
-                              open: open.isNotEmpty,
-                            ),
-                            width: 1.5,
-                          ),
+          // The house itself, big, in its own patch of sky: we came in
+          // through its door on the street.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: MxScene(
+              height: 220,
+              sun: const Offset(0.2, 0.34),
+              child: Align(
+                alignment: const Alignment(0, 0.72),
+                child: Hero(
+                  tag: 'house-${u.id}',
+                  child: MxHouseArt(state: state, width: 132),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(22, 18, 22, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${site.city}$_sep${site.name}',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: kMxWarn,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        u.name,
+                        style: const TextStyle(
+                          fontSize: 30,
+                          height: 1.2,
+                          fontWeight: FontWeight.w700,
+                          color: kMxPrimary,
                         ),
                       ),
                     ),
+                    MxTag(statusText, statusColor),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  mxNb(
+                    '${mxCount(rooms.length, 'חדר אחד', 'חדרים')}$_sep$points נקודות במעקב',
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      open.isEmpty
-                          ? 'הכול תקין בדירה'
-                          : urgent
-                          ? 'יש תקלה דחופה בדירה'
-                          : mxCount(
-                            open.length,
-                            'קריאה פתוחה אחת',
-                            'קריאות פתוחות',
-                          ),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: urgent ? kMxBad : kMxInk,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }(),
-          MxSectionTitle('חדרים', count: db.roomsOf(unitId).length),
+                  style: const TextStyle(fontSize: 14, color: kMxMuted),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           MxTileGrid(
             children: [
-              for (final r in db.roomsOf(unitId))
-                MxTile(
-                  key: Key('room-${r.id}'),
-                  icon: mxRoomGlyph(r.name),
-                  label: r.name,
-                  caption: '${db.pointsOf(r.id).length} נקודות',
-                  alert: db
-                      .pointsOf(r.id)
-                      .any((p) => p.status == MxPointStatus.faulty),
-                  onTap: () => _open(context, _RoomPage(r.id)),
-                ),
+              for (final r in rooms)
+                () {
+                  final pts = db.pointsOf(r.id);
+                  final bad =
+                      pts.where((p) => p.status == MxPointStatus.faulty).length;
+                  final urgentHere = open.any(
+                    (w) => w.urgent && db.point(w.pointId).roomId == r.id,
+                  );
+                  return MxTile(
+                    key: Key('room-${r.id}'),
+                    icon: mxRoomGlyph(r.name),
+                    label: r.name,
+                    caption:
+                        urgentHere
+                            ? 'תקלה דחופה'
+                            : bad > 0
+                            ? mxCount(bad, 'תקלה אחת', 'תקלות')
+                            : 'הכול תקין$_sep${pts.length} נקודות',
+                    alert: bad > 0,
+                    showOk: true,
+                    onTap: () => _open(context, _RoomPage(r.id)),
+                  );
+                }(),
             ],
           ),
         ],
@@ -1250,24 +1466,21 @@ class _RoomPage extends ConsumerWidget {
             margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
               children: [
-                // The printed door sticker: petrol, gold arch, QR inside.
+                // The printed door sticker: a little petrol house with the
+                // QR in its doorway.
                 Container(
                   width: 56,
-                  height: 72,
+                  height: 64,
                   decoration: BoxDecoration(
                     color: kMxPrimary,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   alignment: Alignment.center,
-                  child: const MxArch(
-                    width: 40,
-                    height: 56,
-                    child: Icon(
-                      Icons.qr_code_2_rounded,
-                      size: 20,
-                      color: Colors.white,
-                      semanticLabel: 'מדבקת QR של החדר',
-                    ),
+                  child: const Icon(
+                    Icons.qr_code_2_rounded,
+                    size: 30,
+                    color: Colors.white,
+                    semanticLabel: 'מדבקת QR של החדר',
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1355,6 +1568,9 @@ Future<void> _showSafety(
           : 'התקשרו ל$kMxManagerTitle ${_ltr(kMxManagerPhone)}',
   onCall: () => _call(ref, context, kMxManagerPhone),
   onDone: onMine ?? () {},
+  icon: mxPointGlyph(type),
+  place: ref.read(mxDbProvider).pointPath(w.pointId),
+  note: w.reportedBy == kMxManagerName ? '' : 'הדיווח כבר אצל $kMxManagerTitle',
 );
 
 class _PointPage extends ConsumerWidget {
@@ -1380,15 +1596,10 @@ class _PointPage extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    MxArch(
-                      width: 48,
-                      height: 60,
-                      color: faulty ? _bad : kMxAccent,
-                      child: mxIcon(
-                        mxPointGlyph(p.type),
-                        size: 22,
-                        color: faulty ? _bad : _brand,
-                      ),
+                    MxIconBox(
+                      mxPointGlyph(p.type),
+                      size: 56,
+                      color: faulty ? _bad : _brand,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -2408,9 +2619,13 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
     }
     await mxShowSuccess(
       context,
-      title: 'הדיווח נשלח',
-      body:
-          'מנהל האחזקה כבר יודע. תודה שדיווחת.\n${mxWoLabel(w.id)}$_sepאפשר לעקוב ב״הדיווחים שלי״.',
+      title: 'תודה שדיווחת.',
+      body: 'מנהל האחזקה כבר יודע.\nנעדכן אותך כשהתקלה תיסגר.',
+      timeline: [
+        ('דיווחת', '${w.desc}$_sep${mxWoLabel(w.id)}', true),
+        ('מנהל האחזקה קיבל', 'עכשיו', true),
+        ('טכנאי בדרך', 'נעדכן כשישובץ', false),
+      ],
       actions: [
         ('לדיווחים שלי', const Key('success-mine'), widget.onSent),
         ('דיווח נוסף', const Key('success-again'), () {}),
@@ -3567,7 +3782,6 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(mxDbProvider);
-    final now = ref.watch(mxClockProvider)();
     final n = ref.read(mxDbProvider.notifier);
     final o = db.poByToken(widget.token);
     if (o == null) {
@@ -3591,95 +3805,240 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
     final have = o.lines.where((l) => l.supplied > 0).length;
     final unconfirmed =
         o.status == MxPoStatus.sent || o.status == MxPoStatus.approved;
+    final pointType = {for (final p in db.points) p.sku: p.type};
     return Scaffold(
-      // Branded header: who is ordering, greeting the store by name.
-      appBar: AppBar(
-        automaticallyImplyLeading: !widget.fromLink,
-        toolbarHeight: 72,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('שלום, ${store.name}'),
-            Text(
-              mxHebrewDate(now),
-              style: const TextStyle(
-                color: kMxAccent,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+      backgroundColor: kMxCream,
+      appBar:
+          widget.fromLink
+              ? null
+              : AppBar(backgroundColor: const Color(0xFFE2EDEF)),
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
+          // The store, drawn: our face to them, greeting them by name.
+          DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFE2EDEF), kMxCream],
               ),
             ),
-          ],
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 96),
-        children: [
-          // The org's face to the store: the arch frames the order number.
-          Container(
-            color: kMxPrimary,
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            child: SafeArea(
+              bottom: false,
+              top: widget.fromLink,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Center(child: MxStorefront(name: store.name)),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(22, 14, 22, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                MxArch(
-                  width: 84,
-                  height: 112,
-                  stroke: 2,
-                  draw: true,
-                  child: Text(
-                    o.id.split('-').last,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: kMxTabular,
+                Row(
+                  children: [
+                    const Flexible(
+                      child: Text(
+                        'הזמנה משיח סוד',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: kMxWarn,
+                        ),
+                      ),
                     ),
+                    const Text(
+                      _sep,
+                      style: TextStyle(fontSize: 12.5, color: kMxWarn),
+                    ),
+                    Text(
+                      o.id.split('-').last,
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: kMxWarn,
+                        fontFeatures: kMxTabular,
+                      ),
+                    ),
+                    const Spacer(),
+                    MxTag(_poStatus(o.status), _brand),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'שלום, ${store.name}',
+                  style: const TextStyle(
+                    fontSize: 27,
+                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                    color: kMxPrimary,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 3),
+                Text(
+                  mxNb(
+                    closed
+                        ? 'ההזמנה סגורה. תודה על השירות.'
+                        : '$kMxOrgName מזמינים ${mxCount(o.lines.length, 'פריט אחד', 'פריטים')}. אפשר לאשר בלחיצה.',
+                  ),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: kMxMuted,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: kMxCardRadius,
+              boxShadow: kMxShadow,
+            ),
+            child: Column(
+              children: [
+                for (final (i, l) in o.lines.indexed) ...[
+                  if (i > 0) const Divider(height: 1),
+                  Padding(
+                    key: Key('store-line-${l.sku}'),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
                       children: [
-                        const Text(
-                          'הזמנה משיח סוד',
-                          style: TextStyle(
-                            color: kMxAccent,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                        MxIconBox(
+                          mxPointGlyph(pointType[l.sku] ?? ''),
+                          color: l.supplied == 0 ? kMxZero : _brand,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 200),
+                                style: TextStyle(
+                                  fontFamily: kMxFont,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: l.supplied == 0 ? kMxMuted : kMxInk,
+                                  decoration:
+                                      l.supplied == 0
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                ),
+                                child: Text(
+                                  db.part(l.sku).name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                l.missing
+                                    ? (l.supplied == 0
+                                        ? 'סימנתם שאין'
+                                        : 'יש ${l.supplied} מתוך ${l.qty}')
+                                    : 'הוזמנו ${l.qty}$_sep${mxShekels(l.unitAgorot)} ליח׳',
+                                style: TextStyle(
+                                  color: l.missing ? kMxWarn : kMxMuted,
+                                  fontSize: 13,
+                                  fontWeight:
+                                      l.missing
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                  fontFeatures: kMxTabular,
+                                ),
+                              ),
+                              if (!closed && l.supplied > 0)
+                                TextButton(
+                                  key: Key('store-missing-${l.sku}'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: _brand,
+                                    minimumSize: const Size(0, 36),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    tapTargetSize: MaterialTapTargetSize.padded,
+                                    textStyle: const TextStyle(
+                                      fontFamily: kMxFont,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                  onPressed:
+                                      () => _undoable(
+                                        context,
+                                        ref,
+                                        n.storeMissing(widget.token, l.sku),
+                                        'סומן שאין לכם את הפריט',
+                                      ),
+                                  child: const Text('אין לי'),
+                                ),
+                            ],
                           ),
                         ),
-                        Text(
-                          mxShekels(o.totalAgorot),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: kMxTabular,
+                        if (!closed)
+                          MxStepper(
+                            keyPrefix: 'store-sup-${l.sku}',
+                            value: l.supplied,
+                            max: l.qty,
+                            onChanged:
+                                (v) => _undoable(
+                                  context,
+                                  ref,
+                                  n.storeSupplied(widget.token, l.sku, v),
+                                  'עודכן: יש $v מתוך ${l.qty}',
+                                ),
+                          )
+                        else
+                          Text(
+                            '×${l.supplied}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              fontFeatures: kMxTabular,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${mxCount(o.lines.length, 'פריט אחד', 'פריטים')}$_sepלפני מע״מ',
-                          style: const TextStyle(
-                            color: Color(0xB3FFFFFF),
-                            fontSize: 14,
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: MxTag(_poStatus(o.status), Colors.white),
+                ],
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const MxIcon(MxGlyphs.receipt, size: 18, color: kMxMuted),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'סה״כ לפני מע״מ',
+                        style: TextStyle(fontSize: 14, color: kMxMuted),
+                      ),
+                    ),
+                    Text(
+                      mxShekels(o.totalAgorot),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: kMxPrimary,
+                        fontFeatures: kMxTabular,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
           MxCard(
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -3724,120 +4083,6 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
               ],
             ),
           ),
-          if (!closed)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Text(
-                'חסר לכם משהו? שנו את הכמות שיש לכם, או לחצו "אין לי".',
-                style: TextStyle(color: kMxMuted, fontSize: 16, height: 1.4),
-              ),
-            ),
-          _listCard([
-            for (final l in o.lines)
-              Padding(
-                key: Key('store-line-${l.sku}'),
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _dot(
-                          mxPointGlyph(
-                            db.points
-                                    .where((p) => p.sku == l.sku)
-                                    .firstOrNull
-                                    ?.type ??
-                                '',
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
-                            style: TextStyle(
-                              fontFamily: 'Heebo',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: l.supplied == 0 ? kMxMuted : kMxInk,
-                              decoration:
-                                  l.supplied == 0
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                            ),
-                            child: Text(db.part(l.sku).name),
-                          ),
-                        ),
-                        if (l.missing)
-                          MxTag(
-                            l.supplied == 0
-                                ? 'אין'
-                                : 'יש ${l.supplied} מתוך ${l.qty}',
-                            _warn,
-                          ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 52),
-                      child: Text(
-                        'הוזמנו ${l.qty}$_sep${mxShekels(l.unitAgorot)} ליח׳',
-                        style: const TextStyle(
-                          color: kMxMuted,
-                          fontSize: 14,
-                          fontFeatures: kMxTabular,
-                        ),
-                      ),
-                    ),
-                    if (!closed)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          start: 52,
-                          top: 8,
-                        ),
-                        child: Row(
-                          children: [
-                            MxStepper(
-                              keyPrefix: 'store-sup-${l.sku}',
-                              value: l.supplied,
-                              max: l.qty,
-                              onChanged:
-                                  (v) => _undoable(
-                                    context,
-                                    ref,
-                                    n.storeSupplied(widget.token, l.sku, v),
-                                    'עודכן: יש $v מתוך ${l.qty}',
-                                  ),
-                            ),
-                            const Spacer(),
-                            if (l.supplied > 0)
-                              Flexible(
-                                child: OutlinedButton(
-                                  key: Key('store-missing-${l.sku}'),
-                                  style: OutlinedButton.styleFrom(
-                                    minimumSize: const Size(0, 40),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    foregroundColor: kMxInk,
-                                    side: const BorderSide(color: kMxInk),
-                                  ),
-                                  onPressed:
-                                      () => _undoable(
-                                        context,
-                                        ref,
-                                        n.storeMissing(widget.token, l.sku),
-                                        'סומן שאין לכם את הפריט',
-                                      ),
-                                  child: const Text('אין לי'),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-          ]),
           if (!closed) ...[
             const MxSectionTitle('כשההזמנה מוכנה'),
             Padding(
@@ -3886,9 +4131,9 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                           anyMissing
                               ? 'מאשר את מה שיש ($have מתוך ${o.lines.length})'
                               : 'מאשר, יש לי הכול',
-                      icon: Icons.thumb_up_alt_outlined,
+                      icon: Icons.check_rounded,
                       color: kMxAccent,
-                      foreground: kMxPrimary,
+                      foreground: const Color(0xFF2C2405),
                       onPressed:
                           () => _toast(
                             context,
@@ -3910,11 +4155,12 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                         if (unconfirmed) ...[
                           Expanded(
                             child: SizedBox(
-                              height: 44,
-                              child: OutlinedButton(
+                              height: 48,
+                              child: OutlinedButton.icon(
                                 key: const Key('store-ready'),
+                                icon: const MxIcon(MxGlyphs.box, size: 20),
                                 onPressed: () => _ready(MxFulfil.pickup),
-                                child: const FittedBox(
+                                label: const FittedBox(
                                   child: Text('מוכן לאיסוף'),
                                 ),
                               ),

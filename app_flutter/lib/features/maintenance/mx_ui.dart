@@ -11,10 +11,12 @@
 library;
 
 import 'package:buildsmart/features/maintenance/mx_brand.dart';
+import 'package:buildsmart/features/maintenance/mx_home.dart';
 import 'package:buildsmart/features/maintenance/mx_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+export 'package:buildsmart/features/maintenance/mx_home.dart';
 export 'package:buildsmart/features/maintenance/mx_icons.dart';
 
 // ── icons ────────────────────────────────────────────────────────────────────
@@ -401,8 +403,8 @@ class MxStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final calm = value == 0;
-    final alarm = !calm && color == kMxBad;
     final c = calm ? kMxZero : color;
+    final ink = c == kMxBad ? kMxBad : (c == kMxWarn ? kMxWarn : kMxPrimary);
     return Semantics(
       button: true,
       label: calm ? '$label: אין' : '$value $label',
@@ -411,79 +413,46 @@ class MxStatCard extends StatelessWidget {
       child: _Pressable(
         onTap: onTap,
         child: Container(
-          height: 88,
-          padding: const EdgeInsets.all(16),
+          height: 80,
+          padding: const EdgeInsetsDirectional.fromSTEB(14, 12, 12, 12),
           decoration: BoxDecoration(
-            color: alarm ? kMxPink : Colors.white,
+            color: Colors.white,
             borderRadius: kMxCardRadius,
-            boxShadow: alarm ? null : kMxShadow,
-            // "Waiting" is petrol with a thin gold floor — never olive.
-            border:
-                !calm && color == kMxWarn
-                    ? const Border(
-                      bottom: BorderSide(color: kMxAccent, width: 3),
-                    )
-                    : null,
+            boxShadow: kMxShadow,
+            border: c == kMxBad ? Border.all(color: kMxPink, width: 1.5) : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  mxIcon(
-                    icon,
-                    size: 20,
-                    color:
-                        calm
-                            ? kMxZero
-                            : (color == kMxBad ? kMxBad : kMxPrimary),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
+              MxIconBox(icon, color: calm ? kMxZero : ink),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MxCountUp(
+                      value: value,
+                      style: TextStyle(
+                        fontSize: 26,
+                        height: 1.05,
+                        fontWeight: FontWeight.w700,
+                        color: calm ? kMxZero : ink,
+                        fontFeatures: kMxTabular,
+                      ),
+                    ),
+                    Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: calm ? kMxMuted : kMxInk,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              if (calm)
-                const Row(
-                  children: [
-                    Icon(Icons.check_rounded, size: 22, color: kMxZero),
-                    SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        'הכול תקין',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: kMxZero,
-                        ),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: kMxMuted,
                       ),
                     ),
                   ],
-                )
-              else
-                MxCountUp(
-                  value: value,
-                  style: TextStyle(
-                    fontSize: 32,
-                    height: 1,
-                    fontWeight: FontWeight.w700,
-                    color: c == kMxBad ? kMxBad : kMxPrimary,
-                    fontFeatures: kMxTabular,
-                  ),
                 ),
+              ),
             ],
           ),
         ),
@@ -531,6 +500,7 @@ class MxTile extends StatelessWidget {
     this.caption = '',
     this.alert = false,
     this.selected = false,
+    this.showOk = false,
     super.key,
   });
 
@@ -540,6 +510,9 @@ class MxTile extends StatelessWidget {
   final String caption;
   final bool alert;
   final bool selected;
+
+  /// Show the small sage check when nothing is wrong here.
+  final bool showOk;
   final VoidCallback onTap;
 
   @override
@@ -555,66 +528,91 @@ class MxTile extends StatelessWidget {
     onTap: onTap,
     child: _Pressable(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: kMxEnter,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: kMxCardRadius,
-          boxShadow: kMxShadow,
-          border: selected ? Border.all(color: kMxPrimary, width: 2) : null,
+          boxShadow:
+              alert
+                  ? [
+                    BoxShadow(
+                      color: kMxBad.withValues(alpha: 0.16),
+                      blurRadius: 24,
+                      offset: const Offset(0, 10),
+                    ),
+                  ]
+                  : kMxShadow,
+          border:
+              selected
+                  ? Border.all(color: kMxPrimary, width: 2)
+                  : alert
+                  ? Border.all(color: kMxBad, width: 1.5)
+                  : null,
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                MxArchBadge(
+                MxIconBox(
                   icon,
-                  width: 44,
-                  height: 52,
-                  color: alert ? kMxBad : kMxAccent,
-                  iconColor: alert ? kMxBad : kMxPrimary,
+                  size: 46,
+                  color: alert ? kMxBad : (showOk ? kMxOk : kMxPrimary),
                 ),
+                const Spacer(),
                 if (alert)
-                  PositionedDirectional(
-                    end: -2,
-                    top: -2,
-                    child: Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: kMxBad,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2.5),
-                      ),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                      color: kMxBad,
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: kMxPink, spreadRadius: 5)],
+                    ),
+                  )
+                else if (showOk)
+                  Container(
+                    width: 20,
+                    height: 20,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: kMxSage,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const MxIcon(
+                      MxGlyphs.check,
+                      size: 13,
+                      color: Colors.white,
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
                 height: 1.25,
               ),
             ),
             if (caption.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: 3),
                 child: Text(
                   caption,
-                  textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 12,
-                    color: alert ? kMxBad : kMxMuted,
+                    fontSize: 13,
+                    color: alert ? const Color(0xFFA3262F) : kMxMuted,
                     fontWeight: alert ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
@@ -676,7 +674,7 @@ class MxPrimaryButton extends StatelessWidget {
     padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
     child: SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 58,
       child: FilledButton.icon(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith(
@@ -688,9 +686,14 @@ class MxPrimaryButton extends StatelessWidget {
           foregroundColor: WidgetStatePropertyAll(foreground),
           textStyle: const WidgetStatePropertyAll(
             TextStyle(
-              fontFamily: 'Heebo',
-              fontSize: 16,
+              fontFamily: kMxFont,
+              fontSize: 17,
               fontWeight: FontWeight.w700,
+            ),
+          ),
+          shape: const WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
             ),
           ),
         ),
@@ -945,12 +948,18 @@ Future<void> mxShowSuccess(
   required String title,
   required String body,
   required List<(String label, Key key, VoidCallback onTap)> actions,
+  List<(String title, String sub, bool done)> timeline = const [],
 }) => Navigator.of(context).push(
   PageRouteBuilder<void>(
     transitionDuration: kMxEnter,
     reverseTransitionDuration: kMxExit,
     pageBuilder:
-        (ctx, _, _) => _MomentPage(title: title, body: body, actions: actions),
+        (ctx, _, _) => _MomentPage(
+          title: title,
+          body: body,
+          actions: actions,
+          timeline: timeline,
+        ),
     transitionsBuilder:
         (_, a, _, child) => FadeTransition(
           opacity: CurvedAnimation(parent: a, curve: Curves.easeOutCubic),
@@ -970,6 +979,9 @@ Future<void> mxShowSafety(
   required String callLabel,
   required VoidCallback onCall,
   required VoidCallback onDone,
+  Object icon = MxGlyphs.warning,
+  String place = '',
+  String note = '',
 }) {
   HapticFeedback.heavyImpact();
   Future<void>.delayed(
@@ -987,6 +999,9 @@ Future<void> mxShowSafety(
             callLabel: callLabel,
             onCall: onCall,
             onDone: onDone,
+            icon: icon,
+            place: place,
+            note: note,
           ),
       transitionsBuilder:
           (ctx, a, _, child) =>
@@ -1024,14 +1039,19 @@ class _MomentPage extends StatefulWidget {
     required this.title,
     required this.body,
     required this.actions,
+    required this.timeline,
   });
   final String title;
   final String body;
   final List<(String, Key, VoidCallback)> actions;
+  final List<(String, String, bool)> timeline;
   @override
   State<_MomentPage> createState() => _MomentPageState();
 }
 
+/// "הדלת נפתחת": the house's door swings open (0.1–0.55), warm light spills
+/// out, a gold check is drawn in the doorway (0.5–0.7) with a light haptic,
+/// sparkles appear, then the words and the timeline rise.
 class _MomentPageState extends State<_MomentPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
@@ -1044,7 +1064,7 @@ class _MomentPageState extends State<_MomentPage>
   void initState() {
     super.initState();
     _c.addListener(() {
-      if (!_buzzed && _c.value >= 0.8) {
+      if (!_buzzed && _c.value >= 0.6) {
         _buzzed = true;
         HapticFeedback.mediumImpact();
       }
@@ -1071,102 +1091,237 @@ class _MomentPageState extends State<_MomentPage>
   Widget build(BuildContext context) {
     final rise = CurvedAnimation(
       parent: _c,
-      curve: const Interval(0.7, 1, curve: Curves.easeOutCubic),
+      curve: const Interval(0.55, 1, curve: Curves.easeOutCubic),
+    );
+    Widget risen(Widget child) => FadeTransition(
+      opacity: rise,
+      child: SlideTransition(
+        position: Tween(
+          begin: const Offset(0, 0.25),
+          end: Offset.zero,
+        ).animate(rise),
+        child: child,
+      ),
     );
     return Scaffold(
-      backgroundColor: kMxPrimary,
+      backgroundColor: kMxCream,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
-              AnimatedBuilder(
-                animation: _c,
-                builder:
-                    (_, _) => CustomPaint(
-                      size: const Size(128, 168),
-                      painter: _CeremonyPainter(_c.value),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+                children: [
+                  Center(
+                    child: AnimatedBuilder(
+                      animation: _c,
+                      builder:
+                          (_, _) => CustomPaint(
+                            size: const Size(220, 196),
+                            painter: _CeremonyPainter(_c.value),
+                          ),
                     ),
-              ),
-              const SizedBox(height: 24),
-              FadeTransition(
-                opacity: rise,
-                child: SlideTransition(
-                  position: Tween(
-                    begin: const Offset(0, 0.3),
-                    end: Offset.zero,
-                  ).animate(rise),
-                  child: Column(
-                    children: [
-                      Text(
-                        widget.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
+                  ),
+                  const SizedBox(height: 8),
+                  risen(
+                    Column(
+                      children: [
+                        Text(
+                          widget.title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: kMxPrimary,
+                            fontSize: 30,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          mxNb(widget.body),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: kMxMuted,
+                            fontSize: 17,
+                            height: 1.45,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (widget.timeline.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    risen(
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 2),
+                        decoration: const BoxDecoration(
                           color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          height: 1.25,
+                          borderRadius: kMxCardRadius,
+                          boxShadow: kMxShadow,
+                        ),
+                        child: Column(
+                          children: [
+                            for (final (i, (t, sub, done))
+                                in widget.timeline.indexed)
+                              _MomentStep(
+                                title: t,
+                                sub: sub,
+                                done: done,
+                                last: i == widget.timeline.length - 1,
+                                nextDone:
+                                    i + 1 < widget.timeline.length &&
+                                    widget.timeline[i + 1].$3,
+                              ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        mxNb(widget.body),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.88),
-                          fontSize: 16,
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  ],
+                ],
               ),
-              const Spacer(flex: 3),
-              for (final (i, (label, key, onTap)) in widget.actions.indexed)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: i == 0 ? 52 : 44,
-                    child:
-                        i == 0
-                            ? FilledButton(
-                              key: key,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: kMxPrimary,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                onTap();
-                              },
-                              child: Text(label),
-                            )
-                            : TextButton(
-                              key: key,
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.white,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                onTap();
-                              },
-                              child: Text(label),
-                            ),
-                  ),
-                ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 4, 22, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (i, (label, key, onTap)) in widget.actions.indexed)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: SizedBox(
+                        height: i == 0 ? 58 : 46,
+                        child:
+                            i == 0
+                                ? FilledButton(
+                                  key: key,
+                                  style: FilledButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(22),
+                                    ),
+                                    textStyle: const TextStyle(
+                                      fontFamily: kMxFont,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    onTap();
+                                  },
+                                  child: Text(label),
+                                )
+                                : TextButton(
+                                  key: key,
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    onTap();
+                                  },
+                                  child: Text(label),
+                                ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Arch draw (0–0.5) → light rises in the doorway (0.45–0.65) → check
-/// drawn (0.6–0.8).
+class _MomentStep extends StatelessWidget {
+  const _MomentStep({
+    required this.title,
+    required this.sub,
+    required this.done,
+    required this.last,
+    required this.nextDone,
+  });
+  final String title;
+  final String sub;
+  final bool done;
+  final bool last;
+  final bool nextDone;
+  @override
+  Widget build(BuildContext context) => IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: 28,
+          child: Column(
+            children: [
+              if (done)
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: kMxSage,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const MxIcon(
+                    MxGlyphs.check,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                )
+              else
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFCFC4B4),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              if (!last)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    color: nextDone ? kMxSage : const Color(0xFFE5DACB),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 18, top: 3),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15.5,
+                    fontWeight: done ? FontWeight.w700 : FontWeight.w500,
+                    color: done ? kMxInk : const Color(0xFF9A928A),
+                  ),
+                ),
+                if (sub.isNotEmpty)
+                  Text(
+                    mxNb(sub),
+                    style: const TextStyle(fontSize: 13, color: kMxMuted),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Door opens (0.1–0.55) → gold check in the doorway (0.5–0.7) →
+/// sparkles (0.55–0.85). The warm glow grows with the door.
 class _CeremonyPainter extends CustomPainter {
   _CeremonyPainter(this.t);
   final double t;
@@ -1174,45 +1329,88 @@ class _CeremonyPainter extends CustomPainter {
       c.transform(((t - a) / (b - a)).clamp(0.0, 1.0));
   @override
   void paint(Canvas canvas, Size size) {
-    final arch = MxArchPainter.arch(size, 2);
-    final light = _seg(0.45, 0.65, Curves.easeOutCubic);
-    if (light > 0) {
-      canvas
-        ..save()
-        ..clipPath(Path.from(arch)..close())
-        ..drawRect(
-          Rect.fromLTRB(0, size.height * (1 - light), size.width, size.height),
-          Paint()..color = Colors.white.withValues(alpha: 0.10),
-        )
-        ..restore();
-    }
-    final stroke =
-        Paint()
-          ..color = kMxAccent
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
-          ..strokeCap = StrokeCap.round;
-    final a = _seg(0, 0.5);
-    for (final m in arch.computeMetrics()) {
-      canvas.drawPath(m.extractPath(0, m.length * a), stroke);
-    }
-    final ck = _seg(0.6, 0.8, Curves.easeOut);
+    final door = _seg(0.1, 0.55);
+    final c = Offset(size.width / 2, size.height * 0.52);
+    final r = size.width * 0.62;
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            const Color(0xFFFFE9B8).withValues(alpha: 0.4 + 0.6 * door),
+            const Color(0x00FFE9B8),
+          ],
+          stops: const [0, 0.7],
+        ).createShader(Rect.fromCircle(center: c, radius: r)),
+    );
+    const hw = 138.0;
+    const hh = hw * 96 / 76;
+    final dx = (size.width - hw) / 2;
+    final dy = size.height - hh;
+    canvas
+      ..save()
+      ..translate(dx, dy);
+    MxHousePainter(
+      MxHouseState.ok,
+      door: door,
+      bubble: false,
+    ).paint(canvas, const Size(hw, hh));
+    const k = hw / 76;
+    final ck = _seg(0.5, 0.7, Curves.easeOut);
     if (ck > 0) {
-      final w = size.width;
-      final h = size.height;
       final check =
           Path()
-            ..moveTo(w * 0.3, h * 0.62)
-            ..lineTo(w * 0.45, h * 0.75)
-            ..lineTo(w * 0.72, h * 0.47);
+            ..moveTo(34 * k, 80.5 * k)
+            ..lineTo(37 * k, 83.5 * k)
+            ..lineTo(42.5 * k, 77.5 * k);
       for (final m in check.computeMetrics()) {
         canvas.drawPath(
           m.extractPath(0, m.length * ck),
-          stroke
-            ..color = Colors.white
-            ..strokeWidth = 4,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..color = kMxWarn
+            ..strokeWidth = 4
+            ..strokeCap = StrokeCap.round
+            ..strokeJoin = StrokeJoin.round,
         );
       }
+    }
+    canvas.restore();
+    final sp = _seg(0.55, 0.85, Curves.easeOut);
+    if (sp > 0) {
+      final gold = Paint()..color = kMxAccent.withValues(alpha: sp);
+      for (final (x, y, rr) in const [
+        (0.1, 0.35, 3.0),
+        (0.9, 0.2, 2.6),
+        (0.94, 0.62, 3.0),
+        (0.06, 0.66, 2.2),
+        (0.78, 0.08, 2.0),
+      ]) {
+        canvas.drawCircle(
+          Offset(x * size.width, y * size.height),
+          rr * sp,
+          gold,
+        );
+      }
+      void star(double x, double y, double s) {
+        final o = Offset(x * size.width, y * size.height);
+        final p =
+            Path()
+              ..moveTo(o.dx, o.dy - s)
+              ..lineTo(o.dx + s * 0.28, o.dy - s * 0.28)
+              ..lineTo(o.dx + s, o.dy)
+              ..lineTo(o.dx + s * 0.28, o.dy + s * 0.28)
+              ..lineTo(o.dx, o.dy + s)
+              ..lineTo(o.dx - s * 0.28, o.dy + s * 0.28)
+              ..lineTo(o.dx - s, o.dy)
+              ..lineTo(o.dx - s * 0.28, o.dy - s * 0.28)
+              ..close();
+        canvas.drawPath(p, gold);
+      }
+
+      star(0.22, 0.14, 9 * sp);
+      star(0.82, 0.36, 7 * sp);
     }
   }
 
@@ -1227,12 +1425,18 @@ class _SafetyPage extends StatefulWidget {
     required this.callLabel,
     required this.onCall,
     required this.onDone,
+    required this.icon,
+    required this.place,
+    required this.note,
   });
   final String title;
   final List<String> steps;
   final String callLabel;
   final VoidCallback onCall;
   final VoidCallback onDone;
+  final Object icon;
+  final String place;
+  final String note;
   @override
   State<_SafetyPage> createState() => _SafetyPageState();
 }
@@ -1243,199 +1447,362 @@ class _SafetyPageState extends State<_SafetyPage> {
   @override
   Widget build(BuildContext context) {
     final all = _done.every((d) => d);
+    final n = _done.where((d) => d).length;
     return Scaffold(
       backgroundColor: kMxBad,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-                children: [
-                  Center(
-                    child: _Pulse(
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: _still(context) ? 1 : 0.6, end: 1),
-                        duration: const Duration(milliseconds: 320),
-                        curve: Curves.easeOutBack,
-                        builder:
-                            (_, v, c) => Transform.scale(scale: v, child: c),
-                        child: const MxArch(
-                          width: 80,
-                          height: 104,
-                          stroke: 2,
-                          color: Colors.white,
-                          child: MxIcon(
-                            MxGlyphs.warning,
-                            size: 40,
-                            color: Colors.white,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -0.65),
+            radius: 1.3,
+            colors: [Color(0xFFDB4B4F), kMxBad, Color(0xFFA82A33)],
+            stops: [0, 0.45, 1],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(18, 20, 18, 8),
+                  children: [
+                    Center(
+                      child: _Pulse(
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween(
+                            begin: _still(context) ? 1 : 0.6,
+                            end: 1,
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      height: 1.25,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'עשו עכשיו, לפי הסדר, וסמנו כל צעד:',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  for (final (i, s) in widget.steps.indexed)
-                    MxAppear(
-                      index: i * 2,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Material(
-                          color: Colors.white,
-                          borderRadius: kMxCardRadius,
-                          child: InkWell(
-                            key: Key('safety-step-$i'),
-                            borderRadius: kMxCardRadius,
-                            onTap: () {
-                              HapticFeedback.heavyImpact();
-                              setState(() => _done[i] = !_done[i]);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  AnimatedScale(
-                                    scale: _done[i] ? 1 : 0.9,
-                                    duration: const Duration(milliseconds: 200),
-                                    curve: Curves.easeOutBack,
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 180,
-                                      ),
-                                      width: 32,
-                                      height: 32,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: _done[i] ? kMxBad : kMxPink,
-                                      ),
-                                      child:
-                                          _done[i]
-                                              ? const Icon(
-                                                Icons.check_rounded,
-                                                size: 20,
-                                                color: Colors.white,
-                                              )
-                                              : Text(
-                                                '${i + 1}',
-                                                style: const TextStyle(
-                                                  color: kMxBad,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      s,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        height: 1.35,
-                                        fontWeight: FontWeight.w600,
-                                        color: _done[i] ? kMxMuted : kMxInk,
-                                        decoration:
-                                            _done[i]
-                                                ? TextDecoration.lineThrough
-                                                : null,
-                                        decorationColor: kMxMuted,
-                                      ),
-                                    ),
+                          duration: const Duration(milliseconds: 320),
+                          curve: Curves.easeOutBack,
+                          builder:
+                              (_, v, c) => Transform.scale(scale: v, child: c),
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.14),
+                            ),
+                            child: Container(
+                              width: 108,
+                              height: 108,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0x4D5A000A),
+                                    blurRadius: 30,
+                                    offset: Offset(0, 14),
                                   ),
                                 ],
+                              ),
+                              child: mxIcon(
+                                widget.icon,
+                                size: 54,
+                                color: kMxBad,
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                ],
-              ),
-            ),
-            // At the thumb: the call first, then "done".
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: 72,
-                    child: FilledButton.icon(
-                      key: const Key('urgent-call'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: kMxBad,
-                        textStyle: const TextStyle(
-                          fontFamily: 'Heebo',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                    const SizedBox(height: 22),
+                    Text(
+                      widget.title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    if (widget.place.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        mxNb(widget.place),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.92),
+                          fontSize: 16,
                         ),
                       ),
-                      onPressed: widget.onCall,
-                      icon: const MxIcon(
-                        MxGlyphs.phone,
-                        size: 28,
-                        color: kMxBad,
-                      ),
-                      label: Text(widget.callLabel),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 48,
-                    child: AnimatedSwitcher(
-                      duration: kMxEnter,
-                      child:
-                          all
-                              ? FilledButton(
-                                key: const Key('success-mine'),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.white24,
-                                  foregroundColor: Colors.white,
-                                ),
-                                onPressed: () {
-                                  HapticFeedback.mediumImpact();
-                                  Navigator.pop(context);
-                                  widget.onDone();
-                                },
-                                child: const Text('הבנתי, ביצעתי'),
-                              )
-                              : OutlinedButton(
-                                key: const Key('success-mine'),
-                                style: OutlinedButton.styleFrom(
-                                  disabledForegroundColor: Colors.white,
-                                  side: const BorderSide(color: Colors.white70),
-                                ),
-                                onPressed: null,
-                                child: const Text('סמנו את כל הצעדים'),
+                    ],
+                    const SizedBox(height: 22),
+                    Semantics(
+                      label:
+                          'צעד ${(n + 1).clamp(1, _done.length)} מתוך ${_done.length}',
+                      excludeSemantics: true,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Row(
+                          children: [
+                            Text(
+                              all
+                                  ? 'כל הצעדים בוצעו'
+                                  : 'צעד ${n + 1} מתוך ${_done.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                                fontFeatures: kMxTabular,
                               ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: TweenAnimationBuilder<double>(
+                                  tween: Tween(end: n / _done.length),
+                                  duration: kMxEnter,
+                                  builder:
+                                      (_, v, _) => LinearProgressIndicator(
+                                        value: v,
+                                        minHeight: 6,
+                                        color: Colors.white,
+                                        backgroundColor: Colors.white24,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    for (final (i, s) in widget.steps.indexed)
+                      MxAppear(
+                        index: i * 2,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: AnimatedContainer(
+                            duration: kMxEnter,
+                            decoration: BoxDecoration(
+                              color:
+                                  _done[i]
+                                      ? Colors.white.withValues(alpha: 0.94)
+                                      : Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow:
+                                  _done[i]
+                                      ? null
+                                      : const [
+                                        BoxShadow(
+                                          color: Color(0x2E50000A),
+                                          blurRadius: 20,
+                                          offset: Offset(0, 8),
+                                        ),
+                                      ],
+                            ),
+                            child: Material(
+                              type: MaterialType.transparency,
+                              child: InkWell(
+                                key: Key('safety-step-$i'),
+                                borderRadius: BorderRadius.circular(22),
+                                onTap: () {
+                                  HapticFeedback.heavyImpact();
+                                  setState(() => _done[i] = !_done[i]);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Row(
+                                    children: [
+                                      AnimatedScale(
+                                        scale: _done[i] ? 1 : 0.92,
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        curve: Curves.easeOutBack,
+                                        child: AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 180,
+                                          ),
+                                          width: 34,
+                                          height: 34,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color:
+                                                _done[i]
+                                                    ? kMxSage
+                                                    : Colors.white,
+                                            border:
+                                                _done[i]
+                                                    ? null
+                                                    : Border.all(
+                                                      color: kMxBad,
+                                                      width: 2.5,
+                                                    ),
+                                          ),
+                                          child:
+                                              _done[i]
+                                                  ? const MxIcon(
+                                                    MxGlyphs.check,
+                                                    size: 19,
+                                                    color: Colors.white,
+                                                  )
+                                                  : Text(
+                                                    '${i + 1}',
+                                                    style: const TextStyle(
+                                                      color: kMxBad,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 14),
+                                      Expanded(
+                                        child: Text(
+                                          s,
+                                          style: TextStyle(
+                                            fontSize: 16.5,
+                                            height: 1.35,
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                _done[i]
+                                                    ? const Color(0xFF9A928A)
+                                                    : kMxInk,
+                                            decoration:
+                                                _done[i]
+                                                    ? TextDecoration.lineThrough
+                                                    : null,
+                                            decorationColor: const Color(
+                                              0xFFC9BFB4,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              // At the thumb: the call first, then "done".
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 74,
+                      child: FilledButton(
+                        key: const Key('urgent-call'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: kMxBad,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(26),
+                          ),
+                          textStyle: const TextStyle(
+                            fontFamily: kMxFont,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        onPressed: widget.onCall,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                color: kMxPink,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const MxIcon(
+                                MxGlyphs.phone,
+                                size: 23,
+                                color: kMxBad,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Flexible(
+                              child: Text(
+                                widget.callLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (widget.note.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const MxIcon(
+                              MxGlyphs.check,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                widget.note,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.92),
+                                  fontSize: 14.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      height: 48,
+                      child: AnimatedSwitcher(
+                        duration: kMxEnter,
+                        child:
+                            all
+                                ? FilledButton(
+                                  key: const Key('success-mine'),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.white24,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    HapticFeedback.mediumImpact();
+                                    Navigator.pop(context);
+                                    widget.onDone();
+                                  },
+                                  child: const Text('הבנתי, ביצעתי'),
+                                )
+                                : TextButton(
+                                  key: const Key('success-mine'),
+                                  style: TextButton.styleFrom(
+                                    disabledForegroundColor: Colors.white70,
+                                  ),
+                                  onPressed: null,
+                                  child: const Text('סמנו את כל הצעדים'),
+                                ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1512,13 +1879,17 @@ class MxSectionTitle extends StatelessWidget {
   final Color color;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsetsDirectional.fromSTEB(16, 24, 16, 8),
+    padding: const EdgeInsetsDirectional.fromSTEB(22, 24, 22, 10),
     child: Row(
       children: [
         Flexible(
           child: Text(
             title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: kMxInk,
+            ),
           ),
         ),
         if (count != null && count! > 0) ...[
@@ -1625,17 +1996,10 @@ class MxEmpty extends StatelessWidget {
     padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
     child: Column(
       children: [
-        MxArch(
-          width: 96,
-          height: 124,
-          stroke: 2,
-          draw: success,
-          child: mxIcon(
-            success ? MxGlyphs.check : icon,
-            size: 40,
-            color: kMxPrimary,
-          ),
-        ),
+        if (success)
+          const MxHouseArt(state: MxHouseState.ok, width: 92)
+        else
+          MxIconBox(icon, size: 76, background: kMxPeach),
         const SizedBox(height: 16),
         Text(
           title,
@@ -1697,10 +2061,10 @@ class MxTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     constraints: const BoxConstraints(maxWidth: 132),
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     decoration: BoxDecoration(
-      color: color == Colors.white ? Colors.white24 : mxTintOf(color),
-      borderRadius: BorderRadius.circular(kMxR6),
+      color: color == Colors.white ? Colors.white24 : mxBoxTint(color),
+      borderRadius: BorderRadius.circular(10),
     ),
     child: Text(
       text,
@@ -1734,15 +2098,16 @@ class MxRoleChip extends StatelessWidget {
         height: 36,
         padding: const EdgeInsetsDirectional.fromSTEB(4, 4, 10, 4),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(18),
+          boxShadow: kMxShadow,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircleAvatar(
               radius: 14,
-              backgroundColor: kMxAccent,
+              backgroundColor: kMxPeach,
               child: Text(
                 label.characters.first,
                 style: const TextStyle(
@@ -1756,17 +2121,13 @@ class MxRoleChip extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                color: Colors.white,
+                color: kMxPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(
-              Icons.expand_more_rounded,
-              size: 18,
-              color: Colors.white70,
-            ),
+            const Icon(Icons.expand_more_rounded, size: 18, color: kMxMuted),
           ],
         ),
       ),
@@ -1808,7 +2169,7 @@ class MxBottomBar extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: const BoxDecoration(color: Colors.white, boxShadow: kMxShadow2),
+    decoration: const BoxDecoration(color: kMxCream, boxShadow: kMxShadow2),
     child: SafeArea(
       top: false,
       child: Padding(
@@ -2185,28 +2546,112 @@ class MxArchBadge extends StatelessWidget {
   final double width;
   final double height;
   final Color fill;
+  // "בית": a tinted rounded square; the status color tints the box and,
+  // for danger, the icon too ([height] kept for old call sites).
   @override
-  Widget build(BuildContext context) => Container(
-    width: width,
-    height: height,
-    alignment: const Alignment(0, 0.3),
-    decoration: ShapeDecoration(
-      color: fill,
-      shape: MxArchBorder(side: BorderSide(color: color, width: 1.5)),
-    ),
-    child: mxIcon(icon, size: width <= 44 ? 20 : 24, color: iconColor),
-  );
+  Widget build(BuildContext context) {
+    final tint = switch (color) {
+      kMxBad => kMxPink,
+      kMxWarn => kMxGoldTint,
+      kMxPrimary => kMxTealTint,
+      kMxOk => kMxSageTint,
+      kMxAccent => kMxPeachSoft,
+      _ => kMxPanel,
+    };
+    return MxIconBox(
+      icon,
+      size: width,
+      color: color == kMxBad ? kMxBad : (color == kMxOk ? kMxOk : iconColor),
+      background: tint,
+    );
+  }
 }
 
-/// A house on the street: 0 = all good (gold), 1 = open job (petrol, half
-/// lit), 2 = urgent (crimson, breathing).
+/// A house on the street: 0 = all good, 1 = open job, 2 = urgent.
 typedef MxHouse = (String id, String label, int state);
 
-/// "רחוב הקשתות": every apartment as one small arch, grouped by site — the
-/// whole organization at a glance. When every house is gold the street
-/// lights up, one door after another.
+MxHouseState mxHouseState(int s) => switch (s) {
+  2 => MxHouseState.urgent,
+  1 => MxHouseState.job,
+  _ => MxHouseState.ok,
+};
+
+/// "הרחוב": every apartment as a small drawn house, grouped by site with a
+/// tree between sites, scrolling sideways when the organization grows.
+/// Meant to stand on the hills of an [MxScene]. On Friday before Shabbat,
+/// when every house is fine, the windows light up one after another.
 class MxStreet extends StatelessWidget {
   const MxStreet({
+    required this.groups,
+    required this.onTap,
+    this.celebrate = false,
+    this.houseWidth = 58,
+    super.key,
+  });
+  final List<(String title, List<MxHouse> houses)> groups;
+  final ValueChanged<String> onTap;
+  final bool celebrate;
+  final double houseWidth;
+  @override
+  Widget build(BuildContext context) {
+    var n = 0;
+    final children = <Widget>[];
+    for (final (gi, (title, houses)) in groups.indexed) {
+      if (gi > 0) {
+        children.add(
+          const Padding(
+            padding: EdgeInsets.fromLTRB(5, 0, 5, 30),
+            child: MxTree(height: 40),
+          ),
+        );
+      }
+      children.add(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (final h in houses)
+                  _House(
+                    h,
+                    n++,
+                    onTap,
+                    celebrate: celebrate,
+                    width: houseWidth,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              maxLines: 1,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF7B6A58),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: children,
+      ),
+    );
+  }
+}
+
+/// The street sized to its window: houses shrink (down to 44) so a small
+/// organization fits in one view; a big one scrolls sideways.
+class MxStreetFit extends StatelessWidget {
+  const MxStreetFit({
     required this.groups,
     required this.onTap,
     this.celebrate = false,
@@ -2216,85 +2661,57 @@ class MxStreet extends StatelessWidget {
   final ValueChanged<String> onTap;
   final bool celebrate;
   @override
-  Widget build(BuildContext context) {
-    var n = 0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final (title, houses) in groups) ...[
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: kMxMuted,
-              ),
-            ),
-          ),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              for (final h in houses)
-                _House(h, n++, onTap, celebrate: celebrate),
-            ],
-          ),
-          const SizedBox(height: 16),
-        ],
-      ],
-    );
-  }
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (_, c) {
+      final n = groups.fold(0, (a, g) => a + g.$2.length);
+      final trees = (groups.length - 1).clamp(0, 99) * 42.0;
+      final w = (((c.maxWidth - 20 - trees) / (n == 0 ? 1 : n)) - 8).clamp(
+        44.0,
+        66.0,
+      );
+      return MxStreet(
+        groups: groups,
+        onTap: onTap,
+        celebrate: celebrate,
+        houseWidth: w,
+      );
+    },
+  );
 }
 
 class _House extends StatelessWidget {
-  const _House(this.h, this.i, this.onTap, {required this.celebrate});
+  const _House(
+    this.h,
+    this.i,
+    this.onTap, {
+    required this.celebrate,
+    required this.width,
+  });
   final MxHouse h;
   final int i;
   final ValueChanged<String> onTap;
   final bool celebrate;
+  final double width;
   @override
   Widget build(BuildContext context) {
     final (id, label, state) = h;
-    final tone = mxArchTone(fault: state == 2, open: state == 1);
-    final fill = switch (state) {
-      2 => kMxBad,
-      1 => kMxTealTint,
-      _ => celebrate ? kMxAccent.withValues(alpha: 0.35) : kMxGoldTint,
-    };
-    Widget arch = Container(
-      width: 32,
-      height: 42,
-      decoration: ShapeDecoration(
-        color: fill,
-        shape: MxArchBorder(side: BorderSide(color: tone, width: 1.5)),
-      ),
-    );
-    if (state == 2) arch = _Breathe(child: arch);
-    if (celebrate && !_still(context)) {
-      arch = TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: Duration(milliseconds: 900 + 40 * i),
-        curve: Interval(
-          (40 * i) / (900 + 40 * i),
-          1,
-          curve: Curves.easeOutCubic,
-        ),
-        builder:
-            (_, v, c) => DecoratedBox(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: kMxAccent.withValues(alpha: 0.45 * v),
-                    blurRadius: 12 * v,
-                  ),
-                ],
-              ),
-              child: c,
-            ),
-        child: arch,
-      );
+    final st = mxHouseState(state);
+    Widget art = MxHouseArt(state: st, width: width);
+    if (celebrate) {
+      art =
+          _still(context)
+              ? MxHouseArt(state: st, width: width, lit: 1)
+              : TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: Duration(milliseconds: 900 + 160 * i),
+                curve: Interval(
+                  (160 * i) / (900 + 160 * i),
+                  1,
+                  curve: Curves.easeOutCubic,
+                ),
+                builder:
+                    (_, v, _) => MxHouseArt(state: st, width: width, lit: v),
+              );
     }
     final what = switch (state) {
       2 => 'תקלה דחופה',
@@ -2308,14 +2725,27 @@ class _House extends StatelessWidget {
       onTap: () => onTap(id),
       child: _Pressable(
         onTap: () => onTap(id),
-        child: Column(
+        child: Padding(
           key: Key('street-$id'),
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Hero(tag: 'house-$id', child: arch),
-            const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 12, color: kMxInk)),
-          ],
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Hero(tag: 'house-$id', child: art),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      state == 2
+                          ? const Color(0xFFA3262F)
+                          : const Color(0xFF5E5A52),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -2428,4 +2858,180 @@ class MxNavIcon extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// One tab of [MxNavBar]: icon, label, and a count of things to act on.
+typedef MxNavItem = (Object icon, String label, int badge);
+
+/// "בית" navigation: a floating petrol pill. The active tab opens into a
+/// peach capsule with its name; with three tabs or fewer every name shows.
+class MxNavBar extends StatelessWidget {
+  const MxNavBar({
+    required this.items,
+    required this.selectedIndex,
+    required this.onSelect,
+    super.key,
+  });
+  final List<MxNavItem> items;
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final all = items.length <= 3;
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+        child: Container(
+          height: 66,
+          padding: const EdgeInsets.symmetric(horizontal: 9),
+          decoration: BoxDecoration(
+            color: kMxPrimary,
+            borderRadius: BorderRadius.circular(33),
+            boxShadow: kMxShadow3,
+          ),
+          child: Row(
+            mainAxisAlignment:
+                all
+                    ? MainAxisAlignment.spaceEvenly
+                    : MainAxisAlignment.spaceBetween,
+            children: [
+              for (final (i, (icon, label, badge)) in items.indexed)
+                if (all || i == selectedIndex)
+                  Flexible(
+                    child: _NavTab(
+                      key: Key('nav-$label'),
+                      icon: icon,
+                      label: label,
+                      badge: badge,
+                      selected: i == selectedIndex,
+                      showLabel: true,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onSelect(i);
+                      },
+                    ),
+                  )
+                else
+                  _NavTab(
+                    key: Key('nav-$label'),
+                    icon: icon,
+                    label: label,
+                    badge: badge,
+                    selected: false,
+                    showLabel: false,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onSelect(i);
+                    },
+                  ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavTab extends StatelessWidget {
+  const _NavTab({
+    required this.icon,
+    required this.label,
+    required this.badge,
+    required this.selected,
+    required this.showLabel,
+    required this.onTap,
+    super.key,
+  });
+  final Object icon;
+  final String label;
+  final int badge;
+  final bool selected;
+  final bool showLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = selected ? kMxPrimary : const Color(0xFFB9D0D5);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: badge > 0 ? '$label, $badge' : label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: kMxEnter,
+          curve: Curves.easeOutCubic,
+          height: 48,
+          width: showLabel ? null : 48,
+          alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(horizontal: showLabel ? 14 : 0),
+          decoration: BoxDecoration(
+            color: selected ? kMxPeach : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  mxIcon(icon, size: 22, color: fg),
+                  if (badge > 0)
+                    PositionedDirectional(
+                      top: -7,
+                      end: -9,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 18),
+                        height: 18,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: kMxAccent,
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(
+                            color: selected ? kMxPeach : kMxPrimary,
+                            width: 2,
+                          ),
+                        ),
+                        child: Text(
+                          '$badge',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            height: 1,
+                            fontWeight: FontWeight.w700,
+                            color: kMxPrimary,
+                            fontFeatures: kMxTabular,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              if (showLabel) ...[
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      color: fg,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -8,8 +8,9 @@
 ///   surface   #F5F5F0 / #EFEEE8  warm cream   (page background)
 ///   text      #323232
 ///   green     #248440  (logo stem)            (OK / done)
-/// Their font (Leon) is licensed, so we use the bundled Heebo — the closest
-/// geometric Hebrew sans already shipped with the app. Their LOGO is NOT
+/// "בית" direction (design round 4): cream, peach and sage around the petrol;
+/// red ONLY for danger; gold for the one "yes" of the store; the font is
+/// Rubik (OFL, bundled) — soft, rounded, friendly for every staff member. Their LOGO is NOT
 /// embedded: a text wordmark only, until the client approves using it.
 ///
 /// `MX_BRAND=neutral` gives a plain blue theme for any other organization.
@@ -27,24 +28,35 @@ const bool kMxSiachSod = _brandName == 'siachsod';
 /// Primary (headers, app bar, links).
 const Color kMxPrimary = kMxSiachSod ? Color(0xFF0D4151) : Color(0xFF1F5FA8);
 
-/// Call-to-action (main buttons) and errors.
-const Color kMxCta = kMxSiachSod ? Color(0xFFB51734) : Color(0xFFC0362C);
+/// Danger (safety, overdue, destructive) — never decoration.
+const Color kMxCta = kMxSiachSod ? Color(0xFFC9353F) : Color(0xFFC0362C);
+
+/// The module's typeface.
+const String kMxFont = 'Rubik';
 
 /// Highlight accent.
 const Color kMxAccent = kMxSiachSod ? Color(0xFFD7B42C) : Color(0xFFF0A83A);
 
 /// Status colors (AA contrast on the light surfaces).
 const Color kMxBad = kMxCta;
-// Brand-only palette: "attention" is the dark shade of the gold accent (AA on
-// white), "done / OK" is the petrol primary itself — no off-brand green.
-const Color kMxWarn = kMxSiachSod ? Color(0xFF6B5200) : Color(0xFFB86E00);
-const Color kMxOk = kMxSiachSod ? Color(0xFF0D4151) : Color(0xFF1E8A4C);
+// "Attention" is the dark shade of the gold (AA on white); "done / OK" is the
+// deep sage of the houses' gardens (AA on white).
+const Color kMxWarn = kMxSiachSod ? Color(0xFF7A5C08) : Color(0xFFB86E00);
+const Color kMxOk = kMxSiachSod ? Color(0xFF3F6B4C) : Color(0xFF1E8A4C);
+
+/// The "בית" palette.
+const Color kMxCream = Color(0xFFFBF6EE);
+const Color kMxPeach = Color(0xFFF7E4D4);
+const Color kMxPeachSoft = Color(0xFFFCEFE4);
+const Color kMxSage = Color(0xFF7FA38A);
+const Color kMxSageTint = Color(0xFFEEF3EA);
+const Color kMxWindow = Color(0xFFFFE4A3);
 
 /// Page background and soft panels.
-const Color kMxSurface = kMxSiachSod ? Color(0xFFF5F5F0) : Color(0xFFF4F6F8);
-const Color kMxPanel = kMxSiachSod ? Color(0xFFEFEEE8) : Color(0xFFE9EEF3);
-const Color kMxLine = kMxSiachSod ? Color(0xFFD1D1C0) : Color(0xFFE2E7EC);
-const Color kMxInk = kMxSiachSod ? Color(0xFF323232) : Color(0xFF16202A);
+const Color kMxSurface = kMxSiachSod ? kMxCream : Color(0xFFF4F6F8);
+const Color kMxPanel = kMxSiachSod ? kMxPeachSoft : Color(0xFFE9EEF3);
+const Color kMxLine = kMxSiachSod ? Color(0xFFEFE6D9) : Color(0xFFE2E7EC);
+const Color kMxInk = kMxSiachSod ? Color(0xFF26302F) : Color(0xFF16202A);
 
 /// Wordmark + subtitle in the app bar.
 const String kMxWordmark = kMxSiachSod ? 'שיח סוד' : 'ניהול אחזקה';
@@ -53,18 +65,19 @@ const String kMxSubtitle = kMxSiachSod ? 'אחזקה ורכש' : 'ורכש';
 /// Design tokens (design round 2): one radius scale, three weights, a 4/8
 /// spacing grid, and semantic color roles — red is ONLY safety / overdue /
 /// destructive; every primary action is petrol; waiting is gold.
-const double kMxR6 = 6; // status badge
-const double kMxR12 = 12; // input, chip, tile, segmented
-const double kMxR16 = 16; // card, toast, list group
-const double kMxR24 = 24; // sheet top, dialog
+const double kMxR6 = 8; // status badge
+const double kMxR12 = 14; // input, chip, segmented, icon box
+const double kMxR16 = 22; // card, toast, list group
+const double kMxR24 = 28; // sheet top, dialog
+const double kMxRButton = 18; // every button
 const BorderRadius kMxCardRadius = BorderRadius.all(Radius.circular(kMxR16));
 
 /// Secondary text and "zero / nothing to do" numbers.
-const Color kMxMuted = Color(0xFF5C5C55);
-const Color kMxZero = Color(0xFF9A9A90);
+const Color kMxMuted = Color(0xFF6B655C);
+const Color kMxZero = Color(0xFF9E968A);
 
 /// Input border (quiet) — focus turns petrol.
-const Color kMxField = Color(0xFFD9D7C8);
+const Color kMxField = Color(0xFFE2D6C4);
 
 /// Tabular figures for every number, price and date.
 const List<FontFeature> kMxTabular = [FontFeature.tabularFigures()];
@@ -79,22 +92,22 @@ ThemeData mxBrandTheme() {
     error: kMxBad,
   );
   const btnShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
+    borderRadius: BorderRadius.all(Radius.circular(kMxRButton)),
   );
   const label = TextStyle(
-    fontFamily: 'Heebo',
+    fontFamily: kMxFont,
     fontSize: 16,
     fontWeight: FontWeight.w700,
   );
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    fontFamily: 'Heebo',
+    fontFamily: kMxFont,
     scaffoldBackgroundColor: kMxSurface,
     textTheme: ThemeData.light().textTheme.apply(
       bodyColor: kMxInk,
       displayColor: kMxInk,
-      fontFamily: 'Heebo',
+      fontFamily: kMxFont,
     ),
     iconTheme: const IconThemeData(color: kMxPrimary),
     cardTheme: const CardTheme(
@@ -114,7 +127,7 @@ ThemeData mxBrandTheme() {
                   : kMxPrimary,
         ),
         foregroundColor: const WidgetStatePropertyAll(Colors.white),
-        minimumSize: const WidgetStatePropertyAll(Size(64, 48)),
+        minimumSize: const WidgetStatePropertyAll(Size(64, 52)),
         shape: const WidgetStatePropertyAll(btnShape),
         textStyle: const WidgetStatePropertyAll(label),
         overlayColor: WidgetStatePropertyAll(
@@ -126,8 +139,9 @@ ThemeData mxBrandTheme() {
       style: OutlinedButton.styleFrom(
         foregroundColor: kMxPrimary,
         disabledForegroundColor: kMxPrimary.withValues(alpha: 0.35),
-        side: const BorderSide(color: kMxPrimary),
-        minimumSize: const Size(64, 44),
+        backgroundColor: Colors.white,
+        side: const BorderSide(color: Color(0xFFD9CDBB), width: 1.5),
+        minimumSize: const Size(64, 48),
         shape: btnShape,
         textStyle: label.copyWith(fontWeight: FontWeight.w600),
       ),
@@ -150,12 +164,12 @@ ThemeData mxBrandTheme() {
     chipTheme: const ChipThemeData(
       backgroundColor: Colors.white,
       selectedColor: kMxPrimary,
-      side: BorderSide(color: Color(0xFFC9C7B4)),
+      side: BorderSide(color: Color(0xFFE2D6C4)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
       ),
       labelStyle: TextStyle(
-        fontFamily: 'Heebo',
+        fontFamily: kMxFont,
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: kMxInk,
@@ -197,7 +211,7 @@ ThemeData mxBrandTheme() {
       ),
       labelTextStyle: WidgetStateProperty.resolveWith(
         (s) => TextStyle(
-          fontFamily: 'Heebo',
+          fontFamily: kMxFont,
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color:
@@ -214,7 +228,7 @@ ThemeData mxBrandTheme() {
       elevation: 6,
       shape: RoundedRectangleBorder(borderRadius: kMxCardRadius),
       contentTextStyle: TextStyle(
-        fontFamily: 'Heebo',
+        fontFamily: kMxFont,
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: Colors.white,
@@ -227,7 +241,7 @@ ThemeData mxBrandTheme() {
         borderRadius: BorderRadius.all(Radius.circular(kMxR24)),
       ),
       titleTextStyle: TextStyle(
-        fontFamily: 'Heebo',
+        fontFamily: kMxFont,
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: kMxInk,
@@ -241,19 +255,19 @@ ThemeData mxBrandTheme() {
         borderRadius: BorderRadius.vertical(top: Radius.circular(kMxR24)),
       ),
     ),
-    // One chrome everywhere: petrol bar, white title (design round 2).
+    // "בית": the bar is part of the page — cream, petrol ink, no line.
     appBarTheme: const AppBarTheme(
-      backgroundColor: kMxPrimary,
-      foregroundColor: Colors.white,
+      backgroundColor: kMxCream,
+      foregroundColor: kMxPrimary,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       toolbarHeight: 56,
       titleTextStyle: TextStyle(
-        fontFamily: 'Heebo',
+        fontFamily: kMxFont,
         fontSize: 20,
         fontWeight: FontWeight.w700,
-        color: Colors.white,
+        color: kMxPrimary,
       ),
     ),
     pageTransitionsTheme: const PageTransitionsTheme(
@@ -267,31 +281,33 @@ ThemeData mxBrandTheme() {
 
 // ── premium layer: pastel tints + soft tinted shadows ────────────────────────
 // Tints echo the site's pastel stat cards (the pink "50 שנות ניסיון" card).
-const Color kMxPink = kMxSiachSod ? Color(0xFFF6DDE2) : Color(0xFFFBE4E2);
-const Color kMxGoldTint = kMxSiachSod ? Color(0xFFFBF4DA) : Color(0xFFFCEFD6);
-const Color kMxTealTint = kMxSiachSod ? Color(0xFFDDEAEC) : Color(0xFFE2ECF7);
-const Color kMxGreenTint = kMxSiachSod ? Color(0xFFDDEFE2) : Color(0xFFDDF0E4);
+const Color kMxPink = kMxSiachSod ? Color(0xFFFCE7E6) : Color(0xFFFBE4E2);
+const Color kMxGoldTint = kMxSiachSod ? Color(0xFFFBF1D2) : Color(0xFFFCEFD6);
+const Color kMxTealTint = kMxSiachSod ? Color(0xFFE2EDEF) : Color(0xFFE2ECF7);
+const Color kMxGreenTint = kMxSiachSod ? kMxSageTint : Color(0xFFDDF0E4);
 
 /// Tint for a status color (pastel background behind it).
 Color mxTintOf(Color c) {
   if (c == kMxBad) return kMxPink;
   if (c == kMxWarn) return kMxGoldTint;
-  if (c == kMxOk || c == kMxPrimary) return kMxTealTint;
+  if (c == kMxOk) return kMxGreenTint;
+  if (c == kMxPrimary) return kMxTealTint;
   return kMxTealTint;
 }
 
 /// Elevation 1 (cards): border OR shadow, never both.
+/// Warm, soft, sun-from-above shadows (the "בית" light).
 const List<BoxShadow> kMxShadow = [
-  BoxShadow(color: Color(0x140D4151), blurRadius: 3, offset: Offset(0, 1)),
-  BoxShadow(color: Color(0x0F0D4151), blurRadius: 12, offset: Offset(0, 4)),
+  BoxShadow(color: Color(0x08000000), offset: Offset(0, 1)),
+  BoxShadow(color: Color(0x146E461E), blurRadius: 28, offset: Offset(0, 10)),
 ];
 
-/// Elevation 2 (sticky bars, navigation).
+/// Elevation 2 (sticky bars).
 const List<BoxShadow> kMxShadow2 = [
-  BoxShadow(color: Color(0x1A0D4151), blurRadius: 12, offset: Offset(0, -2)),
+  BoxShadow(color: Color(0x146E461E), blurRadius: 20, offset: Offset(0, -4)),
 ];
 
-/// Elevation 3 (toast, floating).
+/// Elevation 3 (toast, floating navigation).
 const List<BoxShadow> kMxShadow3 = [
-  BoxShadow(color: Color(0x290D4151), blurRadius: 24, offset: Offset(0, 8)),
+  BoxShadow(color: Color(0x520D4151), blurRadius: 30, offset: Offset(0, 16)),
 ];

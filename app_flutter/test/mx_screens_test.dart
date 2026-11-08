@@ -11,6 +11,7 @@ import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_screens.dart';
 import 'package:buildsmart/features/maintenance/mx_state.dart';
 import 'package:buildsmart/features/maintenance/mx_templates.dart';
+import 'package:buildsmart/features/maintenance/mx_ui.dart';
 import 'package:buildsmart/services/task_photo.dart';
 import 'package:buildsmart/state/material_requests_engine.dart';
 import 'package:buildsmart/state/orders_engine.dart';
@@ -96,12 +97,7 @@ class _H {
   }
 
   Future<void> tab(String label) async {
-    await tester.tap(
-      find.descendant(
-        of: find.byType(NavigationBar),
-        matching: find.text(label),
-      ),
-    );
+    await tester.tap(find.byKey(Key('nav-$label')));
     await tester.pumpAndSettle();
   }
 
@@ -269,7 +265,11 @@ void main() {
     expect(h.db.po(po.id).status, MxPoStatus.ready);
     expect(h.db.po(po.id).fulfil, MxFulfil.pickup);
     expect(h.db.po(po.id).invoiceNo, '5531');
-    expect(find.text('תודה, טמבור השכונה'), findsOneWidget, reason: 'thank-you moment');
+    expect(
+      find.text('תודה, טמבור השכונה'),
+      findsOneWidget,
+      reason: 'thank-you moment',
+    );
     await h.tap('store-thanks-ok', wait: false);
 
     // ── manager receives (with a confirm) → stock up by what was supplied ──
@@ -502,20 +502,17 @@ void main() {
       for (final role in MxRole.values) {
         h.container.read(mxRoleProvider.notifier).state = role;
         await tester.pumpAndSettle();
-        final bar = find.byType(NavigationBar);
+        final bar = find.byType(MxNavBar);
         final count =
             bar.evaluate().isEmpty
                 ? 1
-                : tester.widget<NavigationBar>(bar).destinations.length;
+                : tester.widget<MxNavBar>(bar).items.length;
         for (var i = 0; i < count; i++) {
           if (bar.evaluate().isNotEmpty) {
             await tester.tap(
-              find
-                  .descendant(
-                    of: bar,
-                    matching: find.byType(NavigationDestination),
-                  )
-                  .at(i),
+              find.byKey(
+                Key('nav-${tester.widget<MxNavBar>(bar).items[i].$2}'),
+              ),
             );
             await tester.pumpAndSettle();
           }
