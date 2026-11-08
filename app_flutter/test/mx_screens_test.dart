@@ -1,0 +1,189 @@
+// Maintenance module — end-to-end widget flow through the real screens, all
+// four roles: staff reports a point → manager assigns → tech fixes with a part
+// (stock −1) → manager auto-reorders + approves → WhatsApp link opened (fake
+// launcher) → store confirms + ready by link page → manager receives (stock +).
+
+import 'package:buildsmart/features/maintenance/mx_engine.dart';
+import 'package:buildsmart/features/maintenance/mx_model.dart';
+import 'package:buildsmart/features/maintenance/mx_screens.dart';
+import 'package:buildsmart/features/maintenance/mx_state.dart';
+import 'package:buildsmart/features/maintenance/mx_templates.dart';
+import 'package:buildsmart/state/url_launcher_seam.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  final now = DateTime(2026, 11, 8, 10);
+
+  testWidgets('full maintenance loop across roles', (tester) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    final launched = <Uri>[];
+    final container = ProviderContainer(
+      overrides: [
+        mxClockProvider.overrideWithValue(() => now),
+        mxDbProvider.overrideWith(
+          (ref) =>
+              MxNotifier(() => now, persist: false, initial: mxDemoSeed(now)),
+        ),
+        urlLauncherProvider.overrideWithValue((uri) async {
+          launched.add(uri);
+          return true;
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+    MxDb db() => container.read(mxDbProvider);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const MxApp()),
+    );
+    await tester.pumpAndSettle();
+
+    Future<void> role(String label) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const Key('mx-roles')),
+          matching: find.text(label),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tab(String label) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text(label),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tapKey(String key) async {
+      // Let any confirmation toast clear, as a real user would.
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      final f = find.byKey(Key(key));
+      await tester.ensureVisible(f);
+      await tester.pumpAndSettle();
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+    }
+
+    // Dashboard: point-level register count.
+    expect(find.text('${db().points.length}'), findsOneWidget);
+
+    // ── staff reports a kitchen outlet ──
+    await role('מדריך');
+    await tapKey('rep-room');
+    await tester.tap(find.text('מטבח').last);
+    await tester.pumpAndSettle();
+    await tapKey('rep-point');
+    await tester.tap(find.text('שקע 1 – מעל משטח').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('rep-text')), 'ניצוצות מהשקע');
+    await tapKey('rep-photo');
+    await tapKey('rep-send');
+    expect(db().openWorkOrders.single.desc, 'ניצוצות מהשקע');
+    expect(db().openWorkOrders.single.reportedBy, kMxStaffLabel);
+    expect(db().openWorkOrders.single.hasPhoto, isTrue);
+    final woId = db().openWorkOrders.single.id;
+    expect(
+      find.text('$woId · ניצוצות מהשקע'),
+      findsOneWidget,
+      reason: 'staff lands on "my reports"',
+    );
+
+    // ── manager assigns ──
+    await role('מנהל');
+    await tab('קריאות');
+    await tapKey('wo-$woId');
+    await tapKey('wo-assign');
+    expect(db().workOrder(woId).assignee, kMxTechName);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // ── tech fixes with a part ──
+    await role('טכנאי');
+    final before = db().qty('EL-SK16');
+    await tapKey('wo-$woId');
+    await tapKey('wo-fix');
+    expect(db().workOrder(woId).status, MxWoStatus.done);
+    expect(db().qty('EL-SK16'), before - 1);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // ── manager: auto reorder → approve → WhatsApp ──
+    await role('מנהל');
+    await tab('מלאי');
+    await tapKey('auto-reorder');
+    final pos = db().pendingApproval;
+    expect(pos, isNotEmpty);
+    final po = pos.firstWhere((o) => o.storeId == kMxStoreId);
+    await tab('הזמנות');
+    await tapKey('po-approve-${po.id}');
+    expect(db().po(po.id).status, MxPoStatus.sent);
+    await tapKey('po-wa-${po.id}');
+    expect(launched.single.host, 'wa.me');
+    expect(launched.single.queryParameters['text'], contains(po.id));
+    expect(
+      launched.single.queryParameters['text'],
+      contains(db().po(po.id).token),
+    );
+
+    // ── store answers from its inbox / link page ──
+    await role('חנות');
+    await tapKey('inbox-${po.id}');
+    await tapKey('store-confirm');
+    expect(db().po(po.id).status, MxPoStatus.storeConfirmed);
+    await tester.enterText(find.byKey(const Key('store-invoice')), '5531');
+    await tapKey('store-ready');
+    expect(db().po(po.id).status, MxPoStatus.ready);
+    expect(db().po(po.id).invoiceNo, '5531');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // ── manager receives → stock up ──
+    await role('מנהל');
+    await tab('הזמנות');
+    final line = db().po(po.id).lines.first;
+    final had = db().qty(line.sku);
+    await tapKey('po-receive-${po.id}');
+    expect(db().po(po.id).status, MxPoStatus.received);
+    expect(db().qty(line.sku), had + line.qty);
+
+    // ── PM: mark an overdue legal check done ──
+    await tab('תחזוקה');
+    expect(find.textContaining('⚖'), findsWidgets);
+    await tapKey('pm-done-hotwater');
+    expect(
+      db().dueOf(db().pmRules.firstWhere((r) => r.id == 'hotwater'), now),
+      MxDue.ok,
+    );
+  });
+
+  testWidgets('invalid store link shows an honest message', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        mxClockProvider.overrideWithValue(() => now),
+        mxDbProvider.overrideWith(
+          (ref) =>
+              MxNotifier(() => now, persist: false, initial: mxDemoSeed(now)),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: MxStorePage(token: 'not-a-real-token')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('הקישור לא תקף'), findsOneWidget);
+  });
+}
