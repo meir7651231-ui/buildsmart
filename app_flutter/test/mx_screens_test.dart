@@ -239,7 +239,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('איפה התקלה?'), findsOneWidget);
     // Activate the kitchen tile the way TalkBack/VoiceOver does.
-    tester.semantics.tap(find.semantics.byLabel(RegExp(r'^מטבח, ')));
+    tester.semantics.tap(find.semantics.byLabel(RegExp('^מטבח, ')));
     await tester.pumpAndSettle();
     expect(find.text('מה לא עובד?'), findsOneWidget);
     handle.dispose();
@@ -259,11 +259,12 @@ void main() {
       // Some open work + orders so every screen has content to lay out.
       final n = container.read(mxDbProvider.notifier);
       final db0 = container.read(mxDbProvider);
-      n.report(db0.points.first.id, 'בדיקה', kMxStaffLabel);
-      n.assign(n.lastCreatedId!, kMxTechName);
-      n.requestPart(n.lastCreatedId!, 4, kMxTechName);
-      n.autoReorder();
-      n.approve(container.read(mxDbProvider).purchaseOrders.last.id);
+      n
+        ..report(db0.points.first.id, 'בדיקה', kMxStaffLabel)
+        ..assign(n.lastCreatedId!, kMxTechName)
+        ..requestPart(n.lastCreatedId!, 4, kMxTechName)
+        ..autoReorder()
+        ..approve(container.read(mxDbProvider).purchaseOrders.last.id);
       await tester.pumpWidget(
         UncontrolledProviderScope(container: container, child: const MxApp()),
       );

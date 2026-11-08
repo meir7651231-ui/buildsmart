@@ -480,11 +480,27 @@ MxDb storeMarkMissing(MxDb db, String token, String sku) {
   );
 }
 
+/// Note stamped on a PO created by [rerouteMissing] for [poId].
+String mxRerouteNote(String poId) => 'פריטים שחסרו ב-$poId';
+
+/// True once the missing lines of [poId] were already sent to another store.
+bool mxRerouted(MxDb db, String poId) => db.purchaseOrders.any(
+  (o) => o.note == mxRerouteNote(poId) && o.status != MxPoStatus.rejected,
+);
+
+/// Missing lines of an open PO that still need another store — the manager
+/// can reroute them whatever the store did next (e.g. marked the rest ready).
+bool mxCanReroute(MxDb db, MxPurchaseOrder o) =>
+    o.isOpen && o.lines.any((l) => l.missing) && !mxRerouted(db, o.id);
+
 /// Send the missing lines of [poId] to another store (pending approval).
 (MxDb, String?) rerouteMissing(MxDb db, String poId, {required DateTime now}) {
   final o = db.po(poId);
   final missing = o.lines.where((l) => l.missing).toList();
   if (missing.isEmpty) return (db, null);
+  if (mxRerouted(db, poId)) {
+    throw const MxError('החוסרים כבר הופנו לחנות אחרת');
+  }
   final alt = db.storeFor(missing.first.sku, exclude: {o.storeId});
   if (alt == null) throw const MxError('אין חנות חלופית לפריטים החסרים');
   return _newPo(
@@ -496,7 +512,7 @@ MxDb storeMarkMissing(MxDb db, String token, String sku) {
     ],
     by: 'הפניה מ-$poId',
     now: now,
-    note: 'פריטים שחסרו ב-$poId',
+    note: mxRerouteNote(poId),
   );
 }
 

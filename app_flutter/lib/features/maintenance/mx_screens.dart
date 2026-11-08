@@ -2071,7 +2071,7 @@ class _OrdersPage extends ConsumerWidget {
                 label: const Text('מה החנות רואה'),
                 onPressed: () => _open(context, MxStorePage(token: o.token)),
               ),
-              if (o.status == MxPoStatus.storePartial)
+              if (mxCanReroute(db, o))
                 TextButton.icon(
                   key: Key('po-reroute-${o.id}'),
                   icon: const Icon(Icons.alt_route, size: 18),

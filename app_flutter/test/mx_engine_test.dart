@@ -282,16 +282,24 @@ void main() {
           throwsA(isA<MxError>()),
         );
 
-        // Only the tambur sells it in the seed → no alternative store.
+        // With no other store of that type → honest error.
+        final onlyTambur = db.copyWith(
+          stores: db.stores.where((s) => s.id == 'st-tambur').toList(),
+        );
         expect(
-          () => rerouteMissing(db, po.id, now: now),
+          () => rerouteMissing(onlyTambur, po.id, now: now),
           throwsA(isA<MxError>()),
         );
-        // Add an alternative store and reroute.
+        // The seed's electrical store is the alternative for an electrical line.
+        if (db.part(missingSku).storeType == 'חשמל') {
+          final (dbE, altE) = rerouteMissing(db, po.id, now: now);
+          expect(dbE.po(altE!).storeId, 'st-electric');
+        }
+        // Add an explicit alternative store and reroute to it.
         final type = db.part(missingSku).storeType;
-        db = db.copyWith(
+        db = onlyTambur.copyWith(
           stores: [
-            ...db.stores,
+            ...onlyTambur.stores,
             MxStore(
               id: 'st-alt',
               name: 'חלופי',
@@ -346,6 +354,38 @@ void main() {
       expect(db.po('PO-X').status, MxPoStatus.received);
     });
   });
+
+  test(
+    'reroute still possible after the store marked the rest ready; never twice',
+    () {
+      var db = seed();
+      final (db1, ids) = autoReorder(db, now: now);
+      db = approvePo(db1, ids.first);
+      final po = db.po(ids.first);
+      db = storeMarkMissing(db, po.token, po.lines.first.sku);
+      db = storeAct(db, po.token, MxStoreAction.ready);
+      expect(db.po(po.id).status, MxPoStatus.ready);
+      expect(
+        mxCanReroute(db, db.po(po.id)),
+        isTrue,
+        reason: 'missing line still needs a store',
+      );
+      final (db2, alt) = rerouteMissing(db, po.id, now: now);
+      expect(alt, isNotNull);
+      expect(
+        mxCanReroute(db2, db2.po(po.id)),
+        isFalse,
+        reason: 'already rerouted',
+      );
+      expect(
+        () => rerouteMissing(db2, po.id, now: now),
+        throwsA(isA<MxError>()),
+      );
+      // A rejected reroute can be rerouted again.
+      final db3 = rejectPo(db2, alt!);
+      expect(mxCanReroute(db3, db3.po(po.id)), isTrue);
+    },
+  );
 
   group('stock — auto reorder', () {
     test('one PO per store, every low line topped up to 2×min', () {

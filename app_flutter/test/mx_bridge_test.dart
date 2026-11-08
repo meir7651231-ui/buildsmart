@@ -21,10 +21,10 @@ void main() {
   late ProviderContainer c;
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    // Build the module (starts listening to the orders engine).
     c = ProviderContainer(
       overrides: [mxClockProvider.overrideWithValue(() => now)],
-    );
-    c.read(mxDbProvider); // build + start listening to the orders engine
+    )..read(mxDbProvider);
   });
   tearDown(() => c.dispose());
 

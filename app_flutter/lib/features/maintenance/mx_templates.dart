@@ -402,6 +402,13 @@ MxDb mxDemoSeed(DateTime now) {
       phone: '050-0000000',
     ),
     MxStore(
+      id: 'st-electric',
+      name: 'חשמל ותאורה (דוגמה)',
+      types: {'חשמל', 'בטיחות'},
+      phone: '053-0000000',
+      channel: MxStoreChannel.app,
+    ),
+    MxStore(
       id: 'st-judaica',
       name: 'סת"ם ויודאיקה (דוגמה)',
       types: {'יודאיקה'},
