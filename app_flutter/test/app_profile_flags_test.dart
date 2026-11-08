@@ -132,6 +132,11 @@ const Set<String> kPassthrough = {
   // giant-system V6: the deploy-baked company config slice — a per-channel
   // VALUE (inert without ORG_CONFIG, which stays arming-classified above).
   'ORG_CONFIG_JSON',
+  // maintenance module (lib/features/maintenance/mx_state.dart): per-deploy
+  // VALUES — the store-link base URL and the org display name in store
+  // messages. Inert outside the standalone maintenance demo entry.
+  'MX_STORE_BASE',
+  'MX_ORG_NAME',
 };
 
 /// The profile define itself.
