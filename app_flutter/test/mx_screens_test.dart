@@ -269,7 +269,7 @@ void main() {
     expect(h.db.po(po.id).status, MxPoStatus.ready);
     expect(h.db.po(po.id).fulfil, MxFulfil.pickup);
     expect(h.db.po(po.id).invoiceNo, '5531');
-    expect(find.text('תודה רבה!'), findsOneWidget, reason: 'thank-you moment');
+    expect(find.text('תודה, טמבור השכונה'), findsOneWidget, reason: 'thank-you moment');
     await h.tap('store-thanks-ok', wait: false);
 
     // ── manager receives (with a confirm) → stock up by what was supplied ──

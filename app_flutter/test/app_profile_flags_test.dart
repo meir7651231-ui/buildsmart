@@ -139,6 +139,10 @@ const Set<String> kPassthrough = {
   'MX_ORG_NAME',
   // maintenance module client branding ('siachsod' | 'neutral') — a VALUE.
   'MX_BRAND',
+  // maintenance module: the client's real maintenance-manager name + phone
+  // (urgent call button, store contact) — VALUES, empty by default.
+  'MX_MANAGER_NAME',
+  'MX_MANAGER_PHONE',
 };
 
 /// The profile define itself.

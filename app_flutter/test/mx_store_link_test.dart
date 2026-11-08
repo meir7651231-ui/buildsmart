@@ -41,10 +41,10 @@ void main() {
         baseUrl: 'https://example.test/',
         orgName: 'הארגון',
       );
-      expect(msg, startsWith('שלום טמבור השכונה (דוגמה),'));
+      expect(msg, startsWith('שלום טמבור השכונה,'));
       expect(msg, contains('${mxPoLabel(o.id)} מהארגון'));
       expect(msg, contains('כתובת: '));
-      expect(msg, contains(kMxManagerPhone));
+      expect(msg, contains('איש קשר: $kMxManagerTitle'));
       for (final l in o.lines) {
         expect(msg, contains('• ${l.qty} × ${db.part(l.sku).name}'));
       }

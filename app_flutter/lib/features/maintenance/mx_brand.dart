@@ -79,7 +79,7 @@ ThemeData mxBrandTheme() {
     error: kMxBad,
   );
   const btnShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(14)),
+    borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
   );
   const label = TextStyle(
     fontFamily: 'Heebo',
@@ -187,10 +187,8 @@ ThemeData mxBrandTheme() {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       shadowColor: Colors.transparent,
-      indicatorColor: kMxTealTint,
-      indicatorShape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
-      ),
+      // No Material pill: the active tab is marked by a small gold arch.
+      indicatorColor: Colors.transparent,
       iconTheme: WidgetStateProperty.resolveWith(
         (s) => IconThemeData(
           color: s.contains(WidgetState.selected) ? kMxPrimary : kMxMuted,
@@ -201,11 +199,11 @@ ThemeData mxBrandTheme() {
         (s) => TextStyle(
           fontFamily: 'Heebo',
           fontSize: 12,
-          fontWeight:
+          fontWeight: FontWeight.w600,
+          color:
               s.contains(WidgetState.selected)
-                  ? FontWeight.w700
-                  : FontWeight.w500,
-          color: s.contains(WidgetState.selected) ? kMxPrimary : kMxMuted,
+                  ? kMxPrimary
+                  : const Color(0xFF7C7A70),
         ),
       ),
     ),
@@ -217,8 +215,8 @@ ThemeData mxBrandTheme() {
       shape: RoundedRectangleBorder(borderRadius: kMxCardRadius),
       contentTextStyle: TextStyle(
         fontFamily: 'Heebo',
-        fontSize: 15,
-        fontWeight: FontWeight.w500,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
         color: Colors.white,
       ),
     ),

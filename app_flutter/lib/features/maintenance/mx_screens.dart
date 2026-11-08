@@ -300,18 +300,31 @@ Widget _row({
   onTap: onTap,
 );
 
-/// Round tinted icon for list rows.
-Widget _dot(IconData icon, {Color color = kMxPrimary}) => Container(
-  width: 40,
-  height: 40,
-  decoration: BoxDecoration(color: mxTintOf(color), shape: BoxShape.circle),
-  child: Icon(icon, size: 20, color: color),
+/// List-row icon standing in a small doorway arch; the arch's color is the
+/// status (gold ok · petrol in progress · crimson fault/urgent).
+Widget _dot(Object icon, {Color color = kMxPrimary}) => MxArchBadge(
+  icon,
+  color: switch (color) {
+    kMxBad => kMxBad,
+    kMxWarn => kMxPrimary,
+    kMxMuted => const Color(0xFFC9C6B5),
+    _ => kMxAccent,
+  },
+  iconColor: color == kMxBad ? kMxBad : kMxPrimary,
 );
 
 /// The delivery truck, mirrored so it drives "forward" in RTL.
 Widget _truck({double size = 20, Color? color}) => Transform.flip(
   flipX: true,
   child: Icon(Icons.local_shipping_outlined, size: size, color: color),
+);
+
+/// Quiet end-of-list line ("זה הכול · 2 מסגרות").
+Widget _endNote(String text) => Padding(
+  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+  child: Center(
+    child: Text(text, style: const TextStyle(fontSize: 12, color: kMxMuted)),
+  ),
 );
 
 /// Page title for tab bodies (H1 24/700 + one muted line).
@@ -332,7 +345,7 @@ Widget _pageTitle(String title, [String sub = '']) => Padding(
         Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
-            sub,
+            mxNb(sub),
             style: const TextStyle(color: kMxMuted, fontSize: 14, height: 1.4),
           ),
         ),
@@ -385,8 +398,6 @@ String _byRole(MxRole role) => switch (role) {
   _ => kMxManagerName,
 };
 
-const String _callManager = 'התקשרו למנהל האחזקה';
-
 // ── shell ────────────────────────────────────────────────────────────────────
 
 class MxHome extends ConsumerStatefulWidget {
@@ -395,7 +406,7 @@ class MxHome extends ConsumerStatefulWidget {
   ConsumerState<MxHome> createState() => _MxHomeState();
 }
 
-typedef _Tab = (String key, IconData icon, IconData selected, String label);
+typedef _Tab = (String key, MxGlyph icon, String label);
 
 const List<(MxRole, String, String)> _roles = [
   (MxRole.manager, 'מנהל', 'לוח, קריאות, תחזוקה ורכש'),
@@ -412,24 +423,22 @@ class _MxHomeState extends ConsumerState<MxHome> {
 
   List<_Tab> _tabs(MxRole role) => switch (role) {
     MxRole.manager => const [
-      ('home', Icons.space_dashboard_outlined, Icons.space_dashboard, 'לוח'),
-      ('sites', Icons.apartment_outlined, Icons.apartment, 'מסגרות'),
-      ('wo', Icons.build_outlined, Icons.build, 'קריאות'),
-      ('pm', Icons.event_available_outlined, Icons.event_available, 'תחזוקה'),
-      ('buy', Icons.shopping_cart_outlined, Icons.shopping_cart, 'רכש'),
+      ('home', MxGlyphs.board, 'לוח'),
+      ('sites', MxGlyphs.sites, 'מסגרות'),
+      ('wo', MxGlyphs.wrench, 'קריאות'),
+      ('pm', MxGlyphs.calendarCheck, 'תחזוקה'),
+      ('buy', MxGlyphs.cart, 'רכש'),
     ],
     MxRole.tech => const [
-      ('wo', Icons.build_outlined, Icons.build, 'המשימות שלי'),
-      ('sites', Icons.apartment_outlined, Icons.apartment, 'מסגרות'),
-      ('buy', Icons.shopping_cart_outlined, Icons.shopping_cart, 'רכש'),
+      ('wo', MxGlyphs.wrench, 'המשימות שלי'),
+      ('sites', MxGlyphs.sites, 'מסגרות'),
+      ('buy', MxGlyphs.cart, 'רכש'),
     ],
     MxRole.staff => const [
-      ('report', Icons.campaign_outlined, Icons.campaign, 'דיווח תקלה'),
-      ('wo', Icons.list_alt_outlined, Icons.list_alt, 'הדיווחים שלי'),
+      ('report', MxGlyphs.megaphone, 'דיווח תקלה'),
+      ('wo', MxGlyphs.list, 'הדיווחים שלי'),
     ],
-    MxRole.store => const [
-      ('store', Icons.storefront_outlined, Icons.storefront, 'הזמנות'),
-    ],
+    MxRole.store => const [('store', MxGlyphs.store, 'הזמנות')],
   };
 
   void _go(String key, {String? sub}) {
@@ -507,6 +516,13 @@ class _MxHomeState extends ConsumerState<MxHome> {
                     ),
                   const Divider(height: 16, indent: 24, endIndent: 24),
                   _row(
+                    key: const Key('mx-sample'),
+                    leading: _dot(Icons.play_circle_outline_rounded),
+                    title: 'טעינת יום עבודה לדוגמה',
+                    subtitle: 'קריאות, הזמנות ותקלה דחופה, להצגה',
+                    onTap: () => Navigator.pop(ctx, 'sample'),
+                  ),
+                  _row(
                     key: const Key('mx-reset'),
                     leading: _dot(Icons.restart_alt_rounded, color: _bad),
                     title: 'איפוס נתוני ההדגמה',
@@ -521,6 +537,11 @@ class _MxHomeState extends ConsumerState<MxHome> {
     );
     if (!mounted) return;
     if (picked == 'reset') return _reset();
+    if (picked == 'sample') {
+      _loadSampleDay(ref);
+      setState(() => _tab = 0);
+      return _toast(context, null, 'נטען יום עבודה לדוגמה');
+    }
     if (picked is MxRole && picked != cur) {
       ref.read(mxRoleProvider.notifier).state = picked;
       ref.read(_wizardProvider.notifier).state = false;
@@ -540,36 +561,44 @@ class _MxHomeState extends ConsumerState<MxHome> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         titleSpacing: 16,
-        title: const Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(
-                text: kMxWordmark,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+        // ב״ה sits fixed in the top corner, above the wordmark — it never
+        // moves with the role chip.
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'ב״ה',
+              style: TextStyle(
+                color: kMxAccent,
+                fontSize: 10,
+                height: 1.2,
+                fontWeight: FontWeight.w600,
               ),
+            ),
+            Text.rich(
               TextSpan(
-                text: '  $kMxSubtitle',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: kMxAccent,
-                ),
+                children: [
+                  TextSpan(
+                    text: kMxWordmark,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  TextSpan(
+                    text: '  $kMxSubtitle',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xB3FFFFFF),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
         actions: [
-          const Text(
-            'ב״ה',
-            style: TextStyle(
-              color: kMxAccent,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 12),
           MxRoleChip(
             key: const Key('mx-roles'),
             label: roleLabel,
@@ -606,19 +635,51 @@ class _MxHomeState extends ConsumerState<MxHome> {
                         icon: Badge(
                           isLabelVisible: _badge(db, role, t.$1) > 0,
                           label: Text('${_badge(db, role, t.$1)}'),
-                          child: Icon(t.$2),
+                          child: MxNavIcon(t.$2),
                         ),
                         selectedIcon: Badge(
                           isLabelVisible: _badge(db, role, t.$1) > 0,
                           label: Text('${_badge(db, role, t.$1)}'),
-                          child: Icon(t.$3),
+                          child: MxNavIcon(t.$2, selected: true),
                         ),
-                        label: t.$4,
+                        label: t.$3,
                       ),
                   ],
                 ),
               ),
     );
+  }
+}
+
+/// A realistic "Sunday morning" for a live demo: an urgent outlet in a
+/// kitchen, a dripping faucet with the technician, a toilet waiting for a
+/// part, a new light fault — on top of the demo data (resets clean).
+void _loadSampleDay(WidgetRef ref) {
+  final n = ref.read(mxDbProvider.notifier);
+  MxDb db() => ref.read(mxDbProvider);
+  String pt(String unit, String room, String type) {
+    final r = db().roomsOf(unit).firstWhere((r) => r.name.contains(room));
+    return db().pointsOf(r.id).firstWhere((p) => p.type == type).id;
+  }
+
+  bool free(String id) => mxOpenOnPoint(db(), id) == null;
+  final faucet = pt('bsh-1', 'מטבח', 'ברז');
+  if (free(faucet) && n.report(faucet, 'מטפטף', 'צוות הבית – דירה 1') == null) {
+    n.assign(n.lastCreatedId!, kMxTechName);
+  }
+  final toilet = pt('jrs-1', 'רחצה', 'אסלה');
+  if (free(toilet) &&
+      n.report(toilet, 'לא מפסיק למלא', 'צוות הבית – דירה 1') == null) {
+    final id = n.lastCreatedId!;
+    n
+      ..assign(id, kMxTechName)
+      ..requestPart(id, 1, kMxTechName);
+  }
+  final light = pt('jrs-2', 'מטבח', 'גוף תאורה');
+  if (free(light)) n.report(light, 'מהבהב', 'צוות הבית – דירה 2');
+  final outlet = pt(kMxStaffUnit, 'מטבח', 'שקע');
+  if (free(outlet)) {
+    n.report(outlet, 'ניצוצות / ריח שרוף – ליד הכיור', kMxStaffLabel);
   }
 }
 
@@ -642,44 +703,95 @@ class _Dashboard extends ConsumerWidget {
     final urgent = openList.where((w) => w.urgent).toList();
     final open = openList.length;
     final pending = db.pendingApproval.length;
+    String unitOf(MxWorkOrder w) {
+      final u = db.unit(db.room(db.point(w.pointId).roomId).unitId);
+      return '${db.site(u.siteId).city} ${u.name}';
+    }
+
     final parts = <String>[
-      if (open > 0) open == 1 ? 'קריאה פתוחה אחת' : '$open קריאות פתוחות',
       if (overdue > 0)
         overdue == 1 ? 'בדיקה אחת באיחור' : '$overdue בדיקות באיחור',
       if (pending > 0)
         pending == 1 ? 'הזמנה אחת לאישורך' : '$pending הזמנות לאישורך',
     ];
+    // Urgent changes the greeting itself — never "all calm" over a fire.
     final summary =
-        parts.isEmpty
-            ? 'הבית מטופל. אין משימות להיום.'
+        urgent.isNotEmpty
+            ? '${urgent.first.desc.split(' – ').first}$_sep${unitOf(urgent.first)}$_sep${mxAgo(urgent.first.createdAt, now)}'
+            : parts.isEmpty
+            ? 'הבית מטופל. אין משימות דחופות.'
             : '${parts.join(', ')}.';
-    Widget stat(
-      String key,
-      int v,
-      String label,
-      IconData icon,
-      Color c,
-      VoidCallback go,
-      int i,
-    ) => Expanded(
-      child: MxAppear(
-        index: i,
-        child: MxStatCard(
-          key: Key('kpi-$key'),
-          value: v,
-          label: label,
-          icon: icon,
-          color: c,
-          onTap: go,
-        ),
+    final stats = [
+      (
+        'urgent',
+        urgent.length,
+        'תקלות דחופות',
+        MxGlyphs.warning,
+        _bad,
+        () => onGo('wo'),
       ),
-    );
-    const gap = SizedBox(width: 12, height: 12);
+      ('wo', open, 'קריאות פתוחות', MxGlyphs.wrench, _brand, () => onGo('wo')),
+      (
+        'overdue',
+        overdue,
+        'בדיקות באיחור',
+        MxGlyphs.calendarCheck,
+        _bad,
+        () => onGo('pm'),
+      ),
+      (
+        'soon',
+        soon,
+        'בדיקות השבוע',
+        MxGlyphs.calendarCheck,
+        _warn,
+        () => onGo('pm'),
+      ),
+      (
+        'po',
+        pending,
+        'הזמנות לאישור',
+        MxGlyphs.cart,
+        _warn,
+        () => onGo('buy', sub: 'orders'),
+      ),
+      (
+        'low',
+        db.lowStock.length,
+        'חלקים להזמין',
+        MxGlyphs.box,
+        _warn,
+        () => onGo('buy', sub: 'stock'),
+      ),
+    ];
+    final active = stats.where((x) => x.$2 > 0).toList();
+    final calm = stats.where((x) => x.$2 == 0).toList();
+    // The street: every apartment as an arch, by site.
+    final street = [
+      for (final site in db.sites)
+        (
+          '${site.city} – ${site.name}',
+          [
+            for (final u in db.unitsOf(site.id))
+              (
+                u.id,
+                u.name,
+                openList.any((w) => w.urgent && _inUnit(db, w, u.id))
+                    ? 2
+                    : openList.any((w) => _inUnit(db, w, u.id))
+                    ? 1
+                    : 0,
+              ),
+          ],
+        ),
+    ];
+    final allGood = street.every((g) => g.$2.every((h) => h.$3 == 0));
+    final shabbat = allGood && now.weekday == DateTime.friday && now.hour >= 10;
     final todo = [
       for (final (r, d) in due.where((d) => d.$2 != MxDue.ok))
         _row(
           leading: _dot(
-            r.isLegal ? Icons.gavel_outlined : Icons.event_outlined,
+            r.isLegal ? MxGlyphs.legal : MxGlyphs.calendarCheck,
             color: d == MxDue.overdue ? _bad : _warn,
           ),
           title: r.title,
@@ -692,17 +804,30 @@ class _Dashboard extends ConsumerWidget {
         ),
       for (final w in openList.where((w) => !w.urgent))
         _row(
-          leading: _dot(mxPointIcon(db.point(w.pointId).type)),
+          leading: _dot(mxPointGlyph(db.point(w.pointId).type)),
           title: w.desc,
           subtitle: db.pointPath(w.pointId),
           trailing: MxTag(_woStatus(w.status), _woColor(w.status)),
           onTap: () => _open(context, _WorkOrderPage(w.id)),
         ),
     ];
+    Widget tile((String, int, String, MxGlyph, Color, VoidCallback) x, int i) =>
+        Expanded(
+          child: MxAppear(
+            index: i * 2,
+            child: MxStatCard(
+              key: Key('kpi-${x.$1}'),
+              value: x.$2,
+              label: x.$3,
+              icon: x.$4,
+              color: x.$5,
+              onTap: x.$6,
+            ),
+          ),
+        );
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
-        // Urgent first — above the greeting, breathing until handled.
         for (final w in urgent)
           MxAppear(
             child: Padding(
@@ -718,7 +843,7 @@ class _Dashboard extends ConsumerWidget {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        _dot(Icons.warning_amber_rounded, color: _bad),
+                        _dot(MxGlyphs.warning, color: _bad),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -745,7 +870,7 @@ class _Dashboard extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_left_rounded, color: _bad),
+                        const Icon(Icons.chevron_right_rounded, color: _bad),
                       ],
                     ),
                   ),
@@ -756,91 +881,105 @@ class _Dashboard extends ConsumerWidget {
         MxHero(
           eyebrow: mxHebrewDate(now),
           eyebrow2: mxDateLabel(now),
-          title: mxGreeting(now),
+          title: urgent.isNotEmpty ? 'תקלה דחופה' : mxGreeting(now),
           subtitle: summary,
+          count: open,
+          countLabel: 'קריאות\nפתוחות',
+          alert: urgent.isNotEmpty,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              Row(
-                children: [
-                  stat(
-                    'urgent',
-                    urgent.length,
-                    'תקלות דחופות',
-                    Icons.warning_amber_rounded,
-                    _bad,
-                    () => onGo('wo'),
-                    0,
-                  ),
-                  gap,
-                  stat(
-                    'wo',
-                    open,
-                    'קריאות פתוחות',
-                    Icons.build_outlined,
-                    _brand,
-                    () => onGo('wo'),
-                    1,
-                  ),
-                ],
-              ),
-              gap,
-              Row(
-                children: [
-                  stat(
-                    'overdue',
-                    overdue,
-                    'בדיקות באיחור',
-                    Icons.event_busy_outlined,
-                    _bad,
-                    () => onGo('pm'),
-                    2,
-                  ),
-                  gap,
-                  stat(
-                    'soon',
-                    soon,
-                    'בדיקות השבוע',
-                    Icons.event_outlined,
-                    _warn,
-                    () => onGo('pm'),
-                    3,
-                  ),
-                ],
-              ),
-              gap,
-              Row(
-                children: [
-                  stat(
-                    'po',
-                    pending,
-                    'הזמנות לאישור',
-                    Icons.shopping_cart_outlined,
-                    _warn,
-                    () => onGo('buy', sub: 'orders'),
-                    4,
-                  ),
-                  gap,
-                  stat(
-                    'low',
-                    db.lowStock.length,
-                    'חלקים להזמין',
-                    Icons.inventory_2_outlined,
-                    _warn,
-                    () => onGo('buy', sub: 'stock'),
-                    5,
-                  ),
-                ],
-              ),
+              for (var i = 0; i < active.length; i += 2) ...[
+                if (i > 0) const SizedBox(height: 12),
+                Row(
+                  children: [
+                    tile(active[i], i),
+                    const SizedBox(width: 12),
+                    if (i + 1 < active.length)
+                      tile(active[i + 1], i + 1)
+                    else
+                      const Expanded(child: SizedBox()),
+                  ],
+                ),
+              ],
             ],
+          ),
+        ),
+        // Zero metrics fold into one calm line (still tappable).
+        if (calm.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final x in calm)
+                  Semantics(
+                    button: true,
+                    label: '${x.$3}: אין',
+                    excludeSemantics: true,
+                    onTap: x.$6,
+                    child: InkWell(
+                      key: Key('kpi-${x.$1}'),
+                      borderRadius: BorderRadius.circular(kMxR12),
+                      onTap: x.$6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(kMxR12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const MxIcon(
+                              MxGlyphs.check,
+                              size: 16,
+                              color: kMxAccent,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              x.$3,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: kMxMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        MxSectionTitle(
+          shabbat
+              ? 'הבית בסדר. שבת שלום.'
+              : allGood
+              ? 'הבתים · הכול בסדר'
+              : 'הבתים',
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: MxCard(
+            margin: EdgeInsets.zero,
+            child: MxStreet(
+              groups: street,
+              celebrate: shabbat,
+              onTap: (id) => _open(context, _UnitPage(id)),
+            ),
           ),
         ),
         const MxSectionTitle('מה לטפל היום'),
         if (todo.isEmpty)
           const MxEmpty(
-            icon: Icons.check_rounded,
+            icon: MxGlyphs.check,
             success: true,
             title: 'הבית מטופל',
             body: 'אין בדיקות או קריאות שמחכות היום.',
@@ -851,6 +990,9 @@ class _Dashboard extends ConsumerWidget {
     );
   }
 }
+
+bool _inUnit(MxDb db, MxWorkOrder w, String unitId) =>
+    db.room(db.point(w.pointId).roomId).unitId == unitId;
 
 void _open(BuildContext context, Widget page) =>
     Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
@@ -896,7 +1038,7 @@ class _SitesPageState extends ConsumerState<_SitesPage> {
                 .take(40)
                 .toList();
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         _pageTitle(
           'המסגרות',
@@ -926,12 +1068,16 @@ class _SitesPageState extends ConsumerState<_SitesPage> {
                     faulty(s.id) > 0
                         ? MxTag('${faulty(s.id)} תקלות', _bad)
                         : const Icon(
-                          Icons.chevron_left_rounded,
+                          Icons.chevron_right_rounded,
                           color: kMxZero,
                         ),
                 onTap: () => _open(context, _SitePage(s.id)),
               ),
           ]),
+        if (q.isEmpty)
+          _endNote(
+            'זה הכול$_sep${mxCount(sites.length, 'מסגרת אחת', 'מסגרות')}',
+          ),
         if (points.isNotEmpty) ...[
           MxSectionTitle('נקודות', count: points.length),
           _listCard([
@@ -939,7 +1085,7 @@ class _SitesPageState extends ConsumerState<_SitesPage> {
               _row(
                 key: Key('find-${p.id}'),
                 leading: _dot(
-                  mxPointIcon(p.type),
+                  mxPointGlyph(p.type),
                   color: p.status == MxPointStatus.faulty ? _bad : _brand,
                 ),
                 title: p.label,
@@ -969,7 +1115,7 @@ class _SitePage extends ConsumerWidget {
     return _page(
       '${s.city} – ${s.name}',
       ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(bottom: 96),
         children: [
           MxSectionTitle('דירות', count: db.unitsOf(siteId).length),
           MxTileGrid(
@@ -1004,15 +1150,69 @@ class _UnitPage extends ConsumerWidget {
     return _page(
       '${db.site(u.siteId).city}$_sep${u.name}',
       ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(bottom: 96),
         children: [
+          () {
+            final open = db.openWorkOrders.where((w) => _inUnit(db, w, u.id));
+            final urgent = open.any((w) => w.urgent);
+            return MxCard(
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Row(
+                children: [
+                  Hero(
+                    tag: 'house-${u.id}',
+                    child: Container(
+                      width: 32,
+                      height: 42,
+                      decoration: ShapeDecoration(
+                        color:
+                            urgent
+                                ? kMxBad
+                                : open.isNotEmpty
+                                ? kMxTealTint
+                                : kMxGoldTint,
+                        shape: MxArchBorder(
+                          side: BorderSide(
+                            color: mxArchTone(
+                              fault: urgent,
+                              open: open.isNotEmpty,
+                            ),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      open.isEmpty
+                          ? 'הכול תקין בדירה'
+                          : urgent
+                          ? 'יש תקלה דחופה בדירה'
+                          : mxCount(
+                            open.length,
+                            'קריאה פתוחה אחת',
+                            'קריאות פתוחות',
+                          ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: urgent ? kMxBad : kMxInk,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }(),
           MxSectionTitle('חדרים', count: db.roomsOf(unitId).length),
           MxTileGrid(
             children: [
               for (final r in db.roomsOf(unitId))
                 MxTile(
                   key: Key('room-${r.id}'),
-                  icon: mxRoomIcon(r.name),
+                  icon: mxRoomGlyph(r.name),
                   label: r.name,
                   caption: '${db.pointsOf(r.id).length} נקודות',
                   alert: db
@@ -1044,7 +1244,7 @@ class _RoomPage extends ConsumerWidget {
     return _page(
       '${u.name}$_sep${r.name}',
       ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(bottom: 96),
         children: [
           MxCard(
             margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -1113,7 +1313,7 @@ class _RoomPage extends ConsumerWidget {
                 _row(
                   key: Key('pt-${p.id}'),
                   leading: _dot(
-                    mxPointIcon(p.type),
+                    mxPointGlyph(p.type),
                     color: p.status == MxPointStatus.faulty ? _bad : _brand,
                   ),
                   title: '${p.type} ${p.num}',
@@ -1125,7 +1325,7 @@ class _RoomPage extends ConsumerWidget {
                       p.status == MxPointStatus.faulty
                           ? const MxTag('תקול', _bad)
                           : const Icon(
-                            Icons.chevron_left_rounded,
+                            Icons.chevron_right_rounded,
                             color: kMxZero,
                           ),
                   onTap: () => _open(context, _PointPage(p.id)),
@@ -1149,7 +1349,10 @@ Future<void> _showSafety(
   context,
   title: mxSafetyTitle(type, w.desc),
   steps: mxSafetySteps(type, w.desc),
-  callLabel: '$_callManager ${_ltr(kMxManagerPhone)}',
+  callLabel:
+      kMxManagerPhone.isEmpty
+          ? 'התקשרו ל$kMxManagerTitle'
+          : 'התקשרו ל$kMxManagerTitle ${_ltr(kMxManagerPhone)}',
   onCall: () => _call(ref, context, kMxManagerPhone),
   onDone: onMine ?? () {},
 );
@@ -1181,8 +1384,8 @@ class _PointPage extends ConsumerWidget {
                       width: 48,
                       height: 60,
                       color: faulty ? _bad : kMxAccent,
-                      child: Icon(
-                        mxPointIcon(p.type),
+                      child: mxIcon(
+                        mxPointGlyph(p.type),
                         size: 22,
                         color: faulty ? _bad : _brand,
                       ),
@@ -1257,7 +1460,7 @@ class _PointPage extends ConsumerWidget {
                 ),
                 title: '${mxWoLabel(openWo.id)} פתוחה: ${openWo.desc}',
                 subtitle: _woStatus(openWo.status),
-                trailing: const Icon(Icons.chevron_left_rounded),
+                trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => _open(context, _WorkOrderPage(openWo.id)),
               ),
             ]),
@@ -1668,7 +1871,7 @@ class _WorkOrdersPageState extends ConsumerState<_WorkOrdersPage> {
       _ => ('קריאות שירות', 'דחופות קודם, אחר כך מהחדשה לישנה'),
     };
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         _pageTitle(title, sub),
         MxFilterChips(
@@ -1710,7 +1913,7 @@ class _WorkOrdersPageState extends ConsumerState<_WorkOrdersPage> {
                 leading: _dot(
                   w.urgent && w.isOpen
                       ? Icons.warning_amber_rounded
-                      : mxPointIcon(db.point(w.pointId).type),
+                      : mxPointGlyph(db.point(w.pointId).type),
                   color: w.urgent && w.isOpen ? _bad : _brand,
                 ),
                 title: w.desc,
@@ -1729,6 +1932,10 @@ class _WorkOrdersPageState extends ConsumerState<_WorkOrdersPage> {
                 onTap: () => _open(context, _WorkOrderPage(w.id)),
               ),
           ]),
+        if (list.isNotEmpty)
+          _endNote(
+            'זה הכול$_sep${mxCount(list.length, 'קריאה אחת', 'קריאות')}',
+          ),
       ],
     );
   }
@@ -1923,7 +2130,7 @@ class _WorkOrderPage extends ConsumerWidget {
     return _page(
       mxWoLabel(w.id),
       ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(bottom: 96),
         children: [
           if (w.urgent && w.isOpen)
             MxUrgentBanner(
@@ -1942,7 +2149,7 @@ class _WorkOrderPage extends ConsumerWidget {
                 Row(
                   children: [
                     _dot(
-                      mxPointIcon(p.type),
+                      mxPointGlyph(p.type),
                       color: w.urgent && w.isOpen ? _bad : _brand,
                     ),
                     const SizedBox(width: 12),
@@ -2203,7 +2410,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
       context,
       title: 'הדיווח נשלח',
       body:
-          '${mxWoLabel(w.id)} אצל מנהל האחזקה.\nאפשר לעקוב אחריה ב"הדיווחים שלי".',
+          'מנהל האחזקה כבר יודע. תודה שדיווחת.\n${mxWoLabel(w.id)}$_sepאפשר לעקוב ב״הדיווחים שלי״.',
       actions: [
         ('לדיווחים שלי', const Key('success-mine'), widget.onSent),
         ('דיווח נוסף', const Key('success-again'), () {}),
@@ -2217,7 +2424,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
     final u = db.unit(kMxStaffUnit);
     final titles = ['איפה התקלה?', 'מה לא עובד?', 'מה קרה?'];
     final list = ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(8, 16, 16, 4),
@@ -2302,7 +2509,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
                     for (final r in db.roomsOf(kMxStaffUnit))
                       MxTile(
                         key: Key('rep-room-${r.id}'),
-                        icon: mxRoomIcon(r.name),
+                        icon: mxRoomGlyph(r.name),
                         label: r.name,
                         caption: '${db.pointsOf(r.id).length} פריטים',
                         alert: db
@@ -2318,7 +2525,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
                     for (final p in db.pointsOf(_room!))
                       MxTile(
                         key: Key('rep-point-${p.id}'),
-                        icon: mxPointIcon(p.type),
+                        icon: mxPointGlyph(p.type),
                         label: '${p.type} ${p.num}',
                         caption:
                             mxOpenOnPoint(db, p.id) != null
@@ -2360,7 +2567,7 @@ class _ReportPageState extends ConsumerState<_ReportPage> {
     return [
       _listCard([
         _row(
-          leading: _dot(mxPointIcon(p.type)),
+          leading: _dot(mxPointGlyph(p.type)),
           title: p.label,
           subtitle: db.room(p.roomId).name,
         ),
@@ -2518,7 +2725,7 @@ class _PmPage extends ConsumerWidget {
     final legal = db.pmRules.where((r) => r.isLegal).length;
     final pendingNow = all.where((x) => x.$2 != MxDue.ok).length;
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         _pageTitle(
           'בדיקות ותחזוקה',
@@ -2565,15 +2772,15 @@ class _BuyPage extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             decoration: BoxDecoration(
-              color: on ? Colors.white24 : kMxGoldTint,
+              color: on ? kMxGoldTint : Colors.white,
               borderRadius: BorderRadius.circular(kMxR6),
             ),
             child: Text(
               '$n',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: on ? Colors.white : kMxWarn,
+                color: kMxWarn,
                 fontFeatures: kMxTabular,
               ),
             ),
@@ -2585,47 +2792,16 @@ class _BuyPage extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: SegmentedButton<String>(
-              showSelectedIcon: false,
-              style: SegmentedButton.styleFrom(
-                selectedBackgroundColor: kMxPrimary,
-                selectedForegroundColor: Colors.white,
-                foregroundColor: kMxPrimary,
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Color(0xFFC9C7B4)),
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(kMxR12)),
-                ),
-                textStyle: const TextStyle(
-                  fontFamily: 'Heebo',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+          child: MxSwitch<String>(
+            items: [
+              (
+                'orders',
+                seg('הזמנות', pending, 'buy-orders', on: section == 'orders'),
               ),
-              segments: [
-                ButtonSegment(
-                  value: 'orders',
-                  label: seg(
-                    'הזמנות',
-                    pending,
-                    'buy-orders',
-                    on: section == 'orders',
-                  ),
-                ),
-                ButtonSegment(
-                  value: 'stock',
-                  label: seg('מלאי', low, 'buy-stock', on: section == 'stock'),
-                ),
-              ],
-              selected: {section},
-              onSelectionChanged: (s) {
-                HapticFeedback.selectionClick();
-                ref.read(_buySectionProvider.notifier).state = s.first;
-              },
-            ),
+              ('stock', seg('מלאי', low, 'buy-stock', on: section == 'stock')),
+            ],
+            selected: section,
+            onChanged: (v) => ref.read(_buySectionProvider.notifier).state = v,
           ),
         ),
         Expanded(
@@ -2666,7 +2842,7 @@ class _StockPageState extends ConsumerState<_StockPage> {
         }).toList();
     final low = db.lowStock.length;
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         _pageTitle(
           low == 0 ? 'המלאי מלא' : '$low חלקים להזמין',
@@ -2778,17 +2954,98 @@ class _StockPageState extends ConsumerState<_StockPage> {
   Future<void> _importPrices() async {
     const sample =
         'מק"ט,שם,מחיר\nEL-T8,פלורסנט LED T8,19.90\nEL-SK16,מנגנון שקע 16A,16.50\nHW-WSTOP,מעצור חלון,29\n';
-    final csv = await _askText(
-      context,
-      'הדביקו את המחירון שקיבלתם',
-      'מק"ט,שם,מחיר',
-      help: 'שורה לכל פריט: מק״ט, שם ומחיר, מופרדים בפסיק.',
-      initial: sample,
-      ok: 'קלטו מחירים',
-      maxLines: 8,
-      ltr: true,
+    final db = ref.read(mxDbProvider);
+    final preview = mxParsePriceList(sample, db.parts);
+    Widget cell(String t, {bool head = false, bool ltr = false}) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      child: Text(
+        t,
+        textDirection: ltr ? TextDirection.ltr : null,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: head ? FontWeight.w600 : FontWeight.w400,
+          color: head ? kMxMuted : kMxInk,
+          fontFeatures: kMxTabular,
+        ),
+      ),
     );
-    if (csv == null || !mounted) return;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder:
+          (ctx) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _sheetTitle(
+                    'המחירון שהתקבל מ${db.store(kMxStoreId).name}',
+                    'כך יקלטו המחירים. אפשר להדביק מחירון אחר מאקסל.',
+                  ),
+                  Container(
+                    key: const Key('price-preview'),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: kMxLine),
+                      borderRadius: BorderRadius.circular(kMxR12),
+                    ),
+                    child: Table(
+                      columnWidths: const {
+                        0: IntrinsicColumnWidth(),
+                        2: IntrinsicColumnWidth(),
+                      },
+                      children: [
+                        TableRow(
+                          decoration: const BoxDecoration(color: kMxPanel),
+                          children: [
+                            cell('מק״ט', head: true),
+                            cell('פריט', head: true),
+                            cell('מחיר', head: true),
+                          ],
+                        ),
+                        for (final r in preview.rows)
+                          TableRow(
+                            children: [
+                              cell(r.storeSku, ltr: true),
+                              cell(r.name),
+                              cell(mxShekels(r.agorot)),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _sheetButtons(
+                    okKey: const Key('ask-ok'),
+                    ok:
+                        'קלטו ${mxCount(preview.matched.length, 'מחיר אחד', 'מחירים')}',
+                    onOk: () => Navigator.pop(ctx, 'ok'),
+                    cancelKey: const Key('price-paste'),
+                    cancel: 'הדבקת מחירון אחר',
+                    onCancel: () => Navigator.pop(ctx, 'paste'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+    if (choice == null || !mounted) return;
+    var csv = sample;
+    if (choice == 'paste') {
+      final pasted = await _askText(
+        context,
+        'הדביקו את המחירון',
+        'מק"ט,שם,מחיר',
+        help: 'שורה לכל פריט: מק״ט, שם ומחיר, מופרדים בפסיק.',
+        ok: 'קלטו מחירים',
+        maxLines: 8,
+        ltr: true,
+      );
+      if (pasted == null || !mounted) return;
+      csv = pasted;
+    }
     final (err, imp) = ref
         .read(mxDbProvider.notifier)
         .importPrices(kMxStoreId, csv);
@@ -2799,7 +3056,7 @@ class _StockPageState extends ConsumerState<_StockPage> {
     _toast(
       context,
       err,
-      'נקלטו ${imp?.matched.length ?? 0} מחירים מ${ref.read(mxDbProvider).store(kMxStoreId).name}$extra',
+      'נקלטו ${mxCount(imp?.matched.length ?? 0, 'מחיר אחד', 'מחירים')} מ${ref.read(mxDbProvider).store(kMxStoreId).name}$extra',
     );
   }
 }
@@ -2878,7 +3135,7 @@ class _OrdersPageState extends ConsumerState<_OrdersPage> {
       _ => open,
     };
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         _pageTitle(
           pending == 0 ? 'הזמנות לחנויות' : '$pending מחכות לאישורך',
@@ -2909,6 +3166,10 @@ class _OrdersPageState extends ConsumerState<_OrdersPage> {
               ),
         for (final (i, o) in list.indexed)
           MxAppear(index: i, child: _poCard(context, db, n, role, o)),
+        if (list.isNotEmpty)
+          _endNote(
+            'זה הכול$_sep${mxCount(list.length, 'הזמנה אחת', 'הזמנות')}',
+          ),
       ],
     );
   }
@@ -3220,7 +3481,7 @@ class _StoreInbox extends ConsumerWidget {
             .toList();
     final open = mine.where((o) => o.isOpen).length;
     return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: 96),
       children: [
         _pageTitle(
           'שלום, ${db.store(kMxStoreId).name}',
@@ -3242,7 +3503,8 @@ class _StoreInbox extends ConsumerWidget {
               _row(
                 key: Key('inbox-${o.id}'),
                 leading: _dot(Icons.receipt_long_outlined),
-                title: '${mxPoLabel(o.id)}$_sep${o.lines.length} פריטים',
+                title:
+                    '${mxPoLabel(o.id)}$_sep${mxCount(o.lines.length, 'פריט אחד', 'פריטים')}',
                 subtitle:
                     '${mxShekels(o.totalAgorot)}$_sep${_date(o.createdAt)}',
                 trailing: MxTag(_poStatus(o.status), _poColor(o.status)),
@@ -3285,13 +3547,19 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
       fulfil: how,
     );
     if (err != null) return _toast(context, err, '');
+    final db = ref.read(mxDbProvider);
+    final o = db.poByToken(widget.token)!;
+    final prep = [
+      for (final l in o.lines)
+        if (l.supplied > 0) '${l.supplied}\u00A0× ${db.part(l.sku).name}',
+    ].join(', ');
     await mxShowSuccess(
       context,
-      title: 'תודה רבה!',
+      title: 'תודה, ${db.store(o.storeId).name}',
       body:
           how == MxFulfil.delivery
               ? 'מחלקת האחזקה של $kMxOrgName קיבלה הודעה שההזמנה יצאה למשלוח.'
-              : 'מחלקת האחזקה של $kMxOrgName קיבלה הודעה שההזמנה מוכנה לאיסוף.',
+              : 'מחלקת האחזקה של $kMxOrgName קיבלה הודעה שההזמנה מוכנה לאיסוף.\nלהכין: $prep',
       actions: [('סגירה', const Key('store-thanks-ok'), () {})],
     );
   }
@@ -3333,7 +3601,7 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
           children: [
             Text('שלום, ${store.name}'),
             Text(
-              '${mxPoLabel(o.id)} מ$kMxOrgName$_sep${mxHebrewDate(now)}',
+              mxHebrewDate(now),
               style: const TextStyle(
                 color: kMxAccent,
                 fontSize: 12,
@@ -3344,39 +3612,86 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.only(bottom: 96),
         children: [
+          // The org's face to the store: the arch frames the order number.
+          Container(
+            color: kMxPrimary,
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                MxArch(
+                  width: 84,
+                  height: 112,
+                  stroke: 2,
+                  draw: true,
+                  child: Text(
+                    o.id.split('-').last,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: kMxTabular,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'הזמנה משיח סוד',
+                          style: TextStyle(
+                            color: kMxAccent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          mxShekels(o.totalAgorot),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: kMxTabular,
+                          ),
+                        ),
+                        Text(
+                          '${mxCount(o.lines.length, 'פריט אחד', 'פריטים')}$_sepלפני מע״מ',
+                          style: const TextStyle(
+                            color: Color(0xB3FFFFFF),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: MxTag(_poStatus(o.status), Colors.white),
+                ),
+              ],
+            ),
+          ),
           MxCard(
             margin: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        mxShekels(o.totalAgorot),
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w700,
-                          color: kMxPrimary,
-                          fontFeatures: kMxTabular,
-                        ),
-                      ),
-                    ),
-                    MxTag(_poStatus(o.status), _poColor(o.status)),
-                  ],
-                ),
-                Text(
-                  '${o.lines.length} פריטים$_sepלפני מע״מ',
-                  style: const TextStyle(color: kMxMuted, fontSize: 14),
-                ),
-                const Divider(height: 24),
                 MxInfoRow(Icons.place_outlined, 'כתובת', Text(address)),
                 MxInfoRow(
                   Icons.person_outline_rounded,
                   'איש קשר',
-                  Text('מחלקת האחזקה, ${_ltr(kMxManagerPhone)}'),
+                  Text(
+                    kMxManagerPhone.isEmpty
+                        ? kMxManagerTitle
+                        : '$kMxManagerTitle, ${_ltr(kMxManagerPhone)}',
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -3384,7 +3699,7 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                     Expanded(
                       child: OutlinedButton.icon(
                         key: const Key('store-call'),
-                        icon: const Icon(Icons.call_rounded, size: 20),
+                        icon: const MxIcon(MxGlyphs.phone, size: 20),
                         label: const Text('חיוג'),
                         onPressed: () => _call(ref, context, kMxManagerPhone),
                       ),
@@ -3428,7 +3743,7 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                     Row(
                       children: [
                         _dot(
-                          mxPointIcon(
+                          mxPointGlyph(
                             db.points
                                     .where((p) => p.sku == l.sku)
                                     .firstOrNull
@@ -3495,19 +3810,26 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                             ),
                             const Spacer(),
                             if (l.supplied > 0)
-                              TextButton(
-                                key: Key('store-missing-${l.sku}'),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.black54,
-                                ),
-                                onPressed:
-                                    () => _undoable(
-                                      context,
-                                      ref,
-                                      n.storeMissing(widget.token, l.sku),
-                                      'סומן שאין לכם את הפריט',
+                              Flexible(
+                                child: OutlinedButton(
+                                  key: Key('store-missing-${l.sku}'),
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size(0, 40),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
                                     ),
-                                child: const Text('אין לי'),
+                                    foregroundColor: kMxInk,
+                                    side: const BorderSide(color: kMxInk),
+                                  ),
+                                  onPressed:
+                                      () => _undoable(
+                                        context,
+                                        ref,
+                                        n.storeMissing(widget.token, l.sku),
+                                        'סומן שאין לכם את הפריט',
+                                      ),
+                                  child: const Text('אין לי'),
+                                ),
                               ),
                           ],
                         ),
@@ -3565,6 +3887,8 @@ class _MxStorePageState extends ConsumerState<MxStorePage> {
                               ? 'מאשר את מה שיש ($have מתוך ${o.lines.length})'
                               : 'מאשר, יש לי הכול',
                       icon: Icons.thumb_up_alt_outlined,
+                      color: kMxAccent,
+                      foreground: kMxPrimary,
                       onPressed:
                           () => _toast(
                             context,

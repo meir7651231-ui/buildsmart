@@ -5,6 +5,7 @@
 
 // ignore_for_file: avoid_positional_boolean_parameters — ok(name, cond) reads best.
 
+import 'package:buildsmart/features/maintenance/mx_brand.dart';
 import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
 import 'package:buildsmart/features/maintenance/mx_screens.dart';
@@ -164,8 +165,9 @@ void main() {
     }
     await nav('לוח');
     ok(
-      'לוח: כותרת "מה לטפל היום"',
-      find.text('מה לטפל היום').evaluate().isNotEmpty,
+      'לוח: כרטיס פתיחה עם תאריך עברי ו"הבתים"',
+      find.textContaining('בחשוון').evaluate().isNotEmpty &&
+          find.textContaining('הבתים').evaluate().isNotEmpty,
     );
     await role('טכנאי');
     ok('טכנאי: 3 לשוניות', navCount() == 3);
@@ -197,6 +199,19 @@ void main() {
     await nav('לוח');
     await tapText('מדידת טמפרטורת מים חמים (TMV)');
     ok('פריט "דחוף עכשיו" (בדיקה) פותח את לשונית התחזוקה', navIndex() == 3);
+
+    // ── 2b · the street of arches + a demo work-day ────────────────────────
+    await nav('לוח');
+    ok(
+      'רחוב הקשתות: קשת לכל דירה',
+      db().units.every((u) => present('street-${u.id}')),
+    );
+    await tapKey('street-jrs-3');
+    ok(
+      'קשת → נכנסים לדירה (מסך החדרים)',
+      db().roomsOf('jrs-3').every((r) => present('room-${r.id}')),
+    );
+    await back();
 
     // ── 3 · sites → units → rooms → point → report from the card ───────────
     await nav('מסגרות');
@@ -497,8 +512,12 @@ void main() {
       );
     }
     await tapKey('import-prices');
-    ok('ייבוא מחירון: חלון נפתח עם דוגמה', present('ask-text'));
-    await tapText('ביטול');
+    ok(
+      'ייבוא מחירון: תצוגה מקדימה כטבלה (לא שדה CSV)',
+      present('price-preview'),
+    );
+    await tester.tapAt(const Offset(20, 20)); // close without importing
+    await tester.pumpAndSettle();
     ok('"ביטול" לא משנה מחירים', db().storePrices.isEmpty);
     await tapKey('import-prices');
     await tapKey('ask-ok');
@@ -576,8 +595,8 @@ void main() {
     await tapKey('po-storeview-${tamburPo.id}');
     ok(
       '"מה החנות רואה" פותח את דף החנות',
-      find.textContaining(mxPoLabel(tamburPo.id)).evaluate().isNotEmpty &&
-          present('store-line-${approved.lines.first.sku}'),
+      find.text('הזמנה משיח סוד').evaluate().isNotEmpty &&
+          find.text(tamburPo.id.split('-').last).evaluate().isNotEmpty,
     );
     await back();
     // One more request to exercise "reject" (a tech asks for a part).
@@ -620,16 +639,16 @@ void main() {
     );
     ok('אחרי "חסר": "מאשר, יש לי הכול" לא מוצג', !present('store-confirm'));
     ok(
-      '"אין לי" הוא כפתור טקסט אפור (לא אדום)',
+      '"אין לי" הוא כפתור משני אמיתי בצבע הטקסט (לא אדום)',
       find
           .byWidgetPredicate(
             (w) =>
-                w is TextButton &&
+                w is OutlinedButton &&
                 w.key is ValueKey<String> &&
                 (w.key! as ValueKey<String>).value.startsWith(
                   'store-missing-',
                 ) &&
-                w.style?.foregroundColor?.resolve({}) == Colors.black54,
+                w.style?.foregroundColor?.resolve({}) == kMxInk,
           )
           .evaluate()
           .isNotEmpty,
@@ -642,7 +661,7 @@ void main() {
     );
     ok(
       'מסך "תודה" מלא לבעל החנות',
-      find.text('תודה רבה!').evaluate().isNotEmpty,
+      find.textContaining('תודה, ').evaluate().isNotEmpty,
     );
     await tapKey('store-thanks-ok');
     await back();
@@ -699,6 +718,12 @@ void main() {
           db().po(conf.id).invoiceNo == '7788' &&
           db().po(conf.id).allocationNo == '123456789',
     );
+    await tester.fling(
+      find.byType(Scrollable).first,
+      const Offset(0, 3000),
+      3000,
+    );
+    await tester.pumpAndSettle();
     ok(
       'דף החנות לאחר "מוכן" מציג סטטוס "מוכן" ואיסוף',
       find.text('מוכן').evaluate().isNotEmpty &&

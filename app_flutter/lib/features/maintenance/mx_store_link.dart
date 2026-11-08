@@ -68,7 +68,11 @@ String mxStoreMessage(
     ..writeln(
       'כתובת: ${site.address.isEmpty ? '${site.city} – ${site.name}' : site.address}',
     )
-    ..writeln('איש קשר: מחלקת האחזקה, $kMxManagerPhone')
+    ..writeln(
+      kMxManagerPhone.isEmpty
+          ? 'איש קשר: $kMxManagerTitle'
+          : 'איש קשר: $kMxManagerTitle, $kMxManagerPhone',
+    )
     ..writeln()
     ..writeln('לאישור, לסימון מה חסר ולעדכון שההזמנה מוכנה:')
     ..write(mxStoreLink(baseUrl, o.token));

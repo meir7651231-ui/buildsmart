@@ -16,6 +16,7 @@ library;
 
 import 'dart:convert';
 
+import 'package:buildsmart/features/maintenance/mx_brand.dart';
 import 'package:buildsmart/features/maintenance/mx_bridge.dart';
 import 'package:buildsmart/features/maintenance/mx_engine.dart';
 import 'package:buildsmart/features/maintenance/mx_model.dart';
@@ -36,7 +37,7 @@ const String kMxStoreBaseUrl = String.fromEnvironment(
 /// Organization display name used in store messages.
 const String kMxOrgName = String.fromEnvironment(
   'MX_ORG_NAME',
-  defaultValue: 'מחלקת האחזקה',
+  defaultValue: kMxSiachSod ? 'שיח סוד' : 'מחלקת האחזקה',
 );
 
 final mxClockProvider = Provider<DateTime Function()>((_) => DateTime.now);

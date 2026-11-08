@@ -342,8 +342,15 @@ const List<MxPart> kMxParts = [
 ];
 
 /// Demo technicians (the picker shows each one's open jobs).
-/// Demo phone of the maintenance manager (urgent call, store contact).
-const String kMxManagerPhone = '02-000-0000';
+/// The maintenance manager's real name + phone (urgent call, store contact),
+/// set per client at build time (`--dart-define=MX_MANAGER_PHONE=...`).
+/// Empty by default: the app then shows no invented number and the call
+/// button opens the dialer empty.
+const String kMxManagerPhone = String.fromEnvironment('MX_MANAGER_PHONE');
+const String kMxManagerTitle = String.fromEnvironment(
+  'MX_MANAGER_NAME',
+  defaultValue: 'מנהל האחזקה',
+);
 
 const List<String> kMxTechs = [
   'יוסי – טכנאי',
@@ -415,18 +422,8 @@ const List<(String, String, int, String)> kMxPmCatalog = [
 /// A small, clearly fictional demo organization: 2 sites, 5 units, 2 stores.
 MxDb mxDemoSeed(DateTime now) {
   const sites = [
-    MxSite(
-      id: 'jrs',
-      name: 'מסגרת דיור א׳',
-      city: 'ירושלים',
-      address: 'רח׳ הדוגמה 1, ירושלים',
-    ),
-    MxSite(
-      id: 'bsh',
-      name: 'מסגרת דיור ב׳',
-      city: 'בית שמש',
-      address: 'רח׳ הדוגמה 5, בית שמש',
-    ),
+    MxSite(id: 'jrs', name: 'מסגרת דיור א׳', city: 'ירושלים', address: ''),
+    MxSite(id: 'bsh', name: 'מסגרת דיור ב׳', city: 'בית שמש', address: ''),
   ];
   const units = [
     MxUnit(id: 'jrs-1', siteId: 'jrs', name: 'דירה 1'),
@@ -445,20 +442,20 @@ MxDb mxDemoSeed(DateTime now) {
   const stores = [
     MxStore(
       id: 'st-tambur',
-      name: 'טמבור השכונה (דוגמה)',
+      name: 'טמבור השכונה',
       types: {'חשמל', 'אינסטלציה', 'פרזול', 'בטיחות', 'מיזוג'},
       phone: '050-0000000',
     ),
     MxStore(
       id: 'st-electric',
-      name: 'חשמל ותאורה (דוגמה)',
+      name: 'חשמל ותאורה',
       types: {'חשמל', 'בטיחות'},
       phone: '053-0000000',
       channel: MxStoreChannel.app,
     ),
     MxStore(
       id: 'st-judaica',
-      name: 'סת״ם ויודאיקה (דוגמה)',
+      name: 'סת״ם ויודאיקה',
       types: {'יודאיקה'},
       phone: '052-0000000',
       channel: MxStoreChannel.whatsapp,
