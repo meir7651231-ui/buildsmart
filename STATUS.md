@@ -45,7 +45,7 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 - [#65](https://github.com/meir7651231-ui/buildsmart/pull/65): dark-mode גל 17. ‏`bsInk`/`bsMuted` ‏+ 16 מסכים + `AiOffState`. טסט ניגודיות חדש: אדום לפני, ירוק אחרי, mutation-verified. suite **6055 ✅ / 0 ✗ / 12 skip**. screen-review ‏8.4, כל ציר ≥7 אחרי תיקונים. סיכון נמוך-בינוני.
 - [#66](https://github.com/meir7651231-ui/buildsmart/pull/66): ‏36 אזהרות analyzer (56 ← 20), בלי שינוי התנהגות. suite **6034 ✅ / 0 ✗**. סיכון נמוך.
 
-**🔄 בתהליך:** CI (Protocol Enforcement) על #65/#66 רץ בזמן הכתיבה.
+**CI:** Protocol Enforcement ✅ על שלושת ה-PRs (#64 ‏#65 ‏#66), כולל טסטים על 3.29.3 ו-Android release build.
 
 **הערות סביבה:** בקונטיינר אין Flutter מותקן מראש. הורדתי 3.44.0 ל-`/home/user/flutter`. בנוסף, `lib/version.g.dart` נוצר רק דרך `bash scripts/gen_version.sh` **משורש הריפו**, ובלעדיו analyze מראה 8 errors מדומים.
 
