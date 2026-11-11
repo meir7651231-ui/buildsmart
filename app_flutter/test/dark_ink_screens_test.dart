@@ -8,10 +8,12 @@
 //   B) in dark theme, no light-theme ink literal sits on a dark background.
 import 'package:buildsmart/screens/adapter_explain_screen.dart';
 import 'package:buildsmart/screens/alt_explain_screen.dart';
+import 'package:buildsmart/screens/audit_screen.dart';
 import 'package:buildsmart/screens/coming_soon_screen.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart';
 import 'package:buildsmart/screens/paired_explain_screen.dart';
+import 'package:buildsmart/screens/profession_screen.dart';
 import 'package:buildsmart/screens/quote_polish_screen.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
@@ -72,6 +74,8 @@ final _screens = <String, Widget Function()>{
       const QuotePolishScreen(rawQuote: 'הצעה', productName: 'ברז'),
   'daily_report': () =>
       const DailyReportScreen(title: 'דוח', reportLines: ['שורה']),
+  'audit': () => const AuditScreen(),
+  'profession': () => const ProfessionScreen(),
 };
 
 void main() {
