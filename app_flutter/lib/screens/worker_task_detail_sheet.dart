@@ -10,7 +10,6 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/keyboard_job_context.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/state/under_construction.dart';
-import 'package:buildsmart/state/worker_tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/photo_viewer.dart';

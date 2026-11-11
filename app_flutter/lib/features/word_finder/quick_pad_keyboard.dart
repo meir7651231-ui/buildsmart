@@ -73,9 +73,9 @@ class _QuickPadKeyboardState extends State<QuickPadKeyboard> {
   /// floored at 1, capped at kMaxQty. (Fix: canonical audit, money-numeric lens.)
   final Map<Object, int> _qty = <Object, int>{};
 
-  /// The stable identity key for an item: its payload (the product) when set,
-  /// else its label — so [_qty] follows the product, never the slot.
-  Object _key(QuickPadItem item) => item.payload ?? item.label;
+  /// The stable identity key for an item: its payload (the product; always
+  /// non-null) — so [_qty] follows the product, never the slot.
+  Object _key(QuickPadItem item) => item.payload;
 
   /// The current quantity for [item] (defaults to 1 when never stepped).
   int _qtyOf(QuickPadItem item) => _qty[_key(item)] ?? 1;

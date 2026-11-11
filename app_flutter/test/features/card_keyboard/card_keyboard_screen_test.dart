@@ -67,7 +67,7 @@ void main() {
     // off the opening word question (its first answered step).
     final opening = state.verdict as CardAskWords;
     expect(opening.words, isNotEmpty, reason: 'sanity: opening words exist');
-    final firstWord = opening.words.first.word as String;
+    final firstWord = opening.words.first.word;
     await tester.tap(find.text(firstWord).first);
     await tester.pumpAndSettle();
 

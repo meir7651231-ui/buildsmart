@@ -1,5 +1,4 @@
 import 'package:buildsmart/data/catalog_tree.dart';
-import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/logic/category_division.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:flutter_test/flutter_test.dart';

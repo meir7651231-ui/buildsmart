@@ -88,7 +88,7 @@ void main() {
     test('a slang query finds the real products (ON path)', () {
       if (!kGlobalSearch) return; // flag-off: rescue is compiled out
 
-      List res(String q) {
+      List<dynamic> res(String q) {
         final c = ProviderContainer();
         c.read(keyboardDiveQueryProvider.notifier).state = q;
         final r = c.read(diveResultsProvider);

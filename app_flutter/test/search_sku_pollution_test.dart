@@ -7,7 +7,6 @@
 // the results for "20" were unrelated SKU coincidences. SKU is now matched only
 // for queries ≥5 chars (real SKUs are 5–10 digits); short size queries match
 // name/category/colour only.
-import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/polyroll_catalog.dart';
 import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:flutter_test/flutter_test.dart';

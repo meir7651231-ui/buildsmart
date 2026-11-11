@@ -878,7 +878,7 @@ class _DeliveredCardState extends State<_DeliveredCard> {
                       : podCaptured
                       ? '📸 POD נשמר ✓'
                       : '📸 ללא POD'}'
-                  '${deliveredAt != null ? ' · 🕒 ${deliveredAt!.day}.${deliveredAt!.month} ${deliveredAt!.hour.toString().padLeft(2, '0')}:${deliveredAt!.minute.toString().padLeft(2, '0')}' : ''}',
+                  '${deliveredAt != null ? ' · 🕒 ${deliveredAt.day}.${deliveredAt.month} ${deliveredAt.hour.toString().padLeft(2, '0')}:${deliveredAt.minute.toString().padLeft(2, '0')}' : ''}',
                   style: const TextStyle(
                     color: BsTokens.mutedLight,
                     fontSize: 12.5,
