@@ -199,8 +199,12 @@ class _AuditScreenState extends State<AuditScreen> {
                         '${_results.where((r) => r.ok).length}/${_results.length}',
                         style: TextStyle(
                             color: allOk
-                                ? const Color(0xFF15803D)
-                                : BsTokens.danger,
+                                ? (isDark
+                                    ? const Color(0xFF4ADE80)
+                                    : const Color(0xFF15803D))
+                                : (isDark
+                                    ? const Color(0xFFF87171)
+                                    : BsTokens.danger),
                             fontWeight: FontWeight.w800,
                             fontSize: 13),
                       ),
@@ -282,9 +286,10 @@ class _AuditScreenState extends State<AuditScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // Dark: a lighter green / themed muted keep AA on surfaceContainerHighest;
     // light stays the exact legacy #15803D / #888888.
+    final danger = isDark ? const Color(0xFFF87171) : BsTokens.danger;
     final color = r.ok
         ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF15803D))
-        : BsTokens.danger;
+        : danger;
     final meta = isDark ? bsMuted(context) : const Color(0xFF888888);
     final overBudget = r.dropBar > 1.0;
     return Container(
@@ -360,12 +365,12 @@ class _AuditScreenState extends State<AuditScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: BsTokens.danger.withOpacity(0.2),
+                  color: danger.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text('${r.criticalOpen} קריטי',
-                    style: const TextStyle(
-                        color: BsTokens.danger,
+                    style: TextStyle(
+                        color: danger,
                         fontSize: 10,
                         fontWeight: FontWeight.w800)),
               ),
