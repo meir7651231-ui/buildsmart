@@ -88,7 +88,9 @@ class _ManagerScreensSheet extends ConsumerWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.black12,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.black12,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -110,7 +112,12 @@ class _ManagerScreensSheet extends ConsumerWidget {
               style: TextStyle(color: bsMuted(context), fontSize: 13),
             ),
             const SizedBox(height: 12),
-            const Divider(color: Color(0xFFF0F0F0), height: 1),
+            Divider(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white12
+                  : const Color(0xFFF0F0F0),
+              height: 1,
+            ),
             for (final d in _kDests)
               ListTile(
                 leading: Text(d.emoji, style: const TextStyle(fontSize: 24)),

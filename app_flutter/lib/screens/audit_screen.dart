@@ -279,7 +279,13 @@ class _AuditScreenState extends State<AuditScreen> {
   }
 
   Widget _buildRow(_ScenarioResult r) {
-    final color = r.ok ? const Color(0xFF15803D) : BsTokens.danger;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Dark: a lighter green / themed muted keep AA on surfaceContainerHighest;
+    // light stays the exact legacy #15803D / #888888.
+    final color = r.ok
+        ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF15803D))
+        : BsTokens.danger;
+    final meta = isDark ? bsMuted(context) : const Color(0xFF888888);
     final overBudget = r.dropBar > 1.0;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -319,33 +325,33 @@ class _AuditScreenState extends State<AuditScreen> {
           ]),
           const SizedBox(height: 6),
           Row(children: [
-            const Icon(Icons.inventory_2_outlined,
-                color: Color(0xFF888888), size: 13),
+            Icon(Icons.inventory_2_outlined,
+                color: meta, size: 13),
             const SizedBox(width: 4),
             Text('${r.itemCount} פריטים',
-                style: const TextStyle(
-                    color: Color(0xFF888888), fontSize: 11)),
+                style: TextStyle(
+                    color: meta, fontSize: 11)),
             const SizedBox(width: 14),
             Icon(Icons.water_drop_outlined,
                 color: overBudget
                     ? const Color(0xFFB45309)
-                    : const Color(0xFF888888),
+                    : meta,
                 size: 13),
             const SizedBox(width: 4),
             Text('ΔP ${r.dropBar.toStringAsFixed(2)} בר',
                 style: TextStyle(
                     color: overBudget
                         ? const Color(0xFFB45309)
-                        : const Color(0xFF888888),
+                        : meta,
                     fontSize: 11,
                     fontFamily: 'monospace')),
             const SizedBox(width: 14),
-            const Icon(Icons.straighten,
-                color: Color(0xFF888888), size: 13),
+            Icon(Icons.straighten,
+                color: meta, size: 13),
             const SizedBox(width: 4),
             Text('⌀${r.minBoreMm.toStringAsFixed(0)}mm',
-                style: const TextStyle(
-                    color: Color(0xFF888888),
+                style: TextStyle(
+                    color: meta,
                     fontSize: 11,
                     fontFamily: 'monospace')),
             if (r.criticalOpen > 0) ...[
@@ -389,8 +395,8 @@ class _AuditScreenState extends State<AuditScreen> {
                   ),
                 if (r.items.length > 8)
                   Text('+${r.items.length - 8}',
-                      style: const TextStyle(
-                          color: Color(0xFF888888),
+                      style: TextStyle(
+                          color: meta,
                           fontSize: 10,
                           fontWeight: FontWeight.w700)),
               ],

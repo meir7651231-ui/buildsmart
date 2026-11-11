@@ -91,7 +91,11 @@ class _RolePickerCard extends ConsumerWidget {
       'courier': modOn(ref, 'courier'),
       'worker': modOn(ref, 'worker'),
     };
-    return Container(
+    // Material: showGeneralDialog gives no Material/DefaultTextStyle ancestor,
+    // so the header text fell back to the yellow-underline debug style.
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -128,6 +132,7 @@ class _RolePickerCard extends ConsumerWidget {
             if (moduleOn[p.id] ?? true) _RoleRow(persona: p),
         ],
       ),
+    ),
     );
   }
 }
