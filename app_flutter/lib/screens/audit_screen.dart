@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 // Live, in-app audit screen — generates 20 RANDOM installation scenarios
 // each run and shows the auto-built plan + compliance result for each.
@@ -145,6 +146,7 @@ class _AuditScreenState extends State<AuditScreen> {
   @override
   Widget build(BuildContext context) {
     final allOk = _results.isNotEmpty && _results.every((r) => r.ok);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -166,20 +168,20 @@ class _AuditScreenState extends State<AuditScreen> {
                         onTap: () => Navigator.maybePop(context),
                         // ≥48dp tap target around the small arrow (a11y),
                         // without enlarging the visible glyph.
-                        child: const SizedBox(
+                        child: SizedBox(
                           width: 48,
                           height: 48,
                           child: Center(
                             child: Icon(Icons.arrow_back,
-                                color: BsTokens.inkLight, size: 22),
+                                color: bsInk(context), size: 22),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const CfgText('audit_screen.t01', 'אודיט תרחישים',
+                  CfgText('audit_screen.t01', 'אודיט תרחישים',
                       style: TextStyle(
-                          color: BsTokens.inkLight,
+                          color: bsInk(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w800)),
                   const Spacer(),
@@ -197,8 +199,12 @@ class _AuditScreenState extends State<AuditScreen> {
                         '${_results.where((r) => r.ok).length}/${_results.length}',
                         style: TextStyle(
                             color: allOk
-                                ? const Color(0xFF15803D)
-                                : BsTokens.danger,
+                                ? (isDark
+                                    ? const Color(0xFF4ADE80)
+                                    : const Color(0xFF15803D))
+                                : (isDark
+                                    ? const Color(0xFFF87171)
+                                    : BsTokens.danger),
                             fontWeight: FontWeight.w800,
                             fontSize: 13),
                       ),
@@ -232,27 +238,32 @@ class _AuditScreenState extends State<AuditScreen> {
             ),
             Expanded(
               child: _results.isEmpty && !_running
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('🧪', style: TextStyle(fontSize: 48)),
-                          SizedBox(height: 12),
+                          const Text('🧪', style: TextStyle(fontSize: 48)),
+                          const SizedBox(height: 12),
                           CfgText(
                             'audit_screen.t02',
                             'עדיין לא הורצו בדיקות',
                             style: TextStyle(
-                              color: Color(0xFF334155),
+                              color: isDark
+                                  ? bsInk(context)
+                                  : const Color(0xFF334155),
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           CfgText(
                             'audit_screen.t03',
                             'הקש "⚡ הרץ 20 תרחישי בדיקה" כדי להתחיל',
                             style: TextStyle(
-                                color: Color(0xFF64748B), fontSize: 13),
+                                color: isDark
+                                    ? bsMuted(context)
+                                    : const Color(0xFF64748B),
+                                fontSize: 13),
                           ),
                         ],
                       ),
@@ -272,7 +283,14 @@ class _AuditScreenState extends State<AuditScreen> {
   }
 
   Widget _buildRow(_ScenarioResult r) {
-    final color = r.ok ? const Color(0xFF15803D) : BsTokens.danger;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Dark: a lighter green / themed muted keep AA on surfaceContainerHighest;
+    // light stays the exact legacy #15803D / #888888.
+    final danger = isDark ? const Color(0xFFF87171) : BsTokens.danger;
+    final color = r.ok
+        ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF15803D))
+        : danger;
+    final meta = isDark ? bsMuted(context) : const Color(0xFF888888);
     final overBudget = r.dropBar > 1.0;
     return Container(
       padding: const EdgeInsets.all(12),
@@ -290,8 +308,8 @@ class _AuditScreenState extends State<AuditScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(r.title,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight,
+                  style: TextStyle(
+                      color: bsInk(context),
                       fontSize: 13,
                       fontWeight: FontWeight.w700)),
             ),
@@ -312,33 +330,33 @@ class _AuditScreenState extends State<AuditScreen> {
           ]),
           const SizedBox(height: 6),
           Row(children: [
-            const Icon(Icons.inventory_2_outlined,
-                color: Color(0xFF888888), size: 13),
+            Icon(Icons.inventory_2_outlined,
+                color: meta, size: 13),
             const SizedBox(width: 4),
             Text('${r.itemCount} פריטים',
-                style: const TextStyle(
-                    color: Color(0xFF888888), fontSize: 11)),
+                style: TextStyle(
+                    color: meta, fontSize: 11)),
             const SizedBox(width: 14),
             Icon(Icons.water_drop_outlined,
                 color: overBudget
                     ? const Color(0xFFB45309)
-                    : const Color(0xFF888888),
+                    : meta,
                 size: 13),
             const SizedBox(width: 4),
             Text('ΔP ${r.dropBar.toStringAsFixed(2)} בר',
                 style: TextStyle(
                     color: overBudget
                         ? const Color(0xFFB45309)
-                        : const Color(0xFF888888),
+                        : meta,
                     fontSize: 11,
                     fontFamily: 'monospace')),
             const SizedBox(width: 14),
-            const Icon(Icons.straighten,
-                color: Color(0xFF888888), size: 13),
+            Icon(Icons.straighten,
+                color: meta, size: 13),
             const SizedBox(width: 4),
             Text('⌀${r.minBoreMm.toStringAsFixed(0)}mm',
-                style: const TextStyle(
-                    color: Color(0xFF888888),
+                style: TextStyle(
+                    color: meta,
                     fontSize: 11,
                     fontFamily: 'monospace')),
             if (r.criticalOpen > 0) ...[
@@ -347,12 +365,12 @@ class _AuditScreenState extends State<AuditScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
-                  color: BsTokens.danger.withOpacity(0.2),
+                  color: danger.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text('${r.criticalOpen} קריטי',
-                    style: const TextStyle(
-                        color: BsTokens.danger,
+                    style: TextStyle(
+                        color: danger,
                         fontSize: 10,
                         fontWeight: FontWeight.w800)),
               ),
@@ -382,8 +400,8 @@ class _AuditScreenState extends State<AuditScreen> {
                   ),
                 if (r.items.length > 8)
                   Text('+${r.items.length - 8}',
-                      style: const TextStyle(
-                          color: Color(0xFF888888),
+                      style: TextStyle(
+                          color: meta,
                           fontSize: 10,
                           fontWeight: FontWeight.w700)),
               ],

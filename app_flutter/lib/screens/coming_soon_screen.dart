@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
@@ -29,11 +30,11 @@ class ComingSoonScreen extends StatelessWidget {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const CfgText(
+          title: CfgText(
             'coming_soon_screen.title',
             'בקרוב',
             style: TextStyle(
-              color: BsTokens.inkLight,
+              color: bsInk(context),
               fontWeight: FontWeight.w800,
               fontSize: 20,
             ),
@@ -45,10 +46,10 @@ class ComingSoonScreen extends StatelessWidget {
               'coming_soon_screen.back',
               child: TextButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              child: const CfgText(
+              child: CfgText(
                 'coming_soon_screen.back',
                 '‹ חזרה',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                style: TextStyle(color: bsMuted(context), fontSize: 14),
               ),
             ),
             ),
@@ -67,22 +68,22 @@ class ComingSoonScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 64),
                 ),
                 const SizedBox(height: BsTokens.space4),
-                const CfgText(
+                CfgText(
                   'coming_soon_screen.heading',
                   'בקרוב',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
-                    color: BsTokens.inkLight,
+                    color: bsInk(context),
                   ),
                 ),
                 const SizedBox(height: BsTokens.space2),
                 Text(
                   'התוכן עבור $profession בהכנה',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: BsTokens.mutedLight,
+                  style: TextStyle(
+                    color: bsMuted(context),
                     fontSize: 15,
                     height: 1.4,
                   ),

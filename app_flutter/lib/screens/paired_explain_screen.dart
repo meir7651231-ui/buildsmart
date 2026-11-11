@@ -18,6 +18,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -123,9 +124,9 @@ class _PairedExplainState extends ConsumerState<PairedExplainScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('paired_explain_screen.title', '🧩 מה עוד צריך?',
+          title: CfgText('paired_explain_screen.title', '🧩 מה עוד צריך?',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -134,14 +135,14 @@ class _PairedExplainState extends ConsumerState<PairedExplainScreen> {
           children: [
             // ── The product + the REAL paired types (data, never the model). ──
             Text(widget.product,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
-            const CfgText(
+            CfgText(
                 'paired_explain_screen.paired_with', 'מותקן לרוב יחד עם:',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+                style: TextStyle(color: bsMuted(context), fontSize: 13)),
             const SizedBox(height: 6),
             Wrap(
               spacing: 6,
@@ -174,13 +175,13 @@ class _PairedExplainState extends ConsumerState<PairedExplainScreen> {
               AiFailedState(onRetry: _explain)
             else if (_explanation != null)
               Text(_explanation!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.5)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.5)),
             const SizedBox(height: BsTokens.space4),
-            const CfgText(
+            CfgText(
                 'paired_explain_screen.footer',
                 '⚙️ הרשימה מנתוני-הקטלוג; ה-AI רק מסביר למה כל אביזר נחוץ.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),

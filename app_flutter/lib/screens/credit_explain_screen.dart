@@ -17,6 +17,7 @@
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -166,9 +167,9 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('credit_explain_screen.title', '💳 הסבר אשראי',
+          title: CfgText('credit_explain_screen.title', '💳 הסבר אשראי',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -177,8 +178,8 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
           children: [
             // ── The REAL credit figures (data, never the model). ──
             Text(widget.name,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
@@ -208,12 +209,12 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
               AiFailedState(onRetry: _explain)
             else if (_explanation != null)
               Text(_explanation!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.6)),
             const SizedBox(height: BsTokens.space4),
-            const CfgText('credit_explain_screen.note',
+            CfgText('credit_explain_screen.note',
                 '⚙️ המספרים מנתוני-המערכת; ה-AI רק מסביר אותם.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),
@@ -226,12 +227,12 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
           children: [
             Expanded(
               child: Text(label,
-                  style: const TextStyle(
-                      color: BsTokens.mutedLight, fontSize: 13)),
+                  style: TextStyle(
+                      color: bsMuted(context), fontSize: 13)),
             ),
             Text(value,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w700)),
           ],

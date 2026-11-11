@@ -18,6 +18,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -151,9 +152,9 @@ class _AltExplainState extends ConsumerState<AltExplainScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('alt_explain_screen.t01', '💡 למה החלופה שווה?',
+          title: CfgText('alt_explain_screen.t01', '💡 למה החלופה שווה?',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -162,17 +163,17 @@ class _AltExplainState extends ConsumerState<AltExplainScreen> {
           children: [
             // ── The REAL swap (data, never the model). ──
             Text(widget.product,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
             Text('המלצה: ${widget.recName} · ₪${widget.recPrice}',
                 style:
-                    const TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+                    TextStyle(color: bsMuted(context), fontSize: 13)),
             Text('חלופה: ${widget.altName} · ₪${widget.altPrice}',
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w600)),
             const SizedBox(height: BsTokens.space2),
@@ -203,12 +204,12 @@ class _AltExplainState extends ConsumerState<AltExplainScreen> {
               AiFailedState(onRetry: _explain)
             else if (_explanation != null)
               Text(_explanation!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.5)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.5)),
             const SizedBox(height: BsTokens.space4),
-            const CfgText('alt_explain_screen.t02',
+            CfgText('alt_explain_screen.t02',
                 '⚙️ המחירים מתוך נתוני-הקטלוג; ה-AI רק מנסח את ההשוואה.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),

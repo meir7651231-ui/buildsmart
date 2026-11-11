@@ -16,6 +16,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -130,9 +131,9 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('quote_polish_screen.title', '✨ הצעה מקצועית',
+          title: CfgText('quote_polish_screen.title', '✨ הצעה מקצועית',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -140,8 +141,8 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
           padding: const EdgeInsets.all(BsTokens.space4),
           children: [
             Text(widget.productName,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
@@ -149,12 +150,14 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
             Container(
               padding: const EdgeInsets.all(BsTokens.space3),
               decoration: BoxDecoration(
-                color: const Color(0xFFF6F7F9),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF6F7F9),
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
               ),
               child: Text(widget.rawQuote,
-                  style: const TextStyle(
-                      color: BsTokens.mutedLight, fontSize: 12, height: 1.5)),
+                  style: TextStyle(
+                      color: bsMuted(context), fontSize: 12, height: 1.5)),
             ),
             const Divider(height: BsTokens.space5, color: BsTokens.divider),
 
@@ -166,8 +169,8 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
               AiFailedState(onRetry: _polish)
             else if (_polished != null) ...[
               Text(_polished!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.6)),
               const SizedBox(height: BsTokens.space4),
               SizedBox(
                 width: double.infinity,
@@ -179,10 +182,10 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
               ),
             ],
             const SizedBox(height: BsTokens.space4),
-            const CfgText(
+            CfgText(
                 'quote_polish_screen.footer_note',
                 '⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח — לא משנה מחירים.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),

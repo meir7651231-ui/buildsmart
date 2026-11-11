@@ -9,6 +9,7 @@ import 'package:buildsmart/state/notif_settings.dart';
 import 'package:buildsmart/data/repositories/worker_notifs_repository.dart'
     show workerNotifsRepositoryProvider, workerNotifsServerProvider;
 import 'package:buildsmart/state/worker_notifs.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/help_target.dart';
@@ -55,9 +56,9 @@ class WorkerNotifsBell extends ConsumerWidget {
         icon: Stack(
           clipBehavior: Clip.none,
           children: [
-            const Icon(
+            Icon(
               Icons.notifications_outlined,
-              color: BsTokens.mutedLight,
+              color: bsMuted(context),
             ),
             if (unread > 0)
               PositionedDirectional(
@@ -154,12 +155,12 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                   // ── header: title + X close ──
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: CfgText(
                           'worker_notifs_sheet.t01',
                           '🔔 התראות',
                           style: TextStyle(
-                            color: BsTokens.inkLight,
+                            color: bsInk(context),
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                           ),
@@ -168,9 +169,9 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                       IconButton(
                         tooltip: 'סגירה',
                         onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.close,
-                          color: BsTokens.mutedLight,
+                          color: bsMuted(context),
                         ),
                       ),
                     ],
@@ -180,14 +181,14 @@ class _WorkerNotifsSheet extends ConsumerWidget {
                   if (notifs.isEmpty)
                     // Honest empty state — the feed fills only from real events
                     // (אישור/דחייה של המנהל, משימה חדשה שנכנסה לביצוע).
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: BsTokens.space5),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: BsTokens.space5),
                       child: CfgText(
                         'worker_notifs_sheet.t02',
                         'אין התראות עדיין.\nאישורים, החזרות לתיקון ומשימות חדשות יופיעו כאן.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: BsTokens.mutedLight,
+                          color: bsMuted(context),
                           fontSize: 13.5,
                         ),
                       ),
@@ -295,10 +296,16 @@ class _NotifRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color:
           notif.read
               ? Theme.of(context).colorScheme.surface
+              : isDark
+              ? Color.alphaBlend(
+                  BsTokens.brand.withValues(alpha: 0.12),
+                  Theme.of(context).colorScheme.surface,
+                )
               : const Color(0xFFFFF8F2),
       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
       child: InkWell(
@@ -322,7 +329,7 @@ class _NotifRow extends StatelessWidget {
                     Text(
                       notif.title,
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontWeight:
                             notif.read ? FontWeight.w600 : FontWeight.w800,
                         fontSize: 13.5,
@@ -331,16 +338,16 @@ class _NotifRow extends StatelessWidget {
                     if (notif.body.isNotEmpty)
                       Text(
                         notif.body,
-                        style: const TextStyle(
-                          color: BsTokens.mutedLight,
+                        style: TextStyle(
+                          color: bsMuted(context),
                           fontSize: 12.5,
                         ),
                       ),
                     const SizedBox(height: 2),
                     Text(
                       workerNotifAgo(notif.ts),
-                      style: const TextStyle(
-                        color: BsTokens.mutedLight,
+                      style: TextStyle(
+                        color: bsMuted(context),
                         fontSize: 11,
                       ),
                     ),

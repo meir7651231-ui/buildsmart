@@ -128,3 +128,20 @@ Color bsOnAccent(BuildContext context) =>
 Color bsSuccess(BuildContext context) =>
     Theme.of(context).extension<BsSemanticColors>()?.success ??
     BsTokens.success;
+
+/// Body-text ink that follows the active theme. Light → [BsTokens.inkLight]
+/// (byte-identical to the old literal); dark → [BsTokens.inkDark].
+/// Use wherever a screen with a theme-aware surface still painted text with the
+/// hardcoded light ink — #1A1A1A on bgDark #141009 is ~1.1:1, i.e. invisible.
+Color bsInk(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.inkDark
+        : BsTokens.inkLight;
+
+/// Secondary/muted text that follows the active theme. Light →
+/// [BsTokens.mutedLight] (unchanged); dark → [BsTokens.mutedDark]
+/// (AA: 7.3:1 on bgDark, 6.5:1 on cardDark).
+Color bsMuted(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.mutedDark
+        : BsTokens.mutedLight;

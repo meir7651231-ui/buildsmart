@@ -22,6 +22,7 @@ import 'package:buildsmart/data/lipskey_verified_connections.dart'
     show EndType, kVerifiedSpecs;
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -171,9 +172,9 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('adapter_explain_screen.t01', '🔌 איך לגשר?',
+          title: CfgText('adapter_explain_screen.t01', '🔌 איך לגשר?',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -182,13 +183,13 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
           children: [
             // ── The part + its REAL ends (data, never the model). ──
             Text(widget.productName,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
-            const CfgText('adapter_explain_screen.t02', 'הקצוות שלו:',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+            CfgText('adapter_explain_screen.t02', 'הקצוות שלו:',
+                style: TextStyle(color: bsMuted(context), fontSize: 13)),
             const SizedBox(height: 6),
             Wrap(
               spacing: 6,
@@ -221,11 +222,11 @@ class _AdapterExplainState extends ConsumerState<AdapterExplainScreen> {
               AiFailedState(onRetry: _explain)
             else if (_explanation != null)
               Text(_explanation!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.5)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.5)),
             const SizedBox(height: BsTokens.space4),
-            const CfgText('adapter_explain_screen.t03', '⚙️ הקצוות מנתוני-המפרט; ה-AI רק מסביר איזה סוג-מתאם מגשר.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+            CfgText('adapter_explain_screen.t03', '⚙️ הקצוות מנתוני-המפרט; ה-AI רק מסביר איזה סוג-מתאם מגשר.',
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),
