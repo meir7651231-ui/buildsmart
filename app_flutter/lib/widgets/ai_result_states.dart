@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class AiOffState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        style: TextStyle(color: bsMuted(context), fontSize: 13),
       );
 }
 

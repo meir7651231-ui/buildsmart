@@ -2744,3 +2744,6 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave16 — 8 files (alt/quote_polish/coming_soon/adapter/paired/daily_report/credit/manager_screens) (2026-08-23)
 **גל 16 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. משפחת מסכי-explain (alt/adapter/paired/credit) + quote_polish + coming_soon + daily_report + manager_screens — כולם דפוס Scaffold(bgLight)+AppBar(cardLight). bgLight→`scaffoldBackgroundColor` · cardLight/white→`colorScheme.surface`. `flutter analyze` 0 errors. **אטלס 65→49** (‎-16). מצטבר 659→49 (610 תוקנו).
+
+## #darkmode-wave17 — ink fix-up ל-16 קבצי גלים 15–16 + AiOffState (2026-11-11)
+**נחיל: מאמת אחד (82 אתרים: 68 CHANGE · 11 KEEP · 3 MIXED) → 4 fixers דיסיונקטיביים.** inkLight/mutedLight → `bsInk`/`bsMuted`; מילויים בהירים קשיחים → `surfaceContainerHighest` בכהה בלבד (בהיר byte-identical); footnotes `mutedDark` → `bsMuted` (שינוי-בהיר מכוון: 2.5:1 → AA). שער-רגרסיה חדש `dark_ink_screens_test` מוצא לכל טקסט את רקע-האב הצבוע ובודק ניגודיות ≥2.0 + אין ink-בהיר על רקע-כהה. **נשאר לגל הבא:** כותרת AppBar ב-`worker_app_screen.dart:160` · ידיות/מפרידים בהירים (cosmetic) · ~89 קבצים נוספים עם משטח-תמה + ink קשיח.

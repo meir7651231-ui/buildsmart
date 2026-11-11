@@ -19,6 +19,7 @@
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -132,9 +133,9 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('daily_report_screen.title', '✨ ניסוח חכם',
+          title: CfgText('daily_report_screen.title', '✨ ניסוח חכם',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -142,8 +143,8 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
           padding: const EdgeInsets.all(BsTokens.space4),
           children: [
             Text(widget.title,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
@@ -152,8 +153,8 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text('• $line',
-                    style: const TextStyle(
-                        color: BsTokens.inkLight, fontSize: 13)),
+                    style: TextStyle(
+                        color: bsInk(context), fontSize: 13)),
               ),
             const Divider(height: BsTokens.space5, color: BsTokens.divider),
 
@@ -165,8 +166,8 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
               AiFailedState(onRetry: _compose)
             else if (_report != null) ...[
               Text(_report!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.6)),
               const SizedBox(height: BsTokens.space4),
               SizedBox(
                 width: double.infinity,
@@ -178,9 +179,9 @@ class _DailyReportState extends ConsumerState<DailyReportScreen> {
               ),
             ],
             const SizedBox(height: BsTokens.space4),
-            const CfgText('daily_report_screen.footer_note',
+            CfgText('daily_report_screen.footer_note',
                 '⚙️ המספרים נרשמו במערכת; ה-AI רק מנסח אותם לדוח.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),

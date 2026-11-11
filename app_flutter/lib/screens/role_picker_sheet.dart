@@ -8,6 +8,7 @@ import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/org_gates.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -110,17 +111,17 @@ class _RolePickerCard extends ConsumerWidget {
           CfgText(
             'role_picker_sheet.t01',
             'מי אתה?',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 20,
-              color: BsTokens.inkLight,
+              color: bsInk(context),
             ),
           ),
           const SizedBox(height: 2),
           CfgText(
             'role_picker_sheet.t02',
             'בחר תפקיד כדי להיכנס',
-            style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+            style: TextStyle(color: bsMuted(context), fontSize: 13),
           ),
           const SizedBox(height: BsTokens.space3),
           for (final p in kPersonas)
@@ -141,7 +142,9 @@ class _RoleRow extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: const Color(0xFFF5F5F7),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : const Color(0xFFF5F5F7),
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -211,16 +214,16 @@ class _RoleRow extends ConsumerWidget {
                     children: [
                       Text(
                         persona.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
-                          color: BsTokens.inkLight,
+                          color: bsInk(context),
                         ),
                       ),
                       Text(
                         kPersonaDesc[persona.id] ?? '',
-                        style: const TextStyle(
-                          color: BsTokens.mutedLight,
+                        style: TextStyle(
+                          color: bsMuted(context),
                           fontSize: 12.5,
                         ),
                       ),

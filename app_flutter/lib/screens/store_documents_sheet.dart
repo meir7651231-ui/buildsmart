@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
@@ -67,12 +68,12 @@ class _DocumentsSheetBody extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: CfgText(
                       'store_documents_sheet.t01',
                       '🧾 חשבוניות ודוח חודשי',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
                       ),
@@ -81,7 +82,7 @@ class _DocumentsSheetBody extends StatelessWidget {
                   // Explicit X close (sheet rule) — IconButton is 48dp.
                   IconButton(
                     tooltip: 'סגור',
-                    icon: const Icon(Icons.close, color: BsTokens.mutedLight),
+                    icon: Icon(Icons.close, color: bsMuted(context)),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -106,12 +107,12 @@ class _DocumentsSheetBody extends StatelessWidget {
                   color: BsTokens.brand.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                 ),
-                child: const CfgText(
+                child: CfgText(
                   'store_documents_sheet.t02',
                   '🔌 החשבוניות והדוחות האמיתיים יחוברו עם חיבור השרת — '
                   'המסך מוכן ויתמלא אוטומטית.',
                   style: TextStyle(
-                    color: BsTokens.inkLight,
+                    color: bsInk(context),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     height: 1.3,
@@ -166,14 +167,14 @@ class _MonthRow extends StatelessWidget {
         child: Row(
           children: [
             // Decorative lock — the pill beside it carries the meaning.
-            const Icon(Icons.lock_outline,
-                size: 18, color: BsTokens.mutedLight),
+            Icon(Icons.lock_outline,
+                size: 18, color: bsMuted(context)),
             const SizedBox(width: BsTokens.space2),
             Expanded(
               child: Text(
                 '${_kHebMonths[month.month - 1]} ${month.year}',
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
+                style: TextStyle(
+                  color: bsInk(context),
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
@@ -186,14 +187,16 @@ class _MonthRow extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F3F5),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
+                    : const Color(0xFFF2F3F5),
                 borderRadius: BorderRadius.circular(BsTokens.radiusPill),
               ),
-              child: const CfgText(
+              child: CfgText(
                 'store_documents_sheet.t03',
                 'יחובר עם חיבור השרת',
                 style: TextStyle(
-                  color: BsTokens.mutedLight,
+                  color: bsMuted(context),
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                 ),

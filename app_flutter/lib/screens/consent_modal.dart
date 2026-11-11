@@ -14,6 +14,7 @@ import 'package:buildsmart/data/legal_texts.dart'
 import 'package:buildsmart/screens/legal_screen.dart' show LegalScreen, LegalTab;
 import 'package:buildsmart/state/app_settings.dart'
     show AppSettingsNotifier, appSettingsProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
@@ -103,11 +104,11 @@ class _ConsentDialog extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(BsTokens.radiusCard),
         ),
-        title: const CfgText(
+        title: CfgText(
           'consent_modal.t01',
           'שיפור השירות — נתוני שימוש',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: bsInk(context),
             fontWeight: FontWeight.w800,
             fontSize: BsTokens.typeSubhead,
           ),
@@ -119,14 +120,14 @@ class _ConsentDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CfgText(
+                CfgText(
                   'consent_modal.t02',
                   'כדי לשפר את השירות נוכל לאסוף נתוני שימוש מצומצמים ולא-מזהים. '
                   'ברירת-המחדל כבויה — שום נתון לא נשלח ללא הסכמתך. הנתונים נאספים '
                   'במכשירך, ומשודרים אלינו רק לאחר הסכמתך המדעת. ניתן למשוך את '
                   'ההסכמה ולחזור למצב הכבוי בכל עת בהגדרות › פרטיות.',
                   style: TextStyle(
-                    color: BsTokens.mutedLight,
+                    color: bsMuted(context),
                     fontSize: BsTokens.typeBody,
                     height: 1.6,
                   ),
@@ -141,8 +142,8 @@ class _ConsentDialog extends StatelessWidget {
                   ),
                   child: Text(
                     consentPolicyExcerpt(),
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
+                    style: TextStyle(
+                      color: bsMuted(context),
                       fontSize: BsTokens.typeMicro,
                       height: 1.6,
                     ),
@@ -178,7 +179,7 @@ class _ConsentDialog extends StatelessWidget {
             'consent_modal.t04',
             child: TextButton(
             onPressed: onDismiss,
-            style: TextButton.styleFrom(foregroundColor: BsTokens.mutedLight),
+            style: TextButton.styleFrom(foregroundColor: bsMuted(context)),
             child: const CfgText('consent_modal.t04', 'לא עכשיו'),
           ),
           ),

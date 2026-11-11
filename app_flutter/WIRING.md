@@ -4445,3 +4445,6 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave16 — 8 files theme-aware (2026-08-23)
 **גל 16:** 16 משטחים ב-alt_explain(2)·quote_polish(2)·coming_soon(2)·adapter_explain(2)·paired_explain(2)·daily_report(2)·credit_explain(2)·manager_screens(2) → theme. analyze 0 · אטלס 65→49. מצטבר dark-mode 659→49 (610 תוקנו).
+
+### #darkmode-wave17 — ink fix-up: טקסט קריא על המשטחים שכבר הוסבו (2026-11-11)
+**גל 17 (תיקון-המשך לגלים 15–16):** הגלים הקודמים הסבו את ה**משטחים** לתמה אך השאירו טקסט `BsTokens.inkLight`/`mutedLight` קשיח ⇒ בתמה כהה #1A1A1A על #141009 (~1.1:1, בלתי-נראה; אומת בצילום). נוספו `bsInk(context)`/`bsMuted(context)` ב-`lib/theme/app_theme.dart` (בהיר → זהה בדיוק לליטרל; כהה → inkDark/mutedDark, AA). נותבו דרכם 16 הקבצים של גלים 15–16 + `widgets/ai_result_states.dart` (`AiOffState`, משותף ל-6 מסכי-AI). מילויים בהירים קשיחים מתחת לטקסט (F5F5F7/F6F7F9/F2F3F5, unread FFF8F2) → `isDark ? surfaceContainerHighest : <ליטרל>` (בהיר זהה). הערות-שוליים `mutedDark` (נכשלו AA בבהיר ~2.5:1) → `bsMuted`. טסטים: `dark_ink_helpers_test` + `dark_ink_screens_test` (7 מסכים × 2 תמות, ניגודיות טקסט↔רקע-אב; היה אדום 7/7 בכהה לפני). analyze 0 errors.

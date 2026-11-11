@@ -6,6 +6,7 @@
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/state/auth_state.dart' show authStateProvider;
 import 'package:buildsmart/state/role_requests.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -103,14 +104,14 @@ class _RoleRequestSheetState extends ConsumerState<_RoleRequestSheet> {
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 19,
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                 ),
               ),
               const SizedBox(height: 2),
               CfgText(
                 'role_request_sheet.subtitle',
                 'בחר תפקיד — הבקשה תישלח לאישור הגורם המתאים',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                style: TextStyle(color: bsMuted(context), fontSize: 13),
               ),
               const SizedBox(height: BsTokens.space3),
               // WHO is asking, and on whose behalf. Signing in with Google hands
@@ -155,27 +156,29 @@ class _RequestingAs extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6F7F9),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : const Color(0xFFF6F7F9),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          const Icon(Icons.person_outline, size: 20, color: BsTokens.mutedLight),
+          Icon(Icons.person_outline, size: 20, color: bsMuted(context)),
           const SizedBox(width: BsTokens.space2),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'מבקש/ת בשם',
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 11),
+                  style: TextStyle(color: bsMuted(context), fontSize: 11),
                 ),
                 Text(
                   name.isNotEmpty ? name : contact,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -185,8 +188,8 @@ class _RequestingAs extends ConsumerWidget {
                     contact,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
+                    style: TextStyle(
+                      color: bsMuted(context),
                       fontSize: 12,
                     ),
                   ),
@@ -217,7 +220,9 @@ class _RoleRequestRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: BsTokens.space2),
       child: Material(
-        color: const Color(0xFFF5F5F7),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : const Color(0xFFF5F5F7),
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -249,16 +254,16 @@ class _RoleRequestRow extends StatelessWidget {
                     children: [
                       Text(
                         persona?.title ?? role,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
-                          color: BsTokens.inkLight,
+                          color: bsInk(context),
                         ),
                       ),
                       Text(
                         _kRoleDesc[role] ?? '',
-                        style: const TextStyle(
-                          color: BsTokens.mutedLight,
+                        style: TextStyle(
+                          color: bsMuted(context),
                           fontSize: 12.5,
                         ),
                       ),

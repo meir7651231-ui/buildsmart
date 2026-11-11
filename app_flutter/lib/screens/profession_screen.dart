@@ -1,6 +1,7 @@
 import 'package:buildsmart/screens/coming_soon_screen.dart';
 import 'package:buildsmart/state/onboarding_gate.dart';
 import 'package:buildsmart/state/user_profile.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/help_target.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -71,10 +72,10 @@ class ProfessionScreen extends ConsumerWidget {
                       child: TextButton.icon(
                         onPressed: () =>
                             ref.read(startupStepProvider.notifier).state = 0,
-                        icon: const Icon(Icons.chevron_right,
-                            color: BsTokens.mutedLight),
+                        icon: Icon(Icons.chevron_right,
+                            color: bsMuted(context)),
                         label: CfgText('profession_screen.t01', 'חזור',
-                            style: TextStyle(color: BsTokens.mutedLight)),
+                            style: TextStyle(color: bsMuted(context))),
                       ),
                     ),
                   ),
@@ -89,14 +90,14 @@ class ProfessionScreen extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
               CfgText(
                 'profession_screen.t03',
                 'נתאים לך את האפליקציה — קטלוג, כלים והמלצות לפי המקצוע',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 14),
+                style: TextStyle(color: bsMuted(context), fontSize: 14),
               ),
               const SizedBox(height: BsTokens.space5),
               // Only trades with real content are selectable (owner decision —
@@ -117,7 +118,7 @@ class ProfessionScreen extends ConsumerWidget {
                 'profession_screen.t04',
                 'תוכל לשנות את הבחירה בכל עת מההגדרות',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 12),
+                style: TextStyle(color: bsMuted(context), fontSize: 12),
               ),
             ],
           ),
@@ -162,24 +163,24 @@ class _TradeCard extends StatelessWidget {
                   children: [
                     Text(
                       trade.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       trade.desc,
-                      style: const TextStyle(
-                        color: BsTokens.mutedLight,
+                      style: TextStyle(
+                        color: bsMuted(context),
                         fontSize: 13,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+              Icon(Icons.chevron_left, color: bsMuted(context)),
             ],
           ),
         ),
