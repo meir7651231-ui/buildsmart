@@ -5,15 +5,16 @@
  *   display · notifications · region · delivery · about · security ·
  *   support · account · payment · reset
  *
- * Run from repo root:
+ * Run from repo root (override the browser with PW_CHROMIUM=/path/to/chrome):
  *   cd app && npm run build && cd ..
  *   npx http-server app/dist -p 8123 -s &
  *   node app/smoke-settings.mjs
  */
 import { chromium } from './node_modules/playwright/index.mjs';
+import { resolveChromium } from './smoke-chromium.mjs';
 
 const URL = 'http://localhost:8123/';
-const EXE = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const EXE = resolveChromium();
 
 let passed = 0, failed = 0;
 function ok(n)         { console.log(`  ✅ PASS  ${n}`); passed++; }
@@ -54,7 +55,8 @@ function stored(raw, ...keys) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: EXE });
+  const browser = await chromium.launch(EXE ? { executablePath: EXE } : {});
+  console.log(`  chromium: ${EXE ?? '(playwright default)'}`);
   const ctx = await browser.newContext({ viewport: { width: 414, height: 896 } });
   const page = await ctx.newPage();
   await page.goto(URL);
