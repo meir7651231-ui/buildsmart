@@ -4,7 +4,6 @@
 //   E · סריקה   — 4 kPlanTypes · scan→cart (cheapest offer, qty 1).
 // Pure logic + StateNotifier behaviour; sources noted to index.html line anchors.
 import 'package:buildsmart/data/contractor_seeds.dart';
-import 'package:buildsmart/data/phaseb_seeds.dart';
 import 'package:buildsmart/data/repositories/finance_local.dart'
     show LocalFinanceRepository;
 import 'package:buildsmart/screens/budget_screen.dart';

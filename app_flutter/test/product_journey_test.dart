@@ -4,7 +4,6 @@ import 'package:buildsmart/screens/catalog_screen.dart';
 import 'package:buildsmart/screens/departments_screen.dart';
 import 'package:buildsmart/screens/home_shell.dart';
 import 'package:buildsmart/screens/lipskey_product_sheet.dart';
-import 'package:buildsmart/screens/store_screen.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle, FontLoader;

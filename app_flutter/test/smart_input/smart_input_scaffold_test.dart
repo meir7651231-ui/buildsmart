@@ -14,7 +14,6 @@
 // The scaffold reads `featureFlagsProvider`, so every pump is inside a
 // ProviderScope; the RTL Directionality mirrors the real (Hebrew) call site.
 
-import 'package:buildsmart/state/feature_flags.dart';
 import 'package:buildsmart/widgets/smart_input/models.dart';
 import 'package:buildsmart/widgets/smart_input/smart_chip_strip.dart';
 import 'package:buildsmart/widgets/smart_input/smart_input_scaffold.dart';

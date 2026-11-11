@@ -38,7 +38,7 @@ void main() {
     expect(weatherDaysFromOpenMeteo(const {'daily': 'nope'}), isEmpty);
     expect(
       weatherDaysFromOpenMeteo(const {
-        'daily': {'time': [], 'weather_code': [], 'temperature_2m_max': []},
+        'daily': {'time': <dynamic>[], 'weather_code': <dynamic>[], 'temperature_2m_max': <dynamic>[]},
       }),
       isEmpty,
     );

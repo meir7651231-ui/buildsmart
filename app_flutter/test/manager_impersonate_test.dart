@@ -4,7 +4,6 @@
 //     its real employerId) and back, with isImpersonating tracking the state;
 //   • impersonate is a NO-OP unless the current session is a manager;
 //   • a store impersonation carries no employer link (a store has none).
-import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

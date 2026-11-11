@@ -40,7 +40,7 @@
 import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, kbDestinations;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
-    show KbToolNode, kbStoreNodes;
+    show kbStoreNodes;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbPredRow, KbRunByChip, KbUpdatesContext;
 import 'package:buildsmart/screens/store_screen.dart' show StoreSection;

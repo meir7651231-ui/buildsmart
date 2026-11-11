@@ -2159,8 +2159,8 @@ class _NameWords extends StatelessWidget {
         onTap: onAttrTap,
         isOpen: openKind == AttrKind.maker,
       );
-      if (afterSubtypeIdx != null && afterSubtypeIdx! <= chips.length) {
-        chips.insert(afterSubtypeIdx!, makerChip);
+      if (afterSubtypeIdx != null && afterSubtypeIdx <= chips.length) {
+        chips.insert(afterSubtypeIdx, makerChip);
       } else {
         chips.add(makerChip);
       }

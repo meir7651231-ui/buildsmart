@@ -69,7 +69,7 @@ void main() {
 
   testWidgets('SUCCESS — the model answer renders as the assistant bubble',
       (t) async {
-    final fake = await pump(t, _FakeGateway(reply: 'יש 4 הזמנות פתוחות'));
+    await pump(t, _FakeGateway(reply: 'יש 4 הזמנות פתוחות'));
     await t.tap(find.text(kChip));
     await drain(t);
     expect(find.text('יש 4 הזמנות פתוחות'), findsOneWidget);

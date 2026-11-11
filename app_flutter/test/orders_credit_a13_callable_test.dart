@@ -45,7 +45,6 @@ import 'package:buildsmart/data/repositories/customers_local.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
 import 'package:buildsmart/data/repositories/order_functions.dart';
 import 'package:buildsmart/data/repositories/orders_firebase.dart';
-import 'package:buildsmart/logic/manager_dashboard.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

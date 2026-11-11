@@ -1,4 +1,3 @@
-import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/screens/welcome_screen.dart';
 import 'package:buildsmart/screens/worker_profile_screen.dart'
     show workerIndexForSession;

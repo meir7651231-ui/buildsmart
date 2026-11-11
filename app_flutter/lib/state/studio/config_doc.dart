@@ -205,7 +205,7 @@ class ConfigDoc {
       published: ConfigLayer.fromJson(_asStrMap(m['published'])),
       draft: ConfigLayer.fromJson(_asStrMap(m['draft'])),
       history: rawHistory
-          .whereType<Map>()
+          .whereType<Map<dynamic, dynamic>>()
           .map((e) => ConfigVersion.fromJson(_asStrMap(e)))
           .take(kHistoryCap) // defensive cap even if a stored doc over-ran
           .toList(growable: false),

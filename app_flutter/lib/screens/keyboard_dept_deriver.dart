@@ -45,7 +45,7 @@ import 'package:buildsmart/screens/keyboard_destinations.dart'
     show KbDestination, companyDeptDestinations, kbDestinations;
 import 'package:buildsmart/state/app_profile.dart' show kProfileRawShell;
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
-    show KbToolNode, kbDeptNodes;
+    show kbDeptNodes;
 import 'package:buildsmart/screens/keyboard_updates_deriver.dart'
     show KbPredRow, KbUpdatesContext;
 import 'package:buildsmart/state/dept_location.dart';
