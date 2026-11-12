@@ -1096,10 +1096,9 @@ class _Dashboard extends ConsumerWidget {
         // Zero metrics fold into one calm line (still tappable).
         if (calm.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
             child: Wrap(
               spacing: 8,
-              runSpacing: 8,
               children: [
                 for (final x in calm)
                   Semantics(
@@ -1107,48 +1106,52 @@ class _Dashboard extends ConsumerWidget {
                     label: '${x.$3}: אין',
                     excludeSemantics: true,
                     onTap: x.$6,
+                    // The pill stays small; its tap area is 48 tall.
                     child: InkWell(
                       key: Key('kpi-${x.$1}'),
                       borderRadius: BorderRadius.circular(16),
                       onTap: x.$6,
-                      child: Container(
-                        padding: const EdgeInsetsDirectional.fromSTEB(
-                          8,
-                          6,
-                          12,
-                          6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: kMxLine),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 18,
-                              height: 18,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                color: kMxSage,
-                                shape: BoxShape.circle,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Container(
+                          padding: const EdgeInsetsDirectional.fromSTEB(
+                            8,
+                            6,
+                            12,
+                            6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: kMxLine),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 18,
+                                height: 18,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  color: kMxSage,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const MxIcon(
+                                  MxGlyphs.check,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: const MxIcon(
-                                MxGlyphs.check,
-                                size: 12,
-                                color: Colors.white,
+                              const SizedBox(width: 6),
+                              Text(
+                                'אין ${x.$3}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: kMxMuted,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'אין ${x.$3}',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: kMxMuted,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

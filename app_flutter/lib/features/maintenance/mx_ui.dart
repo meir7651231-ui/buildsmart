@@ -2092,45 +2092,53 @@ class MxRoleChip extends StatelessWidget {
     label: 'תפקיד: $label. החלפת תפקיד',
     excludeSemantics: true,
     onTap: onTap,
+    // The chip stays 36 tall; its tap area is 48 (min. touch target).
     child: _Pressable(
       onTap: onTap,
       child: Container(
-        height: 36,
-        padding: const EdgeInsetsDirectional.fromSTEB(4, 4, 10, 4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: kMxShadow,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: kMxPeach,
-              child: Text(
-                label.characters.first,
-                style: const TextStyle(
-                  color: kMxPrimary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                color: kMxPrimary,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(width: 2),
-            const Icon(Icons.expand_more_rounded, size: 18, color: kMxMuted),
-          ],
-        ),
+        height: 48,
+        alignment: Alignment.center,
+        color: Colors.transparent,
+        child: _roleChipFace(label),
       ),
+    ),
+  );
+
+  Widget _roleChipFace(String label) => Container(
+    height: 36,
+    padding: const EdgeInsetsDirectional.fromSTEB(4, 4, 10, 4),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      boxShadow: kMxShadow,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: kMxPeach,
+          child: Text(
+            label.characters.first,
+            style: const TextStyle(
+              color: kMxPrimary,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            color: kMxPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(width: 2),
+        const Icon(Icons.expand_more_rounded, size: 18, color: kMxMuted),
+      ],
     ),
   );
 }
