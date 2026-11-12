@@ -19,7 +19,7 @@ for ln in "${lines[@]}"; do
   p="$BASE/$f"
   if [ ! -f "$p" ]; then echo "FAIL missing-test-file : $f"; fail=1; continue; fi
   if [ -n "$name" ]; then
-    if grep -qF "$name" "$p"; then echo "OK   $f  (has: $name)"; else echo "FAIL name-absent : '$name' not in $f"; fail=1; fi
+    if grep -qF -e "$name" -- "$p"; then echo "OK   $f  (has: $name)"; else echo "FAIL name-absent : '$name' not in $f"; fail=1; fi
   else
     echo "OK   $f  (exists)"
   fi

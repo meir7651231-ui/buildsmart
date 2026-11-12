@@ -101,7 +101,9 @@ lib/data/product_images.dart:::defaultValue: kProfileImageBaseUrl
 #
 # Regression — STAGE-3.2 (2026-07-24): company identity routes through AppBrand (one file per company):
 lib/config/app_brand.dart:::: 'BuildSmart';
-lib/main.dart:::title: AppBrand.name
+# (2026-11-12, issue #67) was `title: AppBrand.name`. The MaterialApp title now routes through the org-term seam
+# with AppBrand.name as the fallback — the identity still comes from AppBrand; the rule pins the full `title:` line.
+lib/main.dart:::title: orgTerm(ref, 'brand.name', AppBrand.name),
 lib/data/related_info.dart:::AppBrand.shareDomain
 #
 # Regression — STAGE-3.3 St1+St2 (2026-07-24): org membership plumbing (inert until an admin assigns):
@@ -307,7 +309,10 @@ lib/screens/org_setup_wizard_screen.dart:::applyVerticalPack(_draft,
 lib/screens/org_setup_wizard_screen.dart:::מצב לא-חמוש
 lib/screens/org_setup_wizard_screen.dart:::קובץ לא-תקין — שום דבר לא יובא
 lib/screens/manager_dashboard_screen.dart:::if (kOrgConfigFlag)
-lib/screens/manager_dashboard_screen.dart:::OrgSetupWizardScreen.route()
+# (2026-11-12, issue #67) was `OrgSetupWizardScreen.route()` on the dashboard. The tile now pushes the two-phase
+# setup host (trade builder → org wizard); the wizard is still reached behind kOrgConfigFlag, one step later.
+lib/screens/manager_dashboard_screen.dart:::Navigator.of(context).push(SystemSetupHostScreen.route()),
+lib/screens/trade_builder/system_setup_host_screen.dart:::return const OrgSetupWizardScreen();
 #
 # Regression — GIANT-SYSTEM V6 (2026-07-26): the baked company lane + the plumbing channel:
 lib/config/org_config.dart:::const String kOrgCompanyJson = String.fromEnvironment('ORG_CONFIG_JSON');
@@ -315,8 +320,8 @@ lib/state/org_config_store.dart:::String? companyJson,
 lib/state/org_config_store.dart:::companyJson: companyJson,
 lib/state/org_config_store.dart:::ownerJson: rawValid ? raw : null,
 lib/main.dart:::companyJson: kOrgCompanyJson.isEmpty ? null : kOrgCompanyJson,
-.github/workflows/clean-two-links.yml:::channel: plumbing
-.github/workflows/clean-two-links.yml:::dart-define=ORG_CONFIG=true
+../.github/workflows/clean-two-links.yml:::channel: plumbing
+../.github/workflows/clean-two-links.yml:::dart-define=ORG_CONFIG=true
 test/app_profile_flags_test.dart:::'ORG_CONFIG_JSON',
 #
 # Regression — GIANT Phase-2 wave-1a (2026-07-26): attention engine — opt-in gate, ranked fan-in:
@@ -326,13 +331,18 @@ lib/state/org_gates.dart:::bool featEnabled(WidgetRef ref, String module, String
 lib/logic/attention_engine.dart:::List<AttentionItem> attentionItems(AttentionInput inp, {required OrgConfig cfg}) {
 lib/logic/attention_engine.dart:::...out.where((a) => a.sev == AttentionSev.crit),
 lib/state/attention_source.dart:::final attentionItemsProvider = Provider<List<AttentionItem>>((ref) {
-lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'attention')) const _AttentionCard(),
+# (2026-11-12, issue #67) was a one-line `if (featEnabled(…'attention')) const _AttentionCard(),`. The card is now a
+# manageable section: the same gate decides whether the section id enters `defaults`, and the card renders only via it.
+lib/screens/manager_dashboard_screen.dart:::if (featEnabled(ref, 'manager', 'attention'))
+lib/screens/manager_dashboard_screen.dart:::ManagerDashSection.attention => const [_AttentionCard()],
 #
 # Regression — GIANT Phase-2 wave-1b (2026-07-26): the workflow kernel (nameable 5-stage machine, pure):
 lib/logic/workflow_engine.dart:::enum WfStage { intake, prep, ready, dispatch, done }
 lib/logic/workflow_engine.dart:::WfAdvancePlan? planWfAdvance(OrgConfig cfg, String name, WfCase a) {
 lib/logic/workflow_engine.dart:::if (!a.dispatchPushed) {
-lib/logic/workflow_engine.dart:::String wfNormName(String s) => _normSearch(s).replaceAll(RegExp(r'\s'), '');
+# (2026-11-12, issue #67) was the inline `_normSearch(s).replaceAll(…)`; wave-2a moved it to the shared text core
+# (text_normalize.dart normName — asserted below), so the kernel delegates instead of duplicating.
+lib/logic/workflow_engine.dart:::String wfNormName(String s) => normName(s);
 lib/logic/workflow_engine.dart:::String wfStageLabel(OrgConfig cfg, WfStage s) =>
 #
 # Regression — GIANT Phase-2 wave-2a (2026-07-26): CRM shared core — ח"פ check-digit fix, phone/text normalize, fuzzy:
