@@ -39,7 +39,7 @@ import 'package:buildsmart/state/org_config_store.dart'
     show hydrateOrgConfig, orgConfigProvider;
 import 'package:buildsmart/state/org_gates.dart' show orgTerm;
 import 'package:buildsmart/state/push_routing.dart'
-    show afterThisFrame, pendingPushThreadProvider, threadIdFromLaunchUrl;
+    show afterThisFrame, pendingPushThreadProvider, takeLaunchThread;
 import 'package:buildsmart/state/push_state.dart';
 import 'package:buildsmart/state/screen_sections_live.dart'
     show screenSectionsLiveProvider;
@@ -557,13 +557,13 @@ class BuildSmartApp extends ConsumerWidget {
     // The web arm of the same tap. When no tab is open the service worker
     // cannot postMessage into a page that does not exist, so it launches one
     // with `?thread=` in the url; this is where that is picked up. Read ONCE
-    // from `Uri.base` — it is the launch url, not a stream — and parked in the
-    // same place the mobile tap parks it, so `ChatsScreen` has a single thing to
+    // from the launch url — it is not a stream, and this build re-runs on every
+    // settings change, so `takeLaunchThread` latches — and parked in the same
+    // place the mobile tap parks it, so `ChatsScreen` has a single thing to
     // consume regardless of which platform the notification came from.
     // Off web, `Uri.base` is a file uri with no query, so this is a no-op.
-    final launchThread = threadIdFromLaunchUrl(Uri.base.toString());
-    if (launchThread != null &&
-        ref.read(pendingPushThreadProvider) != launchThread) {
+    final launchThread = takeLaunchThread(ref.read);
+    if (launchThread != null) {
       // Assign outside the build phase: writing to a provider during build is
       // the release-only crash pattern already fixed once in this codebase.
       afterThisFrame(

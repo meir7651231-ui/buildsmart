@@ -736,10 +736,9 @@ final pushControllerProvider = Provider<PushController>((ref) {
     // then drops you on the catalog is a broken promise, not a feature.
     //
     // The id is PARKED rather than acted on: `ChatsScreen` may not exist yet
-    // (cold launch), and it opens conversations off a `ref.listen` that does not
-    // fire for a value set before it started listening. Parking, plus the
-    // read-on-arrival in that screen, is what covers both orders. See
-    // push_routing.dart.
+    // (signed out), or may already be mounted (the usual warm tap). That screen
+    // both listens for a parked id and takes one that was waiting when it
+    // mounted, which covers both orders. See push_routing.dart.
     onOpened: (message) {
       final threadId = threadIdFrom(message.data);
       if (threadId == null) return; // an order push is not a conversation
