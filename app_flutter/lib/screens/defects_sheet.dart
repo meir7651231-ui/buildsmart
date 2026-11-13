@@ -33,6 +33,7 @@ import 'package:buildsmart/screens/worker_profile_screen.dart'
 import 'package:buildsmart/screens/tasks_screen.dart' show authoringEmployerId;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart' show bsOnAccent;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -73,6 +74,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   // only one form is built per session). Owned by the State, disposed below.
   final TextEditingController _name = TextEditingController();
   final TextEditingController _location = TextEditingController();
+  final FocusNode _nameFocus = FocusNode();
 
   /// The picked severity, '' = unspecified (the honest default — no badge).
   String _severity = '';
@@ -81,6 +83,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   void dispose() {
     _name.dispose();
     _location.dispose();
+    _nameFocus.dispose();
     super.dispose();
   }
 
@@ -139,7 +142,12 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
           ),
           child: ListView(
             controller: scroll,
-            padding: const EdgeInsets.all(BsTokens.space4),
+            // + the bottom safe area, so the save button clears the home
+            // indicator / gesture bar.
+            padding: const EdgeInsets.all(BsTokens.space4).copyWith(
+              bottom:
+                  BsTokens.space4 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
             children: [
               Center(
                 child: Container(
@@ -233,6 +241,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                   location: _location,
                   severity: _severity,
                   nameError: _nameError,
+                  nameFocus: _nameFocus,
                   onNameChanged: _clearNameError,
                   onSeverity: (s) => setState(() => _severity = s),
                   onSave: _openDefect,
@@ -249,6 +258,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                   location: _location,
                   severity: _severity,
                   nameError: _nameError,
+                  nameFocus: _nameFocus,
                   onNameChanged: _clearNameError,
                   onSeverity: (s) => setState(() => _severity = s),
                   onSave: () => _reportDefect(session, workerIndex),
@@ -270,6 +280,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     final name = _name.text.trim();
     if (name.isEmpty) {
       setState(() => _nameError = true);
+      _nameFocus.requestFocus(); // brings the field (and its error) into view
       return;
     }
     ref.read(tasksProvider.notifier).createTask(
@@ -300,6 +311,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     final name = _name.text.trim();
     if (name.isEmpty) {
       setState(() => _nameError = true);
+      _nameFocus.requestFocus(); // brings the field (and its error) into view
       return;
     }
     if (workerIndex == null) return;
@@ -361,7 +373,12 @@ class _DefectRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: BsTokens.space2),
-              Flexible(
+              // Capped (not flex-shared) so a short status never takes half the
+              // row from the defect name; a long one ellipsises.
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * .4,
+                ),
                 child: Text(
                   kTaskStatusLabel[defect.status] ?? defect.status,
                   maxLines: 1,
@@ -398,7 +415,12 @@ class _DefectRow extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: BsTokens.brand.withValues(alpha: .14),
+                      // Lighter tint on light so the amber text keeps AA (≥4.5:1).
+                      color: BsTokens.brand.withValues(
+                        alpha: Theme.of(context).brightness == Brightness.dark
+                            ? .14
+                            : .08,
+                      ),
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     ),
                     child: Text(
@@ -436,6 +458,7 @@ class _AddDefectForm extends StatelessWidget {
     required this.location,
     required this.severity,
     required this.nameError,
+    required this.nameFocus,
     required this.onNameChanged,
     required this.onSeverity,
     required this.onSave,
@@ -451,6 +474,7 @@ class _AddDefectForm extends StatelessWidget {
   final TextEditingController location;
   final String severity;
   final bool nameError;
+  final FocusNode nameFocus;
   final ValueChanged<String> onNameChanged;
   final void Function(String) onSeverity;
   final VoidCallback onSave;
@@ -473,6 +497,7 @@ class _AddDefectForm extends StatelessWidget {
         TextField(
           key: ValueKey(nameKey),
           controller: name,
+          focusNode: nameFocus,
           textInputAction: TextInputAction.next,
           onChanged: onNameChanged,
           decoration: InputDecoration(
@@ -537,8 +562,9 @@ class _AddDefectForm extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   saveLabel,
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
+                  style: TextStyle(
+                    // white normally; dark ink in high-contrast mode
+                    color: bsOnAccent(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
@@ -571,11 +597,11 @@ class _SeverityChip extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: _chip(cs),
+      child: _chip(cs, bsOnAccent(context)),
     );
   }
 
-  Widget _chip(ColorScheme cs) {
+  Widget _chip(ColorScheme cs, Color onAccent) {
     return Material(
       color: selected ? BsTokens.brand : cs.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -588,13 +614,13 @@ class _SeverityChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             border: Border.all(
-              color: selected ? BsTokens.brand : cs.outlineVariant,
+              color: selected ? BsTokens.brand : cs.outline,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? const Color(0xFFFFFFFF) : cs.onSurface,
+              color: selected ? onAccent : cs.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 13.5,
             ),

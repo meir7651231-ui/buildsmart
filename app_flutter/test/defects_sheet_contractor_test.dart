@@ -12,6 +12,7 @@ import 'package:buildsmart/screens/defects_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:buildsmart/theme/app_theme.dart';
+import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -134,6 +135,10 @@ void main() {
     expect(find.byKey(const ValueKey('defect-open')), findsOneWidget,
         reason: 'the sheet stays open');
     expect(c.read(defectsProvider).length, before, reason: 'nothing was saved');
+    final nameField =
+        t.widget<TextField>(find.byKey(const ValueKey('defect-name')));
+    expect(nameField.focusNode?.hasFocus, isTrue,
+        reason: 'focus moves to the field that needs fixing');
 
     await t.enterText(find.byKey(const ValueKey('defect-name')), 'נ');
     await t.pump();
@@ -170,6 +175,38 @@ void main() {
       expect(contrast(colorOf(text)), greaterThanOrEqualTo(4.5),
           reason: '"$text" must be legible in dark mode');
     }
+  });
+
+  testWidgets(
+      'high-contrast: the save label and the selected severity chip use the '
+      'on-accent ink, not white on orange', (t) async {
+    final theme = AppTheme.light(highContrast: true);
+    await _boot(t, theme: theme);
+    await _open(t);
+    await t.ensureVisible(find.text('חמור'));
+    await t.tap(find.text('חמור'));
+    await t.pumpAndSettle();
+
+    double onBrand(Color fg) {
+      final a = fg.computeLuminance(), b = BsTokens.brand.computeLuminance();
+      final hi = a > b ? a : b, lo = a > b ? b : a;
+      return (hi + 0.05) / (lo + 0.05);
+    }
+
+    for (final text in ['פתח ליקוי', 'חמור']) {
+      final w = t.widget<Text>(find.text(text));
+      expect(onBrand(w.style!.color!), greaterThanOrEqualTo(4.5),
+          reason: '"$text" on the brand fill');
+    }
+  });
+
+  testWidgets('a short status does not take half the row from the defect name',
+      (t) async {
+    await _boot(t, size: const Size(360, 800));
+    await _open(t);
+    final row = t.getSize(find.text('סדק בקיר'));
+    expect(row.width, greaterThan(360 * .5),
+        reason: 'the name keeps the room the status does not need');
   });
 
   testWidgets('the sheet is lifted above the on-screen keyboard', (t) async {
