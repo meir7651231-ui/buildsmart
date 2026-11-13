@@ -17,6 +17,7 @@ import 'package:buildsmart/config/org_config.dart';
 import 'package:buildsmart/main.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/org_config_store.dart';
 import 'package:buildsmart/state/push_routing.dart';
 import 'package:buildsmart/state/sys_chat.dart';
@@ -184,6 +185,114 @@ void main() {
           (w) => w.runtimeType.toString() == '_ChatPage'));
       // ignore: avoid_dynamic_calls
       expect((page as dynamic).view.persona, BsRole.store);
+    });
+
+    testWidgets(
+        'a WORKER board covers the shell and its chats tab is not mounted: '
+        'the contractor list underneath leaves the tap for the board',
+        (t) async {
+      final c = await _pumpChats(t);
+      c.read(boardAuthProvider.notifier).enterDemo(BoardRole.worker);
+      final nav = t.state<NavigatorState>(find.byType(Navigator));
+      // The board, on a tab that is not its chats list.
+      unawaited(nav.push(MaterialPageRoute<void>(
+        builder: (_) => const Scaffold(body: Text('worker board · tasks tab')),
+      )));
+      await _settle(t);
+
+      c.read(pendingPushThreadProvider.notifier).state = 'th-contractor-worker';
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), 'th-contractor-worker',
+          reason: 'must NOT be opened as the contractor over the board');
+      expect(find.byWidgetPredicate(
+              (w) => w.runtimeType.toString() == '_ChatPage'),
+          findsNothing);
+
+      // The worker enters the board's chats: that list takes it, as a worker.
+      unawaited(nav.push(MaterialPageRoute<void>(
+        builder: (_) => const Directionality(
+          textDirection: TextDirection.rtl,
+          child: ChatsScreen(persona: BsRole.worker, audience: 'worker'),
+        ),
+      )));
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), isNull);
+    });
+
+    testWidgets(
+        'an id left parked under a board is taken by the shell list once it '
+        'is on top again', (t) async {
+      final c = await _pumpChats(t);
+      c.read(boardAuthProvider.notifier).enterDemo(BoardRole.worker);
+      final nav = t.state<NavigatorState>(find.byType(Navigator));
+      unawaited(nav.push(MaterialPageRoute<void>(
+        builder: (_) => const Scaffold(body: Text('cover')),
+      )));
+      await _settle(t);
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), _thread);
+
+      nav.pop(); // back to the main app
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), isNull);
+      expect(_chatIsOpen(t), isTrue);
+    });
+
+    testWidgets(
+        'the CONTRACTOR on some other main-app screen (no board session): '
+        'the tap opens the conversation right away', (t) async {
+      final c = await _pumpChats(t);
+      final nav = t.state<NavigatorState>(find.byType(Navigator));
+      unawaited(nav.push(MaterialPageRoute<void>(
+        builder: (_) => const Scaffold(body: Text('product page')),
+      )));
+      await _settle(t);
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), isNull);
+      expect(
+          find.byWidgetPredicate(
+              (w) => w.runtimeType.toString() == '_ChatPage'),
+          findsOneWidget);
+    });
+
+    testWidgets(
+        'a conversation opened by tapping its ROW is not stacked again by a '
+        'notification for it', (t) async {
+      final c = await _pumpChats(t);
+      await t.tap(find.byKey(const ValueKey(_thread)));
+      await _settle(t);
+      expect(_chatIsOpen(t), isTrue);
+
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), isNull);
+
+      final nav = t.state<NavigatorState>(find.byType(Navigator));
+      nav.pop();
+      await _settle(t);
+      expect(nav.canPop(), isFalse, reason: 'only one page for the thread');
+    });
+
+    testWidgets(
+        'while a tapped thread is still loading the user opens ANOTHER chat: '
+        'the late one is not pushed over it and no toast fires', (t) async {
+      final c = await _pumpChats(t);
+      c.read(pendingPushThreadProvider.notifier).state = 'late-thread';
+      await _settle(t);
+      expect(_chatIsOpen(t), isFalse);
+
+      await t.tap(find.byKey(const ValueKey(_thread))); // reads another chat
+      await _settle(t);
+      final pages = find.byWidgetPredicate(
+          (w) => w.runtimeType.toString() == '_ChatPage');
+      expect(pages, findsOneWidget);
+
+      await t.pump(const Duration(seconds: 9));
+      await t.pump();
+      expect(find.text('השיחה לא נמצאה'), findsNothing);
+      expect(pages, findsOneWidget);
     });
 
     testWidgets(

@@ -750,9 +750,6 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   /// the contractor underneath.
   static final List<_ChatsScreenState> _live = <_ChatsScreenState>[];
 
-  /// The conversation currently pushed by this screen (null = the list).
-  String? _openThreadId;
-
   /// A notification's thread that is not in the chat engine YET (a cold / web
   /// launch lands before the first server snapshot). Retried when the engine
   /// changes; given up — with a toast, never silently — by [_awaitTimer].
@@ -784,6 +781,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   /// and clears in one step, so exactly one screen opens it.
   void _takePendingPush() {
     if (!mounted || _live.isEmpty || _live.last != this) return;
+    // The home-shell list is mounted for the whole session, also underneath a
+    // role board. While a worker / courier / store board session is active and
+    // something covers the shell, the tap belongs to that board: leave the id
+    // parked — the board's own chats list takes it when it mounts, with the
+    // board's persona — and this list tries again once it is on top.
+    if (_inHomeShell && !_routeIsCurrent && _nonOwnerBoardSession) return;
     // Chat switched off for this org: leave the id for UpdatesScreen, which
     // answers it with the honest "chat is not active" toast.
     if (!moduleOn(ref.read(orgConfigProvider), 'chat')) return;
@@ -791,31 +794,49 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     if (id != null) unawaited(_openFromPush(id));
   }
 
+  bool get _routeIsCurrent => ModalRoute.of(context)?.isCurrent ?? true;
+
+  bool get _nonOwnerBoardSession {
+    final role = ref.read(boardAuthProvider)?.role;
+    return role != null && role != BoardRole.manager;
+  }
+
+  void _stopAwaiting() {
+    _awaitingThread = null;
+    _awaitTimer?.cancel();
+    _awaitTimer = null;
+  }
+
   /// How long a tapped notification waits for its conversation to load.
   static const Duration _pushThreadWait = Duration(seconds: 8);
 
   Future<void> _openFromPush(String id) async {
+    _stopAwaiting(); // a newer tap replaces an older one still waiting
     if (await _openChatById(id) || !mounted) return;
     // Not in the engine yet — wait for it rather than drop the tap.
     _awaitingThread = id;
-    _awaitTimer?.cancel();
     _awaitTimer = Timer(_pushThreadWait, () {
       if (!mounted || _awaitingThread == null) return;
-      _awaitingThread = null;
-      showGlobalToast('השיחה לא נמצאה');
+      // The user meanwhile opened another conversation: drop it quietly.
+      final movedOn = _ChatPageState._openThreads.isNotEmpty;
+      _stopAwaiting();
+      if (!movedOn) showGlobalToast('השיחה לא נמצאה');
     });
   }
 
   Future<void> _retryAwaitingThread() async {
     final id = _awaitingThread;
     if (id == null || _retrying) return;
+    // The user meanwhile opened another conversation — never push the awaited
+    // one over what they are reading.
+    if (_ChatPageState._openThreads.isNotEmpty) {
+      _stopAwaiting();
+      return;
+    }
     _retrying = true;
     try {
       final opened = await _openChatById(id);
-      if (opened && _awaitingThread == id) {
-        _awaitingThread = null;
-        _awaitTimer?.cancel();
-      }
+      if (opened && _awaitingThread == id) _stopAwaiting();
     } finally {
       _retrying = false;
     }
@@ -876,11 +897,10 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     if (!mounted) return false;
     // Already inside this conversation (a second notification for it, or a
     // double tap) — do not stack the same page twice.
-    if (_openThreadId == id) return true;
+    if (_ChatPageState._openThreads.contains(id)) return true;
     final threads = ref.read(chatEngineProvider);
     final match = threads.where((t) => t.id == id);
     if (match.isEmpty) return false; // deleted, or not loaded yet
-    _openThreadId = id;
     final lastRead = ref.read(chatLastReadProvider);
     final view = _viewOf(match.first, widget.persona, lastRead,
         uid: ref.read(currentUidProvider));
@@ -898,7 +918,6 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
           ),
         )
         .then((_) {
-          if (_openThreadId == id) _openThreadId = null;
           // On pop, return the keyboard to the chats-list state (idempotent — the
           // provider was already nulled on open).
           if (mounted) ref.read(updatesChatOpenProvider.notifier).state = null;
@@ -931,6 +950,9 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     ref.listen<String?>(pendingPushThreadProvider, (_, id) {
       if (id != null) _takePendingPush();
     });
+    // An id this list left parked while it was covered: `ModalRoute.of` makes
+    // this build re-run when the route becomes current again, so take it then.
+    if (_inHomeShell && _routeIsCurrent) afterThisFrame(_takePendingPush);
     // …and its conversation may not have loaded yet (first server snapshot
     // still on its way): retry when the thread list changes.
     ref.listen(chatEngineProvider, (_, __) {
@@ -1716,9 +1738,23 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
   BsRole get _persona => widget.view.persona;
   bool get _engineBacked => _threadId != null;
 
+  /// Thread ids of every conversation page currently on screen — however it
+  /// was opened (row tap, keyboard chip, notification). Lets a notification for
+  /// a conversation that is already showing be a no-op instead of stacking the
+  /// same page twice.
+  static final List<String> _openThreads = <String>[];
+
+  /// The id this page registered in [_openThreads] (null = unregistered).
+  String? _registeredThread;
+
   @override
   void initState() {
     super.initState();
+    final open = widget.view.threadId;
+    if (open != null) {
+      _registeredThread = open;
+      _openThreads.add(open);
+    }
     // Opening the chat marks it read (persisted lastReadAt → drives the real
     // unread badge). Deferred a microtask so the provider mutation doesn't
     // land mid-build during the route push.
@@ -2161,6 +2197,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
 
   @override
   void dispose() {
+    final open = _registeredThread;
+    if (open != null) _openThreads.remove(open);
     _controller.dispose();
     _focusNode.dispose();
     _scroll.dispose();
