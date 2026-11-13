@@ -22,6 +22,14 @@
 // then does nothing, which is worse than one that does not open it at all.
 // Hence a pending value that is READ on arrival and cleared by whoever consumes
 // it, rather than an event that must be caught mid-air.
+//
+// THE OTHER HALF OF THE TRAP. Read-on-arrival alone is just as lossy, because
+// the contractor's `ChatsScreen` is ALWAYS mounted (an `IndexedStack` child of
+// the home shell). For a signed-in user it already exists when the id lands —
+// a warm tap, a cold launch whose `getInitialMessage` resolves after the first
+// frame, a web launch parked after the first frame — and nothing rebuilds it.
+// So the screen does BOTH: it takes a value that was waiting when it mounted,
+// and it listens for one that arrives later. Whoever sees it first consumes it.
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +63,34 @@ String? threadIdFromLaunchUrl(String? url) {
   if (url == null || url.isEmpty) return null;
   final id = Uri.tryParse(url)?.queryParameters['thread']?.trim();
   return (id == null || id.isEmpty) ? null : id;
+}
+
+/// The url the app was launched with. A provider only so a test can stand in a
+/// `?thread=` launch; in the app it is `Uri.base`, which never changes.
+final launchUrlProvider = Provider<String>((_) => Uri.base.toString());
+
+/// Whether the launch url was already looked at (per ProviderScope, so every
+/// app boot — and every test — starts fresh).
+final _launchThreadTakenProvider = Provider<_Once>((_) => _Once());
+
+class _Once {
+  bool _done = false;
+
+  /// True the first time only.
+  bool take() => _done ? false : _done = true;
+}
+
+/// The `?thread=` of the launch url — the FIRST time this is called, and null
+/// ever after.
+///
+/// The launch url is a fact about how the page was opened, not a stream: it
+/// still carries `?thread=` an hour later. The caller sits in the root widget's
+/// `build`, which re-runs on every theme / language / text-size change, so
+/// without the latch each of those would park the already-opened conversation
+/// again and re-open it.
+String? takeLaunchThread(T Function<T>(ProviderListenable<T> provider) read) {
+  if (!read(_launchThreadTakenProvider).take()) return null;
+  return threadIdFromLaunchUrl(read(launchUrlProvider));
 }
 
 /// Hand a thread id to whoever opens conversations, from any entry point.

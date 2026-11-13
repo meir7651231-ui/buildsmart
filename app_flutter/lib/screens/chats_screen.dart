@@ -11,7 +11,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/chat_settings.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/push_routing.dart'
-    show afterThisFrame, consumePendingThread;
+    show afterThisFrame, consumePendingThread, pendingPushThreadProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/sys_chat.dart';
@@ -741,6 +741,26 @@ class ChatsScreen extends ConsumerStatefulWidget {
 class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   bool _headerVisible = true;
 
+  @override
+  void initState() {
+    super.initState();
+    // A tapped notification whose thread id was parked BEFORE this screen
+    // existed (signed-out → login, a board opened after the tap). `ref.listen`
+    // in build cannot see a value that was already there, so take it once the
+    // first frame is done — never during build: it clears a provider and
+    // pushes a route.
+    afterThisFrame(_takePendingPush);
+  }
+
+  /// Open the conversation a tapped notification asked for, if one is waiting.
+  /// `consumePendingThread` reads and clears in one step, so when more than one
+  /// `ChatsScreen` is mounted exactly one of them opens it.
+  void _takePendingPush() {
+    if (!mounted) return;
+    final id = consumePendingThread(ref);
+    if (id != null) unawaited(_openChatById(id));
+  }
+
   /// Inside the contractor home_shell tab — the only context that owns the
   /// shrinking-tab-header coordination ([tabHeaderHiddenProvider]).
   bool get _inHomeShell => widget.persona == BsRole.contractor;
@@ -832,19 +852,17 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     ref.listen<String?>(updatesChatOpenProvider, (_, id) {
       if (id != null) unawaited(_openChatById(id));
     });
-    // A TAPPED NOTIFICATION, which is the case the listener above cannot serve.
-    // `ref.listen` fires on a CHANGE, and every push route sets the thread id
-    // BEFORE this screen exists — a cold launch, a browser page opened fresh
-    // with `?thread=`, or a warm resume that sets the id and then navigates
-    // here. The listener would find the value already in place and never fire,
-    // so the notification would open the app and then sit on the wrong screen.
-    // Reading it on arrival is what closes that gap; `consumePendingThread`
-    // clears as it reads, so a later notification for the same conversation
-    // still re-opens it.
-    final fromPush = consumePendingThread(ref);
-    if (fromPush != null) {
-      afterThisFrame(() => unawaited(_openChatById(fromPush)));
-    }
+    // A TAPPED NOTIFICATION that lands while this screen is ALREADY mounted —
+    // the usual case: the contractor's ChatsScreen lives in the home shell's
+    // IndexedStack, so it exists long before a warm tap, a late cold-launch
+    // message or a web `?thread=` launch parks the id. Nothing rebuilds this
+    // screen when that happens, so a read-in-build never saw it (the chat then
+    // opened by itself at the next scroll). The value parked before mount is
+    // taken in initState; `consumePendingThread` clears as it reads, so a later
+    // notification for the same conversation still re-opens it.
+    ref.listen<String?>(pendingPushThreadProvider, (_, id) {
+      if (id != null) _takePendingPush();
+    });
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
