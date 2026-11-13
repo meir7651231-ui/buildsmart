@@ -4,8 +4,8 @@
 // the contractor/worker authoring rides the same createTask/proposeTask the
 // regular §6 tasks use). "ליקויים same as משימות" — a defect reuses the ENTIRE
 // task lifecycle, so this surface adds NO new approve/reject UI:
-//   • CONTRACTOR (the `manager`-role board that opens tasks_screen's
-//     _managerView) → "➕ פתח ליקוי" mints a `pending` defect (createTask,
+//   • CONTRACTOR (the main app — no board session; reached from ניהול אתר →
+//     🔧 רשימת ליקויים) → "➕ פתח ליקוי" mints a `pending` defect (createTask,
 //     kind:'defect') addressed to a worker — it lands in that worker's queue.
 //   • WORKER → "➕ דווח ליקוי" mints a `proposed` defect (proposeTask,
 //     kind:'defect') addressed to themselves — it flows through the SAME
@@ -17,7 +17,7 @@
 // is a ConsumerStatefulWidget because the add-form owns TextEditingControllers
 // (disposed with the State). HONEST by construction: only defects that exist are
 // listed; 🔧 מיקום / a severity badge appear only when non-empty (never an
-// invented place/severity); an empty name is a no-op (no toast).
+// invented place/severity); an empty name shows an inline error on the field.
 //
 // SCOPING mirrors the existing idioms: the contractor sees this employer's
 // defects (`d.employerId == kDemoContractorId`, the same scope
@@ -33,6 +33,7 @@ import 'package:buildsmart/screens/worker_profile_screen.dart'
 import 'package:buildsmart/screens/tasks_screen.dart' show authoringEmployerId;
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
+import 'package:buildsmart/theme/app_theme.dart' show bsOnAccent;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/toast.dart';
@@ -40,14 +41,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Open the shared ליקויים sheet — the wire target for the '🔧 ליקויים' entry on
-/// both tasks_screen (contractor) and worker_app_screen (worker). The role-aware
+/// both the site hub (contractor) and worker_app_screen (worker). The role-aware
 /// body decides what each persona can do (open vs report) and what they see.
 Future<void> showDefectsSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => const _DefectsSheet(),
+    // Lift the sheet above the on-screen keyboard — the add form sits at the
+    // bottom of the list and would otherwise be covered while typing.
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+      child: const _DefectsSheet(),
+    ),
   );
 }
 
@@ -68,6 +74,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   // only one form is built per session). Owned by the State, disposed below.
   final TextEditingController _name = TextEditingController();
   final TextEditingController _location = TextEditingController();
+  final FocusNode _nameFocus = FocusNode();
 
   /// The picked severity, '' = unspecified (the honest default — no badge).
   String _severity = '';
@@ -76,28 +83,39 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   void dispose() {
     _name.dispose();
     _location.dispose();
+    _nameFocus.dispose();
     super.dispose();
+  }
+
+  /// Save was tapped with an empty name — shown inline under the name field
+  /// (a toast would sit behind the sheet) and cleared on the next keystroke.
+  bool _nameError = false;
+
+  void _clearNameError(String _) {
+    if (_nameError) setState(() => _nameError = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(boardAuthProvider);
-    // The contractor board is the `manager`-role board that opens tasks_screen's
-    // _managerView (BuildSmart has no separate BoardRole.contractor — the
-    // contractor is the main app / the manager board here).
-    final isContractor = session?.role == BoardRole.manager;
+    // The contractor is the MAIN APP and never holds a BoardSession (BuildSmart
+    // has no BoardRole.contractor). So only a logged-in WORKER board gets the
+    // report variant; no session / manager / any other session is the employer
+    // view (mirrors tasks_gantt_sheet.dart).
+    final isContractor = session?.role != BoardRole.worker;
 
     // SCOPE the live defects to the acting persona (mirrors the existing
     // idioms): the contractor sees THIS employer's defects (the same
     // employerId == kDemoContractorId scope _contractorProposals uses); the
     // worker sees their OWN (the same `t.worker == <self index>` filter the
-    // worker board's `_bucket`/`mine` uses). null session → empty (honest).
+    // worker board's `_bucket`/`mine` uses).
     final defects = ref.watch(defectsProvider);
     final workerIndex = session == null ? null : workerIndexForSession(session);
+    final employerId = isContractor ? authoringEmployerId(ref) : '';
     final scoped = isContractor
         ? [
             for (final d in defects)
-              if (d.employerId == authoringEmployerId(ref) ||
+              if (d.employerId == employerId ||
                   d.employerId.isEmpty)
                 d
           ]
@@ -108,6 +126,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                 d
           ];
 
+    final cs = Theme.of(context).colorScheme;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -123,7 +142,12 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
           ),
           child: ListView(
             controller: scroll,
-            padding: const EdgeInsets.all(BsTokens.space4),
+            // + the bottom safe area, so the save button clears the home
+            // indicator / gesture bar.
+            padding: const EdgeInsets.all(BsTokens.space4).copyWith(
+              bottom:
+                  BsTokens.space4 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
             children: [
               Center(
                 child: Container(
@@ -131,7 +155,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: BsTokens.space3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDDDDDD),
+                    color: cs.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -139,12 +163,12 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               // Header row — title + a ✕ close (≥48dp tap target).
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: CfgText(
                       'defects_sheet.header',
                       '🔧 ליקויים',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: cs.onSurface,
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                       ),
@@ -159,39 +183,39 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                     ),
                     tooltip: 'סגור',
                     onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(Icons.close, color: BsTokens.mutedLight),
+                    icon: Icon(Icons.close, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
               const SizedBox(height: 2),
               Text(
                 isContractor
-                    ? 'פתח ליקוי ושייך אותו לעובד, ועקוב אחרי הליקויים הפתוחים.'
+                    ? 'פתח ליקוי ועקוב אחרי הליקויים הפתוחים.'
                     : 'דווח על ליקוי שמצאת — הוא יישלח לקבלן לאישור.',
-                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
               ),
               const SizedBox(height: BsTokens.space3),
 
               // ══ LIST — רשימת ליקויים ══
-              const CfgText(
+              CfgText(
                 'defects_sheet.list_title',
                 'רשימת ליקויים',
                 style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: cs.onSurface,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
               if (scoped.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
                   child: CfgText(
                     'defects_sheet.empty',
                     'אין ליקויים',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: BsTokens.inkLight,
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                     ),
@@ -216,8 +240,11 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                   name: _name,
                   location: _location,
                   severity: _severity,
+                  nameError: _nameError,
+                  nameFocus: _nameFocus,
+                  onNameChanged: _clearNameError,
                   onSeverity: (s) => setState(() => _severity = s),
-                  onSave: () => _openDefect(session),
+                  onSave: _openDefect,
                 )
               else
                 _AddDefectForm(
@@ -230,6 +257,9 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
                   name: _name,
                   location: _location,
                   severity: _severity,
+                  nameError: _nameError,
+                  nameFocus: _nameFocus,
+                  onNameChanged: _clearNameError,
                   onSeverity: (s) => setState(() => _severity = s),
                   onSave: () => _reportDefect(session, workerIndex),
                 ),
@@ -243,11 +273,16 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   /// CONTRACTOR "➕ פתח ליקוי" — mint a `pending` defect (createTask,
   /// kind:'defect') addressed to worker 0 (the default starting assignment —
   /// kept minimal per the wave scope; the contractor can reassign it from the
-  /// task board). It lands in that worker's queue. Guards an empty name (no-op,
-  /// no toast). Closes the sheet + honest toast.
-  void _openDefect(BoardSession? session) {
+  /// task board). It lands in that worker's queue. An empty name is rejected
+  /// with an inline error on the field (the sheet stays open). Closes the sheet
+  /// + honest toast.
+  void _openDefect() {
     final name = _name.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      setState(() => _nameError = true);
+      _nameFocus.requestFocus(); // brings the field (and its error) into view
+      return;
+    }
     ref.read(tasksProvider.notifier).createTask(
           name: name,
           kind: 'defect',
@@ -255,11 +290,8 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
           severity: _severity,
           // worker defaults to 0 (createTask's default) — the starting
           // assignment; the contractor can reassign from the task board.
-          // The contractor surface is the MANAGER-role board, whose session
-          // carries NO employerId — so stamp the demo contractor CONSTANT (the
-          // same kDemoContractorId the task author uses), NOT session.employerId
-          // (which is '' for a manager → the defect would vanish from the
-          // contractor's own employer-scoped list). SERVER-SWAP: real uid.
+          // The contractor has no board session (and a manager session carries
+          // NO employerId), so the employer is never read from the session.
           // Wave T3 (2c) — the real contractor uid ON, else the demo constant
           // (mirrors the task author sheet). A contractor-opened defect starts
           // unassigned; they reassign it (with the directory picker) from the board.
@@ -273,10 +305,16 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   /// kind:'defect') addressed to the reporter themselves (worker index + session
   /// uid), stamped with the employing contractor. It flows through the SAME Wave
   /// G1 proposal-approval block on the contractor's board (approveProposal).
-  /// Guards an empty name (no-op) and a missing worker index. Closes + toast.
+  /// An empty name is rejected with an inline error; a missing worker index is
+  /// a no-op. Closes + toast.
   void _reportDefect(BoardSession? session, int? workerIndex) {
     final name = _name.text.trim();
-    if (name.isEmpty || workerIndex == null) return;
+    if (name.isEmpty) {
+      setState(() => _nameError = true);
+      _nameFocus.requestFocus(); // brings the field (and its error) into view
+      return;
+    }
+    if (workerIndex == null) return;
     ref.read(tasksProvider.notifier).proposeTask(
           name: name,
           worker: workerIndex,
@@ -291,6 +329,13 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
   }
 }
 
+/// Accent text that stays readable on the sheet surface in both themes: dark
+/// amber on light (AA at small sizes), the brand orange on dark.
+Color _accentText(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.brand
+        : BsTokens.warnText;
+
 /// One defect row — name, 🔧 מיקום (only when non-empty), a severity badge (only
 /// when non-empty), and the live status label ([kTaskStatusLabel]). HONEST: a
 /// missing place/severity simply isn't rendered (no invented value).
@@ -303,12 +348,14 @@ class _DefectRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasLocation = defect.location.isNotEmpty;
     final hasSeverity = defect.severity.isNotEmpty;
+    final cs = Theme.of(context).colorScheme;
+    final accent = _accentText(context);
     return Container(
       padding: const EdgeInsets.all(BsTokens.space3),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEDEDED)),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,19 +365,29 @@ class _DefectRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   defect.name,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: cs.onSurface,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
                 ),
               ),
-              Text(
-                kTaskStatusLabel[defect.status] ?? '',
-                style: const TextStyle(
-                  color: BsTokens.brandDark,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.5,
+              const SizedBox(width: BsTokens.space2),
+              // Capped (not flex-shared) so a short status never takes half the
+              // row from the defect name; a long one ellipsises.
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * .4,
+                ),
+                child: Text(
+                  kTaskStatusLabel[defect.status] ?? defect.status,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: accent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12.5,
+                  ),
                 ),
               ),
             ],
@@ -343,8 +400,8 @@ class _DefectRow extends StatelessWidget {
                   Expanded(
                     child: Text(
                       '🔧 ${defect.location}',
-                      style: const TextStyle(
-                        color: BsTokens.mutedLight,
+                      style: TextStyle(
+                        color: cs.onSurfaceVariant,
                         fontSize: 12.5,
                       ),
                     ),
@@ -358,13 +415,18 @@ class _DefectRow extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF0E3),
+                      // Lighter tint on light so the amber text keeps AA (≥4.5:1).
+                      color: BsTokens.brand.withValues(
+                        alpha: Theme.of(context).brightness == Brightness.dark
+                            ? .14
+                            : .08,
+                      ),
                       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                     ),
                     child: Text(
                       '⚠️ ${defect.severity}',
-                      style: const TextStyle(
-                        color: BsTokens.brandDark,
+                      style: TextStyle(
+                        color: accent,
                         fontWeight: FontWeight.w700,
                         fontSize: 11.5,
                       ),
@@ -395,6 +457,9 @@ class _AddDefectForm extends StatelessWidget {
     required this.name,
     required this.location,
     required this.severity,
+    required this.nameError,
+    required this.nameFocus,
+    required this.onNameChanged,
     required this.onSeverity,
     required this.onSave,
   });
@@ -408,18 +473,22 @@ class _AddDefectForm extends StatelessWidget {
   final TextEditingController name;
   final TextEditingController location;
   final String severity;
+  final bool nameError;
+  final FocusNode nameFocus;
+  final ValueChanged<String> onNameChanged;
   final void Function(String) onSeverity;
   final VoidCallback onSave;
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: BsTokens.inkLight,
+          style: TextStyle(
+            color: cs.onSurface,
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -428,11 +497,14 @@ class _AddDefectForm extends StatelessWidget {
         TextField(
           key: ValueKey(nameKey),
           controller: name,
+          focusNode: nameFocus,
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
+          onChanged: onNameChanged,
+          decoration: InputDecoration(
             labelText: 'מה הליקוי',
             hintText: 'לדוגמה: נזילה מתחת לכיור',
-            border: OutlineInputBorder(),
+            errorText: nameError ? 'יש לכתוב מה הליקוי' : null,
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: BsTokens.space3),
@@ -447,11 +519,11 @@ class _AddDefectForm extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        const CfgText(
+        CfgText(
           'defects_sheet.severity',
           'חומרה',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: cs.onSurface,
             fontWeight: FontWeight.w700,
             fontSize: 13.5,
           ),
@@ -476,22 +548,26 @@ class _AddDefectForm extends StatelessWidget {
           ],
         ),
         const SizedBox(height: BsTokens.space4),
-        Material(
-          color: BsTokens.brand,
-          borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-          child: InkWell(
-            key: ValueKey(saveKey),
+        Semantics(
+          button: true,
+          child: Material(
+            color: BsTokens.brand,
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
-            onTap: onSave,
-            child: Container(
-              constraints: const BoxConstraints(minHeight: 48),
-              alignment: Alignment.center,
-              child: Text(
-                saveLabel,
-                style: const TextStyle(
-                  color: Color(0xFFFFFFFF),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
+            child: InkWell(
+              key: ValueKey(saveKey),
+              borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              onTap: onSave,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 48),
+                alignment: Alignment.center,
+                child: Text(
+                  saveLabel,
+                  style: TextStyle(
+                    // white normally; dark ink in high-contrast mode
+                    color: bsOnAccent(context),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
@@ -517,8 +593,17 @@ class _SeverityChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: _chip(cs, bsOnAccent(context)),
+    );
+  }
+
+  Widget _chip(ColorScheme cs, Color onAccent) {
     return Material(
-      color: selected ? BsTokens.brand : Theme.of(context).colorScheme.surface,
+      color: selected ? BsTokens.brand : cs.surface,
       borderRadius: BorderRadius.circular(BsTokens.radiusPill),
       child: InkWell(
         borderRadius: BorderRadius.circular(BsTokens.radiusPill),
@@ -529,13 +614,13 @@ class _SeverityChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(BsTokens.radiusPill),
             border: Border.all(
-              color: selected ? BsTokens.brand : const Color(0xFFDDDDDD),
+              color: selected ? BsTokens.brand : cs.outline,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? const Color(0xFFFFFFFF) : BsTokens.inkLight,
+              color: selected ? onAccent : cs.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 13.5,
             ),
