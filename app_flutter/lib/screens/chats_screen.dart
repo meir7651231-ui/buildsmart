@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:buildsmart/data/repositories/users_lookup.dart'
     show usersLookupProvider;
+import 'package:buildsmart/config/org_config.dart' show moduleOn;
 import 'package:buildsmart/screens/camera_sheet.dart';
 import 'package:buildsmart/screens/keyboard_tool_tree.dart'
     show KbToolNode, kbChatsArchiveNodes;
@@ -13,6 +14,7 @@ import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/push_routing.dart'
     show afterThisFrame, consumePendingThread, pendingPushThreadProvider;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
+import 'package:buildsmart/state/org_config_store.dart' show orgConfigProvider;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
 import 'package:buildsmart/state/sys_chat.dart';
 import 'package:buildsmart/state/under_construction.dart';
@@ -741,9 +743,27 @@ class ChatsScreen extends ConsumerStatefulWidget {
 class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   bool _headerVisible = true;
 
+  /// Every mounted chats list, oldest first. The contractor's lives in the home
+  /// shell for the whole session; a role board pushed over it mounts its own.
+  /// A tapped notification belongs to the one the user is actually in — the
+  /// LAST mounted — so the conversation opens with that board's persona, not as
+  /// the contractor underneath.
+  static final List<_ChatsScreenState> _live = <_ChatsScreenState>[];
+
+  /// The conversation currently pushed by this screen (null = the list).
+  String? _openThreadId;
+
+  /// A notification's thread that is not in the chat engine YET (a cold / web
+  /// launch lands before the first server snapshot). Retried when the engine
+  /// changes; given up — with a toast, never silently — by [_awaitTimer].
+  String? _awaitingThread;
+  Timer? _awaitTimer;
+  bool _retrying = false;
+
   @override
   void initState() {
     super.initState();
+    _live.add(this);
     // A tapped notification whose thread id was parked BEFORE this screen
     // existed (signed-out → login, a board opened after the tap). `ref.listen`
     // in build cannot see a value that was already there, so take it once the
@@ -752,13 +772,53 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     afterThisFrame(_takePendingPush);
   }
 
+  @override
+  void dispose() {
+    _live.remove(this);
+    _awaitTimer?.cancel();
+    super.dispose();
+  }
+
   /// Open the conversation a tapped notification asked for, if one is waiting.
-  /// `consumePendingThread` reads and clears in one step, so when more than one
-  /// `ChatsScreen` is mounted exactly one of them opens it.
+  /// Only the top-most chats list takes it, and `consumePendingThread` reads
+  /// and clears in one step, so exactly one screen opens it.
   void _takePendingPush() {
-    if (!mounted) return;
+    if (!mounted || _live.isEmpty || _live.last != this) return;
+    // Chat switched off for this org: leave the id for UpdatesScreen, which
+    // answers it with the honest "chat is not active" toast.
+    if (!moduleOn(ref.read(orgConfigProvider), 'chat')) return;
     final id = consumePendingThread(ref);
-    if (id != null) unawaited(_openChatById(id));
+    if (id != null) unawaited(_openFromPush(id));
+  }
+
+  /// How long a tapped notification waits for its conversation to load.
+  static const Duration _pushThreadWait = Duration(seconds: 8);
+
+  Future<void> _openFromPush(String id) async {
+    if (await _openChatById(id) || !mounted) return;
+    // Not in the engine yet — wait for it rather than drop the tap.
+    _awaitingThread = id;
+    _awaitTimer?.cancel();
+    _awaitTimer = Timer(_pushThreadWait, () {
+      if (!mounted || _awaitingThread == null) return;
+      _awaitingThread = null;
+      showGlobalToast('השיחה לא נמצאה');
+    });
+  }
+
+  Future<void> _retryAwaitingThread() async {
+    final id = _awaitingThread;
+    if (id == null || _retrying) return;
+    _retrying = true;
+    try {
+      final opened = await _openChatById(id);
+      if (opened && _awaitingThread == id) {
+        _awaitingThread = null;
+        _awaitTimer?.cancel();
+      }
+    } finally {
+      _retrying = false;
+    }
   }
 
   /// Inside the contractor home_shell tab — the only context that owns the
@@ -803,7 +863,9 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
   /// pop (defensive — it is already null). If the thread vanished between the
   /// chip render and the tap, we simply reset and stay on the list (edge-crash
   /// safety: no push for a missing thread).
-  Future<void> _openChatById(String id) async {
+  ///
+  /// Returns whether a conversation is now showing (pushed, or already open).
+  Future<bool> _openChatById(String id) async {
     // Null the trigger first so a second tap on the same conversation re-sets
     // it and re-fires — and so a vanished thread leaves no stale id behind.
     ref.read(updatesChatOpenProvider.notifier).state = null;
@@ -811,10 +873,14 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     // dm-<uids> thread with the counterpart, same as `_ThreadRow.onTap`; the id is
     // unchanged for the bot/dm/ambiguous/offline/signed-out cases.
     id = await rerouteThreadToDm(ref, id, widget.persona);
-    if (!mounted) return;
+    if (!mounted) return false;
+    // Already inside this conversation (a second notification for it, or a
+    // double tap) — do not stack the same page twice.
+    if (_openThreadId == id) return true;
     final threads = ref.read(chatEngineProvider);
     final match = threads.where((t) => t.id == id);
-    if (match.isEmpty) return; // thread deleted after the chip rendered
+    if (match.isEmpty) return false; // deleted, or not loaded yet
+    _openThreadId = id;
     final lastRead = ref.read(chatLastReadProvider);
     final view = _viewOf(match.first, widget.persona, lastRead,
         uid: ref.read(currentUidProvider));
@@ -832,10 +898,12 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
           ),
         )
         .then((_) {
+          if (_openThreadId == id) _openThreadId = null;
           // On pop, return the keyboard to the chats-list state (idempotent — the
           // provider was already nulled on open).
           if (mounted) ref.read(updatesChatOpenProvider.notifier).state = null;
         });
+    return true;
   }
 
   @override
@@ -862,6 +930,11 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
     // notification for the same conversation still re-opens it.
     ref.listen<String?>(pendingPushThreadProvider, (_, id) {
       if (id != null) _takePendingPush();
+    });
+    // …and its conversation may not have loaded yet (first server snapshot
+    // still on its way): retry when the thread list changes.
+    ref.listen(chatEngineProvider, (_, __) {
+      if (_awaitingThread != null) unawaited(_retryAwaitingThread());
     });
     final body = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

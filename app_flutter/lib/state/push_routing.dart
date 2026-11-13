@@ -29,7 +29,9 @@
 // a warm tap, a cold launch whose `getInitialMessage` resolves after the first
 // frame, a web launch parked after the first frame — and nothing rebuilds it.
 // So the screen does BOTH: it takes a value that was waiting when it mounted,
-// and it listens for one that arrives later. Whoever sees it first consumes it.
+// and it listens for one that arrives later. Only the top-most chats list
+// consumes it (a role board over the home shell opens it as that board), and a
+// thread that has not loaded yet is waited for, not dropped.
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,8 +39,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// A conversation a tapped notification asked for, waiting to be consumed.
 ///
 /// Set by every push entry point; cleared by the screen that opens the thread.
-/// It holds rather than fires precisely because the listener usually does not
-/// exist yet — see the note above.
+/// It holds rather than fires because the listener may not exist yet — see the
+/// note above.
 final pendingPushThreadProvider = StateProvider<String?>((_) => null);
 
 /// Pull a thread id out of a push payload.
@@ -66,7 +68,7 @@ String? threadIdFromLaunchUrl(String? url) {
 }
 
 /// The url the app was launched with. A provider only so a test can stand in a
-/// `?thread=` launch; in the app it is `Uri.base`, which never changes.
+/// `?thread=` launch; in the app it is `Uri.base` as first read (the launch).
 final launchUrlProvider = Provider<String>((_) => Uri.base.toString());
 
 /// Whether the launch url was already looked at (per ProviderScope, so every

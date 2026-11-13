@@ -11,10 +11,16 @@
 // The second half: the web launch url keeps `?thread=` for the whole session
 // and was re-read on every root rebuild, so once the screen really listens, an
 // unlatched read would re-open the same chat on every settings change.
+import 'dart:async';
+
+import 'package:buildsmart/config/org_config.dart';
 import 'package:buildsmart/main.dart';
 import 'package:buildsmart/screens/chats_screen.dart';
 import 'package:buildsmart/state/app_settings.dart';
+import 'package:buildsmart/state/org_config_store.dart';
 import 'package:buildsmart/state/push_routing.dart';
+import 'package:buildsmart/state/sys_chat.dart';
+import 'package:buildsmart/widgets/toast.dart' show bsMessengerKey;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,8 +46,9 @@ Future<ProviderContainer> _pumpChats(
   await t.pumpWidget(
     ProviderScope(
       overrides: overrides,
-      child: const MaterialApp(
-        home: Directionality(
+      child: MaterialApp(
+        scaffoldMessengerKey: bsMessengerKey,
+        home: const Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(body: ChatsScreen()),
         ),
@@ -99,14 +106,97 @@ void main() {
       expect(c.read(pendingPushThreadProvider), isNull);
     });
 
-    testWidgets('an unknown thread id is consumed and opens nothing',
+    testWidgets(
+        'a thread that never shows up ends in an honest toast, not in silence',
         (t) async {
       final c = await _pumpChats(t);
       c.read(pendingPushThreadProvider.notifier).state = 'no-such-thread';
       await _settle(t);
       expect(c.read(pendingPushThreadProvider), isNull);
       expect(_chatIsOpen(t), isFalse);
+      expect(find.text('השיחה לא נמצאה'), findsNothing, reason: 'still waiting');
+
+      await t.pump(const Duration(seconds: 8));
+      await t.pump();
+      expect(find.text('השיחה לא נמצאה'), findsOneWidget);
+      expect(_chatIsOpen(t), isFalse);
       expect(t.takeException(), isNull);
+      await t.pump(const Duration(seconds: 6)); // let the toast run out
+    });
+
+    testWidgets(
+        'the conversation is not loaded yet (cold / web launch): the tap '
+        'waits and opens it when the thread list arrives', (t) async {
+      final c = await _pumpChats(t);
+      final engine = c.read(chatEngineProvider.notifier);
+      // The live backend starts EMPTY until the first server snapshot.
+      // ignore: invalid_use_of_protected_member
+      engine.state = const [];
+      await _settle(t);
+
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(_chatIsOpen(t), isFalse);
+
+      engine.resetToSeed(); // the snapshot lands
+      await _settle(t);
+      expect(_chatIsOpen(t), isTrue,
+          reason: 'the tap must survive a slow first snapshot');
+
+      await t.pump(const Duration(seconds: 9));
+      expect(find.text('השיחה לא נמצאה'), findsNothing,
+          reason: 'opened — the give-up toast must not fire');
+    });
+
+    testWidgets('a second notification for the conversation already open '
+        'does not stack the same page twice', (t) async {
+      final c = await _pumpChats(t);
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), isNull);
+
+      final nav = t.state<NavigatorState>(find.byType(Navigator));
+      nav.pop();
+      await _settle(t);
+      expect(nav.canPop(), isFalse, reason: 'exactly one chat page was pushed');
+    });
+
+    testWidgets(
+        'with a role board on top, the BOARD opens the conversation — not '
+        'the contractor list underneath', (t) async {
+      final c = await _pumpChats(t);
+      final nav = t.state<NavigatorState>(find.byType(Navigator));
+      unawaited(nav.push(MaterialPageRoute<void>(
+        builder: (_) => const Directionality(
+          textDirection: TextDirection.rtl,
+          child: ChatsScreen(persona: BsRole.store, audience: 'store'),
+        ),
+      )));
+      await _settle(t);
+
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(c.read(pendingPushThreadProvider), isNull);
+
+      final page = t.widget(find.byWidgetPredicate(
+          (w) => w.runtimeType.toString() == '_ChatPage'));
+      // ignore: avoid_dynamic_calls
+      expect((page as dynamic).view.persona, BsRole.store);
+    });
+
+    testWidgets(
+        'chat switched OFF for the org: the id is left for the chat-off '
+        'consumer (UpdatesScreen), no conversation opens', (t) async {
+      final c = await _pumpChats(t, overrides: [
+        orgConfigProvider
+            .overrideWith((_) => const OrgConfig(modules: {'chat': false})),
+      ]);
+      c.read(pendingPushThreadProvider.notifier).state = _thread;
+      await _settle(t);
+      expect(_chatIsOpen(t), isFalse);
+      expect(c.read(pendingPushThreadProvider), _thread);
     });
   });
 
