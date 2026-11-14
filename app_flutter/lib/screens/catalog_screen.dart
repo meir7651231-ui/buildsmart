@@ -18,6 +18,8 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/_size_norm.dart'
+    show chipLabelDirection, inchLabelMm, prettyInch;
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
@@ -7212,7 +7214,9 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
                     return Padding(
                       padding: const EdgeInsetsDirectional.only(start: 4),
                       child: _FacetChip(
-                        label: e.key,
+                        // Display-only fold (P9/P12): the key stays the raw
+                        // atom ('11/2"'), the chip reads like the cards ('1½"').
+                        label: prettyInch(e.key),
                         count: e.value,
                         isSelected: selected.contains(key),
                         onTap: () => toggleAtom(active, e.key),
@@ -7378,7 +7382,15 @@ List<List<(String value, int count)>> _patternSubGroups() {
   return [for (final k in keys) by[k]!];
 }
 
+/// Test seam for the diameter-chip sort order.
+@visibleForTesting
+double diameterSortKey(String atom) => _diameterSortKey(atom);
+
 double _diameterSortKey(String atom) {
+  // Inch atoms by their real bore in mm ('11/2"' is 1½" = 38.1, not 11), so
+  // ½ ¾ 1 1¼ 1½ … sort in size order on the same scale as mm / DN atoms.
+  final inchMm = inchLabelMm(prettyInch(atom));
+  if (inchMm != null) return inchMm;
   final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(atom);
   if (m == null) return 9999;
   return double.tryParse(m.group(0)!) ?? 9999;
@@ -7427,23 +7439,37 @@ class _FacetChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label, style: TextStyle(color: isSelected ? const Color(0xFFCC6614) : cs.onSurface.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 11)),
-            const SizedBox(width: 3),
-            Text('$count', style: TextStyle(color: cs.onSurface.withOpacity(0.45), fontWeight: FontWeight.w600, fontSize: 9)),
-          ],
+    // a11y: one button node "label, count" with its selected state; 32px min
+    // height (was ~20px); count at 0.65 opacity (0.45 was below AA).
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: '$label, $count',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 32),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Digit labels (1½", DN50, 16×20) render LTR so the inch mark
+                // doesn't jump to the wrong side inside the RTL row.
+                Text(label, textDirection: chipLabelDirection(label), style: TextStyle(color: isSelected ? const Color(0xFFCC6614) : cs.onSurface.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 11)),
+                const SizedBox(width: 3),
+                Text('$count', style: TextStyle(color: cs.onSurface.withOpacity(0.65), fontWeight: FontWeight.w600, fontSize: 9)),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -4,6 +4,8 @@
 // Each glyph now maps to its full ASCII fraction, so the catalog's two
 // spellings of the SAME size merge while different sizes stay apart.
 import 'package:buildsmart/data/variant_families.dart';
+import 'package:buildsmart/screens/_size_norm.dart' show prettyInch;
+import 'package:buildsmart/screens/catalog_screen.dart' show diameterSortKey;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -28,6 +30,25 @@ void main() {
 
     test('× splits normalise each side', () {
       expect(sizeDiameterAtoms('16×½"').toSet(), {'16', '1/2"'});
+    });
+
+    test('chip labels read like the product cards (pretty fold)', () {
+      final atoms =
+          [
+            '¼"',
+            '¾"',
+            '1½"',
+            '11/2"',
+            '½"',
+            '1/2"',
+          ].expand(sizeDiameterAtoms).map(prettyInch).toSet();
+      expect(atoms, {'¼"', '¾"', '1½"', '½"'});
+    });
+
+    test('chips sort by real bore, not by the first digit run', () {
+      final atoms = ['11/2"', '1/2"', '3/4"', '1/4"', '1"', '21/2"', '11/4"']
+        ..sort((a, b) => diameterSortKey(a).compareTo(diameterSortKey(b)));
+      expect(atoms, ['1/4"', '1/2"', '3/4"', '1"', '11/4"', '11/2"', '21/2"']);
     });
   });
 }

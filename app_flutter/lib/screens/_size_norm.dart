@@ -102,6 +102,11 @@ const Map<String, double> _kInchMm = {
   '4"': 101.6, '6"': 152.4,
 };
 
+/// Millimetres for a PRETTY inch label (`1½"` → 38.1), or null when the label
+/// isn't a known inch size. Sorting only — e.g. the catalog diameter chips put
+/// inch and mm/DN atoms on one comparable scale.
+double? inchLabelMm(String prettyLabel) => _kInchMm[prettyLabel];
+
 /// Size tokens (NO angles — angle has its own regex/axis).
 /// Order of alternatives matters: longer / more-specific shapes first so the
 /// engine can't accidentally split "DN40" into "40" or "1½"" into two halves.
