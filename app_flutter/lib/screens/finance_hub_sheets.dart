@@ -108,7 +108,7 @@ void _showFinSheet(BuildContext context, {required Widget child}) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder:
-        (_) => Directionality(
+        (ctx) => Directionality(
           textDirection: TextDirection.rtl,
           child: SafeArea(
             top: false,
@@ -117,11 +117,13 @@ void _showFinSheet(BuildContext context, {required Widget child}) {
                 maxHeight: MediaQuery.of(context).size.height * 0.86,
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
+                // + keyboard inset so a sheet with a field (e.g. the FX
+                // converter) isn't hidden under the soft keyboard.
+                padding: EdgeInsets.fromLTRB(
                   BsTokens.space4,
                   BsTokens.space4,
                   BsTokens.space4,
-                  BsTokens.space5,
+                  BsTokens.space5 + MediaQuery.viewInsetsOf(ctx).bottom,
                 ),
                 child: child,
               ),
@@ -1639,18 +1641,30 @@ void _openFx(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFFFE0A3)),
             ),
-            child: const CfgText(
-              'finance_hub_sheets.fx_server_note',
-              '⚙️ שערי המט״ח מתעדכנים מהשרת — כאן מוצגים שערי דמו',
-              style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
-            ),
+            child: _fxRatesToShow().isEmpty
+                // Live backend / empty-seed profiles ship NO rates — the note
+                // must not promise demo rates that aren't there.
+                ? const CfgText(
+                    'finance_hub_sheets.fx_server_note_empty',
+                    '⚙️ שערי המט״ח יוצגו כאן כשיתעדכנו מהשרת',
+                    style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+                  )
+                : const CfgText(
+                    'finance_hub_sheets.fx_server_note',
+                    '⚙️ שערי המט״ח מתעדכנים מהשרת — כאן מוצגים שערי דמו',
+                    style: TextStyle(color: Color(0xFF8A6D00), fontSize: 12.5),
+                  ),
           ),
-          _FinRows([
-            for (final entry in _fxRatesToShow().entries)
-              _FinRow('1 ${entry.key}', '₪${entry.value.toStringAsFixed(2)}'),
-          ]),
-          const SizedBox(height: BsTokens.space4),
-          const _FxCalc(),
+          // No rates → no empty bordered table and no calculator that can only
+          // fail: the note above is the (honest) empty state.
+          if (_fxRatesToShow().isNotEmpty) ...[
+            _FinRows([
+              for (final entry in _fxRatesToShow().entries)
+                _FinRow('1 ${entry.key}', '₪${entry.value.toStringAsFixed(2)}'),
+            ]),
+            const SizedBox(height: BsTokens.space4),
+            const _FxCalc(),
+          ],
         ],
       ),
     ),
@@ -1659,28 +1673,56 @@ void _openFx(BuildContext context) {
 
 /// Group an integer with thousands commas (proto updateFXCalc toLocaleString).
 /// Top-level + public so `fx_group_test` can pin it directly.
-String fxGroupInt(int v) {
-  final neg = v < 0;
-  final d = v.abs().toString();
+String fxGroupInt(int v) =>
+    '${v < 0 ? '-' : ''}${_groupDigits(v.abs().toString())}';
+
+/// Comma-group a plain run of decimal digits ("1234567" → "1,234,567").
+String _groupDigits(String d) {
   final buf = StringBuffer();
   for (var i = 0; i < d.length; i++) {
     if (i > 0 && (d.length - i) % 3 == 0) buf.write(',');
     buf.write(d[i]);
   }
-  return '${neg ? '-' : ''}$buf';
+  return buf.toString();
 }
 
 /// Group the INTEGER PART of a possibly-fractional amount, preserving the
 /// fractional tail. Fractional inputs used to lose grouping entirely
 /// (`v.toString()` → "1234567.5"); now the integer part is grouped
 /// ("1,234,567.5") like the integer case.
+///
+/// Never throws: tiny values whose `toString()` is exponential ("1e-7") are
+/// written out in plain decimals, huge integers (beyond 64-bit) are grouped
+/// via [BigInt], and a non-finite value is returned as-is.
 String fxGroupAmount(double v) {
+  if (!v.isFinite) return v.toString();
   final abs = v.abs();
-  if (abs == abs.roundToDouble()) return fxGroupInt(v.round());
-  final s = abs.toString(); // e.g. "1234567.5"
+  final sign = v < 0 ? '-' : '';
+  final whole = _groupDigits(BigInt.from(abs).toString()); // truncates
+  if (abs == abs.truncateToDouble()) return '$sign$whole';
+  // A double with a fractional part is < 2^53, so toStringAsFixed is exact
+  // enough; it never uses exponent notation below 1e21.
+  var s = abs.toString();
+  if (s.contains('e')) {
+    s = abs.toStringAsFixed(20).replaceFirst(RegExp(r'\.?0+$'), '');
+  }
   final dot = s.indexOf('.');
-  final intPart = int.tryParse(s.substring(0, dot)) ?? 0;
-  return '${v < 0 ? '-' : ''}${fxGroupInt(intPart)}${s.substring(dot)}';
+  // Below ~5e-21 even 20 fixed digits are all zeros → just the integer part.
+  return dot < 0 ? '$sign$whole' : '$sign$whole${s.substring(dot)}';
+}
+
+/// The ₪ side of the converter, or null when it can't be honestly computed:
+/// no rate for [cur] (live backend / empty-seed profiles ship NO rates — the
+/// old `?? 1` fallback invented a 1:1 rate), an invalid amount, or a product
+/// too large to represent. Public so `fx_group_test` can pin it.
+String? fxConvertIls(double? amt, double? rate) {
+  if (rate == null || !rate.isFinite || rate <= 0) return null;
+  // Above 1e15 a double no longer holds whole agorot faithfully — the echo
+  // would print binary noise ("99,999,999,999,999,991,611,392"); refuse.
+  if (amt == null || !amt.isFinite || amt <= 0 || amt >= 1e15) return null;
+  final ils = amt * rate;
+  if (!ils.isFinite) return null;
+  return _groupDigits(BigInt.from(ils.roundToDouble()).toString());
 }
 
 class _FxCalc extends StatefulWidget {
@@ -1699,40 +1741,53 @@ class _FxCalcState extends State<_FxCalc> {
     super.dispose();
   }
 
-  String _result() {
+  /// The result line + whether it is the LTR equation ("1,000 USD = ₪3,720")
+  /// or an RTL Hebrew message (rendered in the sheet's own direction so
+  /// "ל-USD" doesn't scramble inside an LTR run).
+  ({String text, bool ltr}) _result() {
     // proto updateFXCalc: amt*rate (round), thousands-grouped. On the live
-    // backend the gated map is empty (no fabricated rate) → falls back to 1.
-    final amt = double.tryParse(_ctl.text.trim()) ?? 0;
-    final rate = _fxRatesToShow()[_cur] ?? 1;
-    final ils = (amt * rate).round();
-    return '${fxGroupAmount(amt)} $_cur = ₪${fxGroupInt(ils)}';
+    // backend the gated map is empty — no rate is shown rather than a
+    // fabricated 1:1; an invalid / overflowing amount shows a dash (the field
+    // already carries its own 'סכום לא תקין' error) instead of throwing.
+    final rate = _fxRatesToShow()[_cur];
+    if (rate == null) return (text: 'אין שער חליפין זמין ל-$_cur', ltr: false);
+    if (_ctl.text.trim().isEmpty) return (text: 'הזינו סכום להמרה', ltr: false);
+    final amt = double.tryParse(_ctl.text.trim());
+    final ils = fxConvertIls(amt, rate);
+    if (amt == null || ils == null) return (text: '—', ltr: true);
+    return (text: '${fxGroupAmount(amt)} $_cur = ₪$ils', ltr: true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final result = _result();
     return Container(
       padding: const EdgeInsets.all(BsTokens.space4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF6F7F9),
+        color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(cfgRadius(context)),
-        border: Border.all(color: const Color(0xFFE6E8EC)),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const CfgText(
+          CfgText(
             'finance_hub_sheets.convert_amount',
             'המרת סכום',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 12.5),
+            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12.5),
           ),
           const SizedBox(height: 6),
           TextField(
             controller: _ctl,
-            keyboardType: TextInputType.number,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
             textDirection: TextDirection.ltr,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              hintText: 'סכום',
+              // labelText (not hintText): the field is prefilled, so a hint
+              // never shows and the field had no accessible name.
+              labelText: 'סכום',
               // task #64: format-only check — must be a positive number.
               errorText: _ctl.text.trim().isEmpty ||
                       validPositiveAmount(double.tryParse(_ctl.text.trim()))
@@ -1791,13 +1846,16 @@ class _FxCalcState extends State<_FxCalc> {
             onChanged: (v) => setState(() => _cur = v ?? 'USD'),
           ),
           const SizedBox(height: BsTokens.space3),
-          Directionality(
-            textDirection: TextDirection.ltr,
+          Semantics(
+            liveRegion: true,
             child: Text(
-              _result(),
+              result.text,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: _kBrandTeal,
+              textDirection:
+                  result.ltr ? TextDirection.ltr : TextDirection.rtl,
+              // brand #F26B1D on this card was ~2.8:1 (< AA for 18px) — ink.
+              style: TextStyle(
+                color: cs.onSurface,
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
               ),
