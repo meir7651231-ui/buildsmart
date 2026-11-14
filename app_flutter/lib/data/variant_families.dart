@@ -176,11 +176,15 @@ String sizeStructurePattern(String size) {
 ///   "DN50"    → ["DN50"]
 ///   "200"     → ["200"]
 String _normAtom(String s) {
-  // Treat 1½" and 11/2" as the same atom for chip grouping
+  // Treat 1½" and 11/2" (and ½" and 1/2") as the same atom for chip grouping:
+  // each vulgar-fraction glyph becomes its full ASCII fraction, so the
+  // catalog's two spellings collapse while DIFFERENT sizes stay apart. The old
+  // mapping ('½'→'/2', '¼'/'¾'→'/4') merged ¼" with ¾" into one "/4" chip and
+  // 1½" with ½" ("1/2").
   return s
-      .replaceAll('½', '/2')
-      .replaceAll('¼', '/4')
-      .replaceAll('¾', '/4')
+      .replaceAll('½', '1/2')
+      .replaceAll('¼', '1/4')
+      .replaceAll('¾', '3/4')
       .trim();
 }
 
