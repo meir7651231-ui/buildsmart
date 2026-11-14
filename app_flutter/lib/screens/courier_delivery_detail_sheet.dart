@@ -64,15 +64,31 @@ void showCourierDeliveryDetailSheet(BuildContext context, String orderId) {
   _ => (bg: const Color(0xFFEFEFEF), fg: BsTokens.mutedLight),
 };
 
-class CourierDeliveryDetailSheet extends ConsumerWidget {
+class CourierDeliveryDetailSheet extends ConsumerStatefulWidget {
   const CourierDeliveryDetailSheet({required this.orderId, super.key});
   final String orderId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CourierDeliveryDetailSheet> createState() =>
+      _CourierDeliveryDetailSheetState();
+}
+
+class _CourierDeliveryDetailSheetState
+    extends ConsumerState<CourierDeliveryDetailSheet> {
+  /// True while an advance is awaiting (clock stamp / confirm dialog). The
+  /// action button is disabled + shows a spinner, so a fast second tap can't
+  /// re-enter with a stale snapshot.
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final orderId = widget.orderId;
     final orders = ref.watch(sysOrdersProvider);
     final idx = orders.indexWhere((o) => o.id == orderId);
     final order = idx >= 0 ? orders[idx] : null;
+    final cs = Theme.of(context).colorScheme;
+    final ink = cs.onSurface;
+    final muted = cs.onSurfaceVariant;
     if (order == null) {
       // אותו מצב-ריק כן כמו ב-PersonaPodSheet — ההזמנה כבר לא קיימת.
       return Padding(
@@ -88,8 +104,8 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             CfgText(
               'courier_delivery_detail_sheet.t01',
               'ההזמנה לא נמצאה',
-              style: const TextStyle(
-                color: BsTokens.inkLight,
+              style: TextStyle(
+                color: ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -99,7 +115,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
               'courier_delivery_detail_sheet.t02',
               'ייתכן שההזמנה הוסרה או שהמשלוח כבר נסגר — חזרו לרשימת המשלוחים',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
+              style: TextStyle(color: muted, fontSize: 13),
             ),
           ],
         ),
@@ -139,7 +155,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                 width: 38,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD8D8D8),
+                  color: cs.outlineVariant,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -152,8 +168,8 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     '📦 ${order.id}',
-                    style: const TextStyle(
-                      color: BsTokens.inkLight,
+                    style: TextStyle(
+                      color: ink,
                       fontWeight: FontWeight.w800,
                       fontSize: 19,
                     ),
@@ -197,8 +213,8 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             CfgText(
               'courier_delivery_detail_sheet.t03',
               'פריטי המשלוח',
-              style: const TextStyle(
-                color: BsTokens.inkLight,
+              style: TextStyle(
+                color: ink,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -217,7 +233,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                       vertical: BsTokens.space2,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
+                      color: cs.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(BsTokens.radiusCard),
                     ),
                     child: Row(
@@ -225,16 +241,16 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             l.name,
-                            style: const TextStyle(
-                              color: BsTokens.inkLight,
+                            style: TextStyle(
+                              color: ink,
                               fontSize: 13.5,
                             ),
                           ),
                         ),
                         Text(
                           '×${l.qty}',
-                          style: const TextStyle(
-                            color: BsTokens.mutedLight,
+                          style: TextStyle(
+                            color: muted,
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                           ),
@@ -250,8 +266,8 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             CfgText(
               'courier_delivery_detail_sheet.t04',
               'מסלול ההזמנה',
-              style: const TextStyle(
-                color: BsTokens.inkLight,
+              style: TextStyle(
+                color: ink,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -274,7 +290,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                             ? BsTokens.successDark
                             : i == curIdx
                             ? BsTokens.brand
-                            : const Color(0xFFBBBBBB),
+                            : cs.outline,
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -284,8 +300,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                       kOrderStageLabel[kOrderFlow[i]] ?? '',
                       style: TextStyle(
                         color: i == curIdx
-                            ? BsTokens.inkLight
-                            : BsTokens.mutedLight,
+                            ? ink : muted,
                         fontWeight: i == curIdx
                             ? FontWeight.w700
                             : FontWeight.w500,
@@ -299,32 +314,46 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             CfgText(
               'courier_delivery_detail_sheet.t05',
               'חותמות זמן לשלבים יחוברו עם חיבור השרת',
-              style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
+              style: TextStyle(
+                color: muted,
+                fontSize: 11.5,
+              ),
             ),
             const SizedBox(height: BsTokens.space4),
 
             // Shortcut: advance through the SAME shared two-step hand-off.
             if (actionLabel != null)
-              FilledButton(
-                onPressed: canAct ? () => _advance(context, ref, order) : null,
-                style: FilledButton.styleFrom(
-                  // F-34/F-28: white-on-#1F8A4C is 4.38:1 (< AA) → successDark;
-                  // foreground via bsOnAccent for high-contrast mode.
-                  backgroundColor: order.stage == OrderStage.transit
-                      ? BsTokens.brand
-                      : BsTokens.successDark,
-                  foregroundColor: bsOnAccent(context),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+              Semantics(
+                liveRegion: true,
+                child: FilledButton(
+                  onPressed: canAct && !_busy ? () => _advance(order) : null,
+                  style: FilledButton.styleFrom(
+                    // F-34/F-28: white-on-#1F8A4C is 4.38:1 (< AA) → successDark.
+                    // Transit used brand #F26B1D (white ≈3:1, < AA; brandDark is
+                    // still 3.9:1) — successDark (5.0:1) for both steps, matching
+                    // the "נמסר" confirm. Foreground via bsOnAccent (high-contrast).
+                    backgroundColor: BsTokens.successDark,
+                    foregroundColor: bsOnAccent(context),
+                    disabledBackgroundColor: cs.surfaceContainerHighest,
+                    disabledForegroundColor: muted,
+                    minimumSize: const Size.fromHeight(48),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(BsTokens.radiusPill),
+                    ),
                   ),
-                ),
-                child: Text(
-                  actionLabel,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
+                  child: _busy
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2.5),
+                        )
+                      : Text(
+                          actionLabel,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                          ),
+                        ),
                 ),
               )
             else if (order.stage == OrderStage.delivered)
@@ -338,7 +367,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
               onPressed: canPod ? () => showPodSheet(context, order.id) : null,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 11),
-                side: const BorderSide(color: Color(0xFFE0E0E0)),
+                side: BorderSide(color: cs.outlineVariant),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(BsTokens.radiusPill),
                 ),
@@ -347,7 +376,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                 'courier_delivery_detail_sheet.t06',
                 '📸 אישור מסירה (POD)',
                 style: TextStyle(
-                  color: canPod ? BsTokens.inkLight : BsTokens.mutedLight,
+                  color: canPod ? ink : muted,
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),
@@ -359,7 +388,10 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
                 'courier_delivery_detail_sheet.t07',
                 'POD זמין משלב האיסוף (כשההזמנה בידי השליח)',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: BsTokens.mutedLight, fontSize: 11.5),
+                style: TextStyle(
+                  color: muted,
+                  fontSize: 11.5,
+                ),
               ),
             ],
           ],
@@ -370,35 +402,25 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
 
   /// אותו advance משותף של הכרטיס; המעבר הסופי (transit→delivered) עובר דרך
   /// confirmDestructive כמו ב-PersonaPodSheet — פעולה סופית.
-  Future<void> _advance(
-    BuildContext context,
-    WidgetRef ref,
-    SysOrder order,
-  ) async {
+  Future<void> _advance(SysOrder order) async {
     // Staleness guard (same as the dashboard card, F-12): a fast double-tap
     // lands on a button whose closure still holds the OLD snapshot. Act only
     // while the live engine still agrees with the stage this button was built
     // on, and never re-enter while a previous tap is mid-flight.
-    if (!_isLive(ref, order) || !_inFlight.add(order.id)) return;
+    if (_busy || !_isLive(order)) return;
+    setState(() => _busy = true);
     try {
-      await _advanceOnce(context, ref, order);
+      await _advanceOnce(order);
     } finally {
-      _inFlight.remove(order.id);
+      if (mounted) setState(() => _busy = false);
     }
   }
 
-  /// Orders whose advance is currently awaiting (clock stamp / confirm dialog).
-  static final Set<String> _inFlight = <String>{};
-
-  static bool _isLive(WidgetRef ref, SysOrder order) => ref
+  bool _isLive(SysOrder order) => ref
       .read(sysOrdersProvider)
       .any((x) => x.id == order.id && x.stage == order.stage);
 
-  Future<void> _advanceOnce(
-    BuildContext context,
-    WidgetRef ref,
-    SysOrder order,
-  ) async {
+  Future<void> _advanceOnce(SysOrder order) async {
     final wasPickup = order.stage == OrderStage.pickup;
     final wasTransit = order.stage == OrderStage.transit;
     if (wasTransit) {
@@ -409,9 +431,9 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
         confirmLabel: 'נמסר',
         confirmColor: BsTokens.successDark,
       );
-      if (!ok || !context.mounted) return;
+      if (!ok || !mounted) return;
       // The dialog opened a second staleness window — re-verify.
-      if (!_isLive(ref, order)) return;
+      if (!_isLive(order)) return;
     }
     // #86.6 (F-1): ברגע המסירה — ייחוס per-שליח על רשומת ה-fulfillment.
     // נחתם רק כשסשן שליח מחובר; אחרת courierUser נשאר null בכנות.
@@ -431,18 +453,23 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
       delivered: wasTransit,
       repo: ref.read(courierClockRepositoryProvider),
     );
-    if (!context.mounted) return;
+    if (!mounted) return;
     ref
         .read(sysOrdersProvider.notifier)
         .courierAdvance(order.id, from: order.stage);
 
-    // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the courier
-    // dashboard card. Re-read to confirm the engine REALLY reached delivered
-    // (delivered is terminal + courierAdvance no-ops on it), so a no-op advance
-    // never pays out and the 🪙+🔔 pair can't double-fire for one order.
-    // stampCourier + clock already ran above — no double stamp; the bell fires
-    // only for a logged-in courier board session.
+    // Re-read: did the engine REALLY move it? (compare-and-set may no-op if
+    // another screen advanced it meanwhile.) Only a real move toasts / pays.
     final after = ref.read(sysOrdersProvider);
+    final moved = !after.any(
+      (x) => x.id == order.id && x.stage == order.stage,
+    );
+    if (!moved) return;
+
+    // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the courier
+    // dashboard card. delivered is terminal + courierAdvance no-ops on it, so
+    // the 🪙+🔔 pair can't double-fire for one order. The bell fires only for a
+    // logged-in courier board session.
     final delivered =
         wasTransit &&
         after.any((x) => x.id == order.id && x.stage == OrderStage.delivered);
@@ -467,7 +494,10 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
     padding: const EdgeInsets.only(bottom: BsTokens.space1),
     child: Text(
       text,
-      style: const TextStyle(color: BsTokens.inkLight, fontSize: 13.5),
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontSize: 13.5,
+      ),
     ),
   );
 }

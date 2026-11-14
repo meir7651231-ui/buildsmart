@@ -59,6 +59,11 @@ Future<ProviderContainer> _pump(WidgetTester tester, String stage) async {
   return container;
 }
 
+Future<void> _pumpDialog(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+}
+
 String _stage(ProviderContainer c) =>
     c.read(ordersEngineProvider).firstWhere((o) => o.id == _id).stage;
 
@@ -95,6 +100,34 @@ void main() {
     await tester.tap(find.text('📦 אספתי מהחנות'));
     await tester.pumpAndSettle();
     expect(_stage(c), 'transit');
+  });
+
+  testWidgets('transit: confirm "נמסר" delivers once; double-tap opens ONE '
+      'dialog', (tester) async {
+    final c = await _pump(tester, 'transit');
+    final btn = find.text('✅ נמסר ללקוח');
+    await tester.tap(btn);
+    await tester.tap(btn, warnIfMissed: false);
+    // The busy spinner animates while the dialog is open — no pumpAndSettle.
+    await _pumpDialog(tester);
+    expect(find.text('אישור מסירה?'), findsOneWidget);
+    await tester.tap(find.text('נמסר'));
+    await tester.pumpAndSettle();
+    expect(_stage(c), 'delivered');
+  });
+
+  testWidgets('transit: cancelling the dialog keeps transit and re-enables '
+      'the button', (tester) async {
+    final c = await _pump(tester, 'transit');
+    await tester.tap(find.text('✅ נמסר ללקוח'));
+    await _pumpDialog(tester);
+    await tester.tap(find.text('ביטול'));
+    await tester.pumpAndSettle();
+    expect(_stage(c), 'transit');
+    // Busy state released — the button is tappable again.
+    await tester.tap(find.text('✅ נמסר ללקוח'));
+    await _pumpDialog(tester);
+    expect(find.text('אישור מסירה?'), findsOneWidget);
   });
 
   group('courierAdvance(id, from:) — compare-and-set', () {
