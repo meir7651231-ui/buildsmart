@@ -7388,9 +7388,18 @@ double diameterSortKey(String atom) => _diameterSortKey(atom);
 
 double _diameterSortKey(String atom) {
   // Inch atoms by their real bore in mm ('11/2"' is 1½" = 38.1, not 11), so
-  // ½ ¾ 1 1¼ 1½ … sort in size order on the same scale as mm / DN atoms.
+  // ½ ¾ 1 1¼ 1½ … 8" 10" sort in size order on the same scale as mm / DN
+  // atoms. Atoms are ASCII (see _normAtom): [whole]num/den" or whole".
   final inchMm = inchLabelMm(prettyInch(atom));
   if (inchMm != null) return inchMm;
+  final frac = RegExp(r'^(\d*?)(\d)/(\d)["״]$').firstMatch(atom);
+  if (frac != null) {
+    final whole = int.tryParse(frac.group(1)!) ?? 0;
+    final den = int.parse(frac.group(3)!);
+    if (den > 0) return (whole + int.parse(frac.group(2)!) / den) * 25.4;
+  }
+  final wholeInch = RegExp(r'^(\d+(?:\.\d+)?)["״]$').firstMatch(atom);
+  if (wholeInch != null) return double.parse(wholeInch.group(1)!) * 25.4;
   final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(atom);
   if (m == null) return 9999;
   return double.tryParse(m.group(0)!) ?? 9999;

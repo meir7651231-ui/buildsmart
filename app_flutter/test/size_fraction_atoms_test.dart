@@ -46,9 +46,14 @@ void main() {
     });
 
     test('chips sort by real bore, not by the first digit run', () {
-      final atoms = ['11/2"', '1/2"', '3/4"', '1/4"', '1"', '21/2"', '11/4"']
-        ..sort((a, b) => diameterSortKey(a).compareTo(diameterSortKey(b)));
-      expect(atoms, ['1/4"', '1/2"', '3/4"', '1"', '11/4"', '11/2"', '21/2"']);
+      final atoms = [
+        '11/2"', '1/2"', '3/4"', '1/4"', '1"', '21/2"', '11/4"', //
+        '8"', '10"', '5"', '3/8"', '23/8"', '50', 'DN40',
+      ]..sort((a, b) => diameterSortKey(a).compareTo(diameterSortKey(b)));
+      expect(atoms, [
+        '1/4"', '3/8"', '1/2"', '3/4"', '1"', '11/4"', '11/2"', 'DN40', //
+        '50', '23/8"', '21/2"', '5"', '8"', '10"',
+      ]);
     });
   });
 }
