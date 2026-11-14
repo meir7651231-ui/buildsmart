@@ -1659,28 +1659,52 @@ void _openFx(BuildContext context) {
 
 /// Group an integer with thousands commas (proto updateFXCalc toLocaleString).
 /// Top-level + public so `fx_group_test` can pin it directly.
-String fxGroupInt(int v) {
-  final neg = v < 0;
-  final d = v.abs().toString();
+String fxGroupInt(int v) =>
+    '${v < 0 ? '-' : ''}${_groupDigits(v.abs().toString())}';
+
+/// Comma-group a plain run of decimal digits ("1234567" → "1,234,567").
+String _groupDigits(String d) {
   final buf = StringBuffer();
   for (var i = 0; i < d.length; i++) {
     if (i > 0 && (d.length - i) % 3 == 0) buf.write(',');
     buf.write(d[i]);
   }
-  return '${neg ? '-' : ''}$buf';
+  return buf.toString();
 }
 
 /// Group the INTEGER PART of a possibly-fractional amount, preserving the
 /// fractional tail. Fractional inputs used to lose grouping entirely
 /// (`v.toString()` → "1234567.5"); now the integer part is grouped
 /// ("1,234,567.5") like the integer case.
+///
+/// Never throws: tiny values whose `toString()` is exponential ("1e-7") are
+/// written out in plain decimals, huge integers (beyond 64-bit) are grouped
+/// via [BigInt], and a non-finite value is returned as-is.
 String fxGroupAmount(double v) {
+  if (!v.isFinite) return v.toString();
   final abs = v.abs();
-  if (abs == abs.roundToDouble()) return fxGroupInt(v.round());
-  final s = abs.toString(); // e.g. "1234567.5"
-  final dot = s.indexOf('.');
-  final intPart = int.tryParse(s.substring(0, dot)) ?? 0;
-  return '${v < 0 ? '-' : ''}${fxGroupInt(intPart)}${s.substring(dot)}';
+  final sign = v < 0 ? '-' : '';
+  final whole = _groupDigits(BigInt.from(abs).toString()); // truncates
+  if (abs == abs.truncateToDouble()) return '$sign$whole';
+  // A double with a fractional part is < 2^53, so toStringAsFixed is exact
+  // enough; it never uses exponent notation below 1e21.
+  var s = abs.toString();
+  if (s.contains('e')) {
+    s = abs.toStringAsFixed(20).replaceFirst(RegExp(r'0+$'), '');
+  }
+  return '$sign$whole${s.substring(s.indexOf('.'))}';
+}
+
+/// The ₪ side of the converter, or null when it can't be honestly computed:
+/// no rate for [cur] (live backend / empty-seed profiles ship NO rates — the
+/// old `?? 1` fallback invented a 1:1 rate), an invalid amount, or a product
+/// too large to represent. Public so `fx_group_test` can pin it.
+String? fxConvertIls(double? amt, double? rate) {
+  if (rate == null || !rate.isFinite || rate <= 0) return null;
+  if (amt == null || !amt.isFinite || amt <= 0) return null;
+  final ils = amt * rate;
+  if (!ils.isFinite) return null;
+  return _groupDigits(BigInt.from(ils.roundToDouble()).toString());
 }
 
 class _FxCalc extends StatefulWidget {
@@ -1701,11 +1725,15 @@ class _FxCalcState extends State<_FxCalc> {
 
   String _result() {
     // proto updateFXCalc: amt*rate (round), thousands-grouped. On the live
-    // backend the gated map is empty (no fabricated rate) → falls back to 1.
-    final amt = double.tryParse(_ctl.text.trim()) ?? 0;
-    final rate = _fxRatesToShow()[_cur] ?? 1;
-    final ils = (amt * rate).round();
-    return '${fxGroupAmount(amt)} $_cur = ₪${fxGroupInt(ils)}';
+    // backend the gated map is empty — no rate is shown rather than a
+    // fabricated 1:1; an invalid / overflowing amount shows a dash (the field
+    // already carries its own 'סכום לא תקין' error) instead of throwing.
+    final rate = _fxRatesToShow()[_cur];
+    if (rate == null) return 'אין שער חליפין זמין ל-$_cur';
+    final amt = double.tryParse(_ctl.text.trim());
+    final ils = fxConvertIls(amt, rate);
+    if (amt == null || ils == null) return '—';
+    return '${fxGroupAmount(amt)} $_cur = ₪$ils';
   }
 
   @override
