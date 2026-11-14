@@ -375,6 +375,30 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
     WidgetRef ref,
     SysOrder order,
   ) async {
+    // Staleness guard (same as the dashboard card, F-12): a fast double-tap
+    // lands on a button whose closure still holds the OLD snapshot. Act only
+    // while the live engine still agrees with the stage this button was built
+    // on, and never re-enter while a previous tap is mid-flight.
+    if (!_isLive(ref, order) || !_inFlight.add(order.id)) return;
+    try {
+      await _advanceOnce(context, ref, order);
+    } finally {
+      _inFlight.remove(order.id);
+    }
+  }
+
+  /// Orders whose advance is currently awaiting (clock stamp / confirm dialog).
+  static final Set<String> _inFlight = <String>{};
+
+  static bool _isLive(WidgetRef ref, SysOrder order) => ref
+      .read(sysOrdersProvider)
+      .any((x) => x.id == order.id && x.stage == order.stage);
+
+  Future<void> _advanceOnce(
+    BuildContext context,
+    WidgetRef ref,
+    SysOrder order,
+  ) async {
     final wasPickup = order.stage == OrderStage.pickup;
     final wasTransit = order.stage == OrderStage.transit;
     if (wasTransit) {
@@ -386,6 +410,8 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
         confirmColor: BsTokens.successDark,
       );
       if (!ok || !context.mounted) return;
+      // The dialog opened a second staleness window — re-verify.
+      if (!_isLive(ref, order)) return;
     }
     // #86.6 (F-1): ברגע המסירה — ייחוס per-שליח על רשומת ה-fulfillment.
     // נחתם רק כשסשן שליח מחובר; אחרת courierUser נשאר null בכנות.
@@ -406,7 +432,9 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
       repo: ref.read(courierClockRepositoryProvider),
     );
     if (!context.mounted) return;
-    ref.read(sysOrdersProvider.notifier).courierAdvance(order.id);
+    ref
+        .read(sysOrdersProvider.notifier)
+        .courierAdvance(order.id, from: order.stage);
 
     // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the courier
     // dashboard card. Re-read to confirm the engine REALLY reached delivered

@@ -112,9 +112,15 @@ class SysOrdersNotifier extends StateNotifier<List<SysOrder>> {
   /// Courier-owned advance: pickup→transit→delivered. The courier confirms
   /// receipt of the handed-off order at `pickup`, then delivers. No-op on `ready`
   /// (the store owns the hand-off — two-step). Delegates to the shared engine.
-  void courierAdvance(String id) {
+  ///
+  /// [from] — optional expected stage (compare-and-set). When given, the
+  /// advance is a no-op unless the live order is STILL at that stage, so a
+  /// double-tap on a button built from a stale snapshot can never skip a step
+  /// (pickup → transit → delivered with no POD confirmation).
+  void courierAdvance(String id, {OrderStage? from}) {
     final o = _orderById(id);
     if (o == null) return;
+    if (from != null && _stageFromFlow(o.stage) != from) return;
     if (o.stage == 'pickup' || o.stage == 'transit') {
       // A4 — the courier analogue of the store claim in [storeAdvance]: the
       // first courier party to advance the order CLAIMS it (`courierUid`),
