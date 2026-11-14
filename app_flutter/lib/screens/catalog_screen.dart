@@ -18,6 +18,8 @@ import 'package:buildsmart/data/repositories/claude_functions.dart'
 import 'package:buildsmart/data/line_score.dart';
 import 'package:buildsmart/data/score_band.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
+import 'package:buildsmart/screens/_size_norm.dart'
+    show chipLabelDirection, inchLabelMm, prettyInch;
 import 'package:buildsmart/data/lipskey_verified_connections.dart';
 import 'package:buildsmart/data/related_info.dart';
 import 'package:buildsmart/data/search_index.dart';
@@ -7136,17 +7138,7 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
     final active = ref.watch(variantsActiveSubGroupProvider);
     final selected = ref.watch(variantsSizeDiameterProvider);
 
-    // Build material → (atom → count) for products in size families.
-    final perMat = <String, Map<String, int>>{};
-    for (final fam in familiesByKind(AttrKind.size)) {
-      for (final p in fam.products) {
-        final mat = productMaterial(p);
-        final byAtom = perMat.putIfAbsent(mat, () => <String, int>{});
-        for (final a in sizeDiameterAtoms(variantValue(p, AttrKind.size))) {
-          byAtom[a] = (byAtom[a] ?? 0) + 1;
-        }
-      }
-    }
+    final perMat = _diameterAtomsPerMaterial();
     final materials = perMat.entries.toList()
       ..sort((a, b) {
         final ta = a.value.values.fold<int>(0, (s, v) => s + v);
@@ -7188,9 +7180,12 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
           const SizedBox(height: 6),
           () {
             // L13-A: hoist sort once — used for both .length and item access.
+            // Sort keys computed once per atom, not per comparison.
+            final keyOf = {
+              for (final a in perMat[active]!.keys) a: _diameterSortKey(a),
+            };
             final sorted = perMat[active]!.entries.toList()
-              ..sort((a, b) =>
-                  _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
+              ..sort((a, b) => keyOf[a.key]!.compareTo(keyOf[b.key]!));
             return Wrap(
               spacing: 0,
               runSpacing: 4,
@@ -7212,7 +7207,9 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
                     return Padding(
                       padding: const EdgeInsetsDirectional.only(start: 4),
                       child: _FacetChip(
-                        label: e.key,
+                        // Display-only fold (P9/P12): the key stays the raw
+                        // atom ('11/2"'), the chip reads like the cards ('1½"').
+                        label: prettyInch(e.key),
                         count: e.value,
                         isSelected: selected.contains(key),
                         onTap: () => toggleAtom(active, e.key),
@@ -7378,7 +7375,48 @@ List<List<(String value, int count)>> _patternSubGroups() {
   return [for (final k in keys) by[k]!];
 }
 
+// material → (atom → count) for products in size families. The catalog is
+// static, so this is built once per families list (allVariantFamilies() is
+// itself cached) instead of re-running the regex scan on every chip toggle.
+List<VariantFamily>? _perMatSrc;
+Map<String, Map<String, int>> _perMatCache = const {};
+
+Map<String, Map<String, int>> _diameterAtomsPerMaterial() {
+  final all = allVariantFamilies();
+  if (identical(all, _perMatSrc)) return _perMatCache;
+  final perMat = <String, Map<String, int>>{};
+  for (final fam in all) {
+    if (fam.kind != AttrKind.size) continue;
+    for (final p in fam.products) {
+      final mat = productMaterial(p);
+      final byAtom = perMat.putIfAbsent(mat, () => <String, int>{});
+      for (final a in sizeDiameterAtoms(variantValue(p, AttrKind.size))) {
+        byAtom[a] = (byAtom[a] ?? 0) + 1;
+      }
+    }
+  }
+  _perMatSrc = all;
+  return _perMatCache = perMat;
+}
+
+/// Test seam for the diameter-chip sort order.
+@visibleForTesting
+double diameterSortKey(String atom) => _diameterSortKey(atom);
+
 double _diameterSortKey(String atom) {
+  // Inch atoms by their real bore in mm ('11/2"' is 1½" = 38.1, not 11), so
+  // ½ ¾ 1 1¼ 1½ … 8" 10" sort in size order on the same scale as mm / DN
+  // atoms. Atoms are ASCII (see _normAtom): [whole]num/den" or whole".
+  final inchMm = inchLabelMm(prettyInch(atom));
+  if (inchMm != null) return inchMm;
+  final frac = RegExp(r'^(\d*?)(\d)/(\d)["״]$').firstMatch(atom);
+  if (frac != null) {
+    final whole = int.tryParse(frac.group(1)!) ?? 0;
+    final den = int.parse(frac.group(3)!);
+    if (den > 0) return (whole + int.parse(frac.group(2)!) / den) * 25.4;
+  }
+  final wholeInch = RegExp(r'^(\d+(?:\.\d+)?)["״]$').firstMatch(atom);
+  if (wholeInch != null) return double.parse(wholeInch.group(1)!) * 25.4;
   final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(atom);
   if (m == null) return 9999;
   return double.tryParse(m.group(0)!) ?? 9999;
@@ -7427,23 +7465,37 @@ class _FacetChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(label, style: TextStyle(color: isSelected ? const Color(0xFFCC6614) : cs.onSurface.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 11)),
-            const SizedBox(width: 3),
-            Text('$count', style: TextStyle(color: cs.onSurface.withOpacity(0.45), fontWeight: FontWeight.w600, fontSize: 9)),
-          ],
+    // a11y: one button node "label, count" with its selected state; 32px min
+    // height (was ~20px); count at 0.65 opacity (0.45 was below AA).
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: '$label, $count',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 32),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0x22FF7A18) : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isSelected ? BsTokens.brand : cs.outline.withOpacity(0.25), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Digit labels (1½", DN50, 16×20) render LTR so the inch mark
+                // doesn't jump to the wrong side inside the RTL row.
+                Text(label, textDirection: chipLabelDirection(label), style: TextStyle(color: isSelected ? const Color(0xFFCC6614) : cs.onSurface.withOpacity(0.8), fontWeight: FontWeight.w600, fontSize: 11)),
+                const SizedBox(width: 3),
+                Text('$count', style: TextStyle(color: cs.onSurface.withOpacity(0.65), fontWeight: FontWeight.w600, fontSize: 9)),
+              ],
+            ),
+          ),
         ),
       ),
     );
