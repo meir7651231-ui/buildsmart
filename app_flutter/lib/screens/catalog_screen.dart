@@ -7138,17 +7138,7 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
     final active = ref.watch(variantsActiveSubGroupProvider);
     final selected = ref.watch(variantsSizeDiameterProvider);
 
-    // Build material → (atom → count) for products in size families.
-    final perMat = <String, Map<String, int>>{};
-    for (final fam in familiesByKind(AttrKind.size)) {
-      for (final p in fam.products) {
-        final mat = productMaterial(p);
-        final byAtom = perMat.putIfAbsent(mat, () => <String, int>{});
-        for (final a in sizeDiameterAtoms(variantValue(p, AttrKind.size))) {
-          byAtom[a] = (byAtom[a] ?? 0) + 1;
-        }
-      }
-    }
+    final perMat = _diameterAtomsPerMaterial();
     final materials = perMat.entries.toList()
       ..sort((a, b) {
         final ta = a.value.values.fold<int>(0, (s, v) => s + v);
@@ -7190,9 +7180,12 @@ class _MaterialDiameterBrowser extends ConsumerWidget {
           const SizedBox(height: 6),
           () {
             // L13-A: hoist sort once — used for both .length and item access.
+            // Sort keys computed once per atom, not per comparison.
+            final keyOf = {
+              for (final a in perMat[active]!.keys) a: _diameterSortKey(a),
+            };
             final sorted = perMat[active]!.entries.toList()
-              ..sort((a, b) =>
-                  _diameterSortKey(a.key).compareTo(_diameterSortKey(b.key)));
+              ..sort((a, b) => keyOf[a.key]!.compareTo(keyOf[b.key]!));
             return Wrap(
               spacing: 0,
               runSpacing: 4,
@@ -7380,6 +7373,30 @@ List<List<(String value, int count)>> _patternSubGroups() {
   for (final e in all) { by.putIfAbsent(_patternOutlets(e.$1), () => []).add(e); }
   final keys = by.keys.toList()..sort();
   return [for (final k in keys) by[k]!];
+}
+
+// material → (atom → count) for products in size families. The catalog is
+// static, so this is built once per families list (allVariantFamilies() is
+// itself cached) instead of re-running the regex scan on every chip toggle.
+List<VariantFamily>? _perMatSrc;
+Map<String, Map<String, int>> _perMatCache = const {};
+
+Map<String, Map<String, int>> _diameterAtomsPerMaterial() {
+  final all = allVariantFamilies();
+  if (identical(all, _perMatSrc)) return _perMatCache;
+  final perMat = <String, Map<String, int>>{};
+  for (final fam in all) {
+    if (fam.kind != AttrKind.size) continue;
+    for (final p in fam.products) {
+      final mat = productMaterial(p);
+      final byAtom = perMat.putIfAbsent(mat, () => <String, int>{});
+      for (final a in sizeDiameterAtoms(variantValue(p, AttrKind.size))) {
+        byAtom[a] = (byAtom[a] ?? 0) + 1;
+      }
+    }
+  }
+  _perMatSrc = all;
+  return _perMatCache = perMat;
 }
 
 /// Test seam for the diameter-chip sort order.
