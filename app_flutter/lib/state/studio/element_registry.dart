@@ -2034,6 +2034,7 @@ const List<ElementDescriptor> kElementRegistry = [
   ElementDescriptor(id: 'finance_hub_sheets.print', screen: 'finance_hub_sheets', area: 'דוחות PDF', labelHe: 'הדפסה', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'finance_hub_sheets.report_title', screen: 'finance_hub_sheets', area: 'דוחות PDF', labelHe: 'BuildSmart — דוח פיננסי לפרויקט', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'finance_hub_sheets.fx_server_note', screen: 'finance_hub_sheets', area: 'רכש במט״ח', labelHe: '⚙️ שערי המט״ח מתעדכנים מהשרת — כאן מוצגים שערי דמו', kind: ElementKind.text, wired: true),
+  ElementDescriptor(id: 'finance_hub_sheets.fx_server_note_empty', screen: 'finance_hub_sheets', area: 'רכש במט״ח', labelHe: '⚙️ שערי המט״ח יוצגו כאן כשיתעדכנו מהשרת', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'finance_hub_sheets.convert_amount', screen: 'finance_hub_sheets', area: 'רכש במט״ח', labelHe: 'המרת סכום', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'finance_hub_sheets.cur_usd', screen: 'finance_hub_sheets', area: 'רכש במט״ח', labelHe: 'דולר אמריקאי (USD)', kind: ElementKind.text, wired: true),
   ElementDescriptor(id: 'finance_hub_sheets.cur_eur', screen: 'finance_hub_sheets', area: 'רכש במט״ח', labelHe: 'אירו (EUR)', kind: ElementKind.text, wired: true),
