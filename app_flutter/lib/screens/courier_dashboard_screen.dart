@@ -801,7 +801,7 @@ class _CourierDashboardScreenState
       if (!still) return;
     }
 
-    ref.read(sysOrdersProvider.notifier).courierAdvance(o.id);
+    ref.read(sysOrdersProvider.notifier).courierAdvance(o.id, from: o.stage);
 
     // Award/stamp only when the engine REALLY moved it (re-read, not assumed)
     // — delivered is terminal + courierAdvance no-ops on it, so the 🪙+🔔 pair

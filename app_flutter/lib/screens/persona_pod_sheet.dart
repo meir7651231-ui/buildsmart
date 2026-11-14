@@ -351,7 +351,7 @@ class PersonaPodSheet extends ConsumerWidget {
                   if (!context.mounted) return;
                   ref
                       .read(sysOrdersProvider.notifier)
-                      .courierAdvance(order.id);
+                      .courierAdvance(order.id, from: OrderStage.transit);
                   // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the
                   // courier dashboard card. Re-read to confirm the engine
                   // REALLY reached delivered (terminal + courierAdvance no-ops
