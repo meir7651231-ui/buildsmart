@@ -770,4 +770,77 @@ void main() {
       expect(gw.setRoleCalls, [(uid: 'u-target', role: 'courier')]);
     });
   });
+
+  group('admin claim — the owner reviews every role request', () {
+    test('isAdminFromClaims: only a literal `true` counts (rules `== true`)',
+        () {
+      expect(isAdminFromClaims(null), isFalse);
+      expect(isAdminFromClaims(const {}), isFalse);
+      expect(isAdminFromClaims(const {'admin': true}), isTrue);
+      expect(isAdminFromClaims(const {'admin': 'true'}), isFalse);
+      expect(isAdminFromClaims(const {'admin': 1}), isFalse);
+      expect(isAdminFromClaims(const {'admin': false}), isFalse);
+    });
+
+    test('admin stays OUT of roles but lands on AuthSnapshot.isAdmin',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(
+        const AuthUser(uid: 'u-owner'),
+        withClaims: const {'role': 'manager', 'admin': true},
+      );
+      await pumpEventQueue();
+
+      final snap = c.read(authStateProvider);
+      expect(snap.roles, ['manager'], reason: 'admin is not a persona');
+      expect(snap.isAdmin, isTrue);
+    });
+
+    test('a plain manager is not admin', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(
+        const AuthUser(uid: 'u-mgr'),
+        withClaims: const {'role': 'manager'},
+      );
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).isAdmin, isFalse);
+    });
+
+    test('reloadRole keeps isAdmin AND employerId (it used to drop them)',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(
+        const AuthUser(uid: 'u-w'),
+        withClaims: const {
+          'role': 'worker',
+          'employerId': 'c-1',
+          'admin': true,
+        },
+      );
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).employerId, 'c-1');
+
+      await c.read(authStateProvider.notifier).reloadRole();
+      final snap = c.read(authStateProvider);
+      expect(snap.employerId, 'c-1');
+      expect(snap.isAdmin, isTrue);
+      expect(snap.roles, ['worker']);
+    });
+
+    test('sign-out clears isAdmin', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(
+        const AuthUser(uid: 'u-owner'),
+        withClaims: const {'role': 'manager', 'admin': true},
+      );
+      await pumpEventQueue();
+      gw.emit(null);
+      await pumpEventQueue();
+      expect(c.read(authStateProvider).isAdmin, isFalse);
+    });
+  });
 }

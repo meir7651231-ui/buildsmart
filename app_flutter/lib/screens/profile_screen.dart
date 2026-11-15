@@ -350,7 +350,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () => showRoleRequestSheet(context),
               ),
               // #6 inc.3 — the inbox, only for a caller whose claims approve a tier.
-              if (approvableRolesForClaims(auth.roles).isNotEmpty) ...[
+              if (approvableRolesForClaims(auth.roles, isAdmin: auth.isAdmin)
+                  .isNotEmpty) ...[
                 const SizedBox(height: BsTokens.space2),
                 _LinkRow(
                   label: '📋 בקשות תפקיד',

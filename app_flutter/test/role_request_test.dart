@@ -142,6 +142,21 @@ void main() {
     expect(approvableRolesForClaims(<String>[]), isEmpty);
   });
 
+  test('the admin CLAIM (not a role) approves every tier — the owner case', () {
+    // The owner carries `role: manager` + `admin: true`. rolesFromClaims drops
+    // `admin` (not a persona), so the check has to come from the flag.
+    expect(
+      approvableRolesForClaims(['manager'], isAdmin: true),
+      kRequestableRoles,
+    );
+    expect(approvableRolesForClaims(<String>[], isAdmin: true), kRequestableRoles);
+    expect(
+      approvableRolesForClaims(['manager']),
+      ['store', 'contractor'],
+      reason: 'a plain manager still sees only its own tier',
+    );
+  });
+
   testWidgets('the inbox approves a pending request via the reviewer',
       (t) async {
     final calls = <({String uid, bool approve})>[];

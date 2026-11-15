@@ -514,6 +514,14 @@ List<String> rolesFromClaims(Map<String, dynamic>? claims) {
   return const [];
 }
 
+/// The bootstrap `admin: true` boolean claim (functions/README — first admin;
+/// firestore.rules `isAdmin()`). It is NOT a persona, so [rolesFromClaims]
+/// filters it out of [AuthSnapshot.roles]; surfaces that must mirror the
+/// server's admin gate (e.g. the role-request inbox) read this instead. Only a
+/// literal `true` counts — the rules compare `== true`. Pure → unit-testable.
+bool isAdminFromClaims(Map<String, dynamic>? claims) =>
+    claims != null && claims['admin'] == true;
+
 /// Parse the org membership out of a custom-claims map (stage-3.3 St2): the
 /// `orgId` string claim, trimmed — null when absent/blank. Inert until an
 /// admin runs setOrg (no consumer flips behavior; ORG_SCOPED_QUERIES lands
@@ -548,6 +556,7 @@ class AuthSnapshot {
     this.roles = const [],
     this.orgId,
     this.employerId,
+    this.isAdmin = false,
     this.loaded = false,
   });
 
@@ -570,6 +579,10 @@ class AuthSnapshot {
   /// `boardSessionFromAuthSnapshot` reads it into a worker session's employerId
   /// so worker-HR reads can prove "the reader is this worker's employer".
   final String? employerId;
+
+  /// The bootstrap `admin: true` claim ([isAdminFromClaims]). Kept apart from
+  /// [roles] (admin is not a persona), false when signed out / Firebase-free.
+  final bool isAdmin;
 
   /// The `_loaded` guard (§S1 DoD): true once the FIRST auth event has fully
   /// resolved (user + claims) — or immediately when there is no gateway
@@ -672,11 +685,13 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     var roles = const <String>[];
     String? orgId; // stage-3.3 St2 — carried alongside roles, inert downstream
     String? employerId; // worker→employer link (setEmployer claim)
+    var isAdmin = false; // bootstrap `admin: true` claim (not a persona)
     try {
       final claims = await _gateway!.idTokenClaims();
       roles = rolesFromClaims(claims);
       orgId = orgIdFromClaims(claims);
       employerId = employerIdFromClaims(claims);
+      isAdmin = isAdminFromClaims(claims);
     } on Object catch (e) {
       // Claims failure (offline token refresh, etc.) — roles stay empty
       // (signed-out role behavior), never thrown into the UI.
@@ -688,6 +703,7 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
       roles: roles,
       orgId: orgId,
       employerId: employerId,
+      isAdmin: isAdmin,
       loaded: true,
     );
   }
@@ -783,16 +799,27 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     final gen = ++_gen;
     List<String> roles;
     String? orgId; // stage-3.3 St2 — re-read with roles so a refresh keeps it
+    String? employerId; // re-read too — a refresh must not drop the link
+    bool isAdmin;
     try {
       final claims = await g.idTokenClaims(forceRefresh: true);
       roles = rolesFromClaims(claims);
       orgId = orgIdFromClaims(claims);
+      employerId = employerIdFromClaims(claims);
+      isAdmin = isAdminFromClaims(claims);
     } on Object catch (e) {
       debugPrint('AuthStateNotifier: reloadRole claims failed (kept): $e');
       return;
     }
     if (!mounted || gen != _gen) return;
-    state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true);
+    state = AuthSnapshot(
+      user: user,
+      roles: roles,
+      orgId: orgId,
+      employerId: employerId,
+      isAdmin: isAdmin,
+      loaded: true,
+    );
   }
 
   /// The S1.7/S1.8 local wipe: identity-coupled state only (user profile +

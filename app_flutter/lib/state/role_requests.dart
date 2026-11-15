@@ -90,8 +90,17 @@ Future<bool> submitRoleRequest(WidgetRef ref, String role) async {
 /// store→courier, manager→store+contractor. Empty ⇒ this caller approves
 /// nothing (no inbox). The SERVER + S5 rules are the real authority — this only
 /// scopes the client's read so it matches what the rule (`canReview`) allows.
-List<String> approvableRolesForClaims(List<String> claimRoles) {
-  if (claimRoles.contains('admin')) return kRequestableRoles;
+///
+/// [isAdmin] is the bootstrap `admin: true` boolean claim
+/// ([AuthSnapshot.isAdmin]). It never shows up in [claimRoles]:
+/// `rolesFromClaims` keeps persona ids only. Without it the owner (admin +
+/// `manager`) saw only store/contractor requests, although the rule lets them
+/// review every tier.
+List<String> approvableRolesForClaims(
+  List<String> claimRoles, {
+  bool isAdmin = false,
+}) {
+  if (isAdmin || claimRoles.contains('admin')) return kRequestableRoles;
   final out = <String>[];
   if (claimRoles.contains('contractor')) out.add('worker');
   if (claimRoles.contains('store')) out.add('courier');
@@ -109,7 +118,8 @@ List<String> approvableRolesForClaims(List<String> claimRoles) {
 /// roles (authStateProvider), NOT the null-collapsed persona.
 final roleRequestsInboxProvider = Provider<RemoteCollectionSource?>((ref) {
   if (!useFirebaseBackend) return null;
-  final approvable = approvableRolesForClaims(ref.watch(authStateProvider).roles);
+  final auth = ref.watch(authStateProvider);
+  final approvable = approvableRolesForClaims(auth.roles, isAdmin: auth.isAdmin);
   if (approvable.isEmpty) return null;
   return FirestoreCollectionSource(
     'roleRequests',
