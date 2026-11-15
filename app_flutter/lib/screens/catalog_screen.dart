@@ -170,15 +170,57 @@ const String _kHebrewPrefixes = 'משהוכלב';
 /// keep working: they are whole space-delimited words, matched by the prefix arm.
 bool _tokenHitHe(String hay, String token) {
   if (token.isEmpty) return false;
+  // A singular that ends in a word-FINAL letter ("סיפון", "אטם", "מסעף") is not
+  // a prefix of its own plural ("סיפונים", "אטמים", "מסעפים"): inside a word the
+  // letter takes its regular shape. Also try the regular-shape stem, but only
+  // against a LONGER word, so the stem never stands in for a bare word.
+  final stem = _openFinal(token);
   for (final w in hay.split(_wsSplit)) {
-    if (w.startsWith(token)) return true;
-    if (w.length > token.length &&
-        _kHebrewPrefixes.contains(w[0]) &&
-        w.substring(1).startsWith(token)) {
+    if (_wordHit(w, token)) return true;
+    if (stem != null && w.length > token.length && _wordHit(w, stem)) {
       return true;
     }
   }
   return false;
+}
+
+/// [token] starts word [w], directly or past one Hebrew clitic prefix.
+bool _wordHit(String w, String token) {
+  if (w.startsWith(token)) return true;
+  return w.length > token.length &&
+      _kHebrewPrefixes.contains(w[0]) &&
+      w.substring(1).startsWith(token);
+}
+
+/// Word-final Hebrew letter → its regular (mid-word) form.
+const Map<String, String> _kFinalToRegular = {
+  'ך': 'כ',
+  'ם': 'מ',
+  'ן': 'נ',
+  'ף': 'פ',
+  'ץ': 'צ',
+};
+
+/// [token] with its trailing final letter opened to the regular form, or null
+/// when it does not end in one. Tokens shorter than 3 letters are left alone:
+/// a 2-letter stem ("גנ" from "גן") would prefix far too many unrelated words.
+String? _openFinal(String token) {
+  if (token.length < 3) return null;
+  final r = _kFinalToRegular[token[token.length - 1]];
+  return r == null ? null : '${token.substring(0, token.length - 1)}$r';
+}
+
+/// A synonym value is either one word (matched like a query token) or a
+/// multi-word catalogue PHRASE ("אסלות וכיורים" — a category name). A phrase
+/// can never be the prefix of a single word, so it used to never match at all;
+/// it now has to appear in [hay] as consecutive words starting on a word
+/// boundary.
+bool _aliasHitHe(String hay, String alias) {
+  final a = alias.trim();
+  if (a.isEmpty) return false;
+  if (!a.contains(_wsSplit)) return _tokenHitHe(hay, a);
+  final words = a.split(_wsSplit).join(' ');
+  return ' ${hay.split(_wsSplit).join(' ')}'.contains(' $words');
 }
 
 /// Forgiving product match for the search bar: a non-technical user types plain
@@ -210,7 +252,7 @@ bool catalogProductMatchesQuery(LipskeyCatalogProduct p, String rawQuery,
     if (_tokenHitHe(hay, t)) return true;
     final alts = kSearchSynonyms[t];
     return alts != null &&
-        alts.any((a) => _tokenHitHe(hay, _normForSearch(a)));
+        alts.any((a) => _aliasHitHe(hay, _normForSearch(a)));
   }
 
   return requireAll ? tokens.every(hit) : tokens.any(hit);
