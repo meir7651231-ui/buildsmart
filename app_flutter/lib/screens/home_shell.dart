@@ -366,6 +366,14 @@ class _HelpModeOverlay extends ConsumerWidget {
   }
 }
 
+/// Screen-reader name of the floating cart button: what it does + how many
+/// items are in the cart (Hebrew singular for one item). Pure → tested.
+String cartFabSemanticsLabel(int count) {
+  if (count <= 0) return 'פתיחת הסל';
+  if (count == 1) return 'פתיחת הסל · פריט אחד';
+  return 'פתיחת הסל · $count פריטים';
+}
+
 /// Floating cart button — visible whenever the cart has items (and we're not
 /// already on the store tab). Tapping jumps to the store.
 ///
@@ -423,35 +431,43 @@ class CartFab extends ConsumerWidget {
       shape: const CircleBorder(
         side: BorderSide(color: Colors.white, width: 2),
       ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Icon(Icons.shopping_cart, color: bsOnAccent(context), size: 26),
-          if (count > 0)
-            Positioned(
-              top: -10,
-              right: -12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                constraints: const BoxConstraints(minWidth: 18),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: BsTokens.brand, width: 1.5),
-                ),
-                child: Text(
-                  '$count',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: BsTokens.brand,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+      // A11y: the icon has no label and the badge alone made screen readers
+      // announce just "3, button". Give the button a real name (+ item count)
+      // and hide the raw badge digits from semantics so they aren't read twice.
+      child: Semantics(
+        label: cartFabSemanticsLabel(count),
+        child: ExcludeSemantics(
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Icon(Icons.shopping_cart, color: bsOnAccent(context), size: 26),
+              if (count > 0)
+                Positioned(
+                  top: -10,
+                  right: -12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    constraints: const BoxConstraints(minWidth: 18),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: BsTokens.brand, width: 1.5),
+                    ),
+                    child: Text(
+                      '$count',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: BsTokens.brand,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
 
