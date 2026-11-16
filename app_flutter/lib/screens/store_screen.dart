@@ -1656,6 +1656,15 @@ class _CartViewState extends ConsumerState<_CartView> {
 
   @override
   Widget build(BuildContext context) {
+    // The notes controller is seeded from cartNotesProvider only once (in
+    // initState), but checkout success and 'נקה' reset the PROVIDER while this
+    // view stays mounted. Mirror external changes back into the field so the
+    // previous order's note never lingers on screen while the provider (what
+    // placeOrder reads) is already '' — and so typing doesn't send old+new.
+    // Typing writes the same value back → no-op here.
+    ref.listen<String>(cartNotesProvider, (_, next) {
+      if (_notesCtrl.text != next) _notesCtrl.text = next;
+    });
     // Step 94 — checkout_step: fired on a delivery/payment CHANGE via ref.listen.
     // The callback runs OUTSIDE build, so — unlike the ref.watch below — it never
     // trips the "modify a provider while building" assertion. `value` is the bare
