@@ -129,7 +129,7 @@ void main() {
     await t.pump();
 
     // Named even once text is typed (the hint is gone then).
-    expect(find.bySemanticsLabel(RegExp('הערות לשליח')), findsWidgets);
+    expect(find.bySemanticsLabel(RegExp('הערות לשליח')), findsOneWidget);
 
     final editor = t.widget<EditableText>(_notesEditor());
     final scheme = Theme.of(t.element(_notesEditor())).colorScheme;
