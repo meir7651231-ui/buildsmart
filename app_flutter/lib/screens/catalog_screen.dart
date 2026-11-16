@@ -262,6 +262,28 @@ int searchRelevance(LipskeyCatalogProduct p, String rawQuery) {
   return score;
 }
 
+/// Sorts [items] DESCENDING by [primary], ties broken DESCENDING by
+/// [secondary] (when given) — computing each key ONCE per item instead of on
+/// every comparison. The search ranking used to call [searchRelevance] (string
+/// normalisation + synonym scans) inside the comparator, i.e. ~2·n·log n times
+/// per keystroke on a pool of up to the whole catalog. The comparator sees the
+/// exact same key values as before, so the resulting order is identical.
+List<T> sortedByScoreDesc<T>(
+  Iterable<T> items,
+  int Function(T) primary, {
+  int Function(T)? secondary,
+}) {
+  final keyed = [
+    for (final it in items)
+      (it: it, p: primary(it), s: secondary == null ? 0 : secondary(it)),
+  ]..sort((a, b) {
+      final byP = b.p.compareTo(a.p);
+      if (byP != 0 || secondary == null) return byP;
+      return b.s.compareTo(a.s);
+    });
+  return [for (final k in keyed) k.it];
+}
+
 /// As-you-type word completion (Benzi #6): completes the word currently being
 /// typed from the vocabulary of words that appear in catalog **product names**
 /// (system-scoped), most-frequent first, capped at [limit]. Returns the whole
@@ -481,22 +503,17 @@ final diveResultsProvider = Provider<List<LipskeyCatalogProduct>>((ref) {
                 }
               }
               final mates = contextCompatibleSkus(ctx);
-              return [...filtered]..sort((a, b) {
-                final byRel = searchRelevance(b, query)
-                    .compareTo(searchRelevance(a, query));
-                if (byRel != 0) return byRel;
-                return (nameAffinity(b, query) +
-                        productProminence(b) +
-                        matesBoost(b, mates) +
-                        jobBoost(b, jobSkus))
-                    .compareTo(nameAffinity(a, query) +
-                        productProminence(a) +
-                        matesBoost(a, mates) +
-                        jobBoost(a, jobSkus));
-              });
+              return sortedByScoreDesc(
+                filtered,
+                (p) => searchRelevance(p, query),
+                secondary: (p) =>
+                    nameAffinity(p, query) +
+                    productProminence(p) +
+                    matesBoost(p, mates) +
+                    jobBoost(p, jobSkus),
+              );
             })()
-          : ([...filtered]..sort((a, b) =>
-              searchRelevance(b, query).compareTo(searchRelevance(a, query)))))
+          : sortedByScoreDesc(filtered, (p) => searchRelevance(p, query)))
       : sortCatalogProducts(filtered, sort);
   return ordered.take(40).toList();
 });

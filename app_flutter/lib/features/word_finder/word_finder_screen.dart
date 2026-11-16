@@ -309,11 +309,13 @@ class _WordFinderScreenState extends ConsumerState<WordFinderScreen> {
     final query = _typedQuery;
     if (query != null && query.isNotEmpty) {
       // Stable descending sort by relevance: index-keyed so equal scores keep
-      // their base-pool order rather than shuffling arbitrarily.
-      final ranked = [for (var i = 0; i < pool.length; i++) (p: pool[i], i: i)]
-        ..sort((a, b) {
-          final byScore = searchRelevance(b.p, query)
-              .compareTo(searchRelevance(a.p, query));
+      // their base-pool order rather than shuffling arbitrarily. The score is
+      // computed ONCE per product (not on every comparison).
+      final ranked = [
+        for (var i = 0; i < pool.length; i++)
+          (p: pool[i], i: i, s: searchRelevance(pool[i], query)),
+      ]..sort((a, b) {
+          final byScore = b.s.compareTo(a.s);
           return byScore != 0 ? byScore : a.i.compareTo(b.i);
         });
       pool = [for (final e in ranked) e.p];
