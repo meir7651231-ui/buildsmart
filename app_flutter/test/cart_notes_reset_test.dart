@@ -120,4 +120,22 @@ void main() {
     await t.pumpAndSettle();
     expect(_notesText(t), '');
   });
+
+  testWidgets('the field is named for screen readers + uses theme ink',
+      (t) async {
+    final handle = t.ensureSemantics();
+    await _openCart(t);
+    await t.enterText(_notesEditor(), 'קומה 3');
+    await t.pump();
+
+    // Named even once text is typed (the hint is gone then).
+    expect(find.bySemanticsLabel(RegExp('הערות לשליח')), findsWidgets);
+
+    final editor = t.widget<EditableText>(_notesEditor());
+    final scheme = Theme.of(t.element(_notesEditor())).colorScheme;
+    expect(editor.style.color, scheme.onSurface,
+        reason: 'typed text must follow the theme (dark-mode readable)');
+    handle.dispose();
+  });
 }
+

@@ -2540,33 +2540,44 @@ class _NotesField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Theme-aware ink: the old fixed black54 / inkLight / #666 were ~1:1 on the
+    // dark-mode surface (unreadable typed text + invisible label).
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const CfgText(
-          'shop.notes.title',
-          '📝 הערות לשליח',
-          style: TextStyle(color: Colors.black54, fontSize: 12),
+        // The visible title is decorative for screen readers — the field itself
+        // carries the name below (otherwise only the hint was announced, and
+        // nothing once text was typed).
+        ExcludeSemantics(
+          child: CfgText(
+            'shop.notes.title',
+            '📝 הערות לשליח',
+            style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+          ),
         ),
         const SizedBox(height: 6),
         // APP-KEYBOARD-ONLY — delivery-notes field (multi-line, brand caret).
-        BsKeyboardField(
-          controller: controller,
-          style: const TextStyle(color: BsTokens.inkLight, fontSize: 13),
-          cursorColor: BsTokens.brand,
-          maxLines: 2,
-          decoration: InputDecoration(
-            hintText: 'קומה / כניסה / שם האתר / הוראות לנהג...',
-            hintStyle: const TextStyle(color: Color(0xFF666666)),
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surface,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
+        Semantics(
+          label: 'הערות לשליח',
+          child: BsKeyboardField(
+            controller: controller,
+            style: TextStyle(color: scheme.onSurface, fontSize: 13),
+            cursorColor: BsTokens.brand,
+            maxLines: 2,
+            decoration: InputDecoration(
+              hintText: 'קומה / כניסה / שם האתר / הוראות לנהג...',
+              hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+              filled: true,
+              fillColor: scheme.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
           ),
         ),
