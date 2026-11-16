@@ -202,7 +202,7 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 **בדיקות:**
 - **בסיס על main לפני השינויים:** Flutter suite **6034 ✅ / 0 ✗ / 12 skip** · analyze ‏0 errors. הטסטים ירוקים, ולכן כלל 6 לא הופעל.
 - **suite מלא על העץ המשולב** (שלושת ה-PRs יחד, קבצים זרים): **6045 ✅ / 0 ✗ / 12 skip** (+11 טסטים חדשים) · analyze ‏0 errors.
-- **CI (Protocol Enforcement) על #80–#82:** רץ בזמן הכתיבה. צפוי Gate 8 אדום בלבד (#76), כמו בכל PR מאז 14.11.
+- **CI (Protocol Enforcement):** על #80 ו-#81, ‏Gates 1–7 ✅ (analyze · suite מלא על Flutter 3.29.3 · build web · versions · dark surfaces · hooks · settings), ו-**Gate 8 ✗** (Android release, JDK 25, #76). זה הכשל היחיד. על #82, ‏Gates 1–2 ✅ (analyze + suite מלא), ושאר ה-gates עוד רצו בזמן הכתיבה.
 
 **חריגה מחוק-על #0:** לא הורץ נחיל 9×9. המשימות נלקחו מרשימת "הצעד הבא" של 15.11 (ממצאי הנחיל של 13.11), ואומתו מחדש מול הקוד לפני כל תיקון. רץ סוקר screen-review בלתי-תלוי אחד ל-#80 ול-#81, בשני סבבים. את העריכות ואת אימות ה-suite ביצע האורקסטרייטור. `central-verify.sh` לא הורץ, כי הוא אדום על main עד מיזוג #68.
 
