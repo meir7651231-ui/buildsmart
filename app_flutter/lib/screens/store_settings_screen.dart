@@ -1004,6 +1004,18 @@ class _NumberRow extends StatefulWidget implements _Inert {
   State<_NumberRow> createState() => _NumberRowState();
 }
 
+/// Max digits a store-settings number field accepts (≤ 999,999,999).
+const int kNumberRowMaxDigits = 9;
+
+/// The value a store-settings number field commits for [text]: empty ⇒ 0 (the
+/// "no limit" the field always meant when cleared); unparseable ⇒ null, i.e.
+/// keep the last saved value — never a silent 0 that switches a rule off.
+@visibleForTesting
+int? parseNumberRowInput(String text) {
+  if (text.isEmpty) return 0;
+  return int.tryParse(text);
+}
+
 class _NumberRowState extends State<_NumberRow> {
   late final TextEditingController _ctrl = TextEditingController(
     text: widget.value.toString(),
@@ -1064,7 +1076,13 @@ class _NumberRowState extends State<_NumberRow> {
               cursorColor: BsTokens.brand,
               textAlign: TextAlign.center,
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              // 9 digits max: a longer run overflowed int.tryParse → null →
+              // the setting was silently saved as 0 ("no limit") while the
+              // field still showed the typed number.
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(kNumberRowMaxDigits),
+              ],
               decoration: InputDecoration(
                 filled: true,
                 fillColor: const Color(0xFFF2F3F5),
@@ -1077,7 +1095,10 @@ class _NumberRowState extends State<_NumberRow> {
                   vertical: 10,
                 ),
               ),
-              onChanged: (v) => widget.onChanged(int.tryParse(v) ?? 0),
+              onChanged: (v) {
+                final n = parseNumberRowInput(v);
+                if (n != null) widget.onChanged(n);
+              },
             ),
           ),
         ],

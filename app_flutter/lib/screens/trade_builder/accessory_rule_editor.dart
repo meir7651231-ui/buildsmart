@@ -52,7 +52,10 @@ String _slug(String text) =>
 
 /// Strict digits-only check for the price field (int.tryParse alone would
 /// also accept '-5' / '+5' / hex-ish forms — a price is plain digits).
-final RegExp _kDigitsOnly = RegExp(r'^[0-9]+$');
+/// Capped at 9 digits (≤ ₪999,999,999): a longer run overflowed int.parse —
+/// FormatException on iOS/Android (the add silently died), a rounded wrong
+/// price on web. Over the cap ⇒ the same 'מחיר לא תקין' path.
+final RegExp _kDigitsOnly = RegExp(r'^[0-9]{1,9}$');
 
 /// 🧩 אביזרים — the trade's accessory-rule editor (Pillar-2 · step 46).
 class AccessoryRuleEditorScreen extends ConsumerStatefulWidget {
@@ -153,11 +156,13 @@ class _AccessoryRuleEditorState
     final priceText = _price.text.trim();
     int? price;
     if (priceText.isNotEmpty) {
-      if (!_kDigitsOnly.hasMatch(priceText)) {
+      final parsed =
+          _kDigitsOnly.hasMatch(priceText) ? int.tryParse(priceText) : null;
+      if (parsed == null) {
         setState(() => _priceError = true);
         return;
       }
-      price = int.parse(priceText);
+      price = parsed;
     }
     final link =
         _products(doc).any((p) => p.id == _linkSku) ? _linkSku : null;

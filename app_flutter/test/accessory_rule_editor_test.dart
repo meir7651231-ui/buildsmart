@@ -380,5 +380,43 @@ void main() {
       expect(find.textContaining('מחיר לא תקין'), findsWidgets);
       expect(find.textContaining('אין עדיין אביזרים'), findsOneWidget);
     });
+
+    // Nightly 2026-11-17 — a 10+ digit price overflowed int.parse (a
+    // FormatException out of the tap handler on iOS/Android; a rounded wrong
+    // price on web). It now takes the same 'מחיר לא תקין' path.
+    for (final huge in ['99999999999999999999', '1000000000']) {
+      testWidgets('an over-long price ($huge) shows מחיר לא תקין, never throws',
+          (t) async {
+        final c = await pumpEditor(t, seed: _docBase);
+        await t.enterText(fieldLabelled('שם אביזר'), 'סרט טפלון');
+        await settle(t, 2);
+        await t.enterText(fieldLabelled('למה חשוב'), 'איטום');
+        await settle(t, 2);
+        await pickCategory(t);
+        await t.enterText(fieldLabelled('מחיר'), huge);
+        await settle(t, 2);
+
+        await t.tap(find.text('הוסף אביזר').first);
+        await settle(t);
+
+        expect(t.takeException(), isNull);
+        expect(c.read(tradesStoreProvider).accessories, isEmpty);
+        expect(find.textContaining('מחיר לא תקין'), findsWidgets);
+      });
+    }
+
+    testWidgets('a 9-digit price is still accepted', (t) async {
+      final c = await pumpEditor(t, seed: _docBase);
+      await t.enterText(fieldLabelled('שם אביזר'), 'סרט טפלון');
+      await settle(t, 2);
+      await t.enterText(fieldLabelled('למה חשוב'), 'איטום');
+      await settle(t, 2);
+      await pickCategory(t);
+      await t.enterText(fieldLabelled('מחיר'), '999999999');
+      await settle(t, 2);
+      await t.tap(find.text('הוסף אביזר').first);
+      await settle(t);
+      expect(c.read(tradesStoreProvider).accessories.single.price, 999999999);
+    });
   });
 }
