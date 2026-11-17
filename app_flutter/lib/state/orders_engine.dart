@@ -97,6 +97,7 @@ class Order {
     this.courierUid = '',
     this.customerPhone = '',
     this.customerEmail = '',
+    this.deliveryFee = 0,
   });
 
   /// Order id, e.g. `BS-1042` (the legacy `o.id`).
@@ -176,6 +177,13 @@ class Order {
   /// `kOrderEmail` is on (else empty ⇒ byte-identical order docs).
   final String customerEmail;
 
+  /// The delivery fee (₪) charged at checkout — already INSIDE [sum]. The cart
+  /// never adds VAT on it (`cartTotal`), so the invoice must take it out before
+  /// backing the VAT out of [sum]; otherwise the printed VAT is higher than the
+  /// VAT the customer paid (₪187 vs ₪180 on a ₪1000 + ₪45 order). Written only
+  /// when > 0, so pickup / seed / pre-existing orders round-trip byte-identical.
+  final int deliveryFee;
+
   /// Mirrors the legacy `o.stage!=='delivered'` "open order" predicate
   /// (@index.html:16951) — the same rule [ManagerOrder.isOpen] uses.
   bool get isOpen => stage != 'delivered';
@@ -214,6 +222,8 @@ class Order {
         // 📞/💬 target through the whole flow.
         customerPhone: customerPhone ?? this.customerPhone,
         customerEmail: customerEmail ?? this.customerEmail,
+        // Set once at placement (part of what was charged) — never changes.
+        deliveryFee: deliveryFee,
       );
 
   /// Project to the pure [ManagerOrder] the manager analytics fold over — lets
@@ -244,6 +254,7 @@ class Order {
         if (courierUid.isNotEmpty) 'courierUid': courierUid,
         if (customerPhone.isNotEmpty) 'customerPhone': customerPhone,
         if (customerEmail.isNotEmpty) 'customerEmail': customerEmail,
+        if (deliveryFee > 0) 'deliveryFee': deliveryFee,
       };
 
   factory Order.fromJson(Map<String, dynamic> j) => Order(
@@ -269,6 +280,7 @@ class Order {
         courierUid: (j['courierUid'] as String?) ?? '',
         customerPhone: (j['customerPhone'] as String?) ?? '',
         customerEmail: (j['customerEmail'] as String?) ?? '',
+        deliveryFee: (j['deliveryFee'] as num?)?.toInt() ?? 0,
       );
 
   /// Lift a seed [ManagerOrder] into a live [Order] (no timestamp — seed).
@@ -473,6 +485,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>>
     String orgId = '',
     String customerPhone = '',
     String customerEmail = '',
+    int deliveryFee = 0,
   }) {
     // S4.4 — bound to Firestore: the repo's verbatim port places the order
     // (same _nextId/stage/prepend), its optimistic cache notifies back
@@ -493,6 +506,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>>
         orgId: orgId,
         customerPhone: customerPhone,
         customerEmail: customerEmail,
+        deliveryFee: deliveryFee,
       );
     }
     final order = Order(
@@ -510,6 +524,7 @@ class OrdersEngineNotifier extends StateNotifier<List<Order>>
       orgId: orgId,
       customerPhone: customerPhone,
       customerEmail: customerEmail,
+      deliveryFee: deliveryFee,
     );
     state = [order, ...state];
     return order;

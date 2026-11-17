@@ -48,6 +48,7 @@ class _RecordingOrdersRepo implements OrdersRepository {
     String contractorUid = '',
     String customerPhone = '',
     String customerEmail = '',
+    int deliveryFee = 0,
   }) {
     final order = Order(
       id: id ?? 'BS-${2000 + placed.length}',

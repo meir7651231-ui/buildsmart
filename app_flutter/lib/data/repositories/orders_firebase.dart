@@ -207,6 +207,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     String orgId = '',
     String customerPhone = '',
     String customerEmail = '',
+    int deliveryFee = 0,
   }) {
     final order = Order(
       id: id ?? _nextId(),
@@ -223,6 +224,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       orgId: orgId,
       customerPhone: customerPhone,
       customerEmail: customerEmail,
+      deliveryFee: deliveryFee,
     );
     upsert(order); // optimistic prepend + background set
     return order;
