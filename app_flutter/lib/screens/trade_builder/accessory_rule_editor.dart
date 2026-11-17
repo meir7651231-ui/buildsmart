@@ -54,7 +54,7 @@ String _slug(String text) =>
 /// also accept '-5' / '+5' / hex-ish forms — a price is plain digits).
 /// Capped at 9 digits (≤ ₪999,999,999): a longer run overflowed int.parse —
 /// FormatException on iOS/Android (the add silently died), a rounded wrong
-/// price on web. Over the cap ⇒ the same 'מחיר לא תקין' path.
+/// price on web. Over the cap ⇒ the same 'מחיר לא תקין' path + 'עד 9 ספרות'.
 final RegExp _kDigitsOnly = RegExp(r'^[0-9]{1,9}$');
 
 /// 🧩 אביזרים — the trade's accessory-rule editor (Pillar-2 · step 46).
@@ -88,6 +88,15 @@ class _AccessoryRuleEditorState
 
   /// The non-digit-price inline error flag.
   bool _priceError = false;
+
+  /// The rejected price was an all-digit run over 9 digits — the error then
+  /// also says why ('עד 9 ספרות').
+  bool _priceTooLong = false;
+
+  Color _errorInk(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? const Color(0xFFF87171) // ≈6:1 on bgDark/cardDark
+          : BsTokens.dangerDark;
 
   /// Bumped on every successful add — keys the linked-product dropdown so
   /// its FormField state hard-resets with the cleared form.
@@ -159,7 +168,10 @@ class _AccessoryRuleEditorState
       final parsed =
           _kDigitsOnly.hasMatch(priceText) ? int.tryParse(priceText) : null;
       if (parsed == null) {
-        setState(() => _priceError = true);
+        setState(() {
+          _priceError = true;
+          _priceTooLong = RegExp(r'^[0-9]{10,}$').hasMatch(priceText);
+        });
         return;
       }
       price = parsed;
@@ -186,6 +198,7 @@ class _AccessoryRuleEditorState
       _mustHave = false;
       _linkSku = null;
       _priceError = false;
+      _priceTooLong = false;
       _epoch++; // hard-reset the linked-product dropdown's FormField state
     });
   }
@@ -284,16 +297,20 @@ class _AccessoryRuleEditorState
                 controller: _name,
                 onChanged: (_) => setState(() {}),
                 textInputAction: TextInputAction.next,
-                style:
-                    const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                ),
                 decoration: _dec('שם אביזר'),
               ),
               const SizedBox(height: BsTokens.space4),
               TextField(
                 controller: _why,
                 textInputAction: TextInputAction.next,
-                style:
-                    const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                ),
                 decoration: _dec('למה חשוב'),
               ),
               const SizedBox(height: BsTokens.space2),
@@ -314,23 +331,48 @@ class _AccessoryRuleEditorState
                 // No input formatter here ON PURPOSE: the contract's error
                 // path ('מחיר לא תקין') must stay reachable — a digits-only
                 // formatter would silently swallow the bad input instead.
-                onChanged: (_) => setState(() => _priceError = false),
+                onChanged: (_) => setState(() {
+                  _priceError = false;
+                  _priceTooLong = false;
+                }),
                 keyboardType: TextInputType.number,
-                style:
-                    const TextStyle(color: BsTokens.inkLight, fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                ),
                 decoration: _dec('מחיר'),
               ),
               if (_priceError) ...[
                 const SizedBox(height: BsTokens.space2),
-                const Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: CfgText(
-                    'accessory_rule_editor.t03',
-                    'מחיר לא תקין',
-                    style: TextStyle(
-                      color: BsTokens.dangerDark,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                // Announced (liveRegion) so a screen-reader user hears why the
+                // add did nothing; light red in dark mode (dangerDark on
+                // bgDark is ≈2.9:1).
+                Semantics(
+                  liveRegion: true,
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CfgText(
+                          'accessory_rule_editor.t03',
+                          'מחיר לא תקין',
+                          style: TextStyle(
+                            color: _errorInk(context),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (_priceTooLong)
+                          CfgText(
+                            'accessory_rule_editor.price_max',
+                            'עד 9 ספרות',
+                            style: TextStyle(
+                              color: _errorInk(context),
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

@@ -1021,11 +1021,17 @@ class _NumberRowState extends State<_NumberRow> {
     text: widget.value.toString(),
   );
 
+  /// The typed run is longer than [kNumberRowMaxDigits]: nothing is saved
+  /// and a visible, announced 'עד 9 ספרות' explains why (a silent length cap
+  /// would truncate a paste into a believable wrong number).
+  bool _tooLong = false;
+
   @override
   void didUpdateWidget(covariant _NumberRow old) {
     super.didUpdateWidget(old);
-    final current = int.tryParse(_ctrl.text) ?? 0;
-    if (widget.value != current) {
+    // Don't overwrite text the user is still fixing (an over-long run).
+    final current = parseNumberRowInput(_ctrl.text);
+    if (current != null && widget.value != current) {
       _ctrl.text = widget.value.toString();
     }
   }
@@ -1048,11 +1054,27 @@ class _NumberRowState extends State<_NumberRow> {
               children: [
                 Text(
                   widget.label,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 14,
                   ),
                 ),
+                if (_tooLong)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: CfgText(
+                        'store_settings_screen.number_too_long',
+                        'עד 9 ספרות',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
                 if (widget.underConstruction)
                   const Padding(
                     padding: EdgeInsets.only(top: 2),
@@ -1069,36 +1091,45 @@ class _NumberRowState extends State<_NumberRow> {
             ),
           ),
           SizedBox(
-            width: 100,
-            child: TextField(
-              controller: _ctrl,
-              style: const TextStyle(color: BsTokens.inkLight),
-              cursorColor: BsTokens.brand,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              // 9 digits max: a longer run overflowed int.tryParse → null →
-              // the setting was silently saved as 0 ("no limit") while the
-              // field still showed the typed number.
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(kNumberRowMaxDigits),
-              ],
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF2F3F5),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+            // 9 digits + padding stay fully visible, incl. ~1.2× text scale.
+            width: 128,
+            // The label is a sibling Text — name the field for screen readers.
+            child: Semantics(
+              label: widget.label,
+              child: TextField(
+                controller: _ctrl,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 10,
+                cursorColor: BsTokens.brand,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                // Digits only; NO length formatter — a silent cap would cut a
+                // paste into a believable wrong number. Over-long ⇒ not saved
+                // + the visible 'עד 9 ספרות' (before: overflow → saved as 0).
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? BsTokens.bgDark
+                      : const Color(0xFFF2F3F5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
                 ),
+                onChanged: (v) {
+                  final over = v.length > kNumberRowMaxDigits;
+                  if (over != _tooLong) setState(() => _tooLong = over);
+                  final n = over ? null : parseNumberRowInput(v);
+                  if (n != null) widget.onChanged(n);
+                },
               ),
-              onChanged: (v) {
-                final n = parseNumberRowInput(v);
-                if (n != null) widget.onChanged(n);
-              },
             ),
           ),
         ],

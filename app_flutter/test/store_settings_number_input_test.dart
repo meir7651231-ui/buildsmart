@@ -1,8 +1,8 @@
 // Nightly 2026-11-17 — a store-settings number field (e.g. 'מינימום הזמנה (₪)')
 // fed `int.tryParse(v) ?? 0` to the store: a 20-digit entry overflowed to null
 // and was SAVED AS 0 ("no limit") while the field still showed the number.
-// Now the field is capped at 9 digits and an unparseable value keeps the last
-// saved one.
+// Now an over-9-digit run is not saved, keeps the last saved value, and shows
+// a visible, announced 'עד 9 ספרות' (no silent truncation).
 
 import 'package:buildsmart/screens/store_settings_screen.dart';
 import 'package:buildsmart/state/store_settings.dart';
@@ -27,7 +27,7 @@ void main() {
     });
   });
 
-  testWidgets('the minimum-order field caps input at 9 digits and saves it',
+  testWidgets('minimum order: over 9 digits is rejected visibly, never saved',
       (t) async {
     SharedPreferences.setMockInitialValues({});
     await t.binding.setSurfaceSize(const Size(440, 950));
@@ -65,13 +65,25 @@ void main() {
     );
     expect(field, findsOneWidget);
 
-    await t.enterText(field, '99999999999999999999');
+    await t.enterText(field, '250');
     await t.pumpAndSettle();
+    expect(c.read(storeSettingsProvider).minOrderAmount, 250);
+    expect(find.text('עד 9 ספרות'), findsNothing);
 
-    final shown = t.widget<TextField>(field).controller!.text;
-    expect(shown.length, lessThanOrEqualTo(kNumberRowMaxDigits));
-    expect(c.read(storeSettingsProvider).minOrderAmount, int.parse(shown),
-        reason: 'what the field shows is what is saved — never a silent 0');
-    expect(c.read(storeSettingsProvider).minOrderAmount, isNot(0));
+    // A 20-digit paste: NOT saved (before: saved as 0 = "no limit"), not
+    // silently cut to a believable wrong number, and the reason is shown.
+    await t.enterText(field, '12345678901234567890');
+    await t.pumpAndSettle();
+    expect(c.read(storeSettingsProvider).minOrderAmount, 250);
+    expect(t.widget<TextField>(field).controller!.text,
+        '12345678901234567890',
+        reason: 'the user sees what they typed and can fix it');
+    expect(find.text('עד 9 ספרות'), findsOneWidget);
+
+    // Fixing it back under the limit saves and clears the error.
+    await t.enterText(field, '999999999');
+    await t.pumpAndSettle();
+    expect(c.read(storeSettingsProvider).minOrderAmount, 999999999);
+    expect(find.text('עד 9 ספרות'), findsNothing);
   });
 }

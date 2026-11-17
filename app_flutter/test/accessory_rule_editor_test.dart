@@ -402,6 +402,7 @@ void main() {
         expect(t.takeException(), isNull);
         expect(c.read(tradesStoreProvider).accessories, isEmpty);
         expect(find.textContaining('מחיר לא תקין'), findsWidgets);
+        expect(find.text('עד 9 ספרות'), findsOneWidget);
       });
     }
 
