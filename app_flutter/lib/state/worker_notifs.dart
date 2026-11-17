@@ -52,13 +52,13 @@ class WorkerNotif {
   });
 
   factory WorkerNotif.fromJson(Map<String, dynamic> j) => WorkerNotif(
-        id: j['id'] as String? ?? '',
-        emoji: j['emoji'] as String? ?? '🔔',
-        title: j['title'] as String? ?? '',
-        body: j['body'] as String? ?? '',
-        ts: DateTime.tryParse(j['ts'] as String? ?? '') ?? DateTime.now(),
-        read: j['read'] as bool? ?? false,
-      );
+    id: j['id'] as String? ?? '',
+    emoji: j['emoji'] as String? ?? '🔔',
+    title: j['title'] as String? ?? '',
+    body: j['body'] as String? ?? '',
+    ts: DateTime.tryParse(j['ts'] as String? ?? '') ?? DateTime.now(),
+    read: j['read'] as bool? ?? false,
+  );
 
   final String id;
   final String emoji;
@@ -70,22 +70,22 @@ class WorkerNotif {
   final bool read;
 
   WorkerNotif copyWith({bool? read}) => WorkerNotif(
-        id: id,
-        emoji: emoji,
-        title: title,
-        body: body,
-        ts: ts,
-        read: read ?? this.read,
-      );
+    id: id,
+    emoji: emoji,
+    title: title,
+    body: body,
+    ts: ts,
+    read: read ?? this.read,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'emoji': emoji,
-        'title': title,
-        'body': body,
-        'ts': ts.toIso8601String(),
-        'read': read,
-      };
+    'id': id,
+    'emoji': emoji,
+    'title': title,
+    'body': body,
+    'ts': ts.toIso8601String(),
+    'read': read,
+  };
 }
 
 /// The full per-username store: `username → newest-first list`.
@@ -98,52 +98,83 @@ class WorkerNotifsNotifier
   /// When false (tests), skip SharedPreferences entirely (engine pattern).
   final bool persist;
 
-  /// One-shot guard (board_auth idiom): once any mutation wrote state, a late
-  /// async `_load()` must not clobber it.
-  bool _userTouched = false;
+  /// True once the initial load has finished. Until then a mutation is shown
+  /// immediately but kept in [_pending] and NOT persisted; when the load lands
+  /// the pending mutations are REPLAYED on top of the stored map and the merge
+  /// is persisted once. (Before: the first write — e.g. a contractor approving
+  /// a task, which notifies the worker — set a "skip load" latch, so the stored
+  /// feeds of every OTHER user on the device were dropped and overwritten.)
+  bool _ready = false;
+  final List<
+    Map<String, List<WorkerNotif>> Function(Map<String, List<WorkerNotif>>)
+  >
+  _pending = [];
 
   /// Monotonic suffix so two adds in the same microsecond stay unique.
   int _seq = 0;
 
   Future<void> _load() async {
+    Map<String, List<WorkerNotif>>? loaded;
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kWorkerNotifsKey);
-      if (raw == null || raw.isEmpty || _userTouched) return;
-      final m = jsonDecode(raw) as Map<String, dynamic>;
-      if (_userTouched) return;
-      state = {
-        for (final e in m.entries)
-          if (e.value is List)
-            e.key: [
-              for (final j in e.value as List)
-                if (j is Map)
-                  WorkerNotif.fromJson(j.cast<String, dynamic>()),
-            ],
-      };
+      if (raw != null && raw.isNotEmpty) {
+        final m = jsonDecode(raw) as Map<String, dynamic>;
+        loaded = {
+          for (final e in m.entries)
+            if (e.value is List)
+              e.key: [
+                for (final j in e.value as List)
+                  if (j is Map) WorkerNotif.fromJson(j.cast<String, dynamic>()),
+              ],
+        };
+      }
     } on Object catch (_) {
       // Corrupt/old payload — start empty (the feed refills from live events).
     }
+    _settle(loaded);
   }
 
-  Future<void> _persist() async {
+  /// Load finished: replay pending mutations onto [loaded] (null = nothing
+  /// stored / corrupt ⇒ onto an empty map) and persist the merge once.
+  void _settle(Map<String, List<WorkerNotif>>? loaded) {
+    if (_ready) return;
+    _ready = true;
+    var next = loaded ?? const <String, List<WorkerNotif>>{};
+    final hadPending = _pending.isNotEmpty;
+    for (final op in _pending) {
+      next = op(next);
+    }
+    _pending.clear();
+    // Disposed mid-load: still persist the merge so a pending write isn't lost.
+    if (mounted) state = next;
+    if (hadPending) _persist(next);
+  }
+
+  Future<void> _persist(Map<String, List<WorkerNotif>> snapshot) async {
     if (!persist) return;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         kWorkerNotifsKey,
         jsonEncode({
-          for (final e in state.entries)
+          for (final e in snapshot.entries)
             e.key: [for (final n in e.value) n.toJson()],
         }),
       );
     } on Object catch (_) {}
   }
 
-  void _set(Map<String, List<WorkerNotif>> next) {
-    _userTouched = true;
-    state = next;
-    _persist();
+  void _update(
+    Map<String, List<WorkerNotif>> Function(Map<String, List<WorkerNotif>>) op,
+  ) {
+    state = op(state);
+    // persist:false (tests) has no load to wait for — behave as loaded.
+    if (_ready || !persist) {
+      _persist(state);
+    } else {
+      _pending.add(op);
+    }
   }
 
   /// Append a notification to [username]'s feed (newest first, capped).
@@ -161,11 +192,12 @@ class WorkerNotifsNotifier
       body: body,
       ts: DateTime.now(),
     );
-    final cur = state[username] ?? const <WorkerNotif>[];
-    _set({
-      ...state,
-      username: [n, ...cur].take(kWorkerNotifsCap).toList(),
-    });
+    _update(
+      (m) => {
+        ...m,
+        username: [n, ...?m[username]].take(kWorkerNotifsCap).toList(),
+      },
+    );
   }
 
   /// Fan a notification out to every username logged in as seed-worker
@@ -183,14 +215,17 @@ class WorkerNotifsNotifier
 
   /// Mark one notification of [username] as read.
   void markRead(String username, String id) {
-    final cur = state[username];
-    if (cur == null) return;
-    _set({
-      ...state,
-      username: [
-        for (final n in cur)
-          if (n.id == id) n.copyWith(read: true) else n,
-      ],
+    if (state[username] == null) return;
+    _update((m) {
+      final cur = m[username];
+      if (cur == null) return m;
+      return {
+        ...m,
+        username: [
+          for (final n in cur)
+            if (n.id == id) n.copyWith(read: true) else n,
+        ],
+      };
     });
   }
 
@@ -198,9 +233,13 @@ class WorkerNotifsNotifier
   void markAllRead(String username) {
     final cur = state[username];
     if (cur == null || cur.every((n) => n.read)) return;
-    _set({
-      ...state,
-      username: [for (final n in cur) n.copyWith(read: true)],
+    _update((m) {
+      final c = m[username];
+      if (c == null) return m;
+      return {
+        ...m,
+        username: [for (final n in c) n.copyWith(read: true)],
+      };
     });
   }
 
@@ -208,14 +247,16 @@ class WorkerNotifsNotifier
   /// (`confirmDestructive`).
   void clear(String username) {
     if ((state[username] ?? const []).isEmpty) return;
-    _set({...state, username: const []});
+    _update((m) => {...m, username: const <WorkerNotif>[]});
   }
 }
 
 /// The per-username notification store (map). Most UI reads the derived
 /// [currentWorkerNotifsProvider] instead.
-final workerNotifsProvider = StateNotifierProvider<WorkerNotifsNotifier,
-    Map<String, List<WorkerNotif>>>((ref) => WorkerNotifsNotifier());
+final workerNotifsProvider =
+    StateNotifierProvider<WorkerNotifsNotifier, Map<String, List<WorkerNotif>>>(
+      (ref) => WorkerNotifsNotifier(),
+    );
 
 /// PURE GATE for the in-app worker/courier bell feed (notif_settings wiring,
 /// wave-2 batch-3). The feed for a given board role is SURFACED only when the
@@ -251,13 +292,13 @@ final currentWorkerNotifsProvider = Provider<List<WorkerNotif>>((ref) {
   // the HR vacation/training decisions posted by `addNotification`). The two
   // sources never share an id, so a plain union — newest-first — is correct. OFF
   // (server empty) → return the local list unchanged, byte-identical.
-  final server = ref.watch(workerNotifsServerProvider).asData?.value ?? const [];
+  final server =
+      ref.watch(workerNotifsServerProvider).asData?.value ?? const [];
   if (server.isEmpty) return local;
   return [...server, ...local]..sort((a, b) => b.ts.compareTo(a.ts));
 });
 
 /// Unread count for the bell badge on the worker board AppBar.
 final currentWorkerUnreadCountProvider = Provider<int>(
-  (ref) =>
-      ref.watch(currentWorkerNotifsProvider).where((n) => !n.read).length,
+  (ref) => ref.watch(currentWorkerNotifsProvider).where((n) => !n.read).length,
 );

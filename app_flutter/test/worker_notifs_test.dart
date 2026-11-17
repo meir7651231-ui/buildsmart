@@ -166,7 +166,10 @@ void main() {
 
     expect(n.state['ran']!.map((x) => x.title), contains('טרי'),
         reason: 'the fresh add must survive the late prefs load');
-    expect(n.state['ran']!.map((x) => x.title), isNot(contains('ישן')),
-        reason: 'the late load is dropped once a user write landed');
+    // Nightly 2026-11-17: the stored feed is no longer DROPPED — the fresh
+    // write is replayed on top of it (dropping it erased every other feed on
+    // the device; see late_load_replay_test.dart).
+    expect(n.state['ran']!.map((x) => x.title), ['טרי', 'ישן'],
+        reason: 'fresh add on top, stored history kept');
   });
 }

@@ -84,7 +84,9 @@ void main() {
         ..upsert(const SavedCustomer(id: '1', name: 'כהן', phone: '0501234567'))
         ..upsert(const SavedCustomer(id: '2', name: 'לוי'));
       expect(c.read(savedCustomersProvider), hasLength(2));
-      // persisted
+      // persisted — once the initial load settles (writes made before it are
+      // replayed on top of the stored list, then saved; nightly 2026-11-17).
+      await pumpEventQueue();
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString(kSavedCustomersKey), contains('כהן'));
       store.remove('1');
