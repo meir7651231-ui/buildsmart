@@ -3,7 +3,10 @@
 // backed out at the statutory rate so (sum-vat)+vat == sum always — no drift,
 // no fabricated subtotal. Line items are informational.
 
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/logic/invoice.dart';
+import 'package:buildsmart/logic/offline_order_queue.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -203,5 +206,44 @@ void main() {
       expect(n.state.first.deliveryFee, 45);
       n.dispose();
     });
+  });
+
+  test('Firestore codec keeps deliveryFee (toDoc → fromDoc)', () {
+    final repo = FirebaseOrdersRepository();
+    const o = Order(
+      id: 'BS-3001',
+      who: 'קבלן',
+      site: 'אתר',
+      items: 1,
+      sum: 1225,
+      stage: 'new',
+      deliveryFee: 45,
+    );
+    final doc = repo.toDoc(o);
+    expect(doc['deliveryFee'], 45);
+    final back = repo.fromDoc(RemoteDoc('BS-3001', doc));
+    expect(back.deliveryFee, 45);
+    expect(invoiceVatForOrder(back), 180);
+    const pickup = Order(
+      id: 'BS-3002',
+      who: 'a',
+      site: '',
+      items: 1,
+      sum: 100,
+      stage: 'new',
+    );
+    expect(repo.toDoc(pickup).containsKey('deliveryFee'), isFalse);
+  });
+
+  test('offline intent round-trips deliveryFee', () {
+    final i = OfflineOrderIntent(
+      who: 'a',
+      site: '',
+      items: 1,
+      sum: 1225,
+      queuedAt: DateTime(2026, 11, 17),
+      deliveryFee: 45,
+    );
+    expect(OfflineOrderIntent.fromJson(i.toJson()).deliveryFee, 45);
   });
 }

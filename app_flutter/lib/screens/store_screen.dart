@@ -80,8 +80,8 @@ Widget cartLineThumb(String productKey, String emoji, double emojiSize) {
     child: Image(
       image: resolveProductImage(img),
       fit: BoxFit.contain,
-      errorBuilder:
-          (_, __, ___) => Text(emoji, style: TextStyle(fontSize: emojiSize)),
+      errorBuilder: (_, __, ___) =>
+          Text(emoji, style: TextStyle(fontSize: emojiSize)),
     ),
   );
 }
@@ -173,7 +173,6 @@ CartPaymentMethod cartPaymentFor(StorePayment p) => switch (p) {
 final cartDeliveryProvider = StateProvider<CartDelivery>(
   (ref) => cartDeliveryFor(ref.read(storeSettingsProvider).selfPickupDefault),
 );
-
 /// The checkout's selected project (the order's recorded `site`). The projects
 /// engine is canonical: this holds only the *checkout selection*, and its
 /// default IS the active project's name. Watching [activeProjectProvider] means
@@ -374,10 +373,9 @@ const List<_CItem> _kCItems = [];
 
 // clean/company2 (kProfileEmptySeeds): only the FUNCTIONAL 'ללא פרויקט' bucket
 // survives — the two named projects are demo/buildsmart content.
-const _kProjects =
-    kProfileEmptySeeds
-        ? ['ללא פרויקט']
-        : ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
+const _kProjects = kProfileEmptySeeds
+    ? ['ללא פרויקט']
+    : ['בית דוד 3', 'מגדל עזריאלי', 'ללא פרויקט'];
 
 /// DEPRECATED / VESTIGIAL. The store-local project list. As of the
 /// projects-engine unification, the checkout picker reads the PROJECTS ENGINE
@@ -419,8 +417,8 @@ class StoreProjectsNotifier extends StateNotifier<List<String>> {
 /// projects engine ([projectsProvider]).
 final storeProjectsProvider =
     StateNotifierProvider<StoreProjectsNotifier, List<String>>(
-      (_) => StoreProjectsNotifier(),
-    );
+  (_) => StoreProjectsNotifier(),
+);
 
 typedef _DOption = ({CartDelivery method, String emoji, String label, int fee});
 typedef _POption = ({CartPaymentMethod method, String emoji, String label});
@@ -687,43 +685,43 @@ class _SectionChipsRow extends ConsumerWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _Pill(
-                    label: 'הכל',
-                    active: section == StoreSection.all,
-                    onTap: () => select(StoreSection.all),
-                  ),
-                  const SizedBox(width: 8),
-                  _Pill(
-                    label: '🛒 הסל',
-                    active: section == StoreSection.cart,
-                    onTap: () => select(StoreSection.cart),
-                  ),
-                  const SizedBox(width: 8),
-                  _Pill(
-                    label: '📦 הזמנות',
-                    active: section == StoreSection.orders,
-                    onTap: () => select(StoreSection.orders),
-                  ),
-                  // 🔧 שירותים — the whole section is "🚧 בבנייה" placeholder rows
-                  // (backend-blocked). Hidden for Apple review (kHideUnderConstruction);
-                  // the StoreSection enum + grid + sheets stay in code (reversible).
-                  // ORG GATE — entry also requires the orders module's 'services'
-                  // feature; org turned it OFF ⇒ no pill (demo/all-on: unchanged).
-                  if (!kHideUnderConstruction &&
-                      featOn(ref, 'orders', 'services')) ...[
-                    const SizedBox(width: 8),
-                    _Pill(
-                      label: '🔧 שירותים',
-                      active: section == StoreSection.services,
-                      onTap: () => select(StoreSection.services),
-                    ),
-                  ],
-                ],
-              ),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _Pill(
+              label: 'הכל',
+              active: section == StoreSection.all,
+              onTap: () => select(StoreSection.all),
             ),
+            const SizedBox(width: 8),
+            _Pill(
+              label: '🛒 הסל',
+              active: section == StoreSection.cart,
+              onTap: () => select(StoreSection.cart),
+            ),
+            const SizedBox(width: 8),
+            _Pill(
+              label: '📦 הזמנות',
+              active: section == StoreSection.orders,
+              onTap: () => select(StoreSection.orders),
+            ),
+            // 🔧 שירותים — the whole section is "🚧 בבנייה" placeholder rows
+            // (backend-blocked). Hidden for Apple review (kHideUnderConstruction);
+            // the StoreSection enum + grid + sheets stay in code (reversible).
+            // ORG GATE — entry also requires the orders module's 'services'
+            // feature; org turned it OFF ⇒ no pill (demo/all-on: unchanged).
+            if (!kHideUnderConstruction &&
+                featOn(ref, 'orders', 'services')) ...[
+              const SizedBox(width: 8),
+              _Pill(
+                label: '🔧 שירותים',
+                active: section == StoreSection.services,
+                onTap: () => select(StoreSection.services),
+              ),
+            ],
+          ],
+        ),
+      ),
           ),
           // 🔔 #52 — order/shipment notification toggles live HERE in the
           // orders world (relocated from settings). Shown only on 📦 הזמנות.
@@ -749,10 +747,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color:
-          active
-              ? BsTokens.brand
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
+      color: active ? BsTokens.brand : Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -1188,10 +1183,9 @@ class _AllList extends ConsumerWidget {
     final storeOrders = ref.watch(storeOrdersProvider);
     final openOrdersCount =
         storeOrders.where((o) => isOrderOpen(o.stage)).length;
-    final ordersPreview =
-        storeOrders.isEmpty
-            ? 'אין הזמנות פעילות'
-            : 'הזמנה ${storeOrders.first.id} · ${storeOrders.first.stageLabel}';
+    final ordersPreview = storeOrders.isEmpty
+        ? 'אין הזמנות פעילות'
+        : 'הזמנה ${storeOrders.first.id} · ${storeOrders.first.stageLabel}';
     // Drive view-mode from settings (list vs grid).
     final displayMode = ref.watch(
       storeSettingsProvider.select((s) => s.displayMode),
@@ -1212,14 +1206,14 @@ class _AllList extends ConsumerWidget {
                         badge: cartCount,
                       )
                       : m.emoji == '📦'
-                      ? (
-                        emoji: m.emoji,
-                        title: m.title,
-                        preview: ordersPreview,
-                        time: m.time,
-                        badge: openOrdersCount,
-                      )
-                      : m,
+                          ? (
+                            emoji: m.emoji,
+                            title: m.title,
+                            preview: ordersPreview,
+                            time: m.time,
+                            badge: openOrdersCount,
+                          )
+                          : m,
             )
             .toList();
     var items =
@@ -1269,10 +1263,8 @@ class _AllList extends ConsumerWidget {
           return _GridHubCard(
             item: item,
             isFav: favorites.contains(item.title),
-            onFavToggle:
-                () => ref
-                    .read(storeFavoritesProvider.notifier)
-                    .toggle(item.title),
+            onFavToggle: () =>
+                ref.read(storeFavoritesProvider.notifier).toggle(item.title),
             onTap: _tapFor(context, ref, item, svcIdx),
           );
         },
@@ -1377,10 +1369,7 @@ class _GridHubCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   item.preview,
-                  style: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 11,
-                  ),
+                  style: const TextStyle(color: Color(0xFF888888), fontSize: 11),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1490,8 +1479,7 @@ class _StoreRow extends StatelessWidget {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -1650,15 +1638,13 @@ class _CartViewState extends ConsumerState<_CartView> {
     // is needed and a rebuild cannot re-fire it. Scalar item_count only (§4).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref
-          .read(intelBusProvider)
-          .track(
-            IntelEvents.cartView,
-            props: {
-              'item_count':
-                  '${cartItemCount(ref.read(cartQtysProvider), ref.read(smartCartProvider))}',
-            },
-          );
+      ref.read(intelBusProvider).track(
+        IntelEvents.cartView,
+        props: {
+          'item_count':
+              '${cartItemCount(ref.read(cartQtysProvider), ref.read(smartCartProvider))}',
+        },
+      );
     });
   }
 
@@ -1843,8 +1829,7 @@ class _ProjectSelector extends ConsumerWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: const Color(0xFF444444)),
                     ),
@@ -1939,10 +1924,7 @@ class _ProjectChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color:
-              active
-                  ? BsTokens.brand
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: active ? BsTokens.brand : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -2112,7 +2094,9 @@ class _SmartQtyStepper extends StatelessWidget {
           child: SizedBox(
             width: 48,
             height: 48,
-            child: Center(child: Icon(icon, size: 18, color: BsTokens.brand)),
+            child: Center(
+              child: Icon(icon, size: 18, color: BsTokens.brand),
+            ),
           ),
         ),
       ),
@@ -2403,8 +2387,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                 decoration: InputDecoration(
                   hintText: 'כתובת / אתר העבודה',
                   filled: true,
-                  fillColor:
-                      Theme.of(sheetCtx).colorScheme.surfaceContainerHighest,
+                  fillColor: Theme.of(sheetCtx).colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -2440,10 +2423,7 @@ void openShipToSheet(BuildContext context, WidgetRef ref) {
                               ctrl.text.trim();
                           Navigator.pop(sheetCtx);
                         },
-                        child: const CfgText(
-                          'store_screen.shipto_save',
-                          'שמירה',
-                        ),
+                        child: const CfgText('store_screen.shipto_save', 'שמירה'),
                       ),
                     ),
                   ),
@@ -2742,10 +2722,7 @@ class _PaymentChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              active
-                  ? BsTokens.brand
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: active ? BsTokens.brand : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
           border: active ? null : Border.all(color: const Color(0xFF444444)),
         ),
@@ -2803,9 +2780,7 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
         style: ElevatedButton.styleFrom(
           backgroundColor: BsTokens.brand,
           foregroundColor: Color(0xFFFFFFFF),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
         onPressed: _inFlight ? null : () => _checkout(context),
@@ -2855,10 +2830,7 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
                     'store_screen.large_order_cancel',
                     child: TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const CfgText(
-                        'store_screen.large_order_cancel',
-                        'ביטול',
-                      ),
+                      child: const CfgText('store_screen.large_order_cancel', 'ביטול'),
                     ),
                   ),
                   // composite hide: hiding 'store_screen.large_order_confirm'
@@ -2867,13 +2839,8 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
                     'store_screen.large_order_confirm',
                     child: TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      style: TextButton.styleFrom(
-                        foregroundColor: BsTokens.brand,
-                      ),
-                      child: const CfgText(
-                        'store_screen.large_order_confirm',
-                        'אשר והמשך',
-                      ),
+                      style: TextButton.styleFrom(foregroundColor: BsTokens.brand),
+                      child: const CfgText('store_screen.large_order_confirm', 'אשר והמשך'),
                     ),
                   ),
                 ],
@@ -2892,16 +2859,14 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
     // this tap-driven handler (reached only after the min-order + large-order
     // gates pass in _checkout), never from build(). Scalar props only
     // (§4 allow-set {item_count, sum}); widget.total is the same total shown.
-    ref
-        .read(intelBusProvider)
-        .track(
-          IntelEvents.checkoutStart,
-          props: {
-            'item_count':
-                '${cartItemCount(ref.read(cartQtysProvider), ref.read(smartCartProvider))}',
-            'sum': '${widget.total}',
-          },
-        );
+    ref.read(intelBusProvider).track(
+      IntelEvents.checkoutStart,
+      props: {
+        'item_count':
+            '${cartItemCount(ref.read(cartQtysProvider), ref.read(smartCartProvider))}',
+        'sum': '${widget.total}',
+      },
+    );
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -2909,11 +2874,10 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder:
-          (_) => _CheckoutSheet(
-            total: widget.total,
-            deliveryFee: widget.deliveryFee,
-          ),
+      builder: (_) => _CheckoutSheet(
+        total: widget.total,
+        deliveryFee: widget.deliveryFee,
+      ),
     );
   }
 }
@@ -3075,180 +3039,164 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             CfgVisible(
               'shop.checkout.confirm',
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: BsTokens.brand,
-                  foregroundColor: Color(0xFFFFFFFF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BsTokens.brand,
+                foregroundColor: Color(0xFFFFFFFF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                onPressed:
-                    _confirmed
-                        ? null
-                        : () {
-                          // One-shot guard: ignore any tap after the first.
-                          if (_confirmed) return;
-                          // U2.5 — ordering requires a REGISTERED, APPROVED person.
-                          //
-                          // This gate used to read `userProfileProvider.registered`, and
-                          // that flag decides nothing: it is a device-local
-                          // SharedPreferences bool that `user_profile.dart` flips true the
-                          // moment a name and a contact validate. Anyone — including the
-                          // anonymous catalog guest, who has no account at all — could
-                          // type two fields into the profile screen and walk through. The
-                          // order then landed on the store and courier boards
-                          // indistinguishable from an approved contractor's.
-                          //
-                          // It now asks the same two questions the security rules ask, in
-                          // the same order, so the client's answer and the server's cannot
-                          // disagree: is this a real person, and have they been approved.
-                          // The rules are what actually enforce it (`isActive()` on the
-                          // orders create); this exists so the refusal arrives as Hebrew
-                          // in front of the person instead of a silent permission-denied
-                          // after the cart has already been cleared.
-                          //
-                          // Each refusal now carries the action that resolves it. The old
-                          // one said "register" and stopped there, pointing at a screen an
-                          // already-signed-in person cannot reach — a dead end that left
-                          // closing the app as the only move.
-                          final block = checkoutBlock(
-                            userSystemOn: kUserSystem,
-                            isRealUser:
-                                ref.read(authStateProvider).user?.isRealUser ??
-                                false,
-                            isPending: ref.read(pendingApprovalProvider),
-                          );
-                          switch (block) {
-                            case CheckoutBlock.notRegistered:
-                              showToast(context, 'יש להירשם כדי לבצע הזמנה');
-                              unawaited(showLoginSheet(context));
-                              return;
-                            case CheckoutBlock.pendingApproval:
-                              showToast(
-                                context,
-                                'החשבון ממתין לאישור — אפשר לשלוח בקשת תפקיד',
-                              );
-                              showRoleRequestSheet(context);
-                              return;
-                            case CheckoutBlock.none:
-                              break;
-                          }
-                          setState(() => _confirmed = true);
-                          final itemCount = cartItemCount(
-                            ref.read(cartQtysProvider),
-                            ref.read(smartCartProvider),
-                          );
-                          // Capture cart lines for the order detail view before clearing.
-                          final smartLines = ref.read(smartCartProvider);
-                          final capturedLines =
-                              smartLines
-                                  .map(
-                                    (l) => OrderLineItem(
-                                      name: l.productName,
-                                      emoji: l.productEmoji,
-                                      qty: l.productQty,
-                                      price: l.total,
-                                    ),
-                                  )
-                                  .toList();
-                          // Capture shipTo + notes before clearing the cart state.
-                          final shipTo = ref.read(shipToProvider);
-                          final notes = ref.read(cartNotesProvider);
-                          final contractor =
-                              ref.read(userProfileProvider).name.trim();
-                          // A3 (launch uid) — stamp the signed-in contractor's auth.uid on
-                          // the order (additive; '' when signed-out / Firebase-free). The
-                          // display still uses [who]; A4 will scope the listen on this.
-                          final contractorUid =
-                              ref.read(currentUidProvider) ?? '';
-                          // stage-3.3 St3 — stamp the placer's `orgId` custom claim at
-                          // CREATE time only ('' when signed-out / claim-less). It
-                          // round-trips on the model from here on, so stage-advance
-                          // diffs stay {stage,claim} (the rules' hasOnly gate).
-                          final orgId = ref.read(currentOrgIdProvider) ?? '';
-                          // The placer's phone (profile `contact`) — stamped so the
-                          // store/courier/manager order card can show the 📞/💬 buttons
-                          // reaching the contractor who placed this order. Empty (e.g. a
-                          // demo user with no contact, or an email-only contact) → the
-                          // card shows no buttons (ContactActions' own empty-guard).
-                          final customerPhone =
-                              ref.read(userProfileProvider).contact;
-                          // Buyer email for the order-confirmation email — stamped ONLY when
-                          // kOrderEmail is on (else '' ⇒ byte-identical order doc). The
-                          // server send is separately gated (ORDER_EMAIL + RESEND_API_KEY),
-                          // so no email leaves until the owner turns both on.
-                          final customerEmail =
-                              kOrderEmail
-                                  ? (ref.read(authStateProvider).user?.email ??
-                                      '')
-                                  : '';
-                          // Single placeOrder call — ONE id, ONE stage, persisted via
-                          // the engine's bs.orders.v1 key. storeOrdersProvider derives
-                          // from the engine so the orders list updates automatically.
-                          final placed = ref
-                              .read(ordersEngineProvider.notifier)
-                              .placeOrder(
-                                who: contractor.isEmpty ? 'קבלן' : contractor,
-                                site: ref.read(cartProjectProvider),
-                                items: itemCount,
-                                sum: widget.total,
-                                lines: capturedLines,
-                                shipTo: shipTo,
-                                notes: notes,
-                                contractorUid: contractorUid,
-                                orgId: orgId,
-                                customerPhone: customerPhone,
-                                customerEmail: customerEmail,
-                                deliveryFee: widget.deliveryFee,
-                              );
-                          // G4 — key funnel event: a contractor completed checkout. Only
-                          // forwards to FirebaseAnalytics when Firebase is up; a no-op on
-                          // the demo path (byte-identical). Params kept honest + minimal.
-                          ref
-                              .read(telemetryProvider)
-                              .logEvent(
-                                TelemetryEvents.orderPlaced,
-                                params: {
-                                  'order_id': placed.id,
-                                  'items': itemCount,
-                                  'sum': widget.total,
-                                },
-                              );
-                          // Mirror into storeOrdersProvider for legacy test compatibility:
-                          // the test checks storeOrdersProvider.first.items == '$n פריטים'.
-                          // Since storeOrdersProvider is now a derived Provider (not
-                          // StateProvider), it already reflects the placed order via the
-                          // engine — no explicit write needed.
-                          // Clear the cart + notes + checkout fields.
-                          ref.read(smartCartProvider.notifier).clear();
-                          ref.read(cartQtysProvider.notifier).state = const {};
-                          ref.read(cartNotesProvider.notifier).state = '';
-                          ref.read(shipToProvider.notifier).state = '';
-                          ref
-                              .read(cartDeliveryProvider.notifier)
-                              .state = cartDeliveryFor(
-                            ref.read(storeSettingsProvider).selfPickupDefault,
-                          );
-                          ref
-                              .read(cartPaymentProvider.notifier)
-                              .state = cartPaymentFor(
-                            ref.read(storeSettingsProvider).defaultPayment,
-                          );
-                          // Projects engine is canonical: reset the checkout selection
-                          // back to the currently-active project (not the retired
-                          // store-seed default), so the next order again defaults to it.
-                          ref.read(cartProjectProvider.notifier).state =
-                              ref.read(activeProjectProvider).name;
-                          Navigator.pop(context);
-                          showToast(context, 'הזמנה ${placed.id} אושרה! 🎉');
-                        },
-                child: const CfgText(
-                  'shop.checkout.confirm',
-                  'אישור הזמנה',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              onPressed: _confirmed ? null : () {
+                // One-shot guard: ignore any tap after the first.
+                if (_confirmed) return;
+                // U2.5 — ordering requires a REGISTERED, APPROVED person.
+                //
+                // This gate used to read `userProfileProvider.registered`, and
+                // that flag decides nothing: it is a device-local
+                // SharedPreferences bool that `user_profile.dart` flips true the
+                // moment a name and a contact validate. Anyone — including the
+                // anonymous catalog guest, who has no account at all — could
+                // type two fields into the profile screen and walk through. The
+                // order then landed on the store and courier boards
+                // indistinguishable from an approved contractor's.
+                //
+                // It now asks the same two questions the security rules ask, in
+                // the same order, so the client's answer and the server's cannot
+                // disagree: is this a real person, and have they been approved.
+                // The rules are what actually enforce it (`isActive()` on the
+                // orders create); this exists so the refusal arrives as Hebrew
+                // in front of the person instead of a silent permission-denied
+                // after the cart has already been cleared.
+                //
+                // Each refusal now carries the action that resolves it. The old
+                // one said "register" and stopped there, pointing at a screen an
+                // already-signed-in person cannot reach — a dead end that left
+                // closing the app as the only move.
+                final block = checkoutBlock(
+                  userSystemOn: kUserSystem,
+                  isRealUser:
+                      ref.read(authStateProvider).user?.isRealUser ?? false,
+                  isPending: ref.read(pendingApprovalProvider),
+                );
+                switch (block) {
+                  case CheckoutBlock.notRegistered:
+                    showToast(context, 'יש להירשם כדי לבצע הזמנה');
+                    unawaited(showLoginSheet(context));
+                    return;
+                  case CheckoutBlock.pendingApproval:
+                    showToast(
+                      context,
+                      'החשבון ממתין לאישור — אפשר לשלוח בקשת תפקיד',
+                    );
+                    showRoleRequestSheet(context);
+                    return;
+                  case CheckoutBlock.none:
+                    break;
+                }
+                setState(() => _confirmed = true);
+                final itemCount = cartItemCount(
+                  ref.read(cartQtysProvider),
+                  ref.read(smartCartProvider),
+                );
+                // Capture cart lines for the order detail view before clearing.
+                final smartLines = ref.read(smartCartProvider);
+                final capturedLines = smartLines
+                    .map(
+                      (l) => OrderLineItem(
+                        name: l.productName,
+                        emoji: l.productEmoji,
+                        qty: l.productQty,
+                        price: l.total,
+                      ),
+                    )
+                    .toList();
+                // Capture shipTo + notes before clearing the cart state.
+                final shipTo = ref.read(shipToProvider);
+                final notes = ref.read(cartNotesProvider);
+                final contractor = ref.read(userProfileProvider).name.trim();
+                // A3 (launch uid) — stamp the signed-in contractor's auth.uid on
+                // the order (additive; '' when signed-out / Firebase-free). The
+                // display still uses [who]; A4 will scope the listen on this.
+                final contractorUid = ref.read(currentUidProvider) ?? '';
+                // stage-3.3 St3 — stamp the placer's `orgId` custom claim at
+                // CREATE time only ('' when signed-out / claim-less). It
+                // round-trips on the model from here on, so stage-advance
+                // diffs stay {stage,claim} (the rules' hasOnly gate).
+                final orgId = ref.read(currentOrgIdProvider) ?? '';
+                // The placer's phone (profile `contact`) — stamped so the
+                // store/courier/manager order card can show the 📞/💬 buttons
+                // reaching the contractor who placed this order. Empty (e.g. a
+                // demo user with no contact, or an email-only contact) → the
+                // card shows no buttons (ContactActions' own empty-guard).
+                final customerPhone = ref.read(userProfileProvider).contact;
+                // Buyer email for the order-confirmation email — stamped ONLY when
+                // kOrderEmail is on (else '' ⇒ byte-identical order doc). The
+                // server send is separately gated (ORDER_EMAIL + RESEND_API_KEY),
+                // so no email leaves until the owner turns both on.
+                final customerEmail = kOrderEmail
+                    ? (ref.read(authStateProvider).user?.email ?? '')
+                    : '';
+                // Single placeOrder call — ONE id, ONE stage, persisted via
+                // the engine's bs.orders.v1 key. storeOrdersProvider derives
+                // from the engine so the orders list updates automatically.
+                final placed = ref.read(ordersEngineProvider.notifier).placeOrder(
+                      who: contractor.isEmpty ? 'קבלן' : contractor,
+                      site: ref.read(cartProjectProvider),
+                      items: itemCount,
+                      sum: widget.total,
+                      lines: capturedLines,
+                      shipTo: shipTo,
+                      notes: notes,
+                      contractorUid: contractorUid,
+                      orgId: orgId,
+                      customerPhone: customerPhone,
+                      customerEmail: customerEmail,
+                      deliveryFee: widget.deliveryFee,
+                    );
+                // G4 — key funnel event: a contractor completed checkout. Only
+                // forwards to FirebaseAnalytics when Firebase is up; a no-op on
+                // the demo path (byte-identical). Params kept honest + minimal.
+                ref.read(telemetryProvider).logEvent(
+                  TelemetryEvents.orderPlaced,
+                  params: {
+                    'order_id': placed.id,
+                    'items': itemCount,
+                    'sum': widget.total,
+                  },
+                );
+                // Mirror into storeOrdersProvider for legacy test compatibility:
+                // the test checks storeOrdersProvider.first.items == '$n פריטים'.
+                // Since storeOrdersProvider is now a derived Provider (not
+                // StateProvider), it already reflects the placed order via the
+                // engine — no explicit write needed.
+                // Clear the cart + notes + checkout fields.
+                ref.read(smartCartProvider.notifier).clear();
+                ref.read(cartQtysProvider.notifier).state = const {};
+                ref.read(cartNotesProvider.notifier).state = '';
+                ref.read(shipToProvider.notifier).state = '';
+                ref.read(cartDeliveryProvider.notifier).state =
+                    cartDeliveryFor(
+                      ref.read(storeSettingsProvider).selfPickupDefault,
+                    );
+                ref.read(cartPaymentProvider.notifier).state =
+                    cartPaymentFor(
+                      ref.read(storeSettingsProvider).defaultPayment,
+                    );
+                // Projects engine is canonical: reset the checkout selection
+                // back to the currently-active project (not the retired
+                // store-seed default), so the next order again defaults to it.
+                ref.read(cartProjectProvider.notifier).state =
+                    ref.read(activeProjectProvider).name;
+                Navigator.pop(context);
+                showToast(context, 'הזמנה ${placed.id} אושרה! 🎉');
+              },
+              child: const CfgText(
+                'shop.checkout.confirm',
+                'אישור הזמנה',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
             ),
             const SizedBox(height: 20),
           ],
@@ -3311,39 +3259,39 @@ class _CartActionsRow extends ConsumerWidget {
               CfgVisible(
                 'store_screen.save_list_confirm',
                 child: TextButton(
-                  onPressed: () {
-                    if (controller.text.trim().isEmpty) {
-                      showToast(context, 'שם הרשימה לא יכול להיות ריק');
-                      return;
-                    }
-                    final lines = ref.read(smartCartProvider);
-                    if (lines.isEmpty) {
-                      showToast(context, 'הסל ריק');
-                      return;
-                    }
-                    final items =
-                        lines
-                            .map(
-                              (l) => (
-                                emoji: l.productEmoji,
-                                name: l.productName,
-                                qty: l.productQty,
-                                price: '₪${l.total}',
-                              ),
-                            )
-                            .toList();
-                    ref
-                        .read(cartListsProvider.notifier)
-                        .saveCart(controller.text.trim(), items);
-                    Navigator.pop(context);
-                    showToast(context, 'הרשימה נשמרה בהצלחה');
-                  },
-                  child: const CfgText(
-                    'store_screen.save_list_confirm',
-                    'שמור',
-                    style: TextStyle(color: BsTokens.brand),
-                  ),
+                onPressed: () {
+                  if (controller.text.trim().isEmpty) {
+                    showToast(context, 'שם הרשימה לא יכול להיות ריק');
+                    return;
+                  }
+                  final lines = ref.read(smartCartProvider);
+                  if (lines.isEmpty) {
+                    showToast(context, 'הסל ריק');
+                    return;
+                  }
+                  final items =
+                      lines
+                          .map(
+                            (l) => (
+                              emoji: l.productEmoji,
+                              name: l.productName,
+                              qty: l.productQty,
+                              price: '₪${l.total}',
+                            ),
+                          )
+                          .toList();
+                  ref
+                      .read(cartListsProvider.notifier)
+                      .saveCart(controller.text.trim(), items);
+                  Navigator.pop(context);
+                  showToast(context, 'הרשימה נשמרה בהצלחה');
+                },
+                child: const CfgText(
+                  'store_screen.save_list_confirm',
+                  'שמור',
+                  style: TextStyle(color: BsTokens.brand),
                 ),
+              ),
               ),
             ],
           ),
@@ -3357,12 +3305,9 @@ class _CartActionsRow extends ConsumerWidget {
   /// brandPrice is the per-unit share of the parsed total, accessories empty.
   static void _loadItem(WidgetRef ref, CartItem item) {
     // Strip the '₪' (and any separators) from the saved total string.
-    final total =
-        int.tryParse(item.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    final total = int.tryParse(item.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     final r = savedLineReconstruct(total, item.qty);
-    ref
-        .read(smartCartProvider.notifier)
-        .add(
+    ref.read(smartCartProvider.notifier).add(
           SmartCartLine(
             productKey: 'saved:${item.name}',
             productName: item.name,
@@ -3545,64 +3490,66 @@ class _CartActionsRow extends ConsumerWidget {
           CfgVisible(
             'store_screen.actions_share',
             child: TextButton.icon(
-              onPressed: () async {
-                final lines = ref.read(smartCartProvider);
-                if (lines.isEmpty) {
-                  showToast(context, 'הסל ריק');
-                  return;
-                }
-                final items = lines
-                    .map(
-                      (l) =>
-                          '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
-                    )
-                    .join('\n');
-                // Real share — hand the cart summary to the native/Web share sheet
-                // (via the injectable seam so a test captures the exact text).
-                final total = lines.fold<int>(0, (s, l) => s + l.total);
-                final text = 'סל ${AppBrand.name}:\n$items\n\nסה״כ: ₪$total';
-                await ref.read(shareTextProvider)(text);
-              },
-              icon: const Icon(Icons.share_outlined, size: 16),
-              label: const CfgText('store_screen.actions_share', 'שתף'),
-              style: TextButton.styleFrom(foregroundColor: Colors.black38),
-            ),
+            onPressed: () async {
+              final lines = ref.read(smartCartProvider);
+              if (lines.isEmpty) {
+                showToast(context, 'הסל ריק');
+                return;
+              }
+              final items = lines
+                  .map(
+                    (l) =>
+                        '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
+                  )
+                  .join('\n');
+              // Real share — hand the cart summary to the native/Web share sheet
+              // (via the injectable seam so a test captures the exact text).
+              final total = lines.fold<int>(0, (s, l) => s + l.total);
+              final text = 'סל ${AppBrand.name}:\n$items\n\nסה״כ: ₪$total';
+              await ref.read(shareTextProvider)(text);
+            },
+            icon: const Icon(Icons.share_outlined, size: 16),
+            label: const CfgText('store_screen.actions_share', 'שתף'),
+            style: TextButton.styleFrom(foregroundColor: Colors.black38),
+          ),
           ),
         // composite hide: an org that hides 'store_screen.actions_clear' removes
         // the whole button (not an empty shell); absent config ⇒ verbatim.
         CfgVisible(
           'store_screen.actions_clear',
           child: TextButton.icon(
-            onPressed: () async {
-              final ok = await confirmDestructive(
-                context,
-                title: 'ניקוי הסל?',
-                message: 'כל הפריטים יוסרו מהסל.',
-                confirmLabel: 'נקה',
-              );
-              if (!ok || !context.mounted) return;
-              ref.read(smartCartProvider.notifier).clear();
-              ref.read(cartQtysProvider.notifier).state = const {};
-              ref.read(cartNotesProvider.notifier).state = '';
-              ref.read(shipToProvider.notifier).state = '';
-              ref.read(cartDeliveryProvider.notifier).state = cartDeliveryFor(
-                ref.read(storeSettingsProvider).selfPickupDefault,
-              );
-              ref.read(cartPaymentProvider.notifier).state = cartPaymentFor(
-                ref.read(storeSettingsProvider).defaultPayment,
-              );
-              // Canonical: clearing the cart resets the checkout selection to the
-              // active project (the retired store-seed default is no longer used).
-              ref.read(cartProjectProvider.notifier).state =
-                  ref.read(activeProjectProvider).name;
-              showToast(context, 'הסל נוקה');
-            },
-            icon: const Icon(Icons.delete_outline, size: 16),
-            label: const CfgText('store_screen.actions_clear', 'נקה'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.redAccent.withValues(alpha: 0.8),
-            ),
+          onPressed: () async {
+            final ok = await confirmDestructive(
+              context,
+              title: 'ניקוי הסל?',
+              message: 'כל הפריטים יוסרו מהסל.',
+              confirmLabel: 'נקה',
+            );
+            if (!ok || !context.mounted) return;
+            ref.read(smartCartProvider.notifier).clear();
+            ref.read(cartQtysProvider.notifier).state = const {};
+            ref.read(cartNotesProvider.notifier).state = '';
+            ref.read(shipToProvider.notifier).state = '';
+            ref.read(cartDeliveryProvider.notifier).state =
+                cartDeliveryFor(
+                  ref.read(storeSettingsProvider).selfPickupDefault,
+                );
+            ref.read(cartPaymentProvider.notifier).state =
+                cartPaymentFor(
+                  ref.read(storeSettingsProvider).defaultPayment,
+                );
+            // Canonical: clearing the cart resets the checkout selection to the
+            // active project (the retired store-seed default is no longer used).
+            ref.read(cartProjectProvider.notifier).state =
+                ref.read(activeProjectProvider).name;
+            showToast(context, 'הסל נוקה');
+          },
+          icon: const Icon(Icons.delete_outline, size: 16),
+          label: const CfgText('store_screen.actions_clear', 'נקה'),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.redAccent.withValues(alpha: 0.8),
           ),
+        ),
         ),
       ],
     );
@@ -3771,11 +3718,17 @@ class _ServiceSheet extends StatelessWidget {
             (r) => ListTile(
               leading: Text(
                 r.emoji,
-                style: const TextStyle(fontSize: 22, color: Color(0xFF888888)),
+                style: const TextStyle(
+                  fontSize: 22,
+                  color: Color(0xFF888888),
+                ),
               ),
               title: Text(
                 r.label,
-                style: const TextStyle(color: Color(0xFF888888), fontSize: 15),
+                style: const TextStyle(
+                  color: Color(0xFF888888),
+                  fontSize: 15,
+                ),
               ),
               subtitle:
                   r.sub.isEmpty
@@ -3793,25 +3746,25 @@ class _ServiceSheet extends StatelessWidget {
               trailing: CfgVisible(
                 'store_screen.service_under_construction',
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF9C4),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: const Color(0xFFFFD600)),
-                  ),
-                  child: const CfgText(
-                    'store_screen.service_under_construction',
-                    '🚧 בבנייה',
-                    style: TextStyle(
-                      color: Color(0xFF795548),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF9C4),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: const Color(0xFFFFD600)),
+                ),
+                child: const CfgText(
+                  'store_screen.service_under_construction',
+                  '🚧 בבנייה',
+                  style: TextStyle(
+                    color: Color(0xFF795548),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
               ),
               // Non-actionable: tapping shows the placeholder toast but the
               // disabled visual (muted colors + badge) signals it clearly.
@@ -3840,24 +3793,24 @@ typedef _Order =
 /// Map an engine stage string to the Hebrew label + color used in the
 /// contractor view — single place so stage labels never drift.
 String _stageLabelFor(String stage) => switch (stage) {
-  'new' => 'התקבלה 🆕',
-  'preparing' => 'בהכנה 🔧',
-  'ready' => 'מוכן 📦',
-  'pickup' => 'ממתין לאיסוף 🏪',
-  'transit' => 'בדרך 🚛',
-  'delivered' => 'נמסר ✓',
-  _ => stage,
-};
+      'new' => 'התקבלה 🆕',
+      'preparing' => 'בהכנה 🔧',
+      'ready' => 'מוכן 📦',
+      'pickup' => 'ממתין לאיסוף 🏪',
+      'transit' => 'בדרך 🚛',
+      'delivered' => 'נמסר ✓',
+      _ => stage,
+    };
 
 Color _stageColorFor(String stage) => switch (stage) {
-  'new' => const Color(0xFF9C27B0),
-  'preparing' => const Color(0xFFFF9800),
-  'ready' => const Color(0xFF2196F3),
-  'pickup' => const Color(0xFF00BCD4),
-  'transit' => const Color(0xFF4CAF50),
-  'delivered' => const Color(0xFF888888),
-  _ => const Color(0xFF888888),
-};
+      'new' => const Color(0xFF9C27B0),
+      'preparing' => const Color(0xFFFF9800),
+      'ready' => const Color(0xFF2196F3),
+      'pickup' => const Color(0xFF00BCD4),
+      'transit' => const Color(0xFF4CAF50),
+      'delivered' => const Color(0xFF888888),
+      _ => const Color(0xFF888888),
+    };
 
 String _orderTimeFor(Order o) {
   final dt = o.createdAt;
@@ -3868,14 +3821,14 @@ String _orderTimeFor(Order o) {
 /// Map a live engine [Order] to the view-model [_Order] the contractor UI reads.
 /// Always reads the LIVE stage so manager/courier advances are reflected.
 _Order _orderViewOf(Order o) => (
-  id: o.id,
-  items: '${o.items} פריטים',
-  total: _price(o.sum),
-  stage: o.stage,
-  stageLabel: _stageLabelFor(o.stage),
-  time: _orderTimeFor(o),
-  stageColor: _stageColorFor(o.stage),
-);
+      id: o.id,
+      items: '${o.items} פריטים',
+      total: _price(o.sum),
+      stage: o.stage,
+      stageLabel: _stageLabelFor(o.stage),
+      time: _orderTimeFor(o),
+      stageColor: _stageColorFor(o.stage),
+    );
 
 /// The contractor order list — the live engine orders only (stage is always
 /// read LIVE so manager/courier advances are reflected). A fresh contractor
@@ -3922,7 +3875,6 @@ class _OrdersList extends ConsumerWidget {
           final digits = s.replaceAll(RegExp('[^0-9]'), '');
           return int.tryParse(digits) ?? 0;
         }
-
         return parsePrice(a.total).compareTo(parsePrice(b.total));
       });
     }
@@ -3964,63 +3916,53 @@ class _OrdersHidden extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(
-      builder:
-          (context, constraints) => SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: SizedBox(
-              height: constraints.maxHeight,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🔒', style: TextStyle(fontSize: 48)),
-                      const SizedBox(height: 12),
-                      const CfgText(
-                        'shop.orders.hidden',
-                        'היסטוריית הרכישות מוסתרת',
-                        style: TextStyle(
-                          color: BsTokens.inkLight,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      const CfgText(
-                        'store_screen.orders_hidden_hint',
-                        'הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות.',
-                        style: TextStyle(
-                          color: Color(0xFF888888),
-                          fontSize: 13,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      // composite hide: hiding 'store_screen.orders_hidden_show'
-                      // removes the whole button; absent config ⇒ verbatim.
-                      CfgVisible(
-                        'store_screen.orders_hidden_show',
-                        child: OutlinedButton(
-                          onPressed:
-                              () => ref
-                                  .read(storeSettingsProvider.notifier)
-                                  .update(
-                                    (s) => s.copyWith(purchaseHistory: true),
-                                  ),
-                          child: const CfgText(
-                            'store_screen.orders_hidden_show',
-                            'הצג היסטוריה',
-                          ),
-                        ),
-                      ),
-                    ],
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: constraints.maxHeight,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('🔒', style: TextStyle(fontSize: 48)),
+                  const SizedBox(height: 12),
+                  const CfgText(
+                    'shop.orders.hidden',
+                    'היסטוריית הרכישות מוסתרת',
+                    style: TextStyle(
+                      color: BsTokens.inkLight,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                  const SizedBox(height: 6),
+                  const CfgText(
+                    'store_screen.orders_hidden_hint',
+                    'הפעלת "היסטוריית רכישות" בהגדרות תציג שוב את ההזמנות.',
+                    style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  // composite hide: hiding 'store_screen.orders_hidden_show'
+                  // removes the whole button; absent config ⇒ verbatim.
+                  CfgVisible(
+                    'store_screen.orders_hidden_show',
+                    child: OutlinedButton(
+                    onPressed: () => ref
+                        .read(storeSettingsProvider.notifier)
+                        .update((s) => s.copyWith(purchaseHistory: true)),
+                    child: const CfgText('store_screen.orders_hidden_show', 'הצג היסטוריה'),
+                  ),
+                  ),
+                ],
               ),
             ),
           ),
+        ),
+      ),
     );
   }
 }
@@ -4166,245 +4108,232 @@ class _OrderSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'הזמנה ${order.id}',
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: order.stageColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: order.stageColor.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Text(
-                  order.stageLabel,
-                  style: TextStyle(
-                    color: order.stageColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  color: Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${order.items} · ${order.total}${order.time.isNotEmpty ? ' · ${order.time}' : ''}',
-            style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
-          ),
-          // Show ship-to address if set.
-          if (shipTo.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            ),
+            const SizedBox(height: 16),
             Row(
               children: [
-                const Text('📍', style: TextStyle(fontSize: 13)),
-                const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    shipTo,
+                    'הזמנה ${order.id}',
                     style: const TextStyle(
-                      color: Color(0xFF555555),
-                      fontSize: 12,
+                      color: BsTokens.inkLight,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ],
-          // Show courier notes if set.
-          if (notes.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Text('📝', style: TextStyle(fontSize: 13)),
-                const SizedBox(width: 4),
-                Expanded(
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: order.stageColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: order.stageColor.withValues(alpha: 0.4),
+                    ),
+                  ),
                   child: Text(
-                    notes,
-                    style: const TextStyle(
-                      color: Color(0xFF555555),
+                    order.stageLabel,
+                    style: TextStyle(
+                      color: order.stageColor,
                       fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ],
             ),
-          ],
-          const SizedBox(height: 12),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          if (lines.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: CfgText(
-                'store_screen.order_no_items',
-                'פרטי הפריטים אינם זמינים',
-                style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-                textAlign: TextAlign.center,
-              ),
-            )
-          else
-            ...lines.map(
-              (line) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    Text(line.emoji, style: const TextStyle(fontSize: 18)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        line.name,
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '× ${line.qty}',
-                      style: const TextStyle(
-                        color: Color(0xFF888888),
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      _price(line.price),
-                      style: const TextStyle(
-                        color: BsTokens.inkLight,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const SizedBox(height: 4),
+            Text(
+              '${order.items} · ${order.total}${order.time.isNotEmpty ? ' · ${order.time}' : ''}',
+              style: const TextStyle(color: Color(0xFF888888), fontSize: 13),
             ),
-          const Divider(color: Color(0xFFF5F5F5), height: 1),
-          const SizedBox(height: 12),
-          if (lines.isNotEmpty) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const CfgText(
-                  'store_screen.order_subtotal',
-                  'סכום ביניים',
-                  style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-                ),
-                Text(
-                  _price(lineSubtotal),
-                  style: const TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            if (extras != 0) ...[
-              const SizedBox(height: 6),
+            // Show ship-to address if set.
+            if (shipTo.isNotEmpty) ...[
+              const SizedBox(height: 4),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const CfgText(
-                    'store_screen.order_vat_delivery',
-                    'מע"מ + משלוח',
-                    style: TextStyle(color: Color(0xFF888888), fontSize: 13),
-                  ),
-                  Text(
-                    _price(extras),
-                    style: const TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 13,
+                  const Text('📍', style: TextStyle(fontSize: 13)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      shipTo,
+                      style: const TextStyle(
+                        color: Color(0xFF555555),
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
               ),
             ],
-            const SizedBox(height: 8),
-          ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const CfgText(
-                'store_screen.order_total',
-                'סה"כ',
+            // Show courier notes if set.
+            if (notes.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Text('📝', style: TextStyle(fontSize: 13)),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      notes,
+                      style: const TextStyle(
+                        color: Color(0xFF555555),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            const Divider(color: Color(0xFFF5F5F5), height: 1),
+            if (lines.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CfgText(
+                  'store_screen.order_no_items',
+                  'פרטי הפריטים אינם זמינים',
+                  style: TextStyle(color: Color(0xFF888888), fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            else
+              ...lines.map(
+                (line) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    children: [
+                      Text(
+                        line.emoji,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          line.name,
+                          style: const TextStyle(
+                            color: BsTokens.inkLight,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '× ${line.qty}',
+                        style: const TextStyle(
+                          color: Color(0xFF888888),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _price(line.price),
+                        style: const TextStyle(
+                          color: BsTokens.inkLight,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            const Divider(color: Color(0xFFF5F5F5), height: 1),
+            const SizedBox(height: 12),
+            if (lines.isNotEmpty) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const CfgText('store_screen.order_subtotal', 'סכום ביניים',
+                      style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                  Text(_price(lineSubtotal),
+                      style:
+                          const TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                ],
+              ),
+              if (extras != 0) ...[
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const CfgText('store_screen.order_vat_delivery', 'מע"מ + משלוח',
+                        style:
+                            TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                    Text(_price(extras),
+                        style: const TextStyle(
+                            color: Color(0xFF888888), fontSize: 13)),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const CfgText(
+                  'store_screen.order_total',
+                  'סה"כ',
+                  style: TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  order.total,
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Align(
+              alignment: Alignment.centerRight,
+              child: CfgText(
+                'shop.tracking.title',
+                '🚛 מעקב הזמנה',
                 style: TextStyle(
                   color: BsTokens.inkLight,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              Text(
-                order.total,
-                style: const TextStyle(
-                  color: BsTokens.inkLight,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
+            ),
+            const SizedBox(height: 14),
+            _OrderTimeline(stage: order.stage),
+            // 'סרוק תעודת-משלוח' is an OCR feature that does not exist (toast
+            // "(OCR) — בקרוב"). Hidden for Apple review; restored with the flag.
+            if (!kHideUnderConstruction) ...[
+              const SizedBox(height: 18),
+              // composite hide: an org that hides
+              // 'store_screen.order_scan_delivery' removes the whole button
+              // (not an empty shell); absent config ⇒ child verbatim ⇒ identical.
+              CfgVisible(
+                'store_screen.order_scan_delivery',
+                child: OutlinedButton.icon(
+                onPressed: () =>
+                    showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
+                icon: const Text('📄', style: TextStyle(fontSize: 16)),
+                label: const CfgText('store_screen.order_scan_delivery', 'סרוק תעודת-משלוח'),
+              ),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: CfgText(
-              'shop.tracking.title',
-              '🚛 מעקב הזמנה',
-              style: TextStyle(
-                color: BsTokens.inkLight,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          _OrderTimeline(stage: order.stage),
-          // 'סרוק תעודת-משלוח' is an OCR feature that does not exist (toast
-          // "(OCR) — בקרוב"). Hidden for Apple review; restored with the flag.
-          if (!kHideUnderConstruction) ...[
-            const SizedBox(height: 18),
-            // composite hide: an org that hides
-            // 'store_screen.order_scan_delivery' removes the whole button
-            // (not an empty shell); absent config ⇒ child verbatim ⇒ identical.
-            CfgVisible(
-              'store_screen.order_scan_delivery',
-              child: OutlinedButton.icon(
-                onPressed:
-                    () => showToast(context, 'סריקת תעודת-משלוח (OCR) — בקרוב'),
-                icon: const Text('📄', style: TextStyle(fontSize: 16)),
-                label: const CfgText(
-                  'store_screen.order_scan_delivery',
-                  'סרוק תעודת-משלוח',
-                ),
-              ),
-            ),
           ],
-        ],
-      ),
+        ),
     );
   }
 }

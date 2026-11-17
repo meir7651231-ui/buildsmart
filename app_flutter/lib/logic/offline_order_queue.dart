@@ -98,6 +98,7 @@ class OfflineOrderIntent {
     this.lines = const [],
     this.shipTo = '',
     this.notes = '',
+    this.deliveryFee = 0,
   });
 
   /// THROWS on a structurally-bad entry — the queue catches per-payload and
@@ -116,6 +117,7 @@ class OfflineOrderIntent {
                 .toList(),
         shipTo: (j['shipTo'] as String?) ?? '',
         notes: (j['notes'] as String?) ?? '',
+        deliveryFee: (j['deliveryFee'] as num?)?.toInt() ?? 0,
       );
 
   /// The contractor placing the order (`Order.who`).
@@ -143,6 +145,10 @@ class OfflineOrderIntent {
   /// Optional courier notes captured at checkout (`Order.notes`).
   final String notes;
 
+  /// The delivery part of [sum] (`Order.deliveryFee`) — replayed so the
+  /// invoice of a queued order shows the VAT that was actually charged.
+  final int deliveryFee;
+
   /// Mirrors `Order.toJson` field economy: optional fields are written only
   /// when non-empty so payloads stay small and round-trip tolerantly.
   Map<String, dynamic> toJson() => {
@@ -154,6 +160,7 @@ class OfflineOrderIntent {
         if (lines.isNotEmpty) 'lines': lines.map((l) => l.toJson()).toList(),
         if (shipTo.isNotEmpty) 'shipTo': shipTo,
         if (notes.isNotEmpty) 'notes': notes,
+        if (deliveryFee > 0) 'deliveryFee': deliveryFee,
       };
 }
 
@@ -201,6 +208,7 @@ class OfflineOrderQueue {
     List<OrderLineItem> lines = const [],
     String shipTo = '',
     String notes = '',
+    int deliveryFee = 0,
   }) {
     if (!offlineSuspect) return false; // inert when online — the common path
     unawaited(
@@ -214,6 +222,7 @@ class OfflineOrderQueue {
           lines: lines,
           shipTo: shipTo,
           notes: notes,
+          deliveryFee: deliveryFee,
         ),
       ),
     );
@@ -289,6 +298,7 @@ class OfflineOrderQueue {
             lines: intent.lines,
             shipTo: intent.shipTo,
             notes: intent.notes,
+            deliveryFee: intent.deliveryFee,
           );
         } on Object catch (e) {
           // Keep this intent (and the rest) for the next drain — losing a
