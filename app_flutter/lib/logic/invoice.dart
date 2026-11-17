@@ -19,8 +19,17 @@ import 'package:buildsmart/state/orders_engine.dart' show Order;
 int invoiceVatOf(int grossTotal) =>
     grossTotal - (grossTotal / (1 + kVatRate)).round();
 
+/// חלק-המע"מ שחויב בפועל בהזמנה: מחולץ-לאחור מהסחורה בלבד (order.sum פחות
+/// דמי-המשלוח). הסל לא מוסיף מע"מ על המשלוח (`cartTotal`), ולכן חילוץ מתוך
+/// order.sum המלא היה מדפיס מע"מ גבוה ממה שחויב (₪187 במקום ₪180 על ₪1000 +
+/// משלוח ₪45). הזמנה בלי deliveryFee (איסוף · seed · הזמנות ישנות) ⇒ זהה לקודם.
+int invoiceVatForOrder(Order order) {
+  final fee = order.deliveryFee.clamp(0, order.sum < 0 ? 0 : order.sum);
+  return invoiceVatOf(order.sum - fee);
+}
+
 /// שורות-ההדפסה לחשבונית/קבלה מ-[order]. פריטי-השורה מידעיים; הסה"כ הסמכותי
-/// הוא order.sum (מה שחויב) עם מע"מ כחלק המחולץ-לאחור.
+/// הוא order.sum (מה שחויב) עם מע"מ כחלק המחולץ-לאחור מהסחורה.
 List<({String label, String value})> buildInvoiceRows(Order order) {
   final rows = <({String label, String value})>[
     (label: 'מספר הזמנה', value: order.id),
@@ -33,10 +42,13 @@ List<({String label, String value})> buildInvoiceRows(Order order) {
     final head = l.emoji.isEmpty ? l.name : '${l.emoji} ${l.name}';
     rows.add((label: '$head × ${l.qty}', value: formatNis(l.price)));
   }
+  if (order.deliveryFee > 0) {
+    rows.add((label: 'משלוח', value: formatNis(order.deliveryFee)));
+  }
   rows.add((label: 'סה"כ לתשלום (כולל מע"מ)', value: formatNis(order.sum)));
   rows.add((
     label: 'מזה מע"מ ${(kVatRate * 100).round()}%',
-    value: formatNis(invoiceVatOf(order.sum)),
+    value: formatNis(invoiceVatForOrder(order)),
   ));
   return rows;
 }

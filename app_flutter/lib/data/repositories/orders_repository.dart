@@ -42,6 +42,8 @@ abstract class OrdersRepository {
   /// is auto-assigned. [lines]/[shipTo]/[notes] are captured at checkout.
   /// [customerPhone] is the placer's (contractor's) phone, stamped so an order
   /// card can show the 📞/💬 contact buttons (additive, default '' → no buttons).
+  /// [deliveryFee] is the delivery part of [sum] (0 = pickup / unknown), so the
+  /// invoice can show the VAT that was actually charged.
   Order placeOrder({
     required String who,
     required String site,
@@ -55,6 +57,7 @@ abstract class OrdersRepository {
     String contractorUid,
     String customerPhone,
     String customerEmail,
+    int deliveryFee,
   });
 
   /// Advance [orderId] to the NEXT stage in `kManagerOrderFlow` — a no-op once

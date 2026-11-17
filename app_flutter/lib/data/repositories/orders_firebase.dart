@@ -91,6 +91,10 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
         // non-empty so the seed + every legacy doc round-trips unchanged.
         if (o.customerPhone.isNotEmpty) 'customerPhone': o.customerPhone,
         if (o.customerEmail.isNotEmpty) 'customerEmail': o.customerEmail,
+        // The delivery part of `sum` (invoice VAT excludes it) — only when > 0,
+        // so pickup / seed / legacy docs round-trip unchanged. Set at CREATE
+        // only; a stage advance re-sends the same value (no affected key).
+        if (o.deliveryFee > 0) 'deliveryFee': o.deliveryFee,
       };
 
   /// Firestore doc → `Order`. Inverse of [toDoc]: the doc-id becomes `id`,
@@ -122,6 +126,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       storeUid: (j['storeUid'] as String?) ?? '',
       courierUid: (j['courierUid'] as String?) ?? '',
       customerPhone: (j['customerPhone'] as String?) ?? '',
+      deliveryFee: (j['deliveryFee'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -207,6 +212,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
     String orgId = '',
     String customerPhone = '',
     String customerEmail = '',
+    int deliveryFee = 0,
   }) {
     final order = Order(
       id: id ?? _nextId(),
@@ -223,6 +229,7 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       orgId: orgId,
       customerPhone: customerPhone,
       customerEmail: customerEmail,
+      deliveryFee: deliveryFee,
     );
     upsert(order); // optimistic prepend + background set
     return order;

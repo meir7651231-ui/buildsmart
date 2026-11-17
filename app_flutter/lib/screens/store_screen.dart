@@ -1769,7 +1769,11 @@ class _CartViewState extends ConsumerState<_CartView> {
         const SizedBox(height: 12),
         _PaymentSelector(selected: payment),
         const SizedBox(height: 16),
-        _CheckoutButton(subtotal: subtotal, total: total),
+        _CheckoutButton(
+          subtotal: subtotal,
+          total: total,
+          deliveryFee: deliveryFee,
+        ),
         const SizedBox(height: 4),
         const _CartActionsRow(),
         const SizedBox(height: 24),
@@ -2745,9 +2749,17 @@ class _PaymentChip extends StatelessWidget {
 // ─── checkout button ──────────────────────────────────────────────────────────
 
 class _CheckoutButton extends ConsumerStatefulWidget {
-  const _CheckoutButton({required this.subtotal, required this.total});
+  const _CheckoutButton({
+    required this.subtotal,
+    required this.total,
+    this.deliveryFee = 0,
+  });
   final int subtotal;
   final int total;
+
+  /// The delivery part of [total] — stamped on the order so the invoice backs
+  /// the VAT out of the goods only (the cart adds no VAT on delivery).
+  final int deliveryFee;
 
   @override
   ConsumerState<_CheckoutButton> createState() => _CheckoutButtonState();
@@ -2862,7 +2874,10 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _CheckoutSheet(total: widget.total),
+      builder: (_) => _CheckoutSheet(
+        total: widget.total,
+        deliveryFee: widget.deliveryFee,
+      ),
     );
   }
 }
@@ -2870,8 +2885,11 @@ class _CheckoutButtonState extends ConsumerState<_CheckoutButton> {
 // ─── checkout sheet ───────────────────────────────────────────────────────────
 
 class _CheckoutSheet extends ConsumerStatefulWidget {
-  const _CheckoutSheet({required this.total});
+  const _CheckoutSheet({required this.total, this.deliveryFee = 0});
   final int total;
+
+  /// The delivery part of [total] (see [_CheckoutButton.deliveryFee]).
+  final int deliveryFee;
 
   @override
   ConsumerState<_CheckoutSheet> createState() => _CheckoutSheetState();
@@ -3134,6 +3152,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       orgId: orgId,
                       customerPhone: customerPhone,
                       customerEmail: customerEmail,
+                      deliveryFee: widget.deliveryFee,
                     );
                 // G4 — key funnel event: a contractor completed checkout. Only
                 // forwards to FirebaseAnalytics when Firebase is up; a no-op on

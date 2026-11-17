@@ -99,6 +99,7 @@ class _SpyOrders implements OrdersRepository {
     String contractorUid = '',
     String customerPhone = '',
     String customerEmail = '',
+    int deliveryFee = 0,
   }) =>
       throw UnimplementedError();
   @override
