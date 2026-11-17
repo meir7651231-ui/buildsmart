@@ -24,6 +24,8 @@ void main() {
     });
     test('overflow → null (keep the saved value), never a silent 0', () {
       expect(parseNumberRowInput('99999999999999999999'), isNull);
+      expect(parseNumberRowInput('1234567890'), isNull,
+          reason: '10 digits parse fine but are over the cap');
     });
   });
 
@@ -79,6 +81,17 @@ void main() {
         '12345678901234567890',
         reason: 'the user sees what they typed and can fix it');
     expect(find.text('עד 9 ספרות'), findsOneWidget);
+
+    // 10 digits (parseable, but over the cap) survive an unrelated rebuild:
+    // toggling another setting must not revert the field under the error.
+    await t.enterText(field, '1234567890');
+    await t.pumpAndSettle();
+    expect(c.read(storeSettingsProvider).minOrderAmount, 250);
+    await t.tap(find.text('אישור כפול לרכישה גדולה'));
+    await t.pumpAndSettle();
+    expect(t.widget<TextField>(field).controller!.text, '1234567890');
+    expect(find.text('עד 9 ספרות'), findsOneWidget);
+    expect(c.read(storeSettingsProvider).minOrderAmount, 250);
 
     // Fixing it back under the limit saves and clears the error.
     await t.enterText(field, '999999999');

@@ -1013,6 +1013,9 @@ const int kNumberRowMaxDigits = 9;
 @visibleForTesting
 int? parseNumberRowInput(String text) {
   if (text.isEmpty) return 0;
+  // Over the cap ⇒ keep the saved value (also for 10–18 digits, which
+  // int.tryParse would happily accept).
+  if (text.length > kNumberRowMaxDigits) return null;
   return int.tryParse(text);
 }
 
@@ -1126,7 +1129,7 @@ class _NumberRowState extends State<_NumberRow> {
                 onChanged: (v) {
                   final over = v.length > kNumberRowMaxDigits;
                   if (over != _tooLong) setState(() => _tooLong = over);
-                  final n = over ? null : parseNumberRowInput(v);
+                  final n = parseNumberRowInput(v);
                   if (n != null) widget.onChanged(n);
                 },
               ),
