@@ -47,6 +47,7 @@ class OrderLineItem {
     required this.emoji,
     required this.qty,
     required this.price,
+    this.unitPrice = 0,
   });
 
   final String name;
@@ -55,17 +56,30 @@ class OrderLineItem {
   /// Quantity (units, not a string).
   final int qty;
 
-  /// Line total in ₪.
+  /// Line total in ₪ — INCLUDES the line's accessories
+  /// (`SmartCartLine.total`), so `price / qty` is NOT the product's unit price.
   final int price;
 
-  Map<String, dynamic> toJson() =>
-      {'name': name, 'emoji': emoji, 'qty': qty, 'price': price};
+  /// The product's own unit price in ₪ at order time (`SmartCartLine.brandPrice`),
+  /// accessories excluded (#86). `0` = not captured (orders placed before this
+  /// field existed, seed orders) — readers fall back to `price / qty`.
+  /// Serialized only when > 0, so legacy lines stay byte-identical.
+  final int unitPrice;
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'emoji': emoji,
+        'qty': qty,
+        'price': price,
+        if (unitPrice > 0) 'unitPrice': unitPrice,
+      };
 
   factory OrderLineItem.fromJson(Map<String, dynamic> j) => OrderLineItem(
         name: j['name'] as String,
         emoji: j['emoji'] as String,
         qty: (j['qty'] as num).toInt(),
         price: (j['price'] as num).toInt(),
+        unitPrice: j['unitPrice'] is num ? (j['unitPrice'] as num).toInt() : 0,
       );
 }
 
