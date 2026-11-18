@@ -130,36 +130,40 @@ void _suite<S>(_Case<S> c) {
   group('${c.name} load gate', () {
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    test('server: toggle before load does not overwrite the stored doc',
-        () async {
-      final g = _Gate<S>(c.stored);
-      final n = c.make(g);
-      c.update(n, c.toggleB);
-      // Optimistic UI: the toggle is visible immediately …
-      expect(c.b(c.state(n)), !c.b(c.defaults));
-      // … but nothing is written over the server doc yet.
-      expect(g.saves, isEmpty);
+    test(
+      'server: toggle before load does not overwrite the stored doc',
+      () async {
+        final g = _Gate<S>(c.stored);
+        final n = c.make(g);
+        c.update(n, c.toggleB);
+        // Optimistic UI: the toggle is visible immediately …
+        expect(c.b(c.state(n)), !c.b(c.defaults));
+        // … but nothing is written over the server doc yet.
+        expect(g.saves, isEmpty);
 
-      g.release();
-      await _flush();
+        g.release();
+        await _flush();
 
-      final s = c.state(n);
-      expect(c.a(s), c.a(c.stored), reason: 'stored setting kept');
-      expect(c.b(s), !c.b(c.defaults), reason: 'early toggle kept');
-      expect(g.saves, hasLength(1));
-      expect(c.a(g.saves.single), c.a(c.stored));
-      expect(c.b(g.saves.single), !c.b(c.defaults));
-    });
+        final s = c.state(n);
+        expect(c.a(s), c.a(c.stored), reason: 'stored setting kept');
+        expect(c.b(s), !c.b(c.defaults), reason: 'early toggle kept');
+        expect(g.saves, hasLength(1));
+        expect(c.a(g.saves.single), c.a(c.stored));
+        expect(c.b(g.saves.single), !c.b(c.defaults));
+      },
+    );
 
-    test('server: no edit before load ⇒ no write, loaded value shown',
-        () async {
-      final g = _Gate<S>(c.stored);
-      final n = c.make(g);
-      g.release();
-      await _flush();
-      expect(c.a(c.state(n)), c.a(c.stored));
-      expect(g.saves, isEmpty);
-    });
+    test(
+      'server: no edit before load ⇒ no write, loaded value shown',
+      () async {
+        final g = _Gate<S>(c.stored);
+        final n = c.make(g);
+        g.release();
+        await _flush();
+        expect(c.a(c.state(n)), c.a(c.stored));
+        expect(g.saves, isEmpty);
+      },
+    );
 
     test('server: edit after load persists immediately', () async {
       final g = _Gate<S>(c.stored);
@@ -185,8 +189,9 @@ void _suite<S>(_Case<S> c) {
     });
 
     test('prefs: toggle before load keeps both stored and toggled', () async {
-      SharedPreferences.setMockInitialValues(
-          {c.prefsKey: jsonEncode(c.toJson(c.stored))});
+      SharedPreferences.setMockInitialValues({
+        c.prefsKey: jsonEncode(c.toJson(c.stored)),
+      });
       final n = c.make(null);
       c.update(n, c.toggleB);
       await _flush();
@@ -203,78 +208,88 @@ void _suite<S>(_Case<S> c) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  _suite<NotifSettings>(_Case(
-    name: 'NotifSettings',
-    prefsKey: 'bs.notif-settings.v1',
-    defaults: NotifSettings.defaults,
-    stored: NotifSettings.defaults.copyWith(pushEnabled: false),
-    toJson: (s) => s.toJson(),
-    make: (g) => NotifSettingsNotifier(g == null ? null : _NotifRepo(g)),
-    update: (n, f) => (n as NotifSettingsNotifier).update(f),
-    reset: (n) => (n as NotifSettingsNotifier).reset(),
-    state: (n) => (n as NotifSettingsNotifier).debugState,
-    toggleB: (s) => s.copyWith(emailEnabled: !s.emailEnabled),
-    a: (s) => s.pushEnabled,
-    b: (s) => s.emailEnabled,
-  ));
+  _suite<NotifSettings>(
+    _Case(
+      name: 'NotifSettings',
+      prefsKey: 'bs.notif-settings.v1',
+      defaults: NotifSettings.defaults,
+      stored: NotifSettings.defaults.copyWith(pushEnabled: false),
+      toJson: (s) => s.toJson(),
+      make: (g) => NotifSettingsNotifier(g == null ? null : _NotifRepo(g)),
+      update: (n, f) => (n as NotifSettingsNotifier).update(f),
+      reset: (n) => (n as NotifSettingsNotifier).reset(),
+      state: (n) => (n as NotifSettingsNotifier).debugState,
+      toggleB: (s) => s.copyWith(emailEnabled: !s.emailEnabled),
+      a: (s) => s.pushEnabled,
+      b: (s) => s.emailEnabled,
+    ),
+  );
 
-  _suite<ChatSettings>(_Case(
-    name: 'ChatSettings',
-    prefsKey: 'bs.chat-settings.v1',
-    defaults: ChatSettings.defaults,
-    stored: ChatSettings.defaults.copyWith(readReceipts: false),
-    toJson: (s) => s.toJson(),
-    make: (g) => ChatSettingsNotifier(g == null ? null : _ChatRepo(g)),
-    update: (n, f) => (n as ChatSettingsNotifier).update(f),
-    reset: (n) => (n as ChatSettingsNotifier).reset(),
-    state: (n) => (n as ChatSettingsNotifier).debugState,
-    toggleB: (s) => s.copyWith(typingIndicator: !s.typingIndicator),
-    a: (s) => s.readReceipts,
-    b: (s) => s.typingIndicator,
-  ));
+  _suite<ChatSettings>(
+    _Case(
+      name: 'ChatSettings',
+      prefsKey: 'bs.chat-settings.v1',
+      defaults: ChatSettings.defaults,
+      stored: ChatSettings.defaults.copyWith(readReceipts: false),
+      toJson: (s) => s.toJson(),
+      make: (g) => ChatSettingsNotifier(g == null ? null : _ChatRepo(g)),
+      update: (n, f) => (n as ChatSettingsNotifier).update(f),
+      reset: (n) => (n as ChatSettingsNotifier).reset(),
+      state: (n) => (n as ChatSettingsNotifier).debugState,
+      toggleB: (s) => s.copyWith(typingIndicator: !s.typingIndicator),
+      a: (s) => s.readReceipts,
+      b: (s) => s.typingIndicator,
+    ),
+  );
 
-  _suite<StoreSettings>(_Case(
-    name: 'StoreSettings',
-    prefsKey: 'bs.store-settings.v1',
-    defaults: StoreSettings.defaults,
-    stored: StoreSettings.defaults.copyWith(vatInclusive: false),
-    toJson: (s) => s.toJson(),
-    make: (g) => StoreSettingsNotifier(g == null ? null : _StoreRepo(g)),
-    update: (n, f) => (n as StoreSettingsNotifier).update(f),
-    reset: (n) => (n as StoreSettingsNotifier).reset(),
-    state: (n) => (n as StoreSettingsNotifier).debugState,
-    toggleB: (s) => s.copyWith(notifDeals: !s.notifDeals),
-    a: (s) => s.vatInclusive,
-    b: (s) => s.notifDeals,
-  ));
+  _suite<StoreSettings>(
+    _Case(
+      name: 'StoreSettings',
+      prefsKey: 'bs.store-settings.v1',
+      defaults: StoreSettings.defaults,
+      stored: StoreSettings.defaults.copyWith(vatInclusive: false),
+      toJson: (s) => s.toJson(),
+      make: (g) => StoreSettingsNotifier(g == null ? null : _StoreRepo(g)),
+      update: (n, f) => (n as StoreSettingsNotifier).update(f),
+      reset: (n) => (n as StoreSettingsNotifier).reset(),
+      state: (n) => (n as StoreSettingsNotifier).debugState,
+      toggleB: (s) => s.copyWith(notifDeals: !s.notifDeals),
+      a: (s) => s.vatInclusive,
+      b: (s) => s.notifDeals,
+    ),
+  );
 
-  _suite<AppSettings>(_Case(
-    name: 'AppSettings',
-    prefsKey: 'bs.settings.v1',
-    defaults: AppSettings.defaults,
-    stored: AppSettings.defaults.copyWith(reduceMotion: true),
-    toJson: (s) => s.toJson(),
-    make: (g) => AppSettingsNotifier(g == null ? null : _AppRepo(g)),
-    update: (n, f) => (n as AppSettingsNotifier).update(f),
-    reset: (n) => (n as AppSettingsNotifier).reset(),
-    state: (n) => (n as AppSettingsNotifier).debugState,
-    toggleB: (s) => s.copyWith(express: !s.express),
-    a: (s) => s.reduceMotion,
-    b: (s) => s.express,
-  ));
+  _suite<AppSettings>(
+    _Case(
+      name: 'AppSettings',
+      prefsKey: 'bs.settings.v1',
+      defaults: AppSettings.defaults,
+      stored: AppSettings.defaults.copyWith(reduceMotion: true),
+      toJson: (s) => s.toJson(),
+      make: (g) => AppSettingsNotifier(g == null ? null : _AppRepo(g)),
+      update: (n, f) => (n as AppSettingsNotifier).update(f),
+      reset: (n) => (n as AppSettingsNotifier).reset(),
+      state: (n) => (n as AppSettingsNotifier).debugState,
+      toggleB: (s) => s.copyWith(express: !s.express),
+      a: (s) => s.reduceMotion,
+      b: (s) => s.express,
+    ),
+  );
 
-  test('AppSettings pre-hydrated (seeded) local path persists edits at once',
-      () async {
-    SharedPreferences.setMockInitialValues({});
-    final seeded = AppSettings.defaults.copyWith(reduceMotion: true);
-    final n = AppSettingsNotifier(null, seeded);
-    n.update((s) => s.copyWith(express: true));
-    await _flush();
-    final prefs = await SharedPreferences.getInstance();
-    final saved = AppSettings.fromJson(
-        jsonDecode(prefs.getString('bs.settings.v1')!)
-            as Map<String, dynamic>);
-    expect(saved.reduceMotion, isTrue);
-    expect(saved.express, isTrue);
-  });
+  test(
+    'AppSettings pre-hydrated (seeded) local path persists edits at once',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final seeded = AppSettings.defaults.copyWith(reduceMotion: true);
+      final n = AppSettingsNotifier(null, seeded);
+      n.update((s) => s.copyWith(express: true));
+      await _flush();
+      final prefs = await SharedPreferences.getInstance();
+      final saved = AppSettings.fromJson(
+        jsonDecode(prefs.getString('bs.settings.v1')!) as Map<String, dynamic>,
+      );
+      expect(saved.reduceMotion, isTrue);
+      expect(saved.express, isTrue);
+    },
+  );
 }
