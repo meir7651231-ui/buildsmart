@@ -122,12 +122,16 @@ List<StockPred> computeStockForecast(
       if (f == null || ts.isBefore(f)) firstSeen[li.name] = ts;
       final l = lastSeen[li.name];
       if (l == null || !ts.isBefore(l)) {
-        // On the latest line for this name, snapshot its emoji + unit price
-        // (line total / qty). `!isBefore` (>= ) keeps the last writer to win
-        // within the same timestamp.
+        // On the latest line for this name, snapshot its emoji + unit price.
+        // `!isBefore` (>= ) keeps the last writer to win within the same
+        // timestamp. #86 — prefer the captured `unitPrice` (accessories
+        // excluded); the line total `price` includes accessories, so
+        // `price / qty` is only a fallback for lines that predate the field.
         lastSeen[li.name] = ts;
         emojiByName[li.name] = li.emoji;
-        unitPriceByName[li.name] = li.qty > 0 ? (li.price / li.qty).round() : 0;
+        unitPriceByName[li.name] = li.unitPrice > 0
+            ? li.unitPrice
+            : (li.qty > 0 ? (li.price / li.qty).round() : 0);
       }
     }
   }

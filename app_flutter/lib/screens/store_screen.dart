@@ -3090,6 +3090,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         emoji: l.productEmoji,
                         qty: l.productQty,
                         price: l.total,
+                        // #86 — the real unit price (accessories excluded).
+                        unitPrice: l.brandPrice,
                       ),
                     )
                     .toList();
