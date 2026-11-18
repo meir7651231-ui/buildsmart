@@ -12,6 +12,7 @@
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/logic/date_picker_window.dart';
 // Wave T2a — contractor authoring stamps the employer id (kDemoContractorId on
 // the single-device demo, SERVER-SWAP to the real contractor uid) + reads the
 // LIVE review queue projection for the parallel contractor-approval surface.
@@ -1408,12 +1409,14 @@ class _TaskAuthorSheetState extends ConsumerState<_TaskAuthorSheet> {
   /// seed the picker bounds (a window of ±2 years), never to fabricate a stored
   /// date: the State keeps null until the contractor actually picks one.
   Future<void> _pickStart() async {
-    final now = DateTime.now();
+    // The window stretches to include an edited task's stored date — a start
+    // older/later than ±2 years used to throw instead of opening the picker.
+    final w = datePickerWindow(_scheduledStart, DateTime.now());
     final picked = await showDatePicker(
       context: context,
-      initialDate: _scheduledStart ?? now,
-      firstDate: DateTime(now.year - 2, now.month, now.day),
-      lastDate: DateTime(now.year + 2, now.month, now.day),
+      initialDate: w.initial,
+      firstDate: w.first,
+      lastDate: w.last,
     );
     if (picked == null) return;
     setState(() => _scheduledStart = picked);
