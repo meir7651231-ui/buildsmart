@@ -504,43 +504,80 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
   /// SharedPreferences path below. Injected by [notifSettingsProvider].
   final NotifSettingsRepository? _repo;
 
+  /// Load gate (same pattern as the customers store, #84). Until the initial
+  /// load finishes, an [update]/[reset] is applied to the visible state and
+  /// remembered in [_pending] but NOT persisted: persisting a blob built on the
+  /// constructor defaults would overwrite the user's stored settings (on the
+  /// server path, the whole `notifSettings/{uid}` doc), and the late load would then
+  /// snap the toggle back in the UI. When the load lands, the pending edits are
+  /// REPLAYED on top of the loaded value and the merge is persisted once.
+  bool _ready = false;
+  final List<NotifSettings Function(NotifSettings)> _pending = [];
+  final NotifSettings _base = NotifSettings.defaults;
+
+  /// Load finished ([loaded] = stored value, or null when nothing is stored /
+  /// the load failed ⇒ rebase onto the constructor value).
+  void _settle(NotifSettings? loaded) {
+    if (_ready) return;
+    _ready = true;
+    var next = loaded ?? _base;
+    final hadPending = _pending.isNotEmpty;
+    for (final op in _pending) {
+      next = op(next);
+    }
+    _pending.clear();
+    if (mounted && (loaded != null || hadPending)) state = next;
+    if (hadPending) unawaited(_persist(next));
+  }
+
   Future<void> _load() async {
     final repo = _repo;
     if (repo != null) {
       // Server path (USER_DATA_SERVER): the settings live at `notifSettings/{uid}`.
       // Absent doc ⇒ null ⇒ keep [NotifSettings.defaults] (mirrors the local
       // `raw == null` → return; the repo never throws).
-      final s = await repo.load(repo.currentUid);
-      if (s != null) state = s;
+      NotifSettings? s;
+      try {
+        s = await repo.load(repo.currentUid);
+      } on Object catch (_) {/* keep defaults */}
+      _settle(s);
       return;
     }
+    NotifSettings? loaded;
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_kStorageKey);
-      if (raw == null) return;
-      final j = jsonDecode(raw) as Map<String, dynamic>;
-      state = NotifSettings.fromJson(j);
-    } on Object catch (_) {/* keep defaults */}
+      if (raw != null) {
+        loaded = NotifSettings.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      }
+    } on Object catch (_) {
+      // Corrupt or unavailable storage — keep defaults.
+    }
+    _settle(loaded);
   }
 
-  Future<void> _persist() async {
+  Future<void> _persist(NotifSettings value) async {
     final repo = _repo;
     if (repo != null) {
       // Server path: mirror the whole settings blob to `notifSettings/{uid}`.
       try {
-        await repo.save(repo.currentUid, state);
+        await repo.save(repo.currentUid, value);
       } on Object catch (_) {/* best-effort */}
       return;
     }
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kStorageKey, jsonEncode(state.toJson()));
+      await prefs.setString(_kStorageKey, jsonEncode(value.toJson()));
     } on Object catch (_) {/* best-effort */}
   }
 
   void update(NotifSettings Function(NotifSettings) f) {
     state = f(state);
-    unawaited(_persist());
+    if (_ready) {
+      unawaited(_persist(state));
+    } else {
+      _pending.add(f);
+    }
   }
 
   void snoozeForMinutes(int minutes) {
@@ -554,6 +591,14 @@ class NotifSettingsNotifier extends StateNotifier<NotifSettings> {
 
   Future<void> reset() async {
     state = NotifSettings.defaults;
+    if (!_ready) {
+      // Before the load lands: a reset supersedes earlier pending edits; the
+      // defaults blob is persisted once the load settles.
+      _pending
+        ..clear()
+        ..add((_) => NotifSettings.defaults);
+      return;
+    }
     final repo = _repo;
     if (repo != null) {
       // Server path: reset = persist the defaults blob to `notifSettings/{uid}`
