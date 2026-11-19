@@ -27,8 +27,11 @@ void main() {
     expect(bomLineQty(pipe, p, (_) => 2.0), 2);
     expect(bomLineQty(pipe, p, (_) => 6.5), 7);
     expect(bomLineQty(pipe, p, (_) => 0.5), 1);
-    expect(bomLineQty(elbow, p, (_) => 6.5), 3,
-        reason: 'non-pipes ignore metres and use the plan quantity');
+    expect(
+      bomLineQty(elbow, p, (_) => 6.5),
+      3,
+      reason: 'non-pipes ignore metres and use the plan quantity',
+    );
   });
 
   test('estimateBomPrice — default 2 m pipe is priced as 2 units (₪84)', () {
@@ -50,14 +53,14 @@ void main() {
     final p = plan({pipe.sku: 1, elbow.sku: 4});
     double metersOf(String _) => 3.5;
     // _addToCart: brandPrice = estimatePrice([p]).totalILS, qty = bomLineQty.
-    final cartSum = 42 * bomLineQty(pipe, p, metersOf) +
+    final cartSum =
+        42 * bomLineQty(pipe, p, metersOf) +
         18 * bomLineQty(elbow, p, metersOf);
     expect(estimateBomPrice(p, metersOf).totalILS, cartSum);
   });
 
   test('empty plan → zero estimate', () {
-    final pr = estimateBomPrice(
-        const InstallationPlan([], [], {}), (_) => 2.0);
+    final pr = estimateBomPrice(const InstallationPlan([], [], {}), (_) => 2.0);
     expect(pr.totalILS, 0);
   });
 }

@@ -17,8 +17,7 @@ int bomLineQty(
   LipskeyCatalogProduct p,
   InstallationPlan plan,
   double Function(String sku) metersOf,
-) =>
-    isPipe(p) ? metersOf(p.sku).ceil() : plan.qtyOf(p.sku);
+) => isPipe(p) ? metersOf(p.sku).ceil() : plan.qtyOf(p.sku);
 
 /// Budget estimate of the whole BOM, counted with [bomLineQty] — the same
 /// units "add to cart" adds.
