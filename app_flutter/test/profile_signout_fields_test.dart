@@ -33,8 +33,9 @@ class _Gw implements AuthGateway {
   AuthUser? get currentUser => current;
 
   @override
-  Future<Map<String, dynamic>> idTokenClaims({bool forceRefresh = false}) async =>
-      const {};
+  Future<Map<String, dynamic>> idTokenClaims({
+    bool forceRefresh = false,
+  }) async => const {};
 
   @override
   Future<void> signOut() async {
@@ -65,7 +66,8 @@ const _a = UserProfile(
 );
 
 Finder _field(String hint) => find.byWidgetPredicate(
-    (w) => w is TextField && w.decoration?.hintText == hint);
+  (w) => w is TextField && w.decoration?.hintText == hint,
+);
 
 String _text(WidgetTester t, String hint) =>
     t.widget<TextField>(_field(hint)).controller!.text;
@@ -74,24 +76,30 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   Future<ProviderContainer> pump(WidgetTester t, _Gw gw) async {
-    SharedPreferences.setMockInitialValues(
-        {kUserProfileKey: jsonEncode(_a.toJson())});
+    SharedPreferences.setMockInitialValues({
+      kUserProfileKey: jsonEncode(_a.toJson()),
+    });
     await t.binding.setSurfaceSize(const Size(440, 1600));
     addTearDown(() => t.binding.setSurfaceSize(null));
     addTearDown(gw.close);
     final c = ProviderContainer(
-        overrides: [authGatewayProvider.overrideWithValue(gw)]);
+      overrides: [authGatewayProvider.overrideWithValue(gw)],
+    );
     addTearDown(c.dispose);
     // Let the profile load from prefs and the auth stream deliver the user
     // BEFORE the screen opens (its initState seeds the form once).
     c
       ..read(authStateProvider)
       ..read(userProfileProvider);
-    await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
-    await t.pumpWidget(UncontrolledProviderScope(
-      container: c,
-      child: const MaterialApp(locale: Locale('he'), home: ProfileScreen()),
-    ));
+    await t.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await t.pumpWidget(
+      UncontrolledProviderScope(
+        container: c,
+        child: const MaterialApp(locale: Locale('he'), home: ProfileScreen()),
+      ),
+    );
     await t.pumpAndSettle();
     return c;
   }
@@ -121,8 +129,11 @@ void main() {
     expect(p.contact, '');
     expect(p.businessId, '');
     expect(p.profession, '');
-    expect(p.registered, isFalse,
-        reason: 'saving after sign-out must not re-register A');
+    expect(
+      p.registered,
+      isFalse,
+      reason: 'saving after sign-out must not re-register A',
+    );
   });
 
   testWidgets('account deletion clears the form', (t) async {
@@ -138,7 +149,8 @@ void main() {
   });
 
   testWidgets('a FAILED deletion keeps the account and the form', (t) async {
-    final gw = _Gw(const AuthUser(uid: 'a', email: 'a@x.co'))..failDelete = true;
+    final gw = _Gw(const AuthUser(uid: 'a', email: 'a@x.co'))
+      ..failDelete = true;
     final c = await pump(t, gw);
 
     await tapRow(t, '🗑️ מחיקת חשבון');
@@ -159,14 +171,16 @@ void main() {
     expect(_text(t, 'שם הקבלן'), 'דני כהן');
     expect(_text(t, 'כתובת / אזור'), 'תל אביב');
   });
-  testWidgets('signing in again after sign-out shows the new details',
-      (t) async {
+  testWidgets('signing in again after sign-out shows the new details', (
+    t,
+  ) async {
     final c = await pump(t, _Gw(const AuthUser(uid: 'a', email: 'a@x.co')));
     await tapRow(t, '🚪 התנתקות');
     expect(_text(t, 'שם הקבלן'), '');
 
     // The login sheet registers the new person's name on success.
-    c.read(userProfileProvider.notifier)
+    c
+        .read(userProfileProvider.notifier)
         .register(name: 'רונית לוי', contact: '0527654321');
     await t.pumpAndSettle();
 
@@ -184,7 +198,8 @@ void main() {
     await t.enterText(_field('שם הקבלן'), 'מוקלד');
     await t.pump();
 
-    c.read(userProfileProvider.notifier)
+    c
+        .read(userProfileProvider.notifier)
         .register(name: 'אחר', contact: '0527654321');
     await t.pumpAndSettle();
 
