@@ -4455,3 +4455,8 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 quote_polish: באר #F6F7F9 → scaffold בכהה. **a11y-light:** הערת "⚙️ …מנתוני…" (11px) הייתה `mutedDark` גם בבהיר
 (2.49:1, נכשל AA) → `bsMuted` (כהה ללא שינוי). **גארד:** `test/dark_mode_ink_test.dart` (20) — מרנדר כל מסך
 בכהה+בהיר, אוסר ink-בהיר-בלבד בכהה ומחשב ניגודיות WCAG ≥4.5 של כל טקסט ink מול הרקע האטום הקרוב. אטלס 49→45.
+
+**המשך (2026-11-19, אחרי סקירה בלתי-תלויה):** `AiFailedState` — "משהו השתבש" היה `dangerDark` קבוע (2.93:1 על bgDark) →
+`bsDangerText(context)` (light=dangerDark זהה · dark=`BsTokens.dangerOnDark` #F87171, 6.9:1). באר quote_polish בכהה →
+`colorScheme.surface` (נבדל מהעמוד). הגארד הורחב ל-52: 8 מסכי-AI × {תוצאה, כשל} × {כהה, בהיר} עם gateway מזויף
+(בלעדיו רק שלב "AI כבוי" מרונדר). הערה: reject_reason/business_summary בבהיר — רקע bgLight #FAFAFA → scaffold #FAF8F5 (כמו 8 האחרים).

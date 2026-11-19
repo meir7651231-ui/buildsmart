@@ -145,3 +145,11 @@ Color bsMuted(BuildContext context) =>
     Theme.of(context).brightness == Brightness.dark
         ? BsTokens.mutedDark
         : BsTokens.mutedLight;
+
+/// Danger TEXT that follows the theme brightness — light returns EXACTLY
+/// [BsTokens.dangerDark] (6.1:1 on the light scaffold); dark returns
+/// [BsTokens.dangerOnDark] (dangerDark on bgDark is only 2.9:1).
+Color bsDangerText(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.dangerOnDark
+        : BsTokens.dangerDark;

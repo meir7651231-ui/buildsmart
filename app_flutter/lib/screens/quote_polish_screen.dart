@@ -151,9 +151,9 @@ class _QuotePolishState extends ConsumerState<QuotePolishScreen> {
               padding: const EdgeInsets.all(BsTokens.space3),
               decoration: BoxDecoration(
                 // Light: the original #F6F7F9 well (byte-identical). Dark: the
-                // scaffold-dark well — the text inside is bsMuted (light in dark).
+                // card surface — stays distinct from the page; bsMuted text 6.3:1.
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? Theme.of(context).scaffoldBackgroundColor
+                    ? Theme.of(context).colorScheme.surface
                     : const Color(0xFFF6F7F9),
                 borderRadius: BorderRadius.circular(BsTokens.radiusCard),
               ),

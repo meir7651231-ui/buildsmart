@@ -2268,3 +2268,5 @@
 ## #darkmode-ink — גארד dark_mode_ink_test (2026-11-19)
 - **mutation-verify (בוצע):** (1) באר quote_polish חזרה ל-`const Color(0xFFF6F7F9)` קבוע → RED ("below WCAG AA 4.5:1 in dark mode") → שחזור → GREEN.
   (2) `AiOffState` חזר ל-`const TextStyle(color: BsTokens.mutedLight)` → RED ב-7 מסכים ("still paints #1A1A1A/#6E655B") → שחזור → GREEN 20/20.
+
+- **mutation-verify (3, 2026-11-19):** `AiFailedState` חזר ל-`const … BsTokens.dangerDark` → RED ב-8 מסכים ("[failed]: ink text below WCAG AA") → שחזור → GREEN 52/52.

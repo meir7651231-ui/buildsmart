@@ -7,6 +7,7 @@
 //
 // This pumps each fixed screen under the DARK theme and asserts no rendered text
 // still carries the light-only ink, and that light mode still does (no drift).
+import 'package:buildsmart/data/repositories/claude_functions.dart';
 import 'package:buildsmart/screens/adapter_explain_screen.dart';
 import 'package:buildsmart/screens/alt_explain_screen.dart';
 import 'package:buildsmart/screens/business_summary_screen.dart';
@@ -79,6 +80,7 @@ Color _backdrop(Element e) {
 List<String> _lowContrastInk(WidgetTester t) {
   final ink = <Color>{
     BsTokens.inkLight, BsTokens.mutedLight, BsTokens.inkDark, BsTokens.mutedDark,
+    BsTokens.dangerDark, BsTokens.dangerOnDark,
   };
   final bad = <String>[];
   for (final e in find.byType(RichText).evaluate()) {
@@ -100,11 +102,13 @@ List<String> _lowContrastInk(WidgetTester t) {
   return bad;
 }
 
-Future<void> _pump(WidgetTester t, Widget home, {required bool dark}) async {
+Future<void> _pump(WidgetTester t, Widget home,
+    {required bool dark, List<Override> overrides = const []}) async {
   t.view.physicalSize = const Size(780, 1600);
   t.view.devicePixelRatio = 2;
   addTearDown(t.view.reset);
   await t.pumpWidget(ProviderScope(
+    overrides: overrides,
     child: MaterialApp(
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
@@ -112,7 +116,9 @@ Future<void> _pump(WidgetTester t, Widget home, {required bool dark}) async {
       home: home,
     ),
   ));
-  await t.pump(const Duration(milliseconds: 100));
+  for (var i = 0; i < 5; i++) {
+    await t.pump(const Duration(milliseconds: 50));
+  }
 }
 
 class _SheetHost extends StatelessWidget {
@@ -145,7 +151,7 @@ final _screens = <String, Widget>{
   'quote_polish':
       const QuotePolishScreen(rawQuote: 'הצעה', productName: 'צינור'),
   'adapter_explain':
-      const AdapterExplainScreen(productName: 'מתאם', sku: '123'),
+      const AdapterExplainScreen(productName: 'מתאם', sku: '9101601610'),
   'paired_explain':
       const PairedExplainScreen(product: 'ברז', types: ['אטם']),
   'daily_report':
@@ -156,6 +162,29 @@ final _screens = <String, Widget>{
   'reject_reason': const RejectReasonScreen(role: 'קבלן', name: 'יוסי'),
   'business_summary':
       const BusinessSummaryScreen(insightLines: ['הכנסות']),
+};
+
+/// Fake gateway: [fail] throws (→ AiFailedState); else returns a reply (→ the
+/// per-screen result text). Without an override the gateway is null in tests and
+/// only the "AI off" rung renders — so these modes reach the other rungs.
+class _FakeGateway implements ClaudeGateway {
+  _FakeGateway({required this.fail});
+  final bool fail;
+  @override
+  Future<ClaudeResult> ask({
+    required String prompt,
+    String? system,
+    String? model,
+    int? maxTokens,
+  }) async {
+    if (fail) throw const ClaudeException('internal', 'boom');
+    return const ClaudeResult(text: 'תשובת-בדיקה של המודל', model: 'fake');
+  }
+}
+
+const _aiScreens = {
+  'alt_explain', 'quote_polish', 'adapter_explain', 'paired_explain',
+  'daily_report', 'credit_explain', 'reject_reason', 'business_summary',
 };
 
 void main() {
@@ -194,5 +223,39 @@ void main() {
       expect(_lowContrastInk(t), isEmpty,
           reason: '$name: ink text below WCAG AA 4.5:1 in light mode');
     });
+  }
+
+  // The non-"off" rungs: a real reply (result text) and a failure (AiFailedState).
+  for (final name in _aiScreens) {
+    for (final fail in [false, true]) {
+      for (final dark in [true, false]) {
+        final mode = fail ? 'failed' : 'result';
+        testWidgets('$name [$mode] ${dark ? 'dark' : 'light'} — ink clears AA',
+            (t) async {
+          await _pump(t, _screens[name]!,
+              dark: dark,
+              overrides: [
+                claudeGatewayProvider.overrideWith((ref) => _FakeGateway(fail: fail)),
+              ]);
+          expect(
+              find.text(fail ? 'משהו השתבש — נסה שוב.' : 'תשובת-בדיקה של המודל',
+                  findRichText: true),
+              findsWidgets,
+              reason: '$name must actually reach the $mode rung');
+          if (dark) {
+            final painted = _paintedTextColors(t);
+            expect(
+                // dangerDark is NOT banned outright: the adapter "ends" chips pair
+                // it with their own #FEE2E2 fill (legit). The WCAG check below
+                // judges every danger text against its real backdrop instead.
+                painted.intersection({BsTokens.inkLight, BsTokens.mutedLight}),
+                isEmpty,
+                reason: '$name [$mode] paints light-only ink in dark mode');
+          }
+          expect(_lowContrastInk(t), isEmpty,
+              reason: '$name [$mode]: ink text below WCAG AA 4.5:1');
+        });
+      }
+    }
   }
 }

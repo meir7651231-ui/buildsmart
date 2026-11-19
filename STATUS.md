@@ -15,7 +15,9 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 (`SCREEN_SECTIONS_LIVE`, ברירת-מחדל OFF), הכרטיס הפנימי באנדרואיד (v7.02), תיקון אישור-הבעלים (v7.01).
 
 ## בעיות פתוחות
-1. **Dark mode לא הושלם** — אחרי wave 16 נותרו ~49 אתרי-משטח בהירים קשיחים (atlas 65→49, `tools/atom/decompose/bin/colors.dart`).
+1. **🔴 Dark mode — רגרסיית טקסט (התגלתה 2026-11-19).** גלים 1–16 המירו רק משטחים; הטקסט נשאר `BsTokens.inkLight` קבוע ⇒ במצב
+   כהה כותרות בלתי-נראות (~1:1, אומת בצילום). **פיילוט תוקן** (10 מסכים + `AiOffState`/`AiFailedState`, helpers `bsInk`/`bsMuted`/`bsDangerText`,
+   גארד `test/dark_mode_ink_test.dart` 52 בדיקות WCAG). **נותר:** ~93 קבצים · ~1,450 אתרי ink קבוע + atlas משטחים 45.
 2. ~~smoke-settings מקודד נתיב Chromium~~ — ✅ תוקן 2026-11-19 (איתור אוטומטי + `PW_CHROMIUM`). נותר: להכניס ל-CI.
 3. **פער גרסאות Flutter ב-CI** — `protocol-enforce.yml`/`catalog-qa.yml` על 3.29.3, build/deploy על 3.44.0; `flutter analyze` ב-3.44 מציג 56 warnings (לא חוסם).
 4. **הוראות סשן ישנות** — הענף `claude/whats-happening-LyY9G` עדיין מפעיל deploy לפרודקשן בכל push (`web-deploy.yml`, `firebase-hosting.yml`, `firebase-deploy.yml`); מסמכי `orchestrator/`/`knowledge/` עדיין מפנים אליו כענף העבודה.
@@ -24,7 +26,8 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 7. **Spec מיושן** — `app_flutter/knowledge/spec/shell-and-dials.md` §7 עדיין מתאר dials וטאבים שהוסרו (היום: בית · מחלקות · עדכונים · חנות). לעדכן.
 
 ## Next (3–5 משימות הבאות)
-1. **לסיים dark mode** — waves 17+ על ~49 האתרים הנותרים, עד atlas=0, עם צילומי light/dark.
+1. **להשלים dark mode (טקסט + משטחים)** — codemod בגלים של 8–10 קבצים לפי דפוס הפיילוט (`bsInk`/`bsMuted` + הסרת const),
+   כל גל מוסיף את מסכיו ל-`dark_mode_ink_test.dart`; עדיפות ל-manager_copilot (כותרת בלתי-נראית) ולמסכים הנפוצים.
 2. **smoke ב-CI** — הנתיב תוקן; להוסיף job שמריץ build + smoke 21/21 על PR (שינוי workflow — באישור מאיר).
 3. **ליישר CI ל-Flutter 3.44.0** בכל ה-workflows ולנקות את ה-warnings של analyze (דורש אישור — `protocol-enforce.yml` קובץ מוגן).
 4. **החלטה על ענף ה-deploy** — להעביר את הטריגרים של הפרודקשן ל-`main` בלבד (באישור מאיר) ולעדכן את המסמכים.
