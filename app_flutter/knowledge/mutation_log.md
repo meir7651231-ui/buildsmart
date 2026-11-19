@@ -2264,3 +2264,7 @@
 - **התיקון:** `loadAppSettings()` top-level (קורא `bs.settings.v1` לפני `runApp`) + constructor `initial` + `_seeded` (מדלג local re-read, server נטען). override ב-main.
 - **אימות:** `app_settings_preload_test` (3: seeded-state · load-persisted · load-defaults) · analyze 0 · settings tests ירוקים.
 - **mutation-verify (בוצע):** `super(initial ?? defaults)` → `super(defaults)` (מתעלם מ-seed) → RED (+2 -1) → שחזור → GREEN.
+
+## #darkmode-ink — גארד dark_mode_ink_test (2026-11-19)
+- **mutation-verify (בוצע):** (1) באר quote_polish חזרה ל-`const Color(0xFFF6F7F9)` קבוע → RED ("below WCAG AA 4.5:1 in dark mode") → שחזור → GREEN.
+  (2) `AiOffState` חזר ל-`const TextStyle(color: BsTokens.mutedLight)` → RED ב-7 מסכים ("still paints #1A1A1A/#6E655B") → שחזור → GREEN 20/20.

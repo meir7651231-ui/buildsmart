@@ -2744,3 +2744,9 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave16 — 8 files (alt/quote_polish/coming_soon/adapter/paired/daily_report/credit/manager_screens) (2026-08-23)
 **גל 16 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. משפחת מסכי-explain (alt/adapter/paired/credit) + quote_polish + coming_soon + daily_report + manager_screens — כולם דפוס Scaffold(bgLight)+AppBar(cardLight). bgLight→`scaffoldBackgroundColor` · cardLight/white→`colorScheme.surface`. `flutter analyze` 0 errors. **אטלס 65→49** (‎-16). מצטבר 659→49 (610 תוקנו).
+
+## #darkmode-ink — פיילוט טקסט theme-aware · 10 קבצים (2026-11-19)
+צילומי לפני/אחרי (golden, Heebo אמיתי) במצב כהה ובהיר לכל 10 המסכים. לפני: כותרת "בקרוב" ב-coming_soon
+בלתי-נראית בכהה. אחרי: כל הטקסט קריא בכהה; הבהיר זהה (למעט הערת-השוליים שהוכהתה ל-AA). **ממצא-רוחב:** 103
+קבצים שגלים 1–16 נגעו בהם נושאים ~1,489 אתרי ink קבוע — אותה רגרסיה; ההמשך = codemod בגלים עם אותו גארד.
+אטלס 49→45.

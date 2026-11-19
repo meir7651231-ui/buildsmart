@@ -4445,3 +4445,13 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave16 — 8 files theme-aware (2026-08-23)
 **גל 16:** 16 משטחים ב-alt_explain(2)·quote_polish(2)·coming_soon(2)·adapter_explain(2)·paired_explain(2)·daily_report(2)·credit_explain(2)·manager_screens(2) → theme. analyze 0 · אטלס 65→49. מצטבר dark-mode 659→49 (610 תוקנו).
+
+### #darkmode-ink — טקסט theme-aware · פיילוט 10 קבצים (2026-11-19)
+**הבאג:** גלים 1–16 המירו משטחים ל-theme אך השאירו טקסט `BsTokens.inkLight`/`mutedLight` קבוע ⇒ במצב כהה
+#1A1A1A על #1F1A13 (~1:1) — כותרות AppBar בלתי-נראות (אומת בצילום). **התיקון:** `bsInk(context)` / `bsMuted(context)`
+ב-`lib/theme/app_theme.dart` (light מחזיר בדיוק את ה-token הישן ⇒ byte-identical; dark → inkDark/mutedDark).
+הוחל על alt/quote_polish/adapter/paired/credit_explain · coming_soon · daily_report · manager_screens_sheet ·
+`AiOffState` (`widgets/ai_result_states.dart`) + גל-משטחים ל-reject_reason · business_summary (bgLight/cardLight→theme).
+quote_polish: באר #F6F7F9 → scaffold בכהה. **a11y-light:** הערת "⚙️ …מנתוני…" (11px) הייתה `mutedDark` גם בבהיר
+(2.49:1, נכשל AA) → `bsMuted` (כהה ללא שינוי). **גארד:** `test/dark_mode_ink_test.dart` (20) — מרנדר כל מסך
+בכהה+בהיר, אוסר ink-בהיר-בלבד בכהה ומחשב ניגודיות WCAG ≥4.5 של כל טקסט ink מול הרקע האטום הקרוב. אטלס 49→45.

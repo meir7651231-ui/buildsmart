@@ -17,6 +17,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -105,13 +106,13 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('business_summary_screen.t01', '✨ סיכום עסקי',
+          title: CfgText('business_summary_screen.t01', '✨ סיכום עסקי',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -119,15 +120,15 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
           padding: const EdgeInsets.all(BsTokens.space4),
           children: [
             // ── The REAL computed insights (data, never the model). ──
-            const CfgText('business_summary_screen.t02', 'התובנות שחושבו:',
-                style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+            CfgText('business_summary_screen.t02', 'התובנות שחושבו:',
+                style: TextStyle(color: bsMuted(context), fontSize: 13)),
             const SizedBox(height: 6),
             for (final line in widget.insightLines)
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text('• $line',
-                    style: const TextStyle(
-                        color: BsTokens.inkLight, fontSize: 13)),
+                    style: TextStyle(
+                        color: bsInk(context), fontSize: 13)),
               ),
             const Divider(height: BsTokens.space5, color: BsTokens.divider),
 
@@ -140,11 +141,11 @@ class _BusinessSummaryState extends ConsumerState<BusinessSummaryScreen> {
               AiFailedState(onRetry: _summarize)
             else if (_summary != null)
               Text(_summary!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.6)),
             const SizedBox(height: BsTokens.space4),
-            const CfgText('business_summary_screen.t03', '⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח אותם לסיכום.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+            CfgText('business_summary_screen.t03', '⚙️ המספרים מנתוני-המערכת; ה-AI רק מנסח אותם לסיכום.',
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),

@@ -1,3 +1,11 @@
+# 🌙 Dark-mode TEXT fix — pilot (#darkmode-ink) (2026-11-19)
+Owner: this session · ענף `claude/claude-md` · NO merge / NO deploy.
+Scope: `lib/theme/app_theme.dart` (+`bsInk`/`bsMuted`) · `lib/widgets/ai_result_states.dart` · 10 מסכים:
+alt/quote_polish/adapter/paired/credit_explain · coming_soon · daily_report · manager_screens_sheet ·
+reject_reason · business_summary · טסט חדש `test/dark_mode_ink_test.dart`.
+הבעיה: גלי dark-mode 1–16 המירו רק משטחים; הטקסט נשאר `BsTokens.inkLight` קבוע ⇒ במצב כהה כותרות
+בלתי-נראות (~1:1). פיילוט על 10 קבצים; ההמשך (103 קבצים · ~1,489 אתרים) = codemod בגלים.
+
 # 🧹 Fake-data-sweep (Stage-1) — Batch-1: honest-display fixes (v7.00)
 Owner: this session
 Scope: `lib/screens/suppliers_screen.dart` (S4 count) · `lib/screens/rewards_hub_screen.dart` (H3 clipboard) · `lib/screens/finance_hub_sheets.dart` (F1-F4 FX-gate) · `lib/data/lipskey_catalog.dart` (+`kLipskeyProductCount`) · `lib/state/studio/element_registry.dart` (+4 CfgText ids). NO push עד "תדחוף". S1/S3 (store) · M2 credit · H1 progress = פרוסות/החלטות נפרדות — לא ב-batch הזה.
