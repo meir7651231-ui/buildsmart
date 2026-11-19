@@ -22,6 +22,7 @@ import 'package:buildsmart/domain/connection_schema.dart'
 import 'package:buildsmart/domain/trade_physics_config.dart'
     show TradePhysicsConfig;
 import 'package:buildsmart/domain/trade_schema.dart' show AccessoryRule;
+import 'package:buildsmart/logic/bom_quantity.dart';
 import 'package:buildsmart/logic/install_engine.dart';
 import 'package:buildsmart/logic/install_kit.dart';
 import 'package:buildsmart/logic/pressure_drop.dart';
@@ -2395,13 +2396,8 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
                 }),
                 // ── Price estimate (ballpark budget) ───────────────────
                 Builder(builder: (_) {
-                  // Expand by quantity for a unit-count total
-                  final expanded = <LipskeyCatalogProduct>[];
-                  for (final p in plan.items) {
-                    final q = plan.qtyOf(p.sku);
-                    for (var i = 0; i < q; i++) expanded.add(p);
-                  }
-                  final pr = estimatePrice(expanded);
+                  // Same units as "add to cart" (pipes by ceil(metres)).
+                  final pr = estimateBomPrice(plan, _metersOf);
                   return Container(
                     margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                     padding: const EdgeInsets.all(12),
@@ -3134,8 +3130,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
   void _addToCart(BuildContext context, WidgetRef ref) {
     final cart = ref.read(smartCartProvider.notifier);
     for (final p in widget.plan.items) {
-      final qty =
-          isPipe(p) ? _metersOf(p.sku).ceil() : widget.plan.qtyOf(p.sku);
+      final qty = bomLineQty(p, widget.plan, _metersOf);
       cart.add(SmartCartLine(
         productKey: p.sku,
         productName: p.nameHe,
@@ -3148,6 +3143,15 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     }
     Navigator.pop(context);
     showToast(context, 'נוסף לסל: ${widget.plan.items.length} פריטים');
+  }
+
+  /// "×N" as the cart counts it; pipes also carry the stepper length so the
+  /// list says what to cut ("×3 (2.5 מ׳)").
+  String _bomQtyLabel(LipskeyCatalogProduct p, InstallationPlan plan) {
+    final qty = bomLineQty(p, plan, _metersOf);
+    return isPipe(p)
+        ? '×$qty (${_metersOf(p.sku).toStringAsFixed(1)} מ׳)'
+        : '×$qty';
   }
 
   void _copyBom(BuildContext context, InstallationPlan plan) {
@@ -3163,18 +3167,19 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
         for (final sku in entry.value) {
           final p = bySkU[sku];
           if (p == null) continue;
-          final qty = plan.qtyOf(sku);
-          buf.writeln('  • ${p.nameHe}  ×$qty');
+          buf.writeln('  • ${p.nameHe}  ${_bomQtyLabel(p, plan)}');
         }
       }
     } else {
       for (final p in plan.items) {
-        buf.writeln('• ${p.nameHe}  ×${plan.qtyOf(p.sku)}');
+        buf.writeln('• ${p.nameHe}  ${_bomQtyLabel(p, plan)}');
       }
     }
     buf.writeln('──────────────────────────');
-    buf.writeln(
-        'סה"כ: ${plan.items.length} פריטים · ${plan.totalPieces} יחידות');
+    // Same unit count as the cart / the estimate (pipes by ceil(metres)).
+    final units =
+        plan.items.fold<int>(0, (s, p) => s + bomLineQty(p, plan, _metersOf));
+    buf.writeln('סה"כ: ${plan.items.length} פריטים · $units יחידות');
 
     // ── ASCII chain diagram ───────────────────────────────────────────────
     // Vertical layout so it stays readable on a narrow WhatsApp screen.
@@ -3187,12 +3192,7 @@ class _BomSheetState extends ConsumerState<_BomSheet> {
     }
 
     // ── Price estimate ────────────────────────────────────────────────────
-    final expandedForPrice = <LipskeyCatalogProduct>[];
-    for (final p in plan.items) {
-      final q = plan.qtyOf(p.sku);
-      for (var i = 0; i < q; i++) expandedForPrice.add(p);
-    }
-    final pr = estimatePrice(expandedForPrice);
+    final pr = estimateBomPrice(plan, _metersOf);
     buf.writeln('💵 הערכת תקציב: ~₪${pr.totalILS}'
         '${pr.lowConfidence ? " (דיוק נמוך)" : ""}');
 
