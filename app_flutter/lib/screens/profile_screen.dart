@@ -83,6 +83,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
+  /// True for the blank profile an identity wipe leaves behind (sign-out,
+  /// account deletion, an account switch on the auth stream — all of them run
+  /// `userProfileProvider.reset()`).
+  static bool _isWiped(UserProfile p) =>
+      !p.registered &&
+      p.name.isEmpty &&
+      p.contact.isEmpty &&
+      p.address.isEmpty &&
+      p.businessId.isEmpty &&
+      p.profession.isEmpty;
+
+  /// True while every text field is empty (nothing typed to protect).
+  bool get _formBlank =>
+      _nameController.text.isEmpty &&
+      _contactController.text.isEmpty &&
+      _addressController.text.isEmpty &&
+      _businessIdController.text.isEmpty;
+
+  /// Re-seed the form from [p]. The controllers are filled once in initState;
+  /// without this, signing out (or deleting the account) left the previous
+  /// person's name / phone / address / ח.פ. in the fields, and a tap on שמור
+  /// wrote them straight back into the freshly wiped profile — the next person
+  /// to sign in on the device then inherited them.
+  void _fillFields(UserProfile p) {
+    _nameController.text = p.name;
+    _contactController.text = p.contact;
+    _addressController.text = p.address;
+    _businessIdController.text = p.businessId;
+    setState(() => _profession = p.profession);
+  }
+
   void _save() {
     ref.read(userProfileProvider.notifier).update(
           name: _nameController.text,
@@ -171,6 +202,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The profile was wiped while this screen is open → clear the form too.
+    // And the reverse: someone signs in from this screen (login row) after a
+    // wipe → show their details, but only while the form is still untouched
+    // (all fields empty), so typing is never overwritten.
+    ref.listen<UserProfile>(userProfileProvider, (prev, next) {
+      if (prev == null) return;
+      final wiped = !_isWiped(prev) && _isWiped(next);
+      final filledIntoBlankForm =
+          _isWiped(prev) && !_isWiped(next) && _formBlank;
+      if (wiped || filledIntoBlankForm) _fillFields(next);
+    });
     final p = ref.watch(userProfileProvider);
     // task #64: format-only validation — both fields are optional (empty is
     // fine), but a filled field must be well-formed. Uniqueness checks are
