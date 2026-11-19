@@ -60,7 +60,7 @@ smoke (מהשורש, אחרי build) — 21/21:
 npx --yes http-server app/dist -p 8123 -s &
 node app/smoke-settings.mjs
 ```
-⚠️ `smoke-settings.mjs` מקודד נתיב Chromium `/opt/pw-browsers/chromium-1194/...`; בסביבה הנוכחית הוא `chromium-1243/chrome-linux64/chrome` — יש להחליף בהעתק זמני (ראה STATUS.md).
+ה-smoke מאתר Chromium אוטומטית (`/opt/pw-browsers/chromium-*`, הגרסה החדשה ביותר); override: `PW_CHROMIUM=/path/to/chrome`. יוצא עם קוד 1 בכשל.
 
 **Functions**
 ```bash

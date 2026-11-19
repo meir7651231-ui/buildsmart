@@ -10,10 +10,29 @@
  *   npx http-server app/dist -p 8123 -s &
  *   node app/smoke-settings.mjs
  */
+import { existsSync, readdirSync } from 'node:fs';
 import { chromium } from './node_modules/playwright/index.mjs';
 
 const URL = 'http://localhost:8123/';
-const EXE = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+// Chromium resolution (no hardcoded build number — it drifts between images):
+//   1. $PW_CHROMIUM (explicit override)
+//   2. newest /opt/pw-browsers/chromium-*/chrome-linux{64,}/chrome
+//   3. undefined → Playwright's own bundled browser
+function resolveChromium() {
+  if (process.env.PW_CHROMIUM) return process.env.PW_CHROMIUM;
+  const root = '/opt/pw-browsers';
+  if (!existsSync(root)) return undefined;
+  const dirs = readdirSync(root).filter(d => /^chromium-\d+$/.test(d))
+    .sort((a, b) => Number(b.split('-')[1]) - Number(a.split('-')[1]));
+  for (const d of dirs) {
+    for (const sub of ['chrome-linux64', 'chrome-linux']) {
+      const p = `${root}/${d}/${sub}/chrome`;
+      if (existsSync(p)) return p;
+    }
+  }
+  return undefined;
+}
+const EXE = resolveChromium();
 
 let passed = 0, failed = 0;
 function ok(n)         { console.log(`  ✅ PASS  ${n}`); passed++; }
@@ -54,7 +73,7 @@ function stored(raw, ...keys) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ executablePath: EXE });
+  const browser = await chromium.launch(EXE ? { executablePath: EXE } : {});
   const ctx = await browser.newContext({ viewport: { width: 414, height: 896 } });
   const page = await ctx.newPage();
   await page.goto(URL);
