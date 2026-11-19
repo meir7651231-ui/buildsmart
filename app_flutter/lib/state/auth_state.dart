@@ -773,9 +773,9 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   /// re-apply the role, so a user whose role was just (re)assigned server-side
   /// sees it WITHOUT a re-login. A no-op when signed-out / gateway-less. Same
   /// generation guard as [_onAuthEvent]: a slow refresh can never clobber a
-  /// newer auth event or resurrect a signed-out user. Additive — no live
-  /// surface calls it yet (a gated "refresh my role" action wires it under
-  /// kUserSystem), so with the flag OFF it is uncalled and tree-shakes out.
+  /// newer auth event or resurrect a signed-out user. Called on every tap of
+  /// the role chip (home_shell), so the snapshot it builds must carry every
+  /// claim-derived field `_onAuthEvent` does (roles, orgId, employerId).
   Future<void> reloadRole() async {
     final g = _gateway;
     final user = state.user;
@@ -783,16 +783,29 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     final gen = ++_gen;
     List<String> roles;
     String? orgId; // stage-3.3 St2 — re-read with roles so a refresh keeps it
+    // The worker→employer link is re-read too. The refreshed snapshot used to be
+    // built WITHOUT it, so every tap on the role chip (home_shell calls this)
+    // silently nulled `employerId` — and the bound board session then wrote the
+    // worker's HR records (attendance, vacation, certs…) unscoped, invisible to
+    // the contractor. Same claims source as [_onAuthEvent].
+    String? employerId;
     try {
       final claims = await g.idTokenClaims(forceRefresh: true);
       roles = rolesFromClaims(claims);
       orgId = orgIdFromClaims(claims);
+      employerId = employerIdFromClaims(claims);
     } on Object catch (e) {
       debugPrint('AuthStateNotifier: reloadRole claims failed (kept): $e');
       return;
     }
     if (!mounted || gen != _gen) return;
-    state = AuthSnapshot(user: user, roles: roles, orgId: orgId, loaded: true);
+    state = AuthSnapshot(
+      user: user,
+      roles: roles,
+      orgId: orgId,
+      employerId: employerId,
+      loaded: true,
+    );
   }
 
   /// The S1.7/S1.8 local wipe: identity-coupled state only (user profile +
