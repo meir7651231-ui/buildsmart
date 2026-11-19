@@ -83,4 +83,54 @@ void main() {
     expect(c.read(authStateProvider).signedIn, isFalse);
     expect(c.read(authStateProvider).roles, isEmpty);
   });
+  // A role refresh must not drop the worker→employer link: the refreshed
+  // snapshot used to omit employerId, so one tap on the role chip un-scoped the
+  // worker's board session (employerId '') and their HR writes.
+  test('reloadRole keeps the employerId claim', () async {
+    final gw = _RoleFake();
+    final c = container(gw);
+
+    gw.signIn(
+      const AuthUser(uid: 'w1', email: 'w@y.co'),
+      withClaims: const {'role': 'worker', 'employerId': 'contractor-9'},
+    );
+    await pumpEventQueue();
+    expect(c.read(authStateProvider).employerId, 'contractor-9');
+
+    await c.read(authStateProvider.notifier).reloadRole();
+
+    expect(c.read(authStateProvider).roles, ['worker']);
+    expect(c.read(authStateProvider).employerId, 'contractor-9',
+        reason: 'a forced claims refresh re-reads the employer link');
+  });
+
+  test('reloadRole picks up an employer assigned server-side', () async {
+    final gw = _RoleFake();
+    final c = container(gw);
+
+    gw.signIn(const AuthUser(uid: 'w2', email: 'w2@y.co'),
+        withClaims: const {'role': 'worker'});
+    await pumpEventQueue();
+    expect(c.read(authStateProvider).employerId, isNull);
+
+    gw.claims = const {'role': 'worker', 'employerId': 'contractor-7'};
+    await c.read(authStateProvider.notifier).reloadRole();
+
+    expect(c.read(authStateProvider).employerId, 'contractor-7');
+  });
+
+  test('reloadRole clears an employer link revoked server-side', () async {
+    final gw = _RoleFake();
+    final c = container(gw);
+
+    gw.signIn(const AuthUser(uid: 'w3', email: 'w3@y.co'),
+        withClaims: const {'role': 'worker', 'employerId': 'contractor-1'});
+    await pumpEventQueue();
+
+    gw.claims = const {'role': 'worker'};
+    await c.read(authStateProvider.notifier).reloadRole();
+
+    expect(c.read(authStateProvider).employerId, isNull,
+        reason: 'the refresh mirrors the server claims, both ways');
+  });
 }
