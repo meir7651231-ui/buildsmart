@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 // Live, in-app audit screen — generates 20 RANDOM installation scenarios
 // each run and shows the auto-built plan + compliance result for each.
@@ -166,20 +167,20 @@ class _AuditScreenState extends State<AuditScreen> {
                         onTap: () => Navigator.maybePop(context),
                         // ≥48dp tap target around the small arrow (a11y),
                         // without enlarging the visible glyph.
-                        child: const SizedBox(
+                        child: SizedBox(
                           width: 48,
                           height: 48,
                           child: Center(
                             child: Icon(Icons.arrow_back,
-                                color: BsTokens.inkLight, size: 22),
+                                color: bsInk(context), size: 22),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const CfgText('audit_screen.t01', 'אודיט תרחישים',
+                  CfgText('audit_screen.t01', 'אודיט תרחישים',
                       style: TextStyle(
-                          color: BsTokens.inkLight,
+                          color: bsInk(context),
                           fontSize: 16,
                           fontWeight: FontWeight.w800)),
                   const Spacer(),
@@ -232,7 +233,7 @@ class _AuditScreenState extends State<AuditScreen> {
             ),
             Expanded(
               child: _results.isEmpty && !_running
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -242,7 +243,8 @@ class _AuditScreenState extends State<AuditScreen> {
                             'audit_screen.t02',
                             'עדיין לא הורצו בדיקות',
                             style: TextStyle(
-                              color: Color(0xFF334155),
+                              // was const #334155 (slate) — 1.9:1 on bgDark.
+                              color: bsInk(context),
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),

@@ -178,7 +178,7 @@ class _LipskeyProductsListState extends ConsumerState<LipskeyProductsList> {
               'lipskey_products_screen.empty_title',
               'אין מוצרים להצגה',
               style: TextStyle(
-                color: BsTokens.inkLight,
+                color: bsInk(context),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),

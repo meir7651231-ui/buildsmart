@@ -2270,3 +2270,6 @@
   (2) `AiOffState` חזר ל-`const TextStyle(color: BsTokens.mutedLight)` → RED ב-7 מסכים ("still paints #1A1A1A/#6E655B") → שחזור → GREEN 20/20.
 
 - **mutation-verify (3, 2026-11-19):** `AiFailedState` חזר ל-`const … BsTokens.dangerDark` → RED ב-8 מסכים ("[failed]: ink text below WCAG AA") → שחזור → GREEN 52/52.
+
+## #darkmode-ink-w2 (2026-11-20)
+- **mutation-verify:** `git stash -- lib` (כל תיקוני גל-2 הוסרו) → קבוצת w2: RED 9/16 (8 מסכים בכהה + studio בבהיר) → `stash pop` → GREEN 68/68.

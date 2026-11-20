@@ -15,6 +15,7 @@ import 'package:buildsmart/screens/studio/panes/theme_pane.dart';
 import 'package:buildsmart/screens/studio/panes/tree_pane.dart';
 import 'package:buildsmart/screens/studio/studio_top_bar.dart';
 import 'package:buildsmart/state/studio/edit_mode.dart' show studioCanEditProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,16 +57,16 @@ class _StudioScreenState extends ConsumerState<StudioScreen> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           automaticallyImplyLeading: false,
-          title: const Text(
+          title: Text(
             '🎨 סטודיו',
             style: TextStyle(
-              color: BsTokens.inkLight,
+              color: bsInk(context),
               fontWeight: FontWeight.w800,
             ),
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.close, color: BsTokens.inkLight),
+              icon: Icon(Icons.close, color: bsInk(context)),
               tooltip: 'סגור',
               onPressed: () => Navigator.of(context).maybePop(),
             ),

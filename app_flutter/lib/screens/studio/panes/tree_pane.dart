@@ -10,6 +10,7 @@
 import 'package:buildsmart/state/studio/element_registry.dart'
     show ElementDescriptor, elementRegistryProvider;
 import 'package:buildsmart/state/studio/studio_nav.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,15 +72,15 @@ class _TreePaneState extends ConsumerState<TreePane> {
         ),
         Expanded(
           child: rows.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'אין רכיבים',
-                    style: TextStyle(color: BsTokens.mutedLight),
+                    style: TextStyle(color: bsMuted(context)),
                   ),
                 )
               : ListView.builder(
                   itemCount: rows.length,
-                  itemBuilder: (_, i) => _rowWidget(ref, rows[i], selected),
+                  itemBuilder: (_, i) => _rowWidget(context, ref, rows[i], selected),
                 ),
         ),
       ],
@@ -87,20 +88,25 @@ class _TreePaneState extends ConsumerState<TreePane> {
   }
 }
 
-Widget _rowWidget(WidgetRef ref, _Row row, String? selected) {
+Widget _rowWidget(
+    BuildContext context, WidgetRef ref, _Row row, String? selected) {
   switch (row) {
     case _ScreenRow(:final screen):
       return Container(
-        color: BsTokens.surfaceMid,
+        // Light: the original surfaceMid band (byte-identical). Dark: the M3
+        // container tone, so the band + its theme ink stay legible.
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : BsTokens.surfaceMid,
         padding: const EdgeInsets.symmetric(
           horizontal: BsTokens.space3,
           vertical: 6,
         ),
         child: Text(
           '🗂️ $screen',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w800,
-            color: BsTokens.inkLight,
+            color: bsInk(context),
           ),
         ),
       );
@@ -113,9 +119,9 @@ Widget _rowWidget(WidgetRef ref, _Row row, String? selected) {
         ),
         child: Text(
           area,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: BsTokens.mutedLight,
+            color: bsMuted(context),
             fontSize: BsTokens.typeCaption,
           ),
         ),
@@ -128,9 +134,9 @@ Widget _rowWidget(WidgetRef ref, _Row row, String? selected) {
         title: Text(d.labelHe),
         subtitle: Text(
           d.id,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: BsTokens.typeCaption,
-            color: BsTokens.mutedLight,
+            color: bsMuted(context),
           ),
         ),
         trailing: d.wired

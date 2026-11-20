@@ -18,6 +18,7 @@ import 'package:buildsmart/logic/manager_copilot.dart';
 import 'package:buildsmart/logic/manager_dashboard.dart' show kManagerOrderFlow;
 import 'package:buildsmart/state/orders_engine.dart'
     show managerAnalyticsProvider, managerCustomersProvider, ordersEngineProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart' show AiOffState;
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -129,7 +130,7 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const Column(
+          title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -139,13 +140,13 @@ class _ManagerCopilotState extends ConsumerState<ManagerCopilotScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      color: BsTokens.inkLight,
+                      color: bsInk(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
               CfgText('manager_copilot_screen.subtitle', 'שאל את העסק שלך',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
+                  style: TextStyle(color: bsMuted(context), fontSize: 12)),
             ],
           ),
         ),
@@ -197,16 +198,16 @@ class _Welcome extends StatelessWidget {
         const SizedBox(height: BsTokens.space4),
         const Text('🤖', style: TextStyle(fontSize: 44), textAlign: TextAlign.center),
         const SizedBox(height: BsTokens.space3),
-        const CfgText('manager_copilot_screen.welcome_headline', 'שאל אותי כל דבר על העסק שלך.',
+        CfgText('manager_copilot_screen.welcome_headline', 'שאל אותי כל דבר על העסק שלך.',
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: BsTokens.inkLight,
+                color: bsInk(context),
                 fontSize: 17,
                 fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
-        const CfgText('manager_copilot_screen.welcome_sub', 'אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.',
+        CfgText('manager_copilot_screen.welcome_sub', 'אני קורא את ההזמנות, הלקוחות והאשראי החיים שלך ועונה מהמספרים האמיתיים.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+            style: TextStyle(color: bsMuted(context), fontSize: 13)),
         const SizedBox(height: BsTokens.space4),
         SizedBox(
           width: double.infinity,
@@ -217,8 +218,8 @@ class _Welcome extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space4),
-        const CfgText('manager_copilot_screen.or_ask', 'או שאל:',
-            style: TextStyle(color: BsTokens.mutedLight, fontSize: 13)),
+        CfgText('manager_copilot_screen.or_ask', 'או שאל:',
+            style: TextStyle(color: bsMuted(context), fontSize: 13)),
         const SizedBox(height: BsTokens.space2),
         Wrap(
           spacing: BsTokens.space2,
@@ -229,8 +230,8 @@ class _Welcome extends StatelessWidget {
                 label: Text(q),
                 onPressed: () => onAsk(q),
                 backgroundColor: Theme.of(context).colorScheme.surface,
-                labelStyle: const TextStyle(
-                    color: BsTokens.inkLight, fontSize: 13),
+                labelStyle: TextStyle(
+                    color: bsInk(context), fontSize: 13),
               ),
           ],
         ),
@@ -261,8 +262,12 @@ class _Bubble extends StatelessWidget {
         // Dark ink on BOTH bubbles — white-on-brand was ~2.7:1 (fails WCAG AA);
         // dark-on-brand is ~6:1 and keeps the brand-colored owner bubble.
         child: Text(turn.text,
-            style: const TextStyle(
-                color: BsTokens.inkLight, fontSize: 14, height: 1.5)),
+            // owner bubble = brand fill → dark ink in BOTH themes; assistant
+            // bubble = theme surface → theme ink (inkLight there is ~1:1 in dark).
+            style: TextStyle(
+                color: turn.user ? BsTokens.inkLight : bsInk(context),
+                fontSize: 14,
+                height: 1.5)),
       ),
     );
   }

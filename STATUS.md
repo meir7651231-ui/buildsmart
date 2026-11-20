@@ -17,13 +17,15 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 ## בעיות פתוחות
 1. **🔴 Dark mode — רגרסיית טקסט (התגלתה 2026-11-19).** גלים 1–16 המירו רק משטחים; הטקסט נשאר `BsTokens.inkLight` קבוע ⇒ במצב
    כהה כותרות בלתי-נראות (~1:1, אומת בצילום). **פיילוט תוקן** (10 מסכים + `AiOffState`/`AiFailedState`, helpers `bsInk`/`bsMuted`/`bsDangerText`,
-   גארד `test/dark_mode_ink_test.dart` 52 בדיקות WCAG). **נותר:** ~93 קבצים · ~1,450 אתרי ink קבוע + atlas משטחים 45.
+   גארד `test/dark_mode_ink_test.dart`). **גל 2 (2026-11-20):** +17 קבצים (copilot · studio · consent · role_picker · audit …), גארד 68.
+   **נותר:** ~78 קבצים · ~1,400 אתרי ink קבוע + atlas משטחים 45 + קבועי `_ink` ברמת-קובץ (budget/install_studio/stock).
 2. ~~smoke-settings מקודד נתיב Chromium~~ — ✅ תוקן 2026-11-19 (איתור אוטומטי + `PW_CHROMIUM`). נותר: להכניס ל-CI.
 3. **פער גרסאות Flutter ב-CI** — `protocol-enforce.yml`/`catalog-qa.yml` על 3.29.3, build/deploy על 3.44.0; `flutter analyze` ב-3.44 מציג 56 warnings (לא חוסם).
 4. **הוראות סשן ישנות** — הענף `claude/whats-happening-LyY9G` עדיין מפעיל deploy לפרודקשן בכל push (`web-deploy.yml`, `firebase-hosting.yml`, `firebase-deploy.yml`); מסמכי `orchestrator/`/`knowledge/` עדיין מפנים אליו כענף העבודה.
 5. **PRs פתוחים לא מטופלים** — [#59](https://github.com/meir7651231-ui/buildsmart/pull/59) (הצלת נכסי-ענפים ל-`rescue/`) ו-[#5](https://github.com/meir7651231-ui/buildsmart/pull/5) (`.gitignore` ל-`.claude/`) — ממתינים להחלטת מאיר.
 6. **השקה בחנויות** — iOS: אין signing/build (דורש Mac/CI); חשבונות Apple/Google + privacy-policy עדיין פתוחים (`app_flutter/knowledge/LAUNCH_READINESS.md`).
 7. **Spec מיושן** — `app_flutter/knowledge/spec/shell-and-dials.md` §7 עדיין מתאר dials וטאבים שהוסרו (היום: בית · מחלקות · עדכונים · חנות). לעדכן.
+8. **ניגודיות פלטת-המותג (החלטת-עיצוב)** — לבן על כתום-המותג 3.05:1 בכפתורים ראשיים, כתום-על-כהה 2.87:1, chips צבעוניים ~2.6–3.7:1 (מתחת ל-AA 4.5). high-contrast מכסה חלק; ברירת-המחדל דורשת החלטה של מאיר.
 
 ## Next (3–5 משימות הבאות)
 1. **להשלים dark mode (טקסט + משטחים)** — codemod בגלים של 8–10 קבצים לפי דפוס הפיילוט (`bsInk`/`bsMuted` + הסרת const),

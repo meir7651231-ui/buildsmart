@@ -4460,3 +4460,11 @@ quote_polish: באר #F6F7F9 → scaffold בכהה. **a11y-light:** הערת "�
 `bsDangerText(context)` (light=dangerDark זהה · dark=`BsTokens.dangerOnDark` #F87171, 6.9:1). באר quote_polish בכהה →
 `colorScheme.surface` (נבדל מהעמוד). הגארד הורחב ל-52: 8 מסכי-AI × {תוצאה, כשל} × {כהה, בהיר} עם gateway מזויף
 (בלעדיו רק שלב "AI כבוי" מרונדר). הערה: reject_reason/business_summary בבהיר — רקע bgLight #FAFAFA → scaffold #FAF8F5 (כמו 8 האחרים).
+
+### #darkmode-ink-w2 — גל 2 · 17 קבצים (2026-11-20)
+**הוחל `bsInk`/`bsMuted`** ב-manager_copilot (בועת-בעלים על brand נשארת inkLight) · studio_screen + top_bar + 5 panes
+(find_replace/history/inspector/theme/tree; `_rowWidget` קיבל `BuildContext`) · consent_modal · role_picker_sheet ·
+regression_panel · audit · catalog_config · lipskey_products (מצב-ריק). **משטחים שהפכו brightness-aware (בהיר byte-identical):**
+שורות role_picker (#F5F5F7 → surfaceContainerHighest בכהה; היה 1.06:1) · פס-המסך בעץ-הסטודיו (surfaceMid → container בכהה).
+chip "אין שינויים" → `onSurfaceVariant` (היה 4.43:1 בבהיר / 2.15:1 בכהה). audit — כותרת-ריק #334155 → bsInk. **גארד:** קבוצת `_wave2`
+ב-`dark_mode_ink_test.dart` (16; סה"כ 68) — WCAG בלבד; על הקוד הישן 9/16 נכשלים (כל 8 בכהה + studio בבהיר).
