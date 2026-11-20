@@ -86,6 +86,9 @@ class BsTokens {
   // Colors.redAccent-on-white is 3.19:1 (fails WCAG AA 4.5:1 for 14-15px
   // text); this red-700 is ~6.5:1 — passes AA. Use for 'יציאה'/'הסר' labels.
   static const Color dangerDark = Color(0xFFB91C1C);
+  // red-400 for danger TEXT on the DARK theme surfaces (bgDark/cardDark):
+  // dangerDark there is only 2.9:1; this is 6.9:1 on bgDark / 6.3:1 on cardDark.
+  static const Color dangerOnDark = Color(0xFFF87171);
   static const Color warnText = Color(0xFFB45309); // dark amber text
   static const Color warnBright = Color(0xFFF2A516); // bright amber badge
   static const Color divider = Color(0xFFE9E2D9); // §W0 slice-1: warm divider (was #EEEEEE cool)

@@ -15,6 +15,7 @@ import 'package:buildsmart/state/studio/element_registry.dart'
     show EditAxis, descriptorProvider;
 import 'package:buildsmart/state/studio/studio_nav.dart'
     show studioSelectedIdProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -93,17 +94,17 @@ class _InspectorPaneState extends ConsumerState<InspectorPane> {
       children: [
         Text(
           d.labelHe,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: BsTokens.typeSubhead,
-            color: BsTokens.inkLight,
+            color: bsInk(context),
           ),
         ),
         Text(
           d.id,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: BsTokens.typeCaption,
-            color: BsTokens.mutedLight,
+            color: bsMuted(context),
           ),
         ),
         const Divider(height: BsTokens.space5),
@@ -137,9 +138,9 @@ class _InspectorPaneState extends ConsumerState<InspectorPane> {
             value: hidden,
             title: const Text('מוסתר'),
             subtitle: d.kImmutable
-                ? const Text(
+                ? Text(
                     'רכיב קריטי — לא ניתן להסתרה',
-                    style: TextStyle(color: BsTokens.mutedLight),
+                    style: TextStyle(color: bsMuted(context)),
                   )
                 : null,
             onChanged: d.kImmutable
@@ -149,18 +150,18 @@ class _InspectorPaneState extends ConsumerState<InspectorPane> {
         ],
         const SizedBox(height: BsTokens.space4),
         // Live preview of the draft value (what publishing would make live).
-        const Text(
+        Text(
           'תצוגה:',
-          style: TextStyle(color: BsTokens.mutedLight, fontSize: BsTokens.typeCaption),
+          style: TextStyle(color: bsMuted(context), fontSize: BsTokens.typeCaption),
         ),
         const SizedBox(height: 4),
         Text(
           effText == null
               ? '(ברירת-מחדל — ${d.labelHe})'
               : (effEmoji == null ? effText : '$effEmoji $effText'),
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: BsTokens.inkLight,
+            color: bsInk(context),
           ),
         ),
         const SizedBox(height: BsTokens.space5),
@@ -182,7 +183,7 @@ class _InspectorPaneState extends ConsumerState<InspectorPane> {
           child: Text(
             msg,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: BsTokens.mutedLight),
+            style: TextStyle(color: bsMuted(context)),
           ),
         ),
       );

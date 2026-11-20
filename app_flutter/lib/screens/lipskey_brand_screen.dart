@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/data/lipskey_smart_data.dart';
@@ -40,7 +41,7 @@ class LipskeyBrandScreen extends StatelessWidget {
           slivers: [
             SliverAppBar(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: BsTokens.inkLight,
+              foregroundColor: bsInk(context),
               elevation: 0,
               pinned: true,
               leading: IconButton(
@@ -50,10 +51,10 @@ class LipskeyBrandScreen extends StatelessWidget {
               ),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   CfgText('lipskey_brand_screen.appbar_title', 'ליפסקי ברקן',
                       style: TextStyle(
-                          color: BsTokens.inkLight,
+                          color: bsInk(context),
                           fontWeight: FontWeight.bold,
                           fontSize: 17)),
                   CfgText(
@@ -193,8 +194,8 @@ class _SectionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(section.name,
-                    style: const TextStyle(
-                        color: BsTokens.inkLight,
+                    style: TextStyle(
+                        color: bsInk(context),
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         height: 1.2)),
@@ -252,7 +253,7 @@ class LipskeySectionScreen extends StatelessWidget {
           slivers: [
             SliverAppBar(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: BsTokens.inkLight,
+              foregroundColor: bsInk(context),
               elevation: 0,
               pinned: true,
               leading: IconButton(
@@ -355,8 +356,8 @@ class _CategoryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(entry.name,
-                      style: const TextStyle(
-                          color: BsTokens.inkLight,
+                      style: TextStyle(
+                          color: bsInk(context),
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           height: 1.2),

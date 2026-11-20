@@ -16,6 +16,7 @@ import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/feature_flags.dart' show featureFlagsProvider;
 import 'package:buildsmart/state/trade_builder_flags.dart'
     show kTradeImportFlag;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +98,7 @@ class _ManagerScreensSheet extends ConsumerWidget {
               'manager_screens_sheet.t01',
               'מעבר בין מסכים',
               style: TextStyle(
-                color: BsTokens.inkLight,
+                color: bsInk(context),
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
@@ -106,7 +107,7 @@ class _ManagerScreensSheet extends ConsumerWidget {
             CfgText(
               'manager_screens_sheet.t02',
               'צפייה בכל לוח של המערכת — חזרה לניהול בכל רגע.',
-              style: TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+              style: TextStyle(color: bsMuted(context), fontSize: 13),
             ),
             const SizedBox(height: 12),
             const Divider(color: Color(0xFFF0F0F0), height: 1),
@@ -115,10 +116,10 @@ class _ManagerScreensSheet extends ConsumerWidget {
                 leading: Text(d.emoji, style: const TextStyle(fontSize: 24)),
                 title: Text(
                   d.label,
-                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                  style: TextStyle(color: bsInk(context), fontSize: 15),
                 ),
                 trailing:
-                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                    Icon(Icons.chevron_left, color: bsMuted(context)),
                 onTap: () => _open(context, ref, d),
               ),
             // C4.1 · supplier self-onboarding — gated (kTradeImportFlag, default
@@ -128,12 +129,12 @@ class _ManagerScreensSheet extends ConsumerWidget {
             if (ref.watch(featureFlagsProvider).contains(kTradeImportFlag))
               ListTile(
                 leading: const Text('🏪', style: TextStyle(fontSize: 24)),
-                title: const Text(
+                title: Text(
                   'העלאת מוצר (ספק)',
-                  style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                  style: TextStyle(color: bsInk(context), fontSize: 15),
                 ),
                 trailing:
-                    const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                    Icon(Icons.chevron_left, color: bsMuted(context)),
                 onTap: () {
                   Navigator.pop(context); // close the sheet first
                   Navigator.of(context)

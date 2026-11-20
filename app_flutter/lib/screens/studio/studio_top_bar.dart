@@ -14,6 +14,7 @@ import 'package:buildsmart/state/studio/edit_mode.dart'
     show editModeProvider, studioCanEditProvider, studioOwnerEmailProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
     show criticalIdsProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,7 +105,11 @@ class _DraftBadge extends StatelessWidget {
       child: Text(
         has ? 'טיוטה · $count שינויים' : 'אין שינויים',
         style: TextStyle(
-          color: has ? BsTokens.brandDark : BsTokens.mutedLight,
+          // idle chip sits on surfaceContainerHighest → its paired foreground
+          // (mutedLight there was 4.43:1 light / 2.15:1 dark — both < AA).
+          color: has
+              ? BsTokens.brandDark
+              : Theme.of(context).colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w700,
           fontSize: BsTokens.typeCaption,
         ),
@@ -136,9 +141,9 @@ Future<void> _confirmDiscard(
             ),
           ),
           const SizedBox(height: BsTokens.space2),
-          const Text(
+          Text(
             'הטיוטה תימחק. מה שכבר פורסם יישאר חי.',
-            style: TextStyle(color: BsTokens.mutedLight),
+            style: TextStyle(color: bsMuted(sheetCtx)),
           ),
           const SizedBox(height: BsTokens.space4),
           Row(
@@ -255,7 +260,7 @@ class _PublishSheetState extends ConsumerState<_PublishSheet> {
           const SizedBox(height: BsTokens.space4),
           Row(
             children: [
-              const Text('צפה כפי ש-', style: TextStyle(color: BsTokens.mutedLight)),
+              Text('צפה כפי ש-', style: TextStyle(color: bsMuted(context))),
               const SizedBox(width: 8),
               DropdownButton<String>(
                 value: _viewAs,

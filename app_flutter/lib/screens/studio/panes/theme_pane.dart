@@ -15,6 +15,7 @@
 
 import 'package:buildsmart/state/studio/config_store.dart'
     show configStoreProvider, configThemeProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/config_theme.dart' show CfgTheme;
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
@@ -114,10 +115,10 @@ class _Label extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: BsTokens.space2),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: BsTokens.typeSubhead,
-            color: BsTokens.inkLight,
+            color: bsInk(context),
           ),
         ),
       );

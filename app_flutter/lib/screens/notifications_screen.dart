@@ -6,6 +6,7 @@ import 'package:buildsmart/screens/store_screen.dart'
 import 'package:buildsmart/state/app_profile.dart' show kProfileEmptySeeds;
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/notif_settings.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -554,12 +555,12 @@ class _Header extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: CfgText(
               'notifications_screen.screen_title',
               'התראות',
               style: TextStyle(
-                color: BsTokens.inkLight,
+                color: bsInk(context),
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -677,11 +678,11 @@ class _NotifList extends ConsumerWidget {
                   children: [
                     const Text('🔕', style: TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
-                    const CfgText(
+                    CfgText(
                       'notifications_screen.snooze_title',
                       'התראות מושתקות',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -721,11 +722,11 @@ class _NotifList extends ConsumerWidget {
                   children: [
                     const Text('🌙', style: TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
-                    const CfgText(
+                    CfgText(
                       'notifications_screen.quiet_title',
                       'שעות שקט פעילות',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -758,7 +759,7 @@ class _NotifList extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             child: SizedBox(
               height: constraints.maxHeight,
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -768,7 +769,7 @@ class _NotifList extends ConsumerWidget {
                       'notifications_screen.empty_title',
                       'אין התראות',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -939,7 +940,9 @@ class _NotifRow extends ConsumerWidget {
       final offset = box.localToGlobal(Offset.zero);
       final choice = await showMenu<String>(
         context: context,
-        color: const Color(0xFF1E1E1E),
+        // was const #1E1E1E (near-black) under const dark ink → the "סמן כנקרא"
+        // row was ~1:1 in BOTH themes. Theme surface + theme ink now.
+        color: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -951,30 +954,30 @@ class _NotifRow extends ConsumerWidget {
         ),
         items: [
           if (isUnread)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'read',
               child: Row(
                 children: [
-                  Icon(Icons.done, color: Colors.black54, size: 20),
+                  Icon(Icons.done, color: bsMuted(context), size: 20),
                   SizedBox(width: 12),
                   CfgText(
                     'notifications_screen.mark_read',
                     'סמן כנקרא',
-                    style: TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                    style: TextStyle(color: bsInk(context), fontSize: 15),
                   ),
                 ],
               ),
             ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'delete',
             child: Row(
               children: [
-                Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                Icon(Icons.delete_outline, color: bsDangerText(context), size: 20),
                 SizedBox(width: 12),
                 CfgText(
                   'notifications_screen.menu_delete',
                   'מחק',
-                  style: TextStyle(color: Colors.redAccent, fontSize: 15),
+                  style: TextStyle(color: bsDangerText(context), fontSize: 15),
                 ),
               ],
             ),
@@ -1050,7 +1053,7 @@ class _NotifRow extends ConsumerWidget {
                             style: TextStyle(
                               color: notif.highPriority
                                   ? Colors.redAccent
-                                  : BsTokens.inkLight,
+                                  : bsInk(context),
                               fontSize: 16,
                               fontWeight: isUnread
                                   ? FontWeight.w700

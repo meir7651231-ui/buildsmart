@@ -29,6 +29,7 @@ import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/state/keyboard_overlay.dart' show kKbGlobal;
 import 'package:buildsmart/state/keyboard_screen_tools.dart' show KbScreen;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:buildsmart/widgets/studio/cfg_visible.dart';
@@ -213,7 +214,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
             'ai_finder_screen.t01',
             '🗣️ חיפוש חכם',
             style: TextStyle(
-              color: BsTokens.inkLight,
+              color: bsInk(context),
               fontWeight: FontWeight.w800,
               fontSize: 18,
             ),
@@ -240,7 +241,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       'ai_finder_screen.t02',
                       '💡 החיפוש החכם דורש חיבור לשרת.',
                       style: TextStyle(
-                        color: BsTokens.mutedLight,
+                        color: bsMuted(context),
                         fontSize: 13,
                       ),
                     )
@@ -249,7 +250,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       'ai_finder_screen.t03',
                       'תאר במילים שלך מה אתה מחפש:',
                       style: TextStyle(
-                        color: BsTokens.mutedLight,
+                        color: bsMuted(context),
                         fontSize: 13,
                       ),
                     ),
@@ -304,8 +305,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                   else if (_resultTitle != null) ...[
                     Text(
                       '${_resultTitle!}  ·  ${_products.length} מוצרים',
-                      style: const TextStyle(
-                        color: BsTokens.inkLight,
+                      style: TextStyle(
+                        color: bsInk(context),
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                       ),
@@ -316,7 +317,7 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       'ai_finder_screen.t06',
                       'לא נמצאו תוצאות — נסה מילים אחרות.',
                       style: TextStyle(
-                        color: BsTokens.mutedLight,
+                        color: bsMuted(context),
                         fontSize: 14,
                       ),
                     ),
@@ -340,8 +341,8 @@ class _AiFinderState extends ConsumerState<AiFinderScreen> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         p.nameHe,
-                        style: const TextStyle(
-                          color: BsTokens.inkLight,
+                        style: TextStyle(
+                          color: bsInk(context),
                           fontSize: 14,
                         ),
                       ),

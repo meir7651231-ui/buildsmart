@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class AiOffState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: const TextStyle(color: BsTokens.mutedLight, fontSize: 13),
+        style: TextStyle(color: bsMuted(context), fontSize: 13),
       );
 }
 
@@ -49,10 +50,11 @@ class AiFailedState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // dangerDark (not the lighter `danger`) — clears WCAG AA on light card.
-          const CfgText(
+          // (dark theme: bsDangerText → dangerOnDark; dangerDark there is 2.9:1.)
+          CfgText(
             'ai_result_states.t01',
             'משהו השתבש — נסה שוב.',
-            style: TextStyle(color: BsTokens.dangerDark, fontSize: 14),
+            style: TextStyle(color: bsDangerText(context), fontSize: 14),
           ),
           const SizedBox(height: BsTokens.space3),
           OutlinedButton.icon(

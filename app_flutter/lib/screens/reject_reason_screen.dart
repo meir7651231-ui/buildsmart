@@ -15,6 +15,7 @@
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
 import 'package:buildsmart/logic/prompt_sanitize.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
@@ -126,13 +127,13 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: BsTokens.bgLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: BsTokens.cardLight,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('reject_reason_screen.title', '✨ סיבת-דחייה',
+          title: CfgText('reject_reason_screen.title', '✨ סיבת-דחייה',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -142,8 +143,8 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
             Text(
                 'בקשת-תפקיד: ${widget.role}'
                 '${widget.name.trim().isEmpty ? '' : ' · ${widget.name.trim()}'}',
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: bsInk(context),
                     fontSize: 15,
                     fontWeight: FontWeight.w800)),
             const Divider(height: BsTokens.space5, color: BsTokens.divider),
@@ -156,8 +157,8 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
               AiFailedState(onRetry: _draftReason)
             else if (_draft != null) ...[
               Text(_draft!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+                  style: TextStyle(
+                      color: bsInk(context), fontSize: 15, height: 1.6)),
               const SizedBox(height: BsTokens.space4),
               SizedBox(
                 width: double.infinity,
@@ -169,10 +170,10 @@ class _RejectReasonState extends ConsumerState<RejectReasonScreen> {
               ),
             ],
             const SizedBox(height: BsTokens.space4),
-            const CfgText('reject_reason_screen.note',
+            CfgText('reject_reason_screen.note',
                 '⚙️ נוסח כללי ומכובד; ערוך לפי הצורך לפני שליחה. ה-AI לא ממציא '
                 'פרטים על המבקש.',
-                style: TextStyle(fontSize: 11, color: BsTokens.mutedDark)),
+                style: TextStyle(fontSize: 11, color: bsMuted(context))),
           ],
         ),
       ),

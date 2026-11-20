@@ -13,6 +13,7 @@ import 'package:buildsmart/state/studio/config_store.dart'
     show ConfigOp, SetText, cfgOpError, configStoreProvider;
 import 'package:buildsmart/state/studio/element_registry.dart'
     show EditAxis, ElementDescriptor, criticalIdsProvider, elementRegistryProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart' show BsTokens;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,15 +114,15 @@ class _FindReplacePaneState extends ConsumerState<FindReplacePane> {
                           }),
                   title: Text(
                     h.d.labelHe,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: BsTokens.inkLight,
+                      color: bsInk(context),
                     ),
                   ),
                   subtitle: locked
-                      ? const Text(
+                      ? Text(
                           'רכיב קריטי — קריאה בלבד',
-                          style: TextStyle(color: BsTokens.mutedLight),
+                          style: TextStyle(color: bsMuted(context)),
                         )
                       // The strike-through old / bold new is a VISUAL cue; a
                       // screen reader gets a spoken "מ־… ל־…" instead (the bare
@@ -134,16 +135,16 @@ class _FindReplacePaneState extends ConsumerState<FindReplacePane> {
                                 children: [
                                   TextSpan(
                                     text: h.text,
-                                    style: const TextStyle(
-                                      color: BsTokens.mutedLight,
+                                    style: TextStyle(
+                                      color: bsMuted(context),
                                       decoration: TextDecoration.lineThrough,
                                     ),
                                   ),
                                   const TextSpan(text: '  ←  '),
                                   TextSpan(
                                     text: after.isEmpty ? '(ריק)' : after,
-                                    style: const TextStyle(
-                                      color: BsTokens.inkLight,
+                                    style: TextStyle(
+                                      color: bsInk(context),
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -227,7 +228,7 @@ class _Placeholder extends StatelessWidget {
           child: Text(
             msg,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: BsTokens.mutedLight),
+            style: TextStyle(color: bsMuted(context)),
           ),
         ),
       );

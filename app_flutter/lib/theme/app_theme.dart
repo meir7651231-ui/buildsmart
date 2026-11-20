@@ -128,3 +128,28 @@ Color bsOnAccent(BuildContext context) =>
 Color bsSuccess(BuildContext context) =>
     Theme.of(context).extension<BsSemanticColors>()?.success ??
     BsTokens.success;
+
+/// Primary text ink that follows the theme brightness. Light mode returns
+/// EXACTLY [BsTokens.inkLight] (byte-identical to the old hardcoded literal);
+/// dark mode returns [BsTokens.inkDark]. Use instead of a const
+/// `BsTokens.inkLight` on any surface that went theme-aware — a fixed dark ink
+/// over `colorScheme.surface` is ~1:1 contrast (invisible) in dark mode.
+Color bsInk(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.inkDark
+        : BsTokens.inkLight;
+
+/// Secondary/muted text that follows the theme brightness — light returns
+/// EXACTLY [BsTokens.mutedLight]; dark returns [BsTokens.mutedDark].
+Color bsMuted(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.mutedDark
+        : BsTokens.mutedLight;
+
+/// Danger TEXT that follows the theme brightness — light returns EXACTLY
+/// [BsTokens.dangerDark] (6.1:1 on the light scaffold); dark returns
+/// [BsTokens.dangerOnDark] (dangerDark on bgDark is only 2.9:1).
+Color bsDangerText(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+        ? BsTokens.dangerOnDark
+        : BsTokens.dangerDark;

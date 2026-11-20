@@ -1,10 +1,10 @@
 # Color Atlas — dark-mode decomposition (auto-generated)
 
-Scanned **652** files · **192** carry colors.
+Scanned **654** files · **192** carry colors.
 
-- **7406** hardcoded color references total
-- **49** LIGHT-hardcoded SURFACES ⇒ the dark-mode offenders (a white bg painted over the themed Scaffold)
-- by role: other=3521 · text=2428 · border=676 · surface=610 · icon=150 · shadow=20 · gradient=1
+- **7355** hardcoded color references total
+- **45** LIGHT-hardcoded SURFACES ⇒ the dark-mode offenders (a white bg painted over the themed Scaffold)
+- by role: other=3526 · text=2378 · border=676 · surface=606 · icon=148 · shadow=20 · gradient=1
 
 ## Work-list — screens ranked by dark-mode offenders (fix top-down)
 
@@ -15,8 +15,6 @@ Scanned **652** files · **192** carry colors.
 | `signature_pad.dart` | **2** | 46 |
 | `sudoku_grid.dart` | **2** | 16 |
 | `supplier_onboarding_screen.dart` | **2** | 12 |
-| `reject_reason_screen.dart` | **2** | 11 |
-| `business_summary_screen.dart` | **2** | 11 |
 | `persona_picking_sheet.dart` | **1** | 142 |
 | `courier_portal_tab.dart` | **1** | 57 |
 | `worker_report_drilldowns.dart` | **1** | 49 |
@@ -27,26 +25,26 @@ Scanned **652** files · **192** carry colors.
 | `full_internal_card.dart` | **1** | 37 |
 | `legal_screen.dart` | **1** | 37 |
 | `persona_portal.dart` | **1** | 36 |
-| `help_target.dart` | **1** | 35 |
 | `company_catalog_import_sheet.dart` | **1** | 35 |
+| `help_target.dart` | **1** | 35 |
 | `customer_import_sheet.dart` | **1** | 32 |
 | `worker_today_strip.dart` | **1** | 24 |
+| `app_theme.dart` | **1** | 22 |
 | `onboarding_screen.dart` | **1** | 18 |
-| `app_theme.dart` | **1** | 18 |
-| `finder_screen.dart` | **1** | 13 |
-| `tree_pane.dart` | **1** | 13 |
 | `nav_launch.dart` | **1** | 13 |
+| `tree_pane.dart` | **1** | 13 |
+| `finder_screen.dart` | **1** | 13 |
 | `catalog_wheel_screen.dart` | **1** | 12 |
 | `home_atoms.dart` | **1** | 11 |
 | `smart_chip_strip.dart` | **1** | 11 |
 | `edit_safety.dart` | **1** | 8 |
 | `quick_pad_keyboard.dart` | **1** | 7 |
-| `word_keyboard.dart` | **1** | 6 |
 | `updates_screen.dart` | **1** | 6 |
+| `word_keyboard.dart` | **1** | 6 |
 | `reject_reason_dialog.dart` | **1** | 5 |
 | `confirm_dialog.dart` | **1** | 4 |
-| `quick_pad_screen.dart` | **1** | 3 |
 | `word_finder_home.dart` | **1** | 3 |
+| `quick_pad_screen.dart` | **1** | 3 |
 | `order_notif_sheet.dart` | **1** | 2 |
 | `studio_entry.dart` | **1** | 2 |
 
@@ -74,14 +72,6 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/screens/supplier_onboarding_screen.dart
 - `app_flutter/lib/screens/supplier_onboarding_screen.dart:139` · `BsTokens.bgLight`
 - `app_flutter/lib/screens/supplier_onboarding_screen.dart:270` · `Colors.white`
-
-### app_flutter/lib/screens/reject_reason_screen.dart
-- `app_flutter/lib/screens/reject_reason_screen.dart:129` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/reject_reason_screen.dart:131` · `BsTokens.cardLight`
-
-### app_flutter/lib/screens/business_summary_screen.dart
-- `app_flutter/lib/screens/business_summary_screen.dart:108` · `BsTokens.bgLight`
-- `app_flutter/lib/screens/business_summary_screen.dart:110` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/persona_picking_sheet.dart
 - `app_flutter/lib/screens/persona_picking_sheet.dart:777` · `BsTokens.bgLight`
@@ -113,11 +103,11 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/screens/persona_portal.dart
 - `app_flutter/lib/screens/persona_portal.dart:325` · `BsTokens.bgLight`
 
-### app_flutter/lib/widgets/help_target.dart
-- `app_flutter/lib/widgets/help_target.dart:464` · `BsTokens.cardLight`
-
 ### app_flutter/lib/screens/company_catalog_import_sheet.dart
 - `app_flutter/lib/screens/company_catalog_import_sheet.dart:166` · `BsTokens.cardLight`
+
+### app_flutter/lib/widgets/help_target.dart
+- `app_flutter/lib/widgets/help_target.dart:464` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/customer_import_sheet.dart
 - `app_flutter/lib/screens/customer_import_sheet.dart:131` · `BsTokens.cardLight`
@@ -125,20 +115,20 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/screens/worker_today_strip.dart
 - `app_flutter/lib/screens/worker_today_strip.dart:42` · `BsTokens.cardLight`
 
-### app_flutter/lib/screens/onboarding_screen.dart
-- `app_flutter/lib/screens/onboarding_screen.dart:222` · `BsTokens.bgLight`
-
 ### app_flutter/lib/theme/app_theme.dart
 - `app_flutter/lib/theme/app_theme.dart:43` · `BsTokens.bgLightAlt`
 
-### app_flutter/lib/screens/finder_screen.dart
-- `app_flutter/lib/screens/finder_screen.dart:626` · `Colors.white`
+### app_flutter/lib/screens/onboarding_screen.dart
+- `app_flutter/lib/screens/onboarding_screen.dart:222` · `BsTokens.bgLight`
+
+### app_flutter/lib/services/nav_launch.dart
+- `app_flutter/lib/services/nav_launch.dart:102` · `BsTokens.cardLight`
 
 ### app_flutter/lib/screens/studio/panes/tree_pane.dart
 - `app_flutter/lib/screens/studio/panes/tree_pane.dart:94` · `BsTokens.surfaceMid`
 
-### app_flutter/lib/services/nav_launch.dart
-- `app_flutter/lib/services/nav_launch.dart:102` · `BsTokens.cardLight`
+### app_flutter/lib/screens/finder_screen.dart
+- `app_flutter/lib/screens/finder_screen.dart:626` · `Colors.white`
 
 ### app_flutter/lib/features/ring_dive/catalog_wheel_screen.dart
 - `app_flutter/lib/features/ring_dive/catalog_wheel_screen.dart:549` · `Colors.white`
@@ -155,11 +145,11 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/features/word_finder/quick_pad_keyboard.dart
 - `app_flutter/lib/features/word_finder/quick_pad_keyboard.dart:224` · `BsTokens.surfaceMid`
 
-### app_flutter/lib/features/word_finder/word_keyboard.dart
-- `app_flutter/lib/features/word_finder/word_keyboard.dart:160` · `BsTokens.surfaceMid`
-
 ### app_flutter/lib/screens/updates_screen.dart
 - `app_flutter/lib/screens/updates_screen.dart:114` · `Colors.white`
+
+### app_flutter/lib/features/word_finder/word_keyboard.dart
+- `app_flutter/lib/features/word_finder/word_keyboard.dart:160` · `BsTokens.surfaceMid`
 
 ### app_flutter/lib/widgets/reject_reason_dialog.dart
 - `app_flutter/lib/widgets/reject_reason_dialog.dart:27` · `Color(0xFFFFFFFF)`
@@ -167,11 +157,11 @@ Scanned **652** files · **192** carry colors.
 ### app_flutter/lib/widgets/confirm_dialog.dart
 - `app_flutter/lib/widgets/confirm_dialog.dart:24` · `Color(0xFFFFFFFF)`
 
-### app_flutter/lib/features/word_finder/quick_pad_screen.dart
-- `app_flutter/lib/features/word_finder/quick_pad_screen.dart:135` · `BsTokens.surfaceMid`
-
 ### app_flutter/lib/features/word_finder/word_finder_home.dart
 - `app_flutter/lib/features/word_finder/word_finder_home.dart:145` · `BsTokens.surfaceMid`
+
+### app_flutter/lib/features/word_finder/quick_pad_screen.dart
+- `app_flutter/lib/features/word_finder/quick_pad_screen.dart:135` · `BsTokens.surfaceMid`
 
 ### app_flutter/lib/screens/order_notif_sheet.dart
 - `app_flutter/lib/screens/order_notif_sheet.dart:71` · `Colors.white`

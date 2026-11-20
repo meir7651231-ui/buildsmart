@@ -33,6 +33,7 @@ import 'package:buildsmart/features/internal_card/internal_card_flags.dart'
 import 'package:buildsmart/screens/lipskey_product_sheet.dart'
     show showLipskeyProductSheet;
 import 'package:buildsmart/state/smart_cart.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
@@ -515,8 +516,8 @@ class _Tile extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: bsInk(context),
                     fontSize: BsTokens.typeLabel,
                     fontWeight: FontWeight.w700,
                     height: 1.2,
@@ -620,10 +621,10 @@ class _MaterialDots extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           '↔',
           style: TextStyle(
-            color: BsTokens.mutedLight,
+            color: bsMuted(context),
             fontSize: 12,
             fontWeight: FontWeight.w900,
           ),

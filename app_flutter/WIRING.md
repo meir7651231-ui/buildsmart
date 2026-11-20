@@ -4445,3 +4445,41 @@ increment-2 (tasks cross-party) התגלה **כבר בנוי** (3-role providers
 
 ### #darkmode-wave16 — 8 files theme-aware (2026-08-23)
 **גל 16:** 16 משטחים ב-alt_explain(2)·quote_polish(2)·coming_soon(2)·adapter_explain(2)·paired_explain(2)·daily_report(2)·credit_explain(2)·manager_screens(2) → theme. analyze 0 · אטלס 65→49. מצטבר dark-mode 659→49 (610 תוקנו).
+
+### #darkmode-ink — טקסט theme-aware · פיילוט 10 קבצים (2026-11-19)
+**הבאג:** גלים 1–16 המירו משטחים ל-theme אך השאירו טקסט `BsTokens.inkLight`/`mutedLight` קבוע ⇒ במצב כהה
+#1A1A1A על #1F1A13 (~1:1) — כותרות AppBar בלתי-נראות (אומת בצילום). **התיקון:** `bsInk(context)` / `bsMuted(context)`
+ב-`lib/theme/app_theme.dart` (light מחזיר בדיוק את ה-token הישן ⇒ byte-identical; dark → inkDark/mutedDark).
+הוחל על alt/quote_polish/adapter/paired/credit_explain · coming_soon · daily_report · manager_screens_sheet ·
+`AiOffState` (`widgets/ai_result_states.dart`) + גל-משטחים ל-reject_reason · business_summary (bgLight/cardLight→theme).
+quote_polish: באר #F6F7F9 → scaffold בכהה. **a11y-light:** הערת "⚙️ …מנתוני…" (11px) הייתה `mutedDark` גם בבהיר
+(2.49:1, נכשל AA) → `bsMuted` (כהה ללא שינוי). **גארד:** `test/dark_mode_ink_test.dart` (20) — מרנדר כל מסך
+בכהה+בהיר, אוסר ink-בהיר-בלבד בכהה ומחשב ניגודיות WCAG ≥4.5 של כל טקסט ink מול הרקע האטום הקרוב. אטלס 49→45.
+
+**המשך (2026-11-19, אחרי סקירה בלתי-תלויה):** `AiFailedState` — "משהו השתבש" היה `dangerDark` קבוע (2.93:1 על bgDark) →
+`bsDangerText(context)` (light=dangerDark זהה · dark=`BsTokens.dangerOnDark` #F87171, 6.9:1). באר quote_polish בכהה →
+`colorScheme.surface` (נבדל מהעמוד). הגארד הורחב ל-52: 8 מסכי-AI × {תוצאה, כשל} × {כהה, בהיר} עם gateway מזויף
+(בלעדיו רק שלב "AI כבוי" מרונדר). הערה: reject_reason/business_summary בבהיר — רקע bgLight #FAFAFA → scaffold #FAF8F5 (כמו 8 האחרים).
+
+### #darkmode-ink-w2 — גל 2 · 17 קבצים (2026-11-20)
+**הוחל `bsInk`/`bsMuted`** ב-manager_copilot (בועת-בעלים על brand נשארת inkLight) · studio_screen + top_bar + 5 panes
+(find_replace/history/inspector/theme/tree; `_rowWidget` קיבל `BuildContext`) · consent_modal · role_picker_sheet ·
+regression_panel · audit · catalog_config · lipskey_products (מצב-ריק). **משטחים שהפכו brightness-aware (בהיר byte-identical):**
+שורות role_picker (#F5F5F7 → surfaceContainerHighest בכהה; היה 1.06:1) · פס-המסך בעץ-הסטודיו (surfaceMid → container בכהה).
+chip "אין שינויים" → `onSurfaceVariant` (היה 4.43:1 בבהיר / 2.15:1 בכהה). audit — כותרת-ריק #334155 → bsInk. **גארד:** קבוצת `_wave2`
+ב-`dark_mode_ink_test.dart` (16; סה"כ 68) — WCAG בלבד; על הקוד הישן 9/16 נכשלים (כל 8 בכהה + studio בבהיר).
+**המשך גל 2 (2026-11-20, אחרי סקירה בלתי-תלויה):** `_confirmDiscard` — `bsMuted(sheetCtx)` (לא ה-context החיצוני). הגארד 68→80:
+copilot ללא-tap (מסך-הפתיחה) · Studio: מפקח (בחירה מוזרקת) · מצא-והחלף (טיוטה מוזרקת דרך `editDraft` + שאילתה → שורות-תוצאה) ·
+גרסאות · sheet פרסום · sheet ביטול (`studioCanEditProvider`=true — הבעלים). כל מקרה מאמת שהגיע ליעד (`_mustSee`), כולל
+role_picker/consent. directives_ordering תוקן ב-theme_pane + בטסט.
+
+### #darkmode-ink-w3 — גל 3 · 8 מסכים בתנועה-גבוהה (2026-11-20)
+`bsInk`/`bsMuted` ב-notifications · chats (+ארכיון) · profile (`_ink` ברמת-קובץ → `bsInk(context)`) · ai_assistant (בועת-משתמש על brand
+נשארת inkLight) · ai_finder · suppliers · lipskey_brand · legal (`_segment` קיבל `BuildContext`). **🔴 באג-פרודקשן בבהיר:** תפריט
+לחיצה-ארוכה בהתראות היה `color: #1E1E1E` קבוע + ink כהה ⇒ "סמן כנקרא" ~1:1 **גם בבהיר** → `colorScheme.surface` + `bsInk`, "מחק"
+→ `bsDangerText` (redAccent-על-לבן היה 3.2:1). legal: segment לא-נבחר → `onSurfaceVariant` (4.43:1 בבהיר); ℹ️ בקופסת-ההערה
+הבהירה → `warnText`. **גארד:** `_wave3` (20; סה"כ 100), Heebo אמיתי נטען (Ahem הרחב יצר overflow-פנטום); טקסט-אימוג'י-בלבד מוחרג
+מבדיקת-הניגודיות (גליף צבעוני). על הקוד הישן 12/20 נכשלים — כולל `notifications_menu light`.
+**המשך גל 3 (2026-11-20, אחרי סקירה):** הגארד 100→106 — דף-שיחה (`_ChatPage`, הוכחה: hint "הודעה") · תוצאות ai_finder (`initialQuery`, חיפוש-מילולי) ·
+לשונית-פרטיות ב-legal. הערת-doc יתומה של `_ink` הוסרה מ-profile. **פער-כיסוי מתועד:** דיאלוג מחיקת-חשבון מוצג רק למשתמש-אמיתי מחובר
+(`auth.user.isRealUser`) — לא מרונדר בטסט; יושב על `AlertDialog` (theme surface), אומת בקריאת-קוד.

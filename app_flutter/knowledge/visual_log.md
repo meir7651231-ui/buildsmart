@@ -2744,3 +2744,21 @@ verbatim → הדיאל הוחזר ל-placeholder; "עובד" נפתח כעת כ
 
 ## #darkmode-wave16 — 8 files (alt/quote_polish/coming_soon/adapter/paired/daily_report/credit/manager_screens) (2026-08-23)
 **גל 16 (8 fixers מקבילים):** 16 light-surfaces → תמה, 2 בכל קובץ, 0 דולגו. משפחת מסכי-explain (alt/adapter/paired/credit) + quote_polish + coming_soon + daily_report + manager_screens — כולם דפוס Scaffold(bgLight)+AppBar(cardLight). bgLight→`scaffoldBackgroundColor` · cardLight/white→`colorScheme.surface`. `flutter analyze` 0 errors. **אטלס 65→49** (‎-16). מצטבר 659→49 (610 תוקנו).
+
+## #darkmode-ink — פיילוט טקסט theme-aware · 10 קבצים (2026-11-19)
+צילומי לפני/אחרי (golden, Heebo אמיתי) במצב כהה ובהיר לכל 10 המסכים. לפני: כותרת "בקרוב" ב-coming_soon
+בלתי-נראית בכהה. אחרי: כל הטקסט קריא בכהה; הבהיר זהה (למעט הערת-השוליים שהוכהתה ל-AA). **ממצא-רוחב:** 103
+קבצים שגלים 1–16 נגעו בהם נושאים ~1,489 אתרי ink קבוע — אותה רגרסיה; ההמשך = codemod בגלים עם אותו גארד.
+אטלס 49→45.
+
+**המשך (2026-11-19):** שלבי תוצאה/כשל של מסכי-ה-AI צולמו בכהה (gateway מזויף). שורת-הכשל אדומה-בהירה קריאה; באר-ההצעה ב-quote_polish
+נבדלת מהעמוד. שינוי-בהיר מתועד: reject_reason/business_summary רקע #FAFAFA→#FAF8F5 (אחיד עם שאר המסכים).
+
+## #darkmode-ink-w2 — גל 2 (2026-11-20)
+צולמו בכהה: copilot (בועות בעלים/עוזר), role_picker, consent_modal, audit, studio (רוחב-שולחני). כולם קריאים.
+**ממצא-פלטה (לא תוקן — החלטת-בעלים):** בדיקת-ניסוי על *כל* צבעי-הטקסט (לא רק ink) מצאה: לבן-על-כתום-המותג 3.05:1 בכפתורים ראשיים,
+כתום-על-כהה 2.87:1 ("נסה שוב"), chips צבעוניים ~2.6–3.7:1 — מתחת ל-AA. מצב high-contrast כבר מכהה חלק; שינוי ברירת-המחדל = החלטת-עיצוב.
+
+## #darkmode-ink-w3 (2026-11-20)
+לפני/אחרי של תפריט-ההתראות בבהיר (באג-פרודקשן: טקסט שחור על #1E1E1E) + אחרי בכהה; chats/profile/ai_assistant/legal בכהה — קריאים.
+**נותר (משטחים, לא-ink):** עיגולי-אווטאר #F5F5F5 קבועים בהתראות/צ'אטים (לבנים בכהה) · תצוגה-מקדימה בצ'אטים באפור-hex קבוע (עמום).

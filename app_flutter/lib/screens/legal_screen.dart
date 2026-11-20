@@ -1,4 +1,5 @@
 import 'package:buildsmart/data/legal_texts.dart';
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -45,11 +46,11 @@ class _LegalScreenState extends State<LegalScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const CfgText(
+        title: CfgText(
           'legal_screen.t01',
           'תנאי שימוש ופרטיות',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: bsInk(context),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -61,12 +62,12 @@ class _LegalScreenState extends State<LegalScreen> {
             value: _tab,
             onChanged: (t) => setState(() => _tab = t),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: BsTokens.space2),
             child: Text(
               'עדכון אחרון: $kLegalLastUpdated',
               style: TextStyle(
-                color: BsTokens.mutedLight,
+                color: bsMuted(context),
                 fontSize: BsTokens.typeMicro,
               ),
             ),
@@ -106,8 +107,8 @@ class _LegalScreenState extends State<LegalScreen> {
             ),
             child: SelectableText(
               block.substring(3),
-              style: const TextStyle(
-                color: BsTokens.inkLight,
+              style: TextStyle(
+                color: bsInk(context),
                 fontSize: BsTokens.typeSubhead,
                 fontWeight: FontWeight.w800,
                 height: 1.4,
@@ -119,8 +120,8 @@ class _LegalScreenState extends State<LegalScreen> {
             padding: const EdgeInsets.only(bottom: BsTokens.space2),
             child: SelectableText(
               block,
-              style: const TextStyle(
-                color: BsTokens.mutedLight,
+              style: TextStyle(
+                color: bsMuted(context),
                 fontSize: BsTokens.typeBody,
                 height: 1.65,
               ),
@@ -147,7 +148,9 @@ class _PlaceholderNotice extends StatelessWidget {
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('ℹ️', style: TextStyle(fontSize: 16)),
+          // the notice box is a FIXED warm-light fill — pin the glyph to its
+          // own ink (it inherited the theme ink: light-on-light in dark mode).
+          Text('ℹ️', style: TextStyle(fontSize: 16, color: BsTokens.warnText)),
           SizedBox(width: BsTokens.space2),
           Expanded(
             child: Text(
@@ -190,14 +193,18 @@ class _SegmentedToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _segment(label: 'תנאי שימוש', tab: LegalTab.terms),
-          _segment(label: 'מדיניות פרטיות', tab: LegalTab.privacy),
+          _segment(context, label: 'תנאי שימוש', tab: LegalTab.terms),
+          _segment(context, label: 'מדיניות פרטיות', tab: LegalTab.privacy),
         ],
       ),
     );
   }
 
-  Widget _segment({required String label, required LegalTab tab}) {
+  Widget _segment(
+    BuildContext context, {
+    required String label,
+    required LegalTab tab,
+  }) {
     final selected = value == tab;
     return Expanded(
       child: GestureDetector(
@@ -214,7 +221,11 @@ class _SegmentedToggle extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? BsTokens.brandDark : BsTokens.mutedLight,
+              // unselected sits on surfaceContainerHighest → its paired foreground
+              // (mutedLight there was 4.43:1 in light — under AA).
+              color: selected
+                  ? BsTokens.brandDark
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: BsTokens.typeLabel,
               fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
             ),

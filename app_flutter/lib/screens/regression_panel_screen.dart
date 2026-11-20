@@ -26,7 +26,7 @@ class RegressionPanelScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: BsTokens.inkLight,
+        foregroundColor: bsInk(context),
         title: CfgText(
           'regression_panel_screen.t01',
           '🔬 מרכז בדיקות רגרסיה',
