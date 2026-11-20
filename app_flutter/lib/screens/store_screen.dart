@@ -185,7 +185,14 @@ final cartProjectProvider = StateProvider<String>(
 
 /// Benzi #4 — optional, NON-binding "where to ship" address chosen during the
 /// purchase (empty = not set; checkout never requires it).
-final shipToProvider = StateProvider<String>((_) => '');
+///
+/// Identity-scoped: watching [currentUidProvider] rebuilds (→ resets to '')
+/// whenever the signed-in account changes, so user A's address never rides
+/// on user B's order after a sign-out / account switch on the same device.
+final shipToProvider = StateProvider<String>((ref) {
+  ref.watch(currentUidProvider);
+  return '';
+});
 
 /// Benzi #4 — whether the one-time "לאן לשלוח" popup has already been shown. It
 /// pops up ONCE, the first time a product is added to the cart (the selection
@@ -210,7 +217,12 @@ final cartPaymentProvider = StateProvider<CartPaymentMethod>(
 );
 
 /// Free-text delivery note carried into the confirmed order.
-final cartNotesProvider = StateProvider<String>((_) => '');
+final cartNotesProvider = StateProvider<String>((ref) {
+  // Identity-scoped like [shipToProvider]: reset on any account change so a
+  // courier note typed by one user never lands on the next user's order.
+  ref.watch(currentUidProvider);
+  return '';
+});
 
 // ─── static data ─────────────────────────────────────────────────────────────
 
@@ -1656,6 +1668,14 @@ class _CartViewState extends ConsumerState<_CartView> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep the notes field in step with the provider: the store stays mounted
+    // in the shell's IndexedStack, so when the provider is reset from outside
+    // (account change, order placed, cart cleared) the controller would keep
+    // the old text — and the next tap/keystroke would write it straight back
+    // onto the next order.
+    ref.listen<String>(cartNotesProvider, (_, next) {
+      if (_notesCtrl.text != next) _notesCtrl.text = next;
+    });
     // Step 94 — checkout_step: fired on a delivery/payment CHANGE via ref.listen.
     // The callback runs OUTSIDE build, so — unlike the ref.watch below — it never
     // trips the "modify a provider while building" assertion. `value` is the bare
