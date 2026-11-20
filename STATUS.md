@@ -18,7 +18,9 @@ _יומן גרסאות מפורט ותווית הגרסה: `app_flutter/knowledg
 1. **🔴 Dark mode — רגרסיית טקסט (התגלתה 2026-11-19).** גלים 1–16 המירו רק משטחים; הטקסט נשאר `BsTokens.inkLight` קבוע ⇒ במצב
    כהה כותרות בלתי-נראות (~1:1, אומת בצילום). **פיילוט תוקן** (10 מסכים + `AiOffState`/`AiFailedState`, helpers `bsInk`/`bsMuted`/`bsDangerText`,
    גארד `test/dark_mode_ink_test.dart`). **גל 2 (2026-11-20):** +17 קבצים (copilot · studio · consent · role_picker · audit …), גארד 68.
-   **נותר:** ~78 קבצים · ~1,400 אתרי ink קבוע + atlas משטחים 45 + קבועי `_ink` ברמת-קובץ (budget/install_studio/stock).
+   **גל 3 (2026-11-20):** +8 מסכים בתנועה-גבוהה (התראות · צ'אטים · פרופיל · עוזר-AI · legal …), גארד 100. כולל **באג-פרודקשן
+   בבהיר** שתוקן: תפריט לחיצה-ארוכה בהתראות — טקסט שחור על #1E1E1E.
+   **נותר:** ~70 קבצים · ~1,350 אתרי ink קבוע · atlas משטחים 45 · עיגולי-אווטאר לבנים בכהה (התראות/צ'אטים) · צבעי-hex כהים קבועים מחוץ ל-ink.
 2. ~~smoke-settings מקודד נתיב Chromium~~ — ✅ תוקן 2026-11-19 (איתור אוטומטי + `PW_CHROMIUM`). נותר: להכניס ל-CI.
 3. **פער גרסאות Flutter ב-CI** — `protocol-enforce.yml`/`catalog-qa.yml` על 3.29.3, build/deploy על 3.44.0; `flutter analyze` ב-3.44 מציג 56 warnings (לא חוסם).
 4. **הוראות סשן ישנות** — הענף `claude/whats-happening-LyY9G` עדיין מפעיל deploy לפרודקשן בכל push (`web-deploy.yml`, `firebase-hosting.yml`, `firebase-deploy.yml`); מסמכי `orchestrator/`/`knowledge/` עדיין מפנים אליו כענף העבודה.

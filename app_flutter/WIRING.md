@@ -4472,3 +4472,11 @@ chip "אין שינויים" → `onSurfaceVariant` (היה 4.43:1 בבהיר / 
 copilot ללא-tap (מסך-הפתיחה) · Studio: מפקח (בחירה מוזרקת) · מצא-והחלף (טיוטה מוזרקת דרך `editDraft` + שאילתה → שורות-תוצאה) ·
 גרסאות · sheet פרסום · sheet ביטול (`studioCanEditProvider`=true — הבעלים). כל מקרה מאמת שהגיע ליעד (`_mustSee`), כולל
 role_picker/consent. directives_ordering תוקן ב-theme_pane + בטסט.
+
+### #darkmode-ink-w3 — גל 3 · 8 מסכים בתנועה-גבוהה (2026-11-20)
+`bsInk`/`bsMuted` ב-notifications · chats (+ארכיון) · profile (`_ink` ברמת-קובץ → `bsInk(context)`) · ai_assistant (בועת-משתמש על brand
+נשארת inkLight) · ai_finder · suppliers · lipskey_brand · legal (`_segment` קיבל `BuildContext`). **🔴 באג-פרודקשן בבהיר:** תפריט
+לחיצה-ארוכה בהתראות היה `color: #1E1E1E` קבוע + ink כהה ⇒ "סמן כנקרא" ~1:1 **גם בבהיר** → `colorScheme.surface` + `bsInk`, "מחק"
+→ `bsDangerText` (redAccent-על-לבן היה 3.2:1). legal: segment לא-נבחר → `onSurfaceVariant` (4.43:1 בבהיר); ℹ️ בקופסת-ההערה
+הבהירה → `warnText`. **גארד:** `_wave3` (20; סה"כ 100), Heebo אמיתי נטען (Ahem הרחב יצר overflow-פנטום); טקסט-אימוג'י-בלבד מוחרג
+מבדיקת-הניגודיות (גליף צבעוני). על הקוד הישן 12/20 נכשלים — כולל `notifications_menu light`.

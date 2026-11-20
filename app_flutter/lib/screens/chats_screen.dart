@@ -897,11 +897,11 @@ class _ChatsScreenState extends ConsumerState<ChatsScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const CfgText(
+        title: CfgText(
           'chats_screen.appbar_title',
           'שיחות',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: bsInk(context),
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -1169,7 +1169,7 @@ class _ThreadList extends ConsumerWidget {
             .toList();
 
     if (threads.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1179,7 +1179,7 @@ class _ThreadList extends ConsumerWidget {
               'chats_screen.empty_title',
               'אין שיחות',
               style: TextStyle(
-                color: BsTokens.inkLight,
+                color: bsInk(context),
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -1274,7 +1274,7 @@ class _ThreadRow extends ConsumerWidget {
         showOnlinePresence(
           ref.watch(chatSettingsProvider.select((s) => s.lastSeenPrivacy)),
         );
-    final nameColor = missed ? BsTokens.brand : BsTokens.inkLight;
+    final nameColor = missed ? BsTokens.brand : bsInk(context);
     final arrowIcon =
         thread.direction == _Direction.outgoing
             ? Icons.north_east_rounded
@@ -1980,8 +1980,8 @@ class _ChatPageState extends ConsumerState<_ChatPage> {
                 children: [
                   Text(
                     _thread.name,
-                    style: const TextStyle(
-                      color: BsTokens.inkLight,
+                    style: TextStyle(
+                      color: bsInk(context),
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -2771,11 +2771,11 @@ class ChatsArchiveScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black54),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const CfgText(
+        title: CfgText(
           'chats_screen.archive_title',
           'ארכיון שיחות',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: bsInk(context),
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -2783,7 +2783,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
       ),
       body:
           archived.isEmpty
-              ? const Center(
+              ? Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -2797,7 +2797,7 @@ class ChatsArchiveScreen extends ConsumerWidget {
                       'chats_screen.archive_empty_title',
                       'אין שיחות בארכיון',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2851,8 +2851,8 @@ class _ArchivedRow extends ConsumerWidget {
       ),
       title: Text(
         thread.name,
-        style: const TextStyle(
-          color: BsTokens.inkLight,
+        style: TextStyle(
+          color: bsInk(context),
           fontSize: 16,
           fontWeight: FontWeight.w700,
         ),

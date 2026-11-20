@@ -33,6 +33,7 @@ import 'package:buildsmart/screens/describe_to_cart_screen.dart'
 import 'package:buildsmart/state/orders_engine.dart' show ordersEngineProvider;
 import 'package:buildsmart/state/smart_cart.dart'
     show SmartCartLine, smartCartProvider;
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/studio/cfg_text.dart';
 import 'package:flutter/material.dart';
@@ -240,20 +241,20 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('ai_assistant_screen.title', '🤖 העוזר החכם',
+          title: CfgText('ai_assistant_screen.title', '🤖 העוזר החכם',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
         body: !aiAvailable
-            ? const Center(
+            ? Center(
                 child: Padding(
                   padding: EdgeInsets.all(BsTokens.space5),
                   child: CfgText('ai_assistant_screen.offline', '💡 העוזר החכם דורש חיבור לשרת.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          color: BsTokens.mutedLight, fontSize: 14)),
+                          color: bsMuted(context), fontSize: 14)),
                 ),
               )
             : Column(
@@ -283,19 +284,19 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
           padding: const EdgeInsets.all(BsTokens.space5),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Text('🤖', style: TextStyle(fontSize: 40)),
               SizedBox(height: BsTokens.space3),
               CfgText('ai_assistant_screen.empty_prompt', 'שאל אותי כל דבר על אינסטלציה, רכש או עבודה.',
                   textAlign: TextAlign.center,
                   style:
-                      TextStyle(color: BsTokens.inkLight, fontSize: 15)),
+                      TextStyle(color: bsInk(context), fontSize: 15)),
               SizedBox(height: 6),
               CfgText('ai_assistant_screen.empty_examples', 'אפשר גם לבקש: "תמצא לי ברז" · "מה מצב ההזמנות" · '
                   '"כמה נשאר בתקציב" · "תוסיף ערכה לסל".',
                   textAlign: TextAlign.center,
                   style:
-                      TextStyle(color: BsTokens.mutedLight, fontSize: 12)),
+                      TextStyle(color: bsMuted(context), fontSize: 12)),
             ],
           ),
         ),
@@ -324,8 +325,10 @@ class _AiAssistantState extends ConsumerState<AiAssistantScreen> {
             // AA); dark-on-brand is ~6:1 and keeps the brand-colored user bubble
             // (same fix already applied to the manager Co-Pilot bubble).
             Text(t.text,
-                style: const TextStyle(
-                    color: BsTokens.inkLight, fontSize: 14, height: 1.4)),
+                style: TextStyle(
+                    color: isUser ? BsTokens.inkLight : bsInk(context),
+                    fontSize: 14,
+                    height: 1.4)),
             // #ai-assistant-agentic Phase 2 — the cart write is gated behind THIS
             // explicit tap (G5); until confirmed the kit is only a proposal.
             if (hasKit) ...[

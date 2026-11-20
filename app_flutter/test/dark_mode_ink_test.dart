@@ -12,6 +12,14 @@ import 'dart:math' as math;
 import 'package:buildsmart/data/repositories/claude_functions.dart';
 import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart';
 import 'package:buildsmart/screens/adapter_explain_screen.dart';
+import 'package:buildsmart/screens/ai_assistant_screen.dart';
+import 'package:buildsmart/screens/ai_finder_screen.dart';
+import 'package:buildsmart/screens/chats_screen.dart';
+import 'package:buildsmart/screens/legal_screen.dart';
+import 'package:buildsmart/screens/lipskey_brand_screen.dart';
+import 'package:buildsmart/screens/notifications_screen.dart';
+import 'package:buildsmart/screens/profile_screen.dart';
+import 'package:buildsmart/screens/suppliers_screen.dart';
 import 'package:buildsmart/screens/alt_explain_screen.dart';
 import 'package:buildsmart/screens/audit_screen.dart';
 import 'package:buildsmart/screens/business_summary_screen.dart';
@@ -38,6 +46,8 @@ import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart'
+    show FontLoader, TextInputAction, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -91,6 +101,8 @@ Color _backdrop(Element e) {
   return found ?? Theme.of(e).scaffoldBackgroundColor;
 }
 
+final _hasLetters = RegExp(r'[\p{L}\p{N}]', unicode: true);
+
 /// Every ink-family text (the class this regression is about) must clear WCAG AA.
 List<String> _lowContrastInk(WidgetTester t) {
   final ink = <Color>{
@@ -101,6 +113,9 @@ List<String> _lowContrastInk(WidgetTester t) {
   for (final e in find.byType(RichText).evaluate()) {
     final r = e.renderObject;
     if (r is! RenderParagraph) continue;
+    // Pictograph-only text (an emoji avatar) paints in the glyph's own
+    // colours — its TextStyle colour is not what the eye sees. Judge text only.
+    if (!_hasLetters.hasMatch(r.text.toPlainText())) continue;
     final bg = _backdrop(e);
     void v(InlineSpan s) {
       final c = s.style?.color;
@@ -273,8 +288,63 @@ final _extra = <String, List<Override>>{
   for (final n in _needsDraft) n: [studioCanEditProvider.overrideWith((_) => true)],
 };
 
+Future<void> _settle(WidgetTester t, [int n = 8]) async {
+  for (var i = 0; i < n; i++) {
+    await t.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// Wave 3 (#darkmode-ink-w3): high-traffic screens. Each case = (screen,
+/// optional interaction reaching the converted UI, text proving it got there).
+final _wave3 = <String, (Widget, Future<void> Function(WidgetTester)?, String?)>{
+  'notifications': (const Scaffold(body: NotificationsScreen()), null, 'התראות'),
+  // long-press → the row action menu (was #1E1E1E + const dark ink: ~1:1 in
+  // BOTH themes — a live light-mode bug).
+  'notifications_menu': (
+    const Scaffold(body: NotificationsScreen()),
+    (t) async {
+      await t.longPress(find
+          .byWidgetPredicate((w) => w.runtimeType.toString() == '_NotifRow')
+          .first);
+      await _settle(t);
+    },
+    'סמן כנקרא',
+  ),
+  // tab bodies — the app always mounts them under the shell's Scaffold.
+  'chats': (const Scaffold(body: ChatsScreen()), null, null),
+  'chats_archive': (const ChatsArchiveScreen(), null, 'אין שיחות בארכיון'),
+  'profile': (const ProfileScreen(), null, null),
+  'ai_assistant': (
+    const AiAssistantScreen(),
+    (t) async {
+      await t.enterText(find.byType(TextField).first, 'מה המצב?');
+      await t.testTextInput.receiveAction(TextInputAction.send);
+      await _settle(t);
+    },
+    'תשובת-בדיקה של המודל',
+  ),
+  'ai_finder': (const AiFinderScreen(), null, null),
+  'suppliers': (const SuppliersScreen(), null, null),
+  'lipskey_brand': (const LipskeyBrandScreen(), null, null),
+  'legal': (const LegalScreen(), null, null),
+};
+
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  // Real Heebo metrics — the default Ahem squares are ~2× wider and raise
+  // phantom RenderFlex overflows that production never hits.
+  setUpAll(() async {
+    final loader = FontLoader('Heebo');
+    for (final p in const [
+      'assets/fonts/Heebo-Regular.ttf',
+      'assets/fonts/Heebo-SemiBold.ttf',
+      'assets/fonts/Heebo-Bold.ttf',
+      'assets/fonts/Heebo-ExtraBold.ttf',
+    ]) {
+      loader.addFont(rootBundle.load(p));
+    }
+    await loader.load();
+  });
 
   final lightOnly = <Color>{BsTokens.inkLight, BsTokens.mutedLight};
 
@@ -393,6 +463,33 @@ void main() {
             }),
             isNotEmpty,
             reason: '$name rendered no ink text at all — the check would be vacuous');
+        expect(_lowContrastInk(t), isEmpty,
+            reason: '$name: ink text below WCAG AA 4.5:1');
+      });
+    }
+  }
+
+  for (final MapEntry(key: name, value: (home, act, must)) in _wave3.entries) {
+    for (final dark in [true, false]) {
+      testWidgets('w3 $name ${dark ? 'dark' : 'light'} — ink clears AA',
+          (t) async {
+        await _pump(t, home, dark: dark, overrides: [
+          claudeGatewayProvider
+              .overrideWith((ref) => _FakeGateway(fail: false)),
+        ]);
+        await _settle(t, 3);
+        if (act != null) await act(t);
+        if (must != null) {
+          expect(find.textContaining(must, findRichText: true), findsWidgets,
+              reason: '$name must actually reach its target ("$must")');
+        }
+        expect(
+            _paintedTextColors(t).intersection({
+              BsTokens.inkLight, BsTokens.mutedLight,
+              BsTokens.inkDark, BsTokens.mutedDark,
+            }),
+            isNotEmpty,
+            reason: '$name rendered no ink text — the check would be vacuous');
         expect(_lowContrastInk(t), isEmpty,
             reason: '$name: ink text below WCAG AA 4.5:1');
       });

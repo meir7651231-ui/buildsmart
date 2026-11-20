@@ -1,3 +1,4 @@
+import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/data/lipskey_catalog.dart';
 import 'package:buildsmart/screens/company_catalog_import_sheet.dart'
@@ -27,13 +28,13 @@ class SuppliersScreen extends StatelessWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          foregroundColor: BsTokens.inkLight,
+          foregroundColor: bsInk(context),
           elevation: 0,
-          title: const CfgText(
+          title: CfgText(
             'suppliers_screen.title',
             'ספקים ומותגים',
             style: TextStyle(
-              color: BsTokens.inkLight,
+              color: bsInk(context),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -50,10 +51,10 @@ class SuppliersScreen extends StatelessWidget {
                   children: [
                     const Text('🏪', style: TextStyle(fontSize: 40)),
                     const SizedBox(height: 10),
-                    const Text(
+                    Text(
                       'אין ספקים עדיין',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
@@ -143,8 +144,8 @@ class _SupplierTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: BsTokens.inkLight,
+                    style: TextStyle(
+                      color: bsInk(context),
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),

@@ -24,7 +24,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Primary dark text on the light theme (per the spec — no `inkLight` token).
-const Color _ink = BsTokens.inkLight;
 
 /// 👤 הפרופיל שלי — the native home for the user's account.
 ///
@@ -117,12 +116,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           title: CfgText(
             'profile_screen.t01',
             'מחיקת חשבון',
-            style: TextStyle(color: _ink, fontWeight: FontWeight.w800),
+            style: TextStyle(color: bsInk(context), fontWeight: FontWeight.w800),
           ),
           content: CfgText(
             'profile_screen.t02',
             'החשבון וכל הנתונים האישיים יימחקו לצמיתות. את הפעולה אי אפשר לבטל.',
-            style: TextStyle(color: _ink),
+            style: TextStyle(color: bsInk(context)),
           ),
           actions: [
             // composite-hide: the whole ביטול button hides on this element id
@@ -134,7 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 child: CfgText(
                   'profile_screen.t03',
                   'ביטול',
-                  style: TextStyle(color: BsTokens.mutedLight),
+                  style: TextStyle(color: bsMuted(context)),
                 ),
               ),
             ),
@@ -207,13 +206,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          foregroundColor: _ink,
+          foregroundColor: bsInk(context),
           elevation: 0,
           title: CfgText(
             'profile_screen.t05',
             'הפרופיל שלי',
             style: TextStyle(
-              color: _ink,
+              color: bsInk(context),
               fontWeight: FontWeight.w800,
               fontSize: 20,
             ),
@@ -267,7 +266,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     selectedColor: const Color(0xFFFFF0E3),
                     labelStyle: TextStyle(
-                      color: _profession == trade ? BsTokens.brandDark : _ink,
+                      color: _profession == trade ? BsTokens.brandDark : bsInk(context),
                       fontWeight: _profession == trade
                           ? FontWeight.w800
                           : FontWeight.w500,
@@ -421,8 +420,8 @@ class _HeaderCard extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
-                    color: _ink,
+                  style: TextStyle(
+                    color: bsInk(context),
                     fontWeight: FontWeight.w900,
                     fontSize: 22,
                   ),
@@ -431,8 +430,8 @@ class _HeaderCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     profile.profession,
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
+                    style: TextStyle(
+                      color: bsMuted(context),
                       fontSize: 14,
                     ),
                   ),
@@ -441,8 +440,8 @@ class _HeaderCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     profile.contact,
-                    style: const TextStyle(
-                      color: BsTokens.mutedLight,
+                    style: TextStyle(
+                      color: bsMuted(context),
                       fontSize: 13,
                     ),
                   ),
@@ -465,8 +464,8 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: const TextStyle(
-          color: BsTokens.mutedLight,
+        style: TextStyle(
+          color: bsMuted(context),
           fontWeight: FontWeight.w800,
           fontSize: 13,
           letterSpacing: 0.5,
@@ -483,8 +482,8 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: const TextStyle(
-          color: _ink,
+        style: TextStyle(
+          color: bsInk(context),
           fontWeight: FontWeight.w700,
           fontSize: 14,
         ),
@@ -524,10 +523,10 @@ class _Field extends StatelessWidget {
           controller: controller,
           textAlign: TextAlign.right,
           textDirection: textDirection,
-          style: const TextStyle(color: _ink, fontSize: 15),
+          style: TextStyle(color: bsInk(context), fontSize: 15),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: BsTokens.mutedLight),
+            hintStyle: TextStyle(color: bsMuted(context)),
             errorText: errorText,
             filled: true,
             fillColor: Theme.of(context).colorScheme.surface,
@@ -600,15 +599,15 @@ class _LinkRow extends StatelessWidget {
                   child: ExcludeSemantics(
                     child: Text(
                       label,
-                      style: const TextStyle(
-                        color: _ink,
+                      style: TextStyle(
+                        color: bsInk(context),
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_left, color: BsTokens.mutedLight),
+                Icon(Icons.chevron_left, color: bsMuted(context)),
               ],
             ),
           ),
