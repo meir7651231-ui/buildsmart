@@ -23,8 +23,6 @@ import 'package:buildsmart/widgets/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Primary dark text on the light theme (per the spec — no `inkLight` token).
-
 /// 👤 הפרופיל שלי — the native home for the user's account.
 ///
 /// Replaces the menu-dial's ⚙️ → 👤 חשבון group: name + contact + profession,

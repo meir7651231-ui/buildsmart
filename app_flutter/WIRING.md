@@ -4480,3 +4480,6 @@ role_picker/consent. directives_ordering תוקן ב-theme_pane + בטסט.
 → `bsDangerText` (redAccent-על-לבן היה 3.2:1). legal: segment לא-נבחר → `onSurfaceVariant` (4.43:1 בבהיר); ℹ️ בקופסת-ההערה
 הבהירה → `warnText`. **גארד:** `_wave3` (20; סה"כ 100), Heebo אמיתי נטען (Ahem הרחב יצר overflow-פנטום); טקסט-אימוג'י-בלבד מוחרג
 מבדיקת-הניגודיות (גליף צבעוני). על הקוד הישן 12/20 נכשלים — כולל `notifications_menu light`.
+**המשך גל 3 (2026-11-20, אחרי סקירה):** הגארד 100→106 — דף-שיחה (`_ChatPage`, הוכחה: hint "הודעה") · תוצאות ai_finder (`initialQuery`, חיפוש-מילולי) ·
+לשונית-פרטיות ב-legal. הערת-doc יתומה של `_ink` הוסרה מ-profile. **פער-כיסוי מתועד:** דיאלוג מחיקת-חשבון מוצג רק למשתמש-אמיתי מחובר
+(`auth.user.isRealUser`) — לא מרונדר בטסט; יושב על `AlertDialog` (theme surface), אומת בקריאת-קוד.

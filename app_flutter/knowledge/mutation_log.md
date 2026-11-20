@@ -2278,3 +2278,4 @@
 
 ## #darkmode-ink-w3 (2026-11-20)
 - **mutation-verify:** `git stash -- lib` → קבוצת w3: RED 12/20 (10 מסכים בכהה + תפריט-ההתראות בבהיר + legal בבהיר) → `stash pop` → GREEN 100/100.
+- **mutation-verify (המשך, 2026-11-20):** שם-השיחה ב-`_ChatPage` + כותרת-תוצאות ai_finder → `BsTokens.inkLight` → RED (`chats_page dark`, `ai_finder_results dark`) → שחזור → GREEN 106/106.

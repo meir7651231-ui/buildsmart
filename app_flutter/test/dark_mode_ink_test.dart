@@ -327,6 +327,19 @@ final _wave3 = <String, (Widget, Future<void> Function(WidgetTester)?, String?)>
   'suppliers': (const SuppliersScreen(), null, null),
   'lipskey_brand': (const LipskeyBrandScreen(), null, null),
   'legal': (const LegalScreen(), null, null),
+  // Deeper surfaces (independent-review follow-up): each proves it got there.
+  'chats_page': (
+    const Scaffold(body: ChatsScreen()),
+    (t) async {
+      await t.tap(find.text('ספק חומרי בנייה').first);
+      await _settle(t);
+    },
+    'הודעה', // the conversation composer hint — only on the _ChatPage
+  ),
+  'ai_finder_results':
+      (const AiFinderScreen(initialQuery: 'ברז'), null, '🔎 "ברז"'),
+  'legal_privacy':
+      (const LegalScreen(initialTab: LegalTab.privacy), null, null),
 };
 
 void main() {
