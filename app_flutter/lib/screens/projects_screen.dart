@@ -47,6 +47,7 @@ class ProjectsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(projectsProvider);
+    final liveCartLines = ref.watch(smartCartProvider).length;
     final Widget body = Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -56,9 +57,9 @@ class ProjectsScreen extends ConsumerWidget {
           elevation: 0,
           automaticallyImplyLeading: false,
           titleSpacing: BsTokens.space4,
-          title: const CfgText('projects_screen.title', '🏗️ הפרויקטים שלי',
+          title: CfgText('projects_screen.title', '🏗️ הפרויקטים שלי',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: bsInk(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           actions: [
@@ -68,8 +69,8 @@ class ProjectsScreen extends ConsumerWidget {
               critical: true, // exit/back — never hideable (don't trap the user)
               child: TextButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                child: const CfgText('projects_screen.exit', '‹ יציאה',
-                    style: TextStyle(color: BsTokens.mutedLight, fontSize: 14)),
+                child: CfgText('projects_screen.exit', '‹ יציאה',
+                    style: TextStyle(color: bsMuted(context), fontSize: 14)),
               ),
             ),
           ],
@@ -117,11 +118,11 @@ class ProjectsScreen extends ConsumerWidget {
                   children: [
                     const Text('🏗️', style: TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
-                    const CfgText(
+                    CfgText(
                       'projects_screen.empty_title',
                       'אין פרויקטים עדיין',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: bsInk(context),
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -158,11 +159,16 @@ class ProjectsScreen extends ConsumerWidget {
                 _SiteCard(
                   project: p,
                   isActive: p.id == state.activeId,
+                  cartLines: projectCartLines(p,
+                      activeId: state.activeId, liveCartLines: liveCartLines),
                   onSwitch: () => _switch(context, ref, p.id),
                   onStatus: () => _statusSheet(context, ref, p.id),
                   onCart: () {
                     _switch(context, ref, p.id, silent: true);
-                    showToast(context, '🛒 סל הפרויקט: ${p.cart.length} פריטים');
+                    // After the switch [p] is active → its cart is now the
+                    // live one (the incoming snapshot was just loaded into it).
+                    showToast(context,
+                        '🛒 סל הפרויקט: ${ref.read(smartCartProvider).length} פריטים');
                   },
                 ),
           ],
@@ -216,6 +222,15 @@ class ProjectsScreen extends ConsumerWidget {
   }
 }
 
+/// Lines in [p]'s cart. The ACTIVE project's cart is the live shared cart
+/// ([smartCartProvider]) — `LiveProject.cart` is only a snapshot written when
+/// switching AWAY from the project, so reading it for the active project showed
+/// a stale count (e.g. "🛒 0 פריטים בעגלה" with 5 items in the cart). Inactive
+/// projects keep their stashed snapshot, which is current for them.
+int projectCartLines(LiveProject p,
+        {required String activeId, required int liveCartLines}) =>
+    p.id == activeId ? liveCartLines : p.cart.length;
+
 class _SiteCard extends StatelessWidget {
   const _SiteCard({
     required this.project,
@@ -223,9 +238,11 @@ class _SiteCard extends StatelessWidget {
     required this.onSwitch,
     required this.onStatus,
     required this.onCart,
+    required this.cartLines,
   });
   final LiveProject project;
   final bool isActive;
+  final int cartLines;
   final VoidCallback onSwitch;
   final VoidCallback onStatus;
   final VoidCallback onCart;
@@ -261,14 +278,14 @@ class _SiteCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(project.name,
-                                style: const TextStyle(
-                                    color: BsTokens.inkLight,
+                                style: TextStyle(
+                                    color: bsInk(context),
                                     fontWeight: FontWeight.w800,
                                     fontSize: 16)),
                             const SizedBox(height: 2),
                             Text(project.addr,
-                                style: const TextStyle(
-                                    color: BsTokens.mutedLight, fontSize: 12.5)),
+                                style: TextStyle(
+                                    color: bsMuted(context), fontSize: 12.5)),
                           ],
                         ),
                       ),
@@ -305,13 +322,13 @@ class _SiteCard extends StatelessWidget {
                 GestureDetector(
                   onTap: onStatus,
                   child: Text('👷 מנהל עבודה: ${project.manager}',
-                      style: const TextStyle(
-                          color: BsTokens.mutedLight, fontSize: 13)),
+                      style: TextStyle(
+                          color: bsMuted(context), fontSize: 13)),
                 ),
                 const SizedBox(height: BsTokens.space2),
                 Row(children: [
                   _LinkBtn(
-                    label: '🛒 ${project.cart.length} פריטים בעגלה ›',
+                    label: '🛒 $cartLines פריטים בעגלה ›',
                     onTap: onCart,
                   ),
                   const SizedBox(width: BsTokens.space2),
@@ -379,6 +396,9 @@ class _StatusSheet extends ConsumerWidget {
     final p = state.projects.firstWhere((x) => x.id == projectId,
         orElse: () => state.active);
     final isActive = p.id == state.activeId;
+    final cartLines = projectCartLines(p,
+        activeId: state.activeId,
+        liveCartLines: ref.watch(smartCartProvider).length);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: DraggableScrollableSheet(
@@ -397,8 +417,8 @@ class _StatusSheet extends ConsumerWidget {
             padding: const EdgeInsets.all(BsTokens.space4),
             children: [
               Text(p.name,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight,
+                  style: TextStyle(
+                      color: bsInk(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
               const SizedBox(height: BsTokens.space3),
@@ -478,7 +498,7 @@ class _StatusSheet extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
-              _kvTile('🛒 ${p.cart.length} פריטים בעגלה'),
+              _kvTile('🛒 $cartLines פריטים בעגלה'),
               _kvTile('🌳 ${p.treeCount} עצי מוצרים בעבודה'),
               const SizedBox(height: BsTokens.space3),
               // composite hide: whole pill button gone when the org hides this element
@@ -625,8 +645,8 @@ class _EditSheetState extends ConsumerState<_EditSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(isNew ? 'פרויקט חדש' : 'עריכת פרטי האתר',
-                  style: const TextStyle(
-                      color: BsTokens.inkLight,
+                  style: TextStyle(
+                      color: bsInk(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 18)),
               const SizedBox(height: BsTokens.space3),
