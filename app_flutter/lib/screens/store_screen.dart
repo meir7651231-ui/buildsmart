@@ -1668,6 +1668,14 @@ class _CartViewState extends ConsumerState<_CartView> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep the notes field in step with the provider: the store stays mounted
+    // in the shell's IndexedStack, so when the provider is reset from outside
+    // (account change, order placed, cart cleared) the controller would keep
+    // the old text — and the next tap/keystroke would write it straight back
+    // onto the next order.
+    ref.listen<String>(cartNotesProvider, (_, next) {
+      if (_notesCtrl.text != next) _notesCtrl.text = next;
+    });
     // Step 94 — checkout_step: fired on a delivery/payment CHANGE via ref.listen.
     // The callback runs OUTSIDE build, so — unlike the ref.watch below — it never
     // trips the "modify a provider while building" assertion. `value` is the bare
