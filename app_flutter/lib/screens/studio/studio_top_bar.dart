@@ -143,7 +143,7 @@ Future<void> _confirmDiscard(
           const SizedBox(height: BsTokens.space2),
           Text(
             'הטיוטה תימחק. מה שכבר פורסם יישאר חי.',
-            style: TextStyle(color: bsMuted(context)),
+            style: TextStyle(color: bsMuted(sheetCtx)),
           ),
           const SizedBox(height: BsTokens.space4),
           Row(

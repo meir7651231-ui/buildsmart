@@ -7,29 +7,35 @@
 //
 // This pumps each fixed screen under the DARK theme and asserts no rendered text
 // still carries the light-only ink, and that light mode still does (no drift).
+import 'dart:math' as math;
+
 import 'package:buildsmart/data/repositories/claude_functions.dart';
 import 'package:buildsmart/features/catalog_config/catalog_config_screen.dart';
-import 'package:buildsmart/screens/audit_screen.dart';
-import 'package:buildsmart/screens/consent_modal.dart';
-import 'package:buildsmart/screens/lipskey_products_screen.dart';
-import 'package:buildsmart/screens/manager_copilot_screen.dart';
-import 'package:buildsmart/screens/regression_panel_screen.dart';
-import 'package:buildsmart/screens/role_picker_sheet.dart';
-import 'package:buildsmart/screens/studio/studio_screen.dart';
 import 'package:buildsmart/screens/adapter_explain_screen.dart';
 import 'package:buildsmart/screens/alt_explain_screen.dart';
+import 'package:buildsmart/screens/audit_screen.dart';
 import 'package:buildsmart/screens/business_summary_screen.dart';
 import 'package:buildsmart/screens/coming_soon_screen.dart';
+import 'package:buildsmart/screens/consent_modal.dart';
 import 'package:buildsmart/screens/credit_explain_screen.dart';
 import 'package:buildsmart/screens/daily_report_screen.dart';
+import 'package:buildsmart/screens/lipskey_products_screen.dart';
+import 'package:buildsmart/screens/manager_copilot_screen.dart';
 import 'package:buildsmart/screens/manager_screens_sheet.dart';
 import 'package:buildsmart/screens/paired_explain_screen.dart';
 import 'package:buildsmart/screens/quote_polish_screen.dart';
+import 'package:buildsmart/screens/regression_panel_screen.dart';
 import 'package:buildsmart/screens/reject_reason_screen.dart';
+import 'package:buildsmart/screens/role_picker_sheet.dart';
+import 'package:buildsmart/screens/studio/studio_screen.dart';
+import 'package:buildsmart/state/studio/config_store.dart'
+    show configStoreProvider;
+import 'package:buildsmart/state/studio/edit_mode.dart'
+    show studioCanEditProvider;
+import 'package:buildsmart/state/studio/studio_nav.dart'
+    show studioSelectedIdProvider;
 import 'package:buildsmart/theme/app_theme.dart';
 import 'package:buildsmart/theme/tokens.dart';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -227,6 +233,44 @@ final _wave2 = <String, (Widget, String?)>{
       (const LipskeyProductsScreen(category: 'ריק', products: []), null),
   'role_picker': (_Opener((c, _) => showRolePicker(c)), 'open'),
   'consent_modal': (_Opener(showConsentModal), 'open'),
+  // Copilot WITHOUT a tap: the welcome rung (headline · sub · chips) — tapping a
+  // chip swaps it out for the bubbles, so it needs its own case.
+  'manager_copilot_welcome': (const ManagerCopilotScreen(), null),
+  // Studio panes beyond the default tree — reached by their pane tab.
+  'studio_inspector': (const StudioScreen(), 'מפקח'),
+  'studio_find': (const StudioScreen(), 'מצא והחלף'),
+  'studio_history': (const StudioScreen(), 'גרסאות'),
+  // Draft-dependent studio surfaces (a seeded draft text, see _seedDraft).
+  'studio_publish_sheet': (const StudioScreen(), 'פרסם לכולם'),
+  'studio_discard_sheet': (const StudioScreen(), 'בטל טיוטה'),
+};
+
+/// Cases that need a live studio DRAFT (find hits · publish/discard sheets).
+const _needsDraft = {'studio_find', 'studio_publish_sheet', 'studio_discard_sheet'};
+
+/// Seeds a draft text override on cart.cta through the real store API.
+void _seedDraft(WidgetTester t) {
+  ProviderScope.containerOf(t.element(find.byType(StudioScreen)))
+      .read(configStoreProvider.notifier)
+      .editDraft('cart.cta', (n) => n.copyWith(text: 'הזמנה מהירה'));
+}
+
+/// Proof each case really reached its target (not a vacuous pass).
+const _mustSee = <String, String>{
+  'role_picker': 'מי אתה?',
+  'consent_modal': 'שיפור השירות — נתוני שימוש',
+  'manager_copilot': 'תשובת-בדיקה של המודל',
+  'studio_inspector': 'cart.cta',
+  'studio_history': 'עדיין לא פורסמו גרסאות',
+  'studio_publish_sheet': 'ישפיע על כל המשתמשים',
+  'studio_discard_sheet': 'הטיוטה תימחק',
+};
+
+/// Extra provider seeding per case (the inspector needs a selected element).
+final _extra = <String, List<Override>>{
+  'studio_inspector': [studioSelectedIdProvider.overrideWith((_) => 'cart.cta')],
+  // Draft surfaces are owner-gated (#84) — the owner is the one who sees them.
+  for (final n in _needsDraft) n: [studioCanEditProvider.overrideWith((_) => true)],
 };
 
 void main() {
@@ -309,16 +353,37 @@ void main() {
           (t) async {
         await _pump(t, home,
             dark: dark,
-            size: name == 'studio' ? const Size(2800, 1800) : const Size(780, 1600),
+            size: name.startsWith('studio')
+                ? const Size(2800, 1800)
+                : const Size(780, 1600),
             overrides: [
-          claudeGatewayProvider
-              .overrideWith((ref) => _FakeGateway(fail: false)),
-        ]);
+              claudeGatewayProvider
+                  .overrideWith((ref) => _FakeGateway(fail: false)),
+              ...?_extra[name],
+            ]);
+        if (_needsDraft.contains(name)) {
+          _seedDraft(t);
+          await t.pump();
+        }
         if (tap != null) {
-          await t.tap(find.text(tap).first);
+          await t.tap(find.textContaining(tap).first);
           for (var i = 0; i < 10; i++) {
             await t.pump(const Duration(milliseconds: 100));
           }
+        }
+        if (name == 'studio_find') {
+          await t.enterText(find.widgetWithText(TextField, 'מצא טקסט'), 'הזמנה');
+          for (var i = 0; i < 5; i++) {
+            await t.pump(const Duration(milliseconds: 100));
+          }
+          // hit rows are the only Checkbox-bearing rows in the find pane.
+          expect(find.byType(Checkbox), findsWidgets,
+              reason: 'studio_find must render hit rows for the query');
+        }
+        final must = _mustSee[name];
+        if (must != null) {
+          expect(find.textContaining(must, findRichText: true), findsWidgets,
+              reason: '$name must actually reach its target ("$must")');
         }
         final painted = _paintedTextColors(t);
         expect(

@@ -2273,3 +2273,5 @@
 
 ## #darkmode-ink-w2 (2026-11-20)
 - **mutation-verify:** `git stash -- lib` (כל תיקוני גל-2 הוסרו) → קבוצת w2: RED 9/16 (8 מסכים בכהה + studio בבהיר) → `stash pop` → GREEN 68/68.
+- **mutation-verify (המשך, 2026-11-20):** כותרת-שורת-תוצאה ב-find_replace → `BsTokens.inkLight` + טקסט sheet-הביטול → `BsTokens.mutedLight`
+  → RED (`studio_find dark`, `studio_discard_sheet dark`) → שחזור → GREEN 80/80. (בדרך התגלה שמקרה-find הראשון היה ריק — אין overrides ⇒ אין תוצאות; תוקן.)

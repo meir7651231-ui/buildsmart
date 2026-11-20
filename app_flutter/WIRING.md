@@ -4468,3 +4468,7 @@ regression_panel · audit · catalog_config · lipskey_products (מצב-ריק).
 שורות role_picker (#F5F5F7 → surfaceContainerHighest בכהה; היה 1.06:1) · פס-המסך בעץ-הסטודיו (surfaceMid → container בכהה).
 chip "אין שינויים" → `onSurfaceVariant` (היה 4.43:1 בבהיר / 2.15:1 בכהה). audit — כותרת-ריק #334155 → bsInk. **גארד:** קבוצת `_wave2`
 ב-`dark_mode_ink_test.dart` (16; סה"כ 68) — WCAG בלבד; על הקוד הישן 9/16 נכשלים (כל 8 בכהה + studio בבהיר).
+**המשך גל 2 (2026-11-20, אחרי סקירה בלתי-תלויה):** `_confirmDiscard` — `bsMuted(sheetCtx)` (לא ה-context החיצוני). הגארד 68→80:
+copilot ללא-tap (מסך-הפתיחה) · Studio: מפקח (בחירה מוזרקת) · מצא-והחלף (טיוטה מוזרקת דרך `editDraft` + שאילתה → שורות-תוצאה) ·
+גרסאות · sheet פרסום · sheet ביטול (`studioCanEditProvider`=true — הבעלים). כל מקרה מאמת שהגיע ליעד (`_mustSee`), כולל
+role_picker/consent. directives_ordering תוקן ב-theme_pane + בטסט.
