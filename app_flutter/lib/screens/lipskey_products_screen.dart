@@ -937,6 +937,29 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
     ref.read(smartCartProvider.notifier).setQtyForKey(_cartLine(_qty * _unitMult));
   }
 
+  /// Unit chip (בודד / ארגז / משטח). When the product is already in the cart
+  /// the stepper is DERIVED from the cart (`cartQty ~/ _unitMult` in build), so
+  /// a bare `setState(_unit = u)` left them disagreeing: 30 units → "1 ארגז"
+  /// (20) on screen, and the next "−" silently wrote 20 to the cart (10 units
+  /// lost). Now the switch converts: the cart is rounded UP to whole units of
+  /// the new size (never loses quantity) and the stepper equals the cart.
+  void _switchUnit(_Unit u) {
+    if (u == _unit) return;
+    final cartQty = ref
+        .read(smartCartProvider)
+        .where((l) => l.productKey == 'lip:${p.sku}')
+        .fold<int>(0, (s, l) => s + l.productQty);
+    setState(() => _unit = u);
+    if (cartQty <= 0) return;
+    final mult = _unitMult;
+    _qty = max(1, (cartQty + mult - 1) ~/ mult);
+    if (_qty * mult != cartQty) {
+      ref
+          .read(smartCartProvider.notifier)
+          .setQtyForKey(_cartLine(_qty * mult));
+    }
+  }
+
   /// Cancel the selection — clears every line of this product and collapses
   /// the card back to its unselected (+) state.
   Future<void> _removeFromCart() async {
@@ -1556,8 +1579,14 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
   Widget _unitToggle() {
     Widget opt(String label, _Unit u, {required bool enabled}) {
       final sel = _unit == u;
-      return GestureDetector(
-        onTap: enabled ? () => setState(() => _unit = u) : null,
+      // Screen readers: a real button with its selected/disabled state (was a
+      // bare GestureDetector → read as plain text, state invisible).
+      return Semantics(
+        button: true,
+        selected: sel,
+        enabled: enabled,
+        child: GestureDetector(
+        onTap: enabled ? () => _switchUnit(u) : null,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
           color: sel ? _brand : Colors.transparent,
@@ -1569,6 +1598,7 @@ class _ProductRowState extends ConsumerState<_ProductRow> {
                       : (enabled ? _muted : const Color(0xFF44495A)),
                   fontWeight: sel ? FontWeight.w800 : FontWeight.w400)),
         ),
+      ),
       );
     }
 
