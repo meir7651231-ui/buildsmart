@@ -40,6 +40,7 @@ import 'package:buildsmart/widgets/confirm_dialog.dart';
 import 'package:buildsmart/widgets/smart_input/keyboard/bs_keyboard_field.dart';
 import 'package:buildsmart/widgets/smart_input/nav/category_suggestion_strip.dart';
 import 'package:buildsmart/widgets/toast.dart';
+import 'package:buildsmart/logic/money_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1991,26 +1992,34 @@ class _SmartCartRow extends ConsumerWidget {
                   ],
                 ),
               ),
-              // Quantity stepper — adjust the real cart line.
-              _SmartQtyStepper(
-                qty: line.productQty,
-                onMinus:
-                    () => ref
-                        .read(smartCartProvider.notifier)
-                        .setLineQty(index, line.productQty - 1),
-                onPlus:
-                    () => ref
-                        .read(smartCartProvider.notifier)
-                        .setLineQty(index, line.productQty + 1),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '₪${line.total}',
-                style: const TextStyle(
-                  color: BsTokens.brand,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
+              // Quantity stepper + line total stacked, so a large total
+              // ("₪124,656") never crushes the product name on a narrow phone
+              // (side-by-side, the name column hit 0px at ≤360px).
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _SmartQtyStepper(
+                    qty: line.productQty,
+                    onMinus:
+                        () => ref
+                            .read(smartCartProvider.notifier)
+                            .setLineQty(index, line.productQty - 1),
+                    onPlus:
+                        () => ref
+                            .read(smartCartProvider.notifier)
+                            .setLineQty(index, line.productQty + 1),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formatNis(line.total),
+                    style: const TextStyle(
+                      color: BsTokens.brand,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
               IconButton(
                 tooltip: 'הסר מהסל',
@@ -2048,7 +2057,7 @@ class _SmartCartRow extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '₪${a.price * a.qty}',
+                      formatNis(a.price * a.qty),
                       style: const TextStyle(
                         color: Color(0xFF888888),
                         fontSize: 12,
@@ -2138,12 +2147,16 @@ class _SupplierHeader extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Text(
-            '🏪 $name',
-            style: const TextStyle(
-              color: BsTokens.inkLight,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+          Flexible(
+            child: Text(
+              '🏪 $name',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: BsTokens.inkLight,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -3257,7 +3270,7 @@ class _CartActionsRow extends ConsumerWidget {
                               emoji: l.productEmoji,
                               name: l.productName,
                               qty: l.productQty,
-                              price: '₪${l.total}',
+                              price: formatNis(l.total),
                             ),
                           )
                           .toList();
@@ -3480,13 +3493,13 @@ class _CartActionsRow extends ConsumerWidget {
               final items = lines
                   .map(
                     (l) =>
-                        '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
+                        '${l.productEmoji} ${l.productName} × ${l.productQty} = ${formatNis(l.total)}',
                   )
                   .join('\n');
               // Real share — hand the cart summary to the native/Web share sheet
               // (via the injectable seam so a test captures the exact text).
               final total = lines.fold<int>(0, (s, l) => s + l.total);
-              final text = 'סל ${AppBrand.name}:\n$items\n\nסה״כ: ₪$total';
+              final text = 'סל ${AppBrand.name}:\n$items\n\nסה״כ: ${formatNis(total)}';
               await ref.read(shareTextProvider)(text);
             },
             icon: const Icon(Icons.share_outlined, size: 16),
