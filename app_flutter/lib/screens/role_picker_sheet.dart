@@ -149,12 +149,13 @@ class _RoleRow extends ConsumerWidget {
             if (persona.id == 'contractor') {
               // Contractor IS the main app (HomeShell) — clear any persona.
               ref.read(activePersonaProvider.notifier).state = null;
-              Navigator.of(context).pop();
+              // Back to the main app: close the picker AND any role board it
+              // was opened from (e.g. worker profile → 'החלפת תפקיד').
+              _closeToRoot(context);
               return;
             }
             if (persona.id == 'worker') {
               // Worker is a full role-app (same shell as the main app), not a dial.
-              Navigator.of(context).pop();
               _pushBoard(context, BoardRole.worker,
                   (_) => const WorkerAppScreen());
               return;
@@ -162,21 +163,18 @@ class _RoleRow extends ConsumerWidget {
             if (persona.id == 'manager') {
               // Manager is a full role-app (the מרכז השליטה dashboard SHELL),
               // not a BS-dial drill — mirror the worker→WorkerAppScreen pattern.
-              Navigator.of(context).pop();
               _pushBoard(context, BoardRole.manager,
                   (_) => const ManagerDashboardScreen());
               return;
             }
             if (persona.id == 'store') {
               // Supplier store — full role-app (4 tabs), not a dial (T9).
-              Navigator.of(context).pop();
               _pushBoard(context, BoardRole.store,
                   (_) => const StoreDashboardScreen());
               return;
             }
             if (persona.id == 'courier') {
               // Courier — full role-app (delivery list), not a dial (T9).
-              Navigator.of(context).pop();
               _pushBoard(context, BoardRole.courier,
                   (_) => const CourierDashboardScreen());
               return;
@@ -249,11 +247,42 @@ void _pushBoard(
   BoardRole role,
   WidgetBuilder boardBuilder,
 ) {
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => _BoardGateRoute(role: role, boardBuilder: boardBuilder),
-    ),
+  // Replace (not stack) any board the picker was opened from: close the
+  // picker and any board below it, then push the new board.
+  final route = MaterialPageRoute<void>(
+    builder: (_) => _BoardGateRoute(role: role, boardBuilder: boardBuilder),
   );
+  _openBoards.add(route);
+  route.popped.whenComplete(() => _openBoards.remove(route));
+  _closeToRoot(context).push(route);
+}
+
+/// Role-board routes this picker pushed that are still on the stack (oldest
+/// first). Lets a role switch close the board it was opened from WITHOUT
+/// touching ordinary main-app screens (profile form, catalog...) that are not
+/// boards.
+final List<Route<void>> _openBoards = [];
+
+/// Closes the picker and — only when it was opened from inside a role board —
+/// that board plus anything above it (e.g. the worker profile screen), so a
+/// role switch never leaves the previous board underneath. With no board open
+/// (opened from the main app, e.g. ProfileScreen) it pops ONLY the picker, so
+/// an ordinary screen and its unsaved form stay put.
+/// Returns the navigator for a follow-up push.
+NavigatorState _closeToRoot(BuildContext context) {
+  final nav = Navigator.of(context);
+  final lowest = _openBoards.where((r) => r.isActive).firstOrNull;
+  if (lowest == null) {
+    nav.pop();
+    return nav;
+  }
+  var passedBoard = false;
+  nav.popUntil((r) {
+    if (passedBoard || r.isFirst) return true;
+    if (r == lowest) passedBoard = true;
+    return false; // pop it (picker / screens above the board / the board)
+  });
+  return nav;
 }
 
 /// The gate route of a role board: while there is no matching [BoardSession]
