@@ -17,6 +17,8 @@
 
 import 'package:buildsmart/data/persona_data.dart';
 import 'package:buildsmart/data/phaseb_seeds.dart';
+import 'package:buildsmart/data/projects.dart';
+import 'package:buildsmart/state/projects_engine.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,13 +73,30 @@ List<DayStage> buildDayStages() => [
 /// The marked-done keys — day-stage keys (`<taskId>-<day>`) AND step keys
 /// (`<taskId>-step<i>`) share one persisted Set (distinct namespaces). Mirrors
 /// `stage_progress.dart` exactly, separate prefs key.
+///
+/// Scoped PER PROJECT: every project runs the same seed day-stages, so the
+/// done-set must be keyed by project or a day marked in PRJ-1 would show as
+/// done in PRJ-2 too. The seed-active project ([kActiveProjectId]) keeps the
+/// original prefs key, so marks saved before the scoping stay where they were
+/// (no migration); every other project gets `<v1 key>.<projectId>`.
 class SmartProjectNotifier extends StateNotifier<Set<String>> {
-  SmartProjectNotifier({this.persist = true}) : super(const {}) {
+  SmartProjectNotifier({this.persist = true, this.projectId = kActiveProjectId})
+      : super(const {}) {
     if (persist) _load();
   }
 
   final bool persist;
-  static const _key = 'bs.smart-project.v1';
+
+  /// The project whose done-set this notifier holds.
+  final String projectId;
+
+  static const _baseKey = 'bs.smart-project.v1';
+
+  /// Prefs key for [projectId] — legacy key for the seed-active project.
+  static String prefsKeyFor(String projectId) =>
+      projectId == kActiveProjectId ? _baseKey : '$_baseKey.$projectId';
+
+  String get _key => prefsKeyFor(projectId);
 
   /// True once any mutation has been applied (or _load completes).
   /// Guards against _load clobbering a mutation that arrived before prefs.
@@ -109,9 +128,13 @@ class SmartProjectNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _persist() async {
     if (!persist) return;
+    // Snapshot BEFORE the await: switching project disposes this notifier, and
+    // reading `state` after dispose would throw and drop the write.
+    final snapshot = state.toList();
+    final key = _key;
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList(_key, state.toList());
+      await prefs.setStringList(key, snapshot);
     } on Object catch (_) {}
   }
 
@@ -131,9 +154,14 @@ class SmartProjectNotifier extends StateNotifier<Set<String>> {
   }
 }
 
+/// The ACTIVE project's done-set. Rebuilt on project switch (watches only the
+/// active id), so every consumer — the §7 screen, the progress bar, the
+/// worker's today strip — reads and toggles the current project's marks.
 final smartProjectProvider =
     StateNotifierProvider<SmartProjectNotifier, Set<String>>(
-  (ref) => SmartProjectNotifier(),
+  (ref) => SmartProjectNotifier(
+    projectId: ref.watch(activeProjectProvider.select((p) => p.id)),
+  ),
 );
 
 /// Project progress — `{done, total, pct}` over the day-stages (proto
