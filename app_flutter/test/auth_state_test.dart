@@ -22,7 +22,9 @@
 import 'dart:async';
 
 import 'package:buildsmart/state/auth_state.dart';
+import 'package:buildsmart/screens/store_screen.dart' show cartQtysProvider;
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -768,6 +770,98 @@ void main() {
           .read(authStateProvider.notifier)
           .assignRole(uid: 'u-target', role: 'courier');
       expect(gw.setRoleCalls, [(uid: 'u-target', role: 'courier')]);
+    });
+  });
+
+  group('session end — the device cart leaves with the user', () {
+    // The local cart (bs.smart-cart.v1) is device-wide unless USER_DATA_SERVER
+    // is on. Before this, nothing but the two "clear cart" buttons ever wiped
+    // it: user A signed out, user B signed in and found A's ₪4,200 cart,
+    // ready to order.
+    const line = SmartCartLine(
+      productKey: 'p1',
+      productName: 'צינור',
+      productEmoji: '🔧',
+      brandName: 'ספק',
+      brandPrice: 4200,
+      productQty: 1,
+      accessories: [],
+    );
+
+    Future<void> fillCart(ProviderContainer c) async {
+      // Let the notifier finish its prefs load so the add isn't clobbered.
+      c.read(smartCartProvider);
+      await pumpEventQueue();
+      c.read(smartCartProvider.notifier).add(line);
+      c.read(cartQtysProvider.notifier).state = const {'q1': 3};
+      expect(c.read(smartCartProvider), hasLength(1));
+    }
+
+    test('signOut() empties the cart + quick-qty map, and persists it',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(const AuthUser(uid: 'u-A', email: 'a@x.co'));
+      await pumpEventQueue();
+      await fillCart(c);
+
+      await c.read(authStateProvider.notifier).signOut();
+      await pumpEventQueue();
+
+      expect(c.read(smartCartProvider), isEmpty);
+      expect(c.read(cartQtysProvider), isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('bs.smart-cart.v1'), '[]',
+          reason: 'a relaunch must not resurrect the previous cart');
+    });
+
+    test('deleteAccount() empties the cart', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(const AuthUser(uid: 'u-A', email: 'a@x.co'));
+      await pumpEventQueue();
+      await fillCart(c);
+
+      await c.read(authStateProvider.notifier).deleteAccount();
+      await pumpEventQueue();
+      expect(c.read(smartCartProvider), isEmpty);
+    });
+
+    test('the stream switching A → B (no explicit sign-out) empties it',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(const AuthUser(uid: 'u-A', email: 'a@x.co'));
+      await pumpEventQueue();
+      await fillCart(c);
+
+      gw.emit(const AuthUser(uid: 'u-B', email: 'b@x.co'));
+      await pumpEventQueue();
+      expect(c.read(smartCartProvider), isEmpty);
+    });
+
+    test('an anonymous GUEST signing in keeps the cart they built', () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      gw.signInAs(const AuthUser(uid: 'anon-1', isAnonymous: true));
+      await pumpEventQueue();
+      await fillCart(c);
+
+      gw.emit(const AuthUser(uid: 'u-A', email: 'a@x.co'));
+      await pumpEventQueue();
+      expect(c.read(smartCartProvider), hasLength(1),
+          reason: 'guest → login is the same person — the cart survives');
+      expect(c.read(cartQtysProvider), const {'q1': 3});
+    });
+
+    test('a restored session on launch keeps the cart (not a switch)',
+        () async {
+      final gw = _FakeAuthGateway();
+      final c = makeContainer(gw);
+      await fillCart(c);
+      gw.signInAs(const AuthUser(uid: 'u-A', email: 'a@x.co'));
+      await pumpEventQueue();
+      expect(c.read(smartCartProvider), hasLength(1));
     });
   });
 }
