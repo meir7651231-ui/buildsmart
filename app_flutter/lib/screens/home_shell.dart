@@ -998,11 +998,7 @@ class _BottomNav extends ConsumerWidget {
                 Icon(currentIndex == 0 ? Icons.home : Icons.home_outlined),
                 orgTerm(ref, 'nav.home', 'בית'),
               ),
-              tab(
-                1,
-                const Icon(Icons.apps),
-                orgTerm(ref, 'nav.catalog', 'מחלקות'),
-              ),
+              tab(1, const Icon(Icons.apps), orgTerm(ref, 'nav.catalog', 'מחלקות')),
               tab(
                 2,
                 _BadgedIcon(
@@ -1014,11 +1010,7 @@ class _BottomNav extends ConsumerWidget {
                 ),
                 orgTerm(ref, 'nav.updates', 'עדכונים'),
               ),
-              tab(
-                3,
-                const Icon(Icons.shopping_cart_outlined),
-                orgTerm(ref, 'nav.store', 'חנות'),
-              ),
+              tab(3, const Icon(Icons.shopping_cart_outlined), orgTerm(ref, 'nav.store', 'חנות')),
             ],
           ),
         ),
@@ -1502,10 +1494,7 @@ class _NewChatSheet extends ConsumerWidget {
                 leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
                 title: Text(
                   c.label,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
-                    fontSize: 15,
-                  ),
+                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
                 ),
                 trailing: const Icon(
                   Icons.chevron_left,
@@ -1801,29 +1790,29 @@ class _RoleStatusChip extends ConsumerWidget {
     final state = ref.watch(roleChipStateProvider);
     final (String label, Color dot, Color fg, Color bg) = switch (state) {
       RoleChipState.needsRegistration => (
-        'דרוש הרשמה',
-        const Color(0xFFF39C12), // orange
-        const Color(0xFF9C6A08),
-        const Color(0xFFFDF1DD),
-      ),
+          'דרוש הרשמה',
+          const Color(0xFFF39C12), // orange
+          const Color(0xFF9C6A08),
+          const Color(0xFFFDF1DD),
+        ),
       RoleChipState.inProcess => (
-        'בתהליך',
-        const Color(0xFFEAC10C), // yellow
-        const Color(0xFF8A7500),
-        const Color(0xFFFBF6D6),
-      ),
+          'בתהליך',
+          const Color(0xFFEAC10C), // yellow
+          const Color(0xFF8A7500),
+          const Color(0xFFFBF6D6),
+        ),
       RoleChipState.approved => (
-        'מאושר',
-        const Color(0xFF27AE60), // green
-        const Color(0xFF1B7A43),
-        const Color(0xFFDDF3E6),
-      ),
+          'מאושר',
+          const Color(0xFF27AE60), // green
+          const Color(0xFF1B7A43),
+          const Color(0xFFDDF3E6),
+        ),
       RoleChipState.rejected => (
-        'נדחה',
-        const Color(0xFFE74C3C), // red
-        const Color(0xFFA3271A),
-        const Color(0xFFFBE3E0),
-      ),
+          'נדחה',
+          const Color(0xFFE74C3C), // red
+          const Color(0xFFA3271A),
+          const Color(0xFFFBE3E0),
+        ),
     };
     return Padding(
       padding: const EdgeInsets.only(top: 2),
@@ -1873,9 +1862,9 @@ class _RoleStatusChip extends ConsumerWidget {
   void _onTap(BuildContext context, WidgetRef ref, RoleChipState state) {
     final registered = ref.read(authStateProvider).user?.isRealUser ?? false;
     if (!registered) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()));
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()),
+      );
       return;
     }
     // 🌉 מצב-מסונן: ריענון-תפקיד-כפוי בכל הקשה — מושך idToken טרי (עם ה-custom-
