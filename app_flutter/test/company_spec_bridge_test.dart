@@ -89,6 +89,49 @@ void main() {
     });
   });
 
+  group('a2 · hostile sizes never throw (import-sheet spinner, native)', () {
+    // int.parse on a 20-digit run overflows on the VM and THREW out of
+    // registerCompanySpecs — the import sheet's _busy never reset, and on
+    // every later launch hydration skipped every spec after the bad row.
+    final huge = '9' * 20;
+    final inf = '9' * 400; // double.parse → Infinity → toInt() threw
+
+    test('overflowing / zero-denominator inch sizes are unparseable', () {
+      for (final cell in [
+        'תבריג זכר $huge/2',
+        'תבריג זכר 1/$huge',
+        'תבריג נקבה $huge 1/2',
+        'תבריג נקבה 1 1/0',
+        'תבריג זכר 1/0',
+      ]) {
+        expect(() => companySpecFor(_p('H1', {'קצה 1': cell})),
+            returnsNormally, reason: cell);
+        expect(companySpecFor(_p('H1', {'קצה 1': cell})), isNull,
+            reason: cell);
+      }
+    });
+
+    test('an Infinity-sized push-fit/press end is unparseable', () {
+      expect(
+          companySpecFor(_p('H2', {'קצה 1': 'פקס $inf', 'חומר': 'PEX'})),
+          isNull);
+      expect(companySpecFor(_p('H3', {'קצה 1': inf, 'חומר': 'HDPE'})),
+          isNull);
+    });
+
+    test('one bad row does not stop the rows after it from registering', () {
+      expect(
+          () => reg([
+                _p('H4', {'קצה 1': 'תבריג זכר $huge/2'}),
+                _p('H5', {'קצה 1': 'תבריג זכר 1/2'}),
+              ]),
+          returnsNormally);
+      expect(kCompanySpecSkus.contains('H4'), isFalse);
+      expect(kCompanySpecSkus.contains('H5'), isTrue,
+          reason: 'the good row after the hostile one still registers');
+    });
+  });
+
   group('b · material honesty', () {
     test('push-fit end + unknown material ⇒ NO spec (no fabricated family)',
         () {

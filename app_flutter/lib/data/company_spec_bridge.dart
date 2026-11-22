@@ -225,15 +225,28 @@ String? _canonInchSize(String text) {
     RegExp(r'(\d+)\s+\.(\d+)'),
     (m) => '${m[1]}.${m[2]}',
   );
+  // tryParse, never parse: an imported cell like 'תבריג זכר 99999999999999999999/2'
+  // overflows int on native and int.parse THROWS — that escaped
+  // registerCompanySpecs and left the import sheet spinning forever (and on
+  // every later launch silently skipped every spec after the bad row). A
+  // number that doesn't fit, or a zero denominator, is honestly unparseable.
+  double? ratio(String? num, String? den) {
+    final n = int.tryParse(num ?? '');
+    final d = int.tryParse(den ?? '');
+    return (n == null || d == null || d == 0) ? null : n / d;
+  }
+
   double? v;
   final mixed = RegExp(r'(\d+)[\s-]+(\d+)\s*/\s*(\d+)').firstMatch(t);
   if (mixed != null) {
     // '1 1/4' / '1-1/4' — a whole plus a fraction.
-    v = int.parse(mixed[1]!) + int.parse(mixed[2]!) / int.parse(mixed[3]!);
+    final whole = int.tryParse(mixed[1]!);
+    final part = ratio(mixed[2], mixed[3]);
+    v = (whole == null || part == null) ? null : whole + part;
   } else {
     final frac = RegExp(r'(\d+)\s*/\s*(\d+)').firstMatch(t);
     if (frac != null) {
-      v = int.parse(frac[1]!) / int.parse(frac[2]!);
+      v = ratio(frac[1], frac[2]);
     } else {
       final dec = RegExp(r'\d*\.?\d+').firstMatch(t);
       if (dec != null) v = double.tryParse(dec[0]!);
@@ -267,7 +280,12 @@ String? _mmSize(String text) {
   final m = RegExp(r'\d+(?:\.\d+)?').firstMatch(text);
   if (m == null) return null;
   final n = double.parse(m[0]!);
-  return n == n.roundToDouble() ? n.toInt().toString() : m[0]!;
+  // A run of 309+ digits parses to Infinity and Infinity.toInt() THROWS —
+  // same escape as the inch path. Not a size; honestly unparseable.
+  if (!n.isFinite) return null;
+  return n == n.roundToDouble() && n.abs() < 9007199254740992 // 2^53
+      ? n.toInt().toString()
+      : m[0]!;
 }
 
 /// The engine's material vocabulary — the ONLY normalization targets
