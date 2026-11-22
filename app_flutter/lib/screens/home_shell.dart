@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:buildsmart/data/repositories/backend.dart'
     show kIntelLive, kUserSystem, useFirebaseBackend;
@@ -665,8 +666,11 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     // Registered user's first name → chip beside the logo (guest/demo → none).
     // .select the two fields used, so an unrelated profile edit (address /
     // profession / businessId / contact) doesn't rebuild the whole app bar.
-    final profile = ref.watch(userProfileProvider
-        .select((p) => (registered: p.registered, name: p.name)));
+    final profile = ref.watch(
+      userProfileProvider.select(
+        (p) => (registered: p.registered, name: p.name),
+      ),
+    );
     final firstName =
         profile.registered && profile.name.trim().isNotEmpty
             ? profile.name.trim().split(RegExp(r'\s+')).first
@@ -686,88 +690,143 @@ class _HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // #31 — explains the logo's real job: it opens the role
-                    // picker. (Help mode intercepts the tap; the ancestor
-                    // InkWell still runs showRolePicker outside help mode.)
-                    const HelpTarget(
-                      title: 'החלפת לוח / זהות',
-                      body:
-                          'לחיצה על הלוגו פותחת את בורר התפקידים — מעבר בין '
-                          'לוח קבלן · מנהל · חנות · שליח · עובד. כך עוברים בין '
-                          'סוגי המשתמשים באפליקציה.',
-                      child: CfgText(
-                        'home.topbar.brand',
-                        // stage-5: profile-aware wordmark (default byte-identical
-                        // 'BuildSmart'; Studio overrides still win at runtime).
-                        AppBrand.name,
-                        style: TextStyle(
-                          color: BsTokens.brand,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 22,
-                        ),
-                      ),
-                    ),
-                    if (firstName.isNotEmpty) ...[
-                      const SizedBox(width: BsTokens.space2),
-                      // The name chip is its OWN tap target → opens a read-only
-                      // profile CARD (the editor is one tap further, behind
-                      // 'ערוך פרופיל'). This inner GestureDetector wins taps on
-                      // the chip; the outer InkWell still handles the logo/version
-                      // (showRolePicker). HitTestBehavior.opaque so the whole chip
-                      // area (incl. padding) is hot.
-                      Semantics(
-                        button: true,
-                        label: 'הפרופיל שלי',
-                        child: Tooltip(
-                          message: 'הפרופיל שלי',
-                          // #31 — the chip explains itself in help mode (opens
-                          // the read-only profile card); the GestureDetector's
-                          // real onTap still fires outside help mode.
-                          child: HelpTarget(
-                            title: 'הפרופיל שלי',
-                            body:
-                                'פותח כרטיס פרופיל לקריאה — שם · מקצוע · '
-                                'כתובת · ח.פ. · איש קשר; ומשם "ערוך פרופיל" '
-                                'לעריכה מלאה.',
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => showProfileCard(context),
-                              // ≥48dp tap target around the small pill (a11y),
-                              // without enlarging the visible chip.
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 48,
-                                ),
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF0E3),
-                                      borderRadius: BorderRadius.circular(999),
-                                    ),
-                                    child: Text(
-                                      firstName,
-                                      style: const TextStyle(
-                                        color: BsTokens.brandDark,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
+                LayoutBuilder(
+                  builder: (context, rc) {
+                    final titleMax = rc.maxWidth;
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // #31 — explains the logo's real job: it opens the role
+                        // picker. (Help mode intercepts the tap; the ancestor
+                        // InkWell still runs showRolePicker outside help mode.)
+                        // ≤360px phones: the logo + name chip + up to 4 action
+                        // icons overflowed the bar (68px at 320). The logo keeps
+                        // its natural size whenever it fits and only scales DOWN
+                        // when it alone is wider than the title slot.
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth:
+                                // the 8px gap before the name chip is part of
+                                // the row too — reserve it, or the bar overflows
+                                // by exactly that gap at 320–360px.
+                                firstName.isNotEmpty
+                                    ? math.max(0, titleMax - BsTokens.space2)
+                                    : titleMax,
+                          ),
+                          child: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: HelpTarget(
+                              title: 'החלפת לוח / זהות',
+                              body:
+                                  'לחיצה על הלוגו פותחת את בורר התפקידים — מעבר בין '
+                                  'לוח קבלן · מנהל · חנות · שליח · עובד. כך עוברים בין '
+                                  'סוגי המשתמשים באפליקציה.',
+                              child: CfgText(
+                                'home.topbar.brand',
+                                // stage-5: profile-aware wordmark (default byte-identical
+                                // 'BuildSmart'; Studio overrides still win at runtime).
+                                AppBrand.name,
+                                style: TextStyle(
+                                  color: BsTokens.brand,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 22,
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ],
+                        if (firstName.isNotEmpty) ...[
+                          const SizedBox(width: BsTokens.space2),
+                          // The chip takes only the space LEFT after the logo;
+                          // too narrow for a readable pill (<56px) ⇒ it steps
+                          // aside (the profile stays reachable from ⚙️ הגדרות)
+                          // instead of squeezing to a sliver or overflowing.
+                          Flexible(
+                            child: LayoutBuilder(
+                              builder:
+                                  (context, c) =>
+                                      c.maxWidth < 56
+                                          ? const SizedBox.shrink()
+                                          :
+                                          // The name chip is its OWN tap target → opens a read-only
+                                          // profile CARD (the editor is one tap further, behind
+                                          // 'ערוך פרופיל'). This inner GestureDetector wins taps on
+                                          // the chip; the outer InkWell still handles the logo/version
+                                          // (showRolePicker). HitTestBehavior.opaque so the whole chip
+                                          // area (incl. padding) is hot.
+                                          Semantics(
+                                            button: true,
+                                            label: 'הפרופיל שלי',
+                                            child: Tooltip(
+                                              message: 'הפרופיל שלי',
+                                              // #31 — the chip explains itself in help mode (opens
+                                              // the read-only profile card); the GestureDetector's
+                                              // real onTap still fires outside help mode.
+                                              child: HelpTarget(
+                                                title: 'הפרופיל שלי',
+                                                body:
+                                                    'פותח כרטיס פרופיל לקריאה — שם · מקצוע · '
+                                                    'כתובת · ח.פ. · איש קשר; ומשם "ערוך פרופיל" '
+                                                    'לעריכה מלאה.',
+                                                child: GestureDetector(
+                                                  behavior:
+                                                      HitTestBehavior.opaque,
+                                                  onTap:
+                                                      () => showProfileCard(
+                                                        context,
+                                                      ),
+                                                  // ≥48dp tap target around the small pill (a11y),
+                                                  // without enlarging the visible chip.
+                                                  child: ConstrainedBox(
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minHeight: 48,
+                                                        ),
+                                                    child: Center(
+                                                      child: Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 4,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: const Color(
+                                                            0xFFFFF0E3,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                999,
+                                                              ),
+                                                        ),
+                                                        child: Text(
+                                                          firstName,
+                                                          maxLines: 1,
+                                                          overflow:
+                                                              TextOverflow
+                                                                  .ellipsis,
+                                                          style: const TextStyle(
+                                                            color:
+                                                                BsTokens
+                                                                    .brandDark,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
                 // Registration / role status chip — UNDER the logo, where the
                 // version sits. Replaces the removed "ממתין לאישור" banner. Only
@@ -939,7 +998,11 @@ class _BottomNav extends ConsumerWidget {
                 Icon(currentIndex == 0 ? Icons.home : Icons.home_outlined),
                 orgTerm(ref, 'nav.home', 'בית'),
               ),
-              tab(1, const Icon(Icons.apps), orgTerm(ref, 'nav.catalog', 'מחלקות')),
+              tab(
+                1,
+                const Icon(Icons.apps),
+                orgTerm(ref, 'nav.catalog', 'מחלקות'),
+              ),
               tab(
                 2,
                 _BadgedIcon(
@@ -951,7 +1014,11 @@ class _BottomNav extends ConsumerWidget {
                 ),
                 orgTerm(ref, 'nav.updates', 'עדכונים'),
               ),
-              tab(3, const Icon(Icons.shopping_cart_outlined), orgTerm(ref, 'nav.store', 'חנות')),
+              tab(
+                3,
+                const Icon(Icons.shopping_cart_outlined),
+                orgTerm(ref, 'nav.store', 'חנות'),
+              ),
             ],
           ),
         ),
@@ -1435,7 +1502,10 @@ class _NewChatSheet extends ConsumerWidget {
                 leading: Text(c.emoji, style: const TextStyle(fontSize: 24)),
                 title: Text(
                   c.label,
-                  style: const TextStyle(color: BsTokens.inkLight, fontSize: 15),
+                  style: const TextStyle(
+                    color: BsTokens.inkLight,
+                    fontSize: 15,
+                  ),
                 ),
                 trailing: const Icon(
                   Icons.chevron_left,
@@ -1731,29 +1801,29 @@ class _RoleStatusChip extends ConsumerWidget {
     final state = ref.watch(roleChipStateProvider);
     final (String label, Color dot, Color fg, Color bg) = switch (state) {
       RoleChipState.needsRegistration => (
-          'דרוש הרשמה',
-          const Color(0xFFF39C12), // orange
-          const Color(0xFF9C6A08),
-          const Color(0xFFFDF1DD),
-        ),
+        'דרוש הרשמה',
+        const Color(0xFFF39C12), // orange
+        const Color(0xFF9C6A08),
+        const Color(0xFFFDF1DD),
+      ),
       RoleChipState.inProcess => (
-          'בתהליך',
-          const Color(0xFFEAC10C), // yellow
-          const Color(0xFF8A7500),
-          const Color(0xFFFBF6D6),
-        ),
+        'בתהליך',
+        const Color(0xFFEAC10C), // yellow
+        const Color(0xFF8A7500),
+        const Color(0xFFFBF6D6),
+      ),
       RoleChipState.approved => (
-          'מאושר',
-          const Color(0xFF27AE60), // green
-          const Color(0xFF1B7A43),
-          const Color(0xFFDDF3E6),
-        ),
+        'מאושר',
+        const Color(0xFF27AE60), // green
+        const Color(0xFF1B7A43),
+        const Color(0xFFDDF3E6),
+      ),
       RoleChipState.rejected => (
-          'נדחה',
-          const Color(0xFFE74C3C), // red
-          const Color(0xFFA3271A),
-          const Color(0xFFFBE3E0),
-        ),
+        'נדחה',
+        const Color(0xFFE74C3C), // red
+        const Color(0xFFA3271A),
+        const Color(0xFFFBE3E0),
+      ),
     };
     return Padding(
       padding: const EdgeInsets.only(top: 2),
@@ -1803,9 +1873,9 @@ class _RoleStatusChip extends ConsumerWidget {
   void _onTap(BuildContext context, WidgetRef ref, RoleChipState state) {
     final registered = ref.read(authStateProvider).user?.isRealUser ?? false;
     if (!registered) {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const WelcomeScreen()));
       return;
     }
     // 🌉 מצב-מסונן: ריענון-תפקיד-כפוי בכל הקשה — מושך idToken טרי (עם ה-custom-
