@@ -48,7 +48,9 @@ import 'package:buildsmart/data/edge/rest_auth.dart';
 import 'package:buildsmart/data/personas.dart';
 import 'package:buildsmart/data/repositories/backend.dart';
 import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/screens/store_screen.dart' show cartQtysProvider;
 import 'package:buildsmart/state/dial_state.dart';
+import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/user_profile.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -590,9 +592,13 @@ class AuthSnapshot {
 /// Firebase-free sandbox) it is born `loaded` and signed-out, and every flow
 /// method throws `unavailable` — the UI shows a Hebrew toast, nothing breaks.
 class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
-  AuthStateNotifier(AuthGateway? gateway, {void Function()? onIdentityCleared})
-      : _gateway = gateway,
+  AuthStateNotifier(
+    AuthGateway? gateway, {
+    void Function()? onIdentityCleared,
+    void Function()? onSessionEnded,
+  })  : _gateway = gateway,
         _onIdentityCleared = onIdentityCleared,
+        _onSessionEnded = onSessionEnded,
         super(
           gateway == null
               ? const AuthSnapshot(loaded: true)
@@ -626,6 +632,15 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
   /// directly unit-testable with a recording callback.
   final void Function()? _onIdentityCleared;
 
+  /// Wipe hook for the DEVICE-scoped shopping cart (wired by
+  /// [authStateProvider]). Narrower than [_onIdentityCleared]: it fires when a
+  /// REAL user's session ends — sign-out, account deletion, or the auth stream
+  /// moving away from a non-anonymous uid — but NOT when an anonymous guest
+  /// signs in (anon uid → real uid), so a guest's cart survives login.
+  /// Without it the local cart (`bs.smart-cart.v1`, device-wide unless
+  /// USER_DATA_SERVER) passed to whoever signed in next, ready to order.
+  final void Function()? _onSessionEnded;
+
   StreamSubscription<AuthUser?>? _sub;
 
   /// The `_loaded` discipline of orders_engine.dart adapted to a stream+fetch
@@ -658,9 +673,11 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     // same uid is not a switch either. The callback is idempotent (a profile
     // reset and a persona null), so overlapping with an explicit sign-out costs
     // nothing.
-    final previousUid = state.user?.uid;
+    final previous = state.user;
+    final previousUid = previous?.uid;
     if (previousUid != null && previousUid != user?.uid) {
       _clearIdentityCache();
+      if (previous!.isRealUser) _onSessionEnded?.call();
     }
     if (user == null) {
       state = const AuthSnapshot(loaded: true);
@@ -741,6 +758,7 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     _gen++; // kill any in-flight claims apply
     state = const AuthSnapshot(loaded: true);
     _clearIdentityCache();
+    _onSessionEnded?.call();
     try {
       await _gateway?.signOut();
     } on Object catch (e) {
@@ -759,6 +777,7 @@ class AuthStateNotifier extends StateNotifier<AuthSnapshot> {
     _gen++;
     if (mounted) state = const AuthSnapshot(loaded: true);
     _clearIdentityCache();
+    _onSessionEnded?.call();
   }
 
   /// S1.9 — the in-app call-site of the `setRole` callable: an ADMIN assigns
@@ -868,7 +887,7 @@ final filteredFirestoreProvider = Provider<FirestoreRest?>((ref) {
 
 /// S1.4 — the current user + server roles + `_loaded` guard. Without Firebase
 /// (tests / sandbox): born loaded + signed-out → zero regression.
-final authStateProvider =
+final StateNotifierProvider<AuthStateNotifier, AuthSnapshot> authStateProvider =
     StateNotifierProvider<AuthStateNotifier, AuthSnapshot>((ref) {
   return AuthStateNotifier(
     ref.watch(authGatewayProvider),
@@ -877,6 +896,12 @@ final authStateProvider =
       // (name/contact, persisted under bs.profile.v1) + the picked persona.
       ref.read(userProfileProvider.notifier).reset();
       ref.read(activePersonaProvider.notifier).state = null;
+    },
+    onSessionEnded: () {
+      // The device cart + its quick-qty mirror end with the session, so the
+      // next account never inherits (and orders) the previous one's cart.
+      ref.read(smartCartProvider.notifier).forgetDeviceCart();
+      ref.read(cartQtysProvider.notifier).state = const {};
     },
   );
 });

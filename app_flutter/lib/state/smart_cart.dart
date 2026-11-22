@@ -211,6 +211,15 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
 
   void clear() => state = const [];
 
+  /// Session end (sign-out / account deletion): drop the DEVICE cart so the
+  /// next account on this device starts empty. A no-op on the server path
+  /// (USER_DATA_SERVER): that cart is already scoped to `carts/{uid}` and
+  /// clearing here would erase the signed-out user's saved server cart.
+  void forgetDeviceCart() {
+    if (_carts != null) return;
+    clear();
+  }
+
   /// Replace every cart line with [lines] (a project's stashed snapshot). Used
   /// by the cart-per-project switch: the incoming project's snapshot becomes the
   /// live cart. Reassigns `state` (new list) so it rebuilds + persists via the
