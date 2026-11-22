@@ -21,8 +21,8 @@
 
 import 'dart:async';
 
-import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/screens/store_screen.dart' show cartQtysProvider;
+import 'package:buildsmart/state/auth_state.dart';
 import 'package:buildsmart/state/dial_state.dart';
 import 'package:buildsmart/state/smart_cart.dart';
 import 'package:buildsmart/state/user_profile.dart';
