@@ -333,10 +333,16 @@ class PersonaPodSheet extends ConsumerWidget {
                     confirmColor: BsTokens.successDark,
                   );
                   if (!ok || !context.mounted) return;
+                  // #103: the delivery is a business fact, not UI — capture
+                  // the long-lived container BEFORE the clock await, so the
+                  // advance + reward still land if the sheet is dismissed
+                  // mid-write (a disposed WidgetRef can't be read). Only the
+                  // pop + toast below stay gated on `mounted`.
+                  final c = ProviderScope.containerOf(context, listen: false);
                   // #86.6 (F-1): attribute the delivery to the LOGGED-IN
                   // courier at the moment it happens — non-courier sessions
                   // honestly leave courierUser null.
-                  final s = ref.read(boardAuthProvider);
+                  final s = c.read(boardAuthProvider);
                   if (s != null && s.role == BoardRole.courier) {
                     fn.stampCourier(order.id, s.username);
                   }
@@ -346,28 +352,25 @@ class PersonaPodSheet extends ConsumerWidget {
                   await stampCourierClock(
                     order.id,
                     delivered: true,
-                    repo: ref.read(courierClockRepositoryProvider),
+                    repo: c.read(courierClockRepositoryProvider),
                   );
-                  if (!context.mounted) return;
-                  ref
-                      .read(sysOrdersProvider.notifier)
-                      .courierAdvance(order.id);
+                  c.read(sysOrdersProvider.notifier).courierAdvance(order.id);
                   // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the
                   // courier dashboard card. Re-read to confirm the engine
                   // REALLY reached delivered (terminal + courierAdvance no-ops
                   // on it), so a no-op never pays out and the pair can't
                   // double-fire. stampCourier + clock already ran above — no
                   // double stamp; the bell fires only for the logged-in courier.
-                  final after = ref.read(sysOrdersProvider);
+                  final after = c.read(sysOrdersProvider);
                   final delivered = after.any(
                     (x) => x.id == order.id && x.stage == OrderStage.delivered,
                   );
                   if (delivered) {
-                    ref
+                    c
                         .read(rewardsProvider.notifier)
                         .awardCoins(kCourierDeliveryCoins);
                     if (s != null && s.role == BoardRole.courier) {
-                      ref
+                      c
                           .read(workerNotifsProvider.notifier)
                           .addNotification(
                             username: s.username,
@@ -377,6 +380,7 @@ class PersonaPodSheet extends ConsumerWidget {
                           );
                     }
                   }
+                  if (!context.mounted) return;
                   unawaited(Navigator.of(context).maybePop());
                   showToast(
                     context,
