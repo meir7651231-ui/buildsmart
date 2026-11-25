@@ -6,6 +6,7 @@ import 'package:buildsmart/data/repositories/backend.dart' show kUserSystem;
 import 'package:buildsmart/data/task_skus_local.dart' show productBySku;
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
+import 'package:buildsmart/logic/money_format.dart';
 import 'package:buildsmart/screens/contractor_tools_sheets.dart';
 import 'package:buildsmart/screens/finance_hub_sheets.dart';
 import 'package:buildsmart/screens/login_sheet.dart' show showLoginSheet;
@@ -467,6 +468,35 @@ int cartTotal(int subtotal, int deliveryFee, {required bool vatInclusive}) =>
     vatInclusive
         ? subtotal + deliveryFee
         : subtotal + cartVat(subtotal, vatInclusive: false) + deliveryFee;
+
+/// The cart summary handed to the share sheet. Its «סה״כ» is the SAME
+/// [cartTotal] the on-screen summary shows as «סה"כ לתשלום» — delivery (and, on
+/// a VAT-exclusive store, the VAT on top) included — so a teammate never gets a
+/// lower number than the one that will be charged. Amounts use the app-wide
+/// thousands grouping ([formatNis]).
+String cartShareText(
+  List<SmartCartLine> lines, {
+  required int deliveryFee,
+  required bool vatInclusive,
+}) {
+  final items = lines
+      .map(
+        (l) =>
+            '${l.productEmoji} ${l.productName} × ${l.productQty} = '
+            '${formatNis(l.total)}',
+      )
+      .join('\n');
+  final subtotal = lines.fold<int>(0, (s, l) => s + l.total);
+  final total = cartTotal(subtotal, deliveryFee, vatInclusive: vatInclusive);
+  final vatLine = vatInclusive
+      ? ''
+      : 'מע"מ 18%: ${formatNis(cartVat(subtotal, vatInclusive: false))}\n';
+  final delivery = deliveryFee == 0 ? 'חינם' : formatNis(deliveryFee);
+  return 'סל ${AppBrand.name}:\n$items\n\n'
+      '$vatLine'
+      'משלוח: $delivery\n'
+      'סה״כ: ${formatNis(total)}';
+}
 
 /// Total number of units in the cart: summed fixed-item quantities plus the
 /// quantity of every smart-cart line (so 3× of one product counts as 3).
@@ -3477,16 +3507,15 @@ class _CartActionsRow extends ConsumerWidget {
                 showToast(context, 'הסל ריק');
                 return;
               }
-              final items = lines
-                  .map(
-                    (l) =>
-                        '${l.productEmoji} ${l.productName} × ${l.productQty} = ₪${l.total}',
-                  )
-                  .join('\n');
               // Real share — hand the cart summary to the native/Web share sheet
               // (via the injectable seam so a test captures the exact text).
-              final total = lines.fold<int>(0, (s, l) => s + l.total);
-              final text = 'סל ${AppBrand.name}:\n$items\n\nסה״כ: ₪$total';
+              // Same delivery + VAT math as the on-screen summary, so the
+              // shared «סה״כ» equals «סה"כ לתשלום».
+              final text = cartShareText(
+                lines,
+                deliveryFee: deliveryFeeFor(ref.read(cartDeliveryProvider)),
+                vatInclusive: ref.read(storeSettingsProvider).vatInclusive,
+              );
               await ref.read(shareTextProvider)(text);
             },
             icon: const Icon(Icons.share_outlined, size: 16),

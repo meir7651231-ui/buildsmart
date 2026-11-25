@@ -120,7 +120,7 @@ void main() {
       await t.pumpAndSettle();
       expect(shared, hasLength(1));
       expect(shared.single, contains('מלט'));
-      expect(shared.single, contains('סה״כ: ₪60'));
+      expect(shared.single, contains('סה״כ: ₪105')); // ₪60 + standard ₪45
     });
   });
 
