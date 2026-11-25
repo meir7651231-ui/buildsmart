@@ -102,7 +102,11 @@ void main() {
     expect(text, contains('🧱'));
     expect(text, contains('× 2'));
     expect(text, contains('₪60')); // 30 × 2 line total
-    expect(text, contains('סה״כ: ₪60'));
+    // #share-total: the shared total equals the on-screen «סה"כ לתשלום» —
+    // standard delivery (₪45) included, not just the line sum.
+    expect(text, contains('משלוח: ₪45'));
+    expect(text, contains('סה״כ: ₪105'));
+    expect(text, isNot(contains('סה״כ: ₪60')));
   });
 
   testWidgets('empty cart shares NOTHING (only toasts הסל ריק)', (t) async {

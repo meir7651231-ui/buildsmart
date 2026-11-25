@@ -16,6 +16,7 @@
 
 import 'package:buildsmart/data/repositories/claude_functions.dart'
     show claudeGatewayProvider;
+import 'package:buildsmart/logic/money_format.dart';
 import 'package:buildsmart/logic/prompt_sanitize.dart' show promptSafeText;
 import 'package:buildsmart/theme/tokens.dart';
 import 'package:buildsmart/widgets/ai_result_states.dart';
@@ -158,6 +159,9 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
   @override
   Widget build(BuildContext context) {
     final aiAvailable = ref.watch(claudeGatewayProvider) != null;
+    // Theme-aware ink: the fixed light-theme ink was near-invisible on the
+    // dark scaffold (title, name, every figure).
+    final ink = Theme.of(context).colorScheme.onSurface;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -166,9 +170,9 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
-          title: const CfgText('credit_explain_screen.title', '💳 הסבר אשראי',
+          title: CfgText('credit_explain_screen.title', '💳 הסבר אשראי',
               style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: ink,
                   fontWeight: FontWeight.w800,
                   fontSize: 18)),
         ),
@@ -177,8 +181,8 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
           children: [
             // ── The REAL credit figures (data, never the model). ──
             Text(widget.name,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: ink,
                     fontSize: 16,
                     fontWeight: FontWeight.w800)),
             const SizedBox(height: BsTokens.space2),
@@ -189,16 +193,17 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
             // the one figure here that was never in doubt.
             if (widget.creditLimit <= 0) ...[
               _row('מסגרת', 'לא רשומה'),
-              _row('נוצל', '₪${widget.used}'),
+              _row('נוצל', formatNis(widget.used)),
               _row('יתרה', '—'),
               _row('ניצול', '—'),
             ] else ...[
-              _row('מסגרת', '₪${widget.creditLimit}'),
-              _row('נוצל', '₪${widget.used}'),
-              _row('יתרה', '₪${widget.balance}'),
+              _row('מסגרת', formatNis(widget.creditLimit)),
+              _row('נוצל', formatNis(widget.used)),
+              _row('יתרה', formatNis(widget.balance)),
               _row('ניצול', '${widget.pct}%'),
             ],
-            const Divider(height: BsTokens.space5, color: BsTokens.divider),
+            Divider(
+                height: BsTokens.space5, color: Theme.of(context).dividerColor),
 
             if (!aiAvailable)
               const AiOffState('💡 ההסבר החכם דורש חיבור לשרת.')
@@ -208,8 +213,7 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
               AiFailedState(onRetry: _explain)
             else if (_explanation != null)
               Text(_explanation!,
-                  style: const TextStyle(
-                      color: BsTokens.inkLight, fontSize: 15, height: 1.6)),
+                  style: TextStyle(color: ink, fontSize: 15, height: 1.6)),
             const SizedBox(height: BsTokens.space4),
             const CfgText('credit_explain_screen.note',
                 '⚙️ המספרים מנתוני-המערכת; ה-AI רק מסביר אותם.',
@@ -230,8 +234,8 @@ class _CreditExplainState extends ConsumerState<CreditExplainScreen> {
                       color: BsTokens.mutedLight, fontSize: 13)),
             ),
             Text(value,
-                style: const TextStyle(
-                    color: BsTokens.inkLight,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.w700)),
           ],

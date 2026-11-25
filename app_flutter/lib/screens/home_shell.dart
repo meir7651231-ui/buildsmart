@@ -5,6 +5,7 @@ import 'package:buildsmart/data/repositories/backend.dart'
 import 'package:buildsmart/features/global_search/global_search.dart'
     show kGlobalSearch;
 import 'package:buildsmart/config/app_brand.dart' show AppBrand;
+import 'package:buildsmart/logic/money_format.dart';
 import 'package:buildsmart/logic/system_division.dart';
 import 'package:buildsmart/screens/ai_hub_screen.dart';
 import 'package:buildsmart/screens/camera_sheet.dart';
@@ -573,7 +574,7 @@ class _CartChatBubble extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '₪${line.total}',
+                      formatNis(line.total),
                       style: const TextStyle(
                         color: BsTokens.brand,
                         fontSize: 13,
