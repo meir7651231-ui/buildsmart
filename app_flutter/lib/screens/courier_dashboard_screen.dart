@@ -817,28 +817,32 @@ class _CourierDashboardScreenState
     // F-10 — ה-writer של bs.courier-clock.v1: חותמת-שעון ברגעי ה-advance
     // האמיתיים דרך ה-helper המשותף (פורמט תואם-בייט לקורא בדוחות-השליח).
     // attempts לא נחתם — אין זרימת ניסיון-חוזר אמיתית.
-    final clockRepo = ref.read(courierClockRepositoryProvider);
+    // #103: capture the container BEFORE the clock awaits — the delivery
+    // reward/attribution are business facts and must land even if this
+    // screen is disposed mid-write. Only the toasts stay gated on `mounted`.
+    final c = ProviderScope.containerOf(context, listen: false);
+    final clockRepo = c.read(courierClockRepositoryProvider);
     if (movedToTransit) {
       await stampCourierClock(o.id, pickedUp: true, repo: clockRepo);
     }
     if (delivered) await stampCourierClock(o.id, delivered: true, repo: clockRepo);
-    if (!mounted) return;
 
     if (!delivered) {
+      if (!mounted) return;
       showToast(context, 'המשלוח ${o.id} עודכן — מסונכרן עם החנות והמנהל ✓');
       return;
     }
     // 🪙 fixed DEMO tariff (kCourierDeliveryCoins) onto the shared rewards
     // balance — same seam as the worker's task-approval award (#85ו).
-    ref.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
-    final s = ref.read(boardAuthProvider);
+    c.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
+    final s = c.read(boardAuthProvider);
     if (s != null && s.role == BoardRole.courier) {
       // F-1 (#86.6) — רגע המסירה חותם את זהות השליח על רשומת ה-fulfillment
       // (side-car בלבד — מנוע ההזמנות המשותף לא נגוע); זו נקודת-האמת לייחוס
       // per-courier בפרופיל ובדוחות.
-      ref.read(fulfillmentProvider.notifier).stampCourier(o.id, s.username);
+      c.read(fulfillmentProvider.notifier).stampCourier(o.id, s.username);
       // 🔔 'delivered' event onto the courier's own per-username feed.
-      ref
+      c
           .read(workerNotifsProvider.notifier)
           .addNotification(
             username: s.username,
@@ -847,6 +851,7 @@ class _CourierDashboardScreenState
             body: '${o.id} · ${o.who}',
           );
     }
+    if (!mounted) return;
     showToast(
       context,
       'המשלוח ${o.id} נמסר ✓ +$kCourierDeliveryCoins מטבעות 🪙',

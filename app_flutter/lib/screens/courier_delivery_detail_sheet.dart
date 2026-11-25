@@ -387,12 +387,17 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
       );
       if (!ok || !context.mounted) return;
     }
+    // #103: capture the long-lived container BEFORE the clock await — the
+    // advance/reward are business facts and must land even if the sheet is
+    // dismissed mid-write (a disposed WidgetRef can't be read). Only the
+    // toast at the end stays gated on `mounted`.
+    final c = ProviderScope.containerOf(context, listen: false);
     // #86.6 (F-1): ברגע המסירה — ייחוס per-שליח על רשומת ה-fulfillment.
     // נחתם רק כשסשן שליח מחובר; אחרת courierUser נשאר null בכנות.
     if (wasTransit) {
-      final s = ref.read(boardAuthProvider);
+      final s = c.read(boardAuthProvider);
       if (s != null && s.role == BoardRole.courier) {
-        ref
+        c
             .read(fulfillmentProvider.notifier)
             .stampCourier(order.id, s.username);
       }
@@ -403,10 +408,9 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
       order.id,
       pickedUp: wasPickup,
       delivered: wasTransit,
-      repo: ref.read(courierClockRepositoryProvider),
+      repo: c.read(courierClockRepositoryProvider),
     );
-    if (!context.mounted) return;
-    ref.read(sysOrdersProvider.notifier).courierAdvance(order.id);
+    c.read(sysOrdersProvider.notifier).courierAdvance(order.id);
 
     // 🪙+🔔 COURIER v2 ב — reward on delivered, same seam as the courier
     // dashboard card. Re-read to confirm the engine REALLY reached delivered
@@ -414,15 +418,15 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
     // never pays out and the 🪙+🔔 pair can't double-fire for one order.
     // stampCourier + clock already ran above — no double stamp; the bell fires
     // only for a logged-in courier board session.
-    final after = ref.read(sysOrdersProvider);
+    final after = c.read(sysOrdersProvider);
     final delivered =
         wasTransit &&
         after.any((x) => x.id == order.id && x.stage == OrderStage.delivered);
     if (delivered) {
-      ref.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
-      final s = ref.read(boardAuthProvider);
+      c.read(rewardsProvider.notifier).awardCoins(kCourierDeliveryCoins);
+      final s = c.read(boardAuthProvider);
       if (s != null && s.role == BoardRole.courier) {
-        ref
+        c
             .read(workerNotifsProvider.notifier)
             .addNotification(
               username: s.username,
@@ -432,6 +436,7 @@ class CourierDeliveryDetailSheet extends ConsumerWidget {
             );
       }
     }
+    if (!context.mounted) return;
     showToast(context, 'המשלוח ${order.id} עודכן — מסונכרן עם החנות והמנהל ✓');
   }
 
