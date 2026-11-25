@@ -1537,6 +1537,10 @@ Future<String> rerouteThreadToDm(
   if (counterpart == null) return threadId; // bot / dm / ambiguous
   final lookup = ref.read(usersLookupProvider);
   if (lookup == null) return threadId; // Firebase-free
+  // Read the engine BEFORE the directory await: the caller's widget (a list row
+  // or the chats screen) can be disposed while the lookup is in flight, and a
+  // disposed WidgetRef throws on read — an uncaught async error, not a no-op.
+  final engine = ref.read(chatEngineProvider.notifier);
   List<String> uids;
   try {
     uids = await lookup.uidsByRole(counterpart.name);
@@ -1545,7 +1549,7 @@ Future<String> rerouteThreadToDm(
   }
   final peers = uids.where((u) => u.isNotEmpty && u != myUid).toList();
   if (peers.length != 1) return threadId; // none / ambiguous ⇒ keep seed thread
-  return ref.read(chatEngineProvider.notifier).createOrGetThread(
+  return engine.createOrGetThread(
     [myUid, peers.first],
     name: t.name,
     avatar: t.avatar,
