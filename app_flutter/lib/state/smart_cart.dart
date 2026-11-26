@@ -203,10 +203,61 @@ class SmartCartNotifier extends StateNotifier<List<SmartCartLine>>
 
   /// Quick-add stepper: collapse all lines for [line.productKey] into the
   /// single [line]. A line with productQty <= 0 removes the product entirely.
+  ///
+  /// The grid/list steppers build [line] with NO accessories/config, so the
+  /// priced accessories (and the selection) the product sheet already put on
+  /// that key are CARRIED OVER into the collapsed line — merged by
+  /// name+emoji+price with their quantities summed. Before, tapping "+" on the
+  /// grid card silently deleted e.g. a ₪4 teflon tape + ₪8 gasket from the
+  /// cart and dropped the subtotal.
   void setQtyForKey(SmartCartLine line) {
-    final others =
-        state.where((l) => l.productKey != line.productKey).toList();
-    state = line.productQty > 0 ? [...others, line] : others;
+    final others = <SmartCartLine>[];
+    final existing = <SmartCartLine>[];
+    for (final l in state) {
+      (l.productKey == line.productKey ? existing : others).add(l);
+    }
+    if (line.productQty <= 0) {
+      state = others;
+      return;
+    }
+    final merged = <String, SmartCartAcc>{};
+    for (final a in [
+      for (final l in existing) ...l.accessories,
+      ...line.accessories,
+    ]) {
+      final k = '${a.name}\u0000${a.emoji}\u0000${a.price}';
+      final prev = merged[k];
+      merged[k] = prev == null
+          ? a
+          : SmartCartAcc(
+              name: a.name,
+              emoji: a.emoji,
+              price: a.price,
+              qty: prev.qty + a.qty,
+            );
+    }
+    var selection = line.selection;
+    if (selection.isEmpty) {
+      for (final l in existing) {
+        if (l.selection.isNotEmpty) {
+          selection = l.selection;
+          break;
+        }
+      }
+    }
+    state = [
+      ...others,
+      SmartCartLine(
+        productKey: line.productKey,
+        productName: line.productName,
+        productEmoji: line.productEmoji,
+        brandName: line.brandName,
+        brandPrice: line.brandPrice,
+        productQty: line.productQty,
+        accessories: merged.values.toList(),
+        selection: selection,
+      ),
+    ];
   }
 
   void clear() => state = const [];
