@@ -1674,13 +1674,45 @@ String fxGroupInt(int v) {
 /// fractional tail. Fractional inputs used to lose grouping entirely
 /// (`v.toString()` → "1234567.5"); now the integer part is grouped
 /// ("1,234,567.5") like the integer case.
+///
+/// Never throws: a non-finite value (NaN/±Infinity from a hardware-keyboard
+/// "1e999"/"NaN") or one beyond the safe-integer range is returned as-is, and
+/// a tiny fraction whose `toString()` is exponential ("1e-7") is rendered in
+/// fixed notation (up to 6 places) instead of crashing on a missing '.'.
 String fxGroupAmount(double v) {
+  if (!v.isFinite) return v.toString();
   final abs = v.abs();
+  if (abs >= 1e15) return v.toString();
   if (abs == abs.roundToDouble()) return fxGroupInt(v.round());
-  final s = abs.toString(); // e.g. "1234567.5"
+  var s = abs.toString(); // e.g. "1234567.5"
+  if (s.contains('e')) {
+    // Exponential form ("1e-7") — fixed notation, trailing zeros trimmed.
+    s = abs.toStringAsFixed(6).replaceFirst(RegExp(r'0+$'), '');
+    if (s.endsWith('.')) s = s.substring(0, s.length - 1);
+  }
   final dot = s.indexOf('.');
+  if (dot < 0) return '${v < 0 ? '-' : ''}$s';
   final intPart = int.tryParse(s.substring(0, dot)) ?? 0;
   return '${v < 0 ? '-' : ''}${fxGroupInt(intPart)}${s.substring(dot)}';
+}
+
+/// The FX converter's result line for the raw [input] in currency [cur].
+///
+/// Honest on a missing rate: on the live backend (and clean seeds)
+/// [_fxRatesToShow] is empty — there is no real FX feed yet — so the line says
+/// "אין שער זמין" instead of converting at a fabricated 1:1 rate (which showed
+/// "1,000 USD = ₪1,000"). Never throws on NaN/Infinity input.
+/// Top-level + public so `fx_group_test` can pin it directly.
+String fxCalcResult(String input, String cur, Map<String, double> rates) {
+  final parsed = double.tryParse(input.trim()) ?? 0;
+  final amt = parsed.isFinite ? parsed : 0.0;
+  final rate = rates[cur];
+  if (rate == null) return '${fxGroupAmount(amt)} $cur = אין שער זמין';
+  final ils = amt * rate;
+  if (!ils.isFinite || ils.abs() >= 1e15) {
+    return '${fxGroupAmount(amt)} $cur = ₪${ils.toStringAsFixed(0)}';
+  }
+  return '${fxGroupAmount(amt)} $cur = ₪${fxGroupInt(ils.round())}';
 }
 
 class _FxCalc extends StatefulWidget {
@@ -1699,14 +1731,9 @@ class _FxCalcState extends State<_FxCalc> {
     super.dispose();
   }
 
-  String _result() {
-    // proto updateFXCalc: amt*rate (round), thousands-grouped. On the live
-    // backend the gated map is empty (no fabricated rate) → falls back to 1.
-    final amt = double.tryParse(_ctl.text.trim()) ?? 0;
-    final rate = _fxRatesToShow()[_cur] ?? 1;
-    final ils = (amt * rate).round();
-    return '${fxGroupAmount(amt)} $_cur = ₪${fxGroupInt(ils)}';
-  }
+  // proto updateFXCalc: amt*rate (round), thousands-grouped. On the live
+  // backend the gated map is empty (no fabricated rate) → "אין שער זמין".
+  String _result() => fxCalcResult(_ctl.text, _cur, _fxRatesToShow());
 
   @override
   Widget build(BuildContext context) {
