@@ -159,15 +159,17 @@ class _WorkerAttendanceScreenState
   /// permission-denied / unsupported / error — no invented coordinate), then
   /// records attendance with whatever it got. A null fix is honest: the day is
   /// stamped without a location and the toast says so.
+  ///
+  /// The notifier + employerId are captured BEFORE the GPS await and the
+  /// clock-in is written unconditionally: a slow fix (permission prompt, cold
+  /// GPS) must not silently drop the attendance stamp when the worker leaves
+  /// the screen mid-lookup. Only the toast is gated on `mounted`.
   Future<void> _clockIn(String username) async {
+    final notifier = ref.read(workerAttendanceProvider.notifier);
+    final employerId = ref.read(boardAuthProvider)?.employerId ?? '';
     final fix = await currentGeoFix();
-    if (!mounted) return;
-    final ok = ref
-        .read(workerAttendanceProvider.notifier)
-        .clockIn(username,
-            lat: fix?.lat,
-            lng: fix?.lng,
-            employerId: ref.read(boardAuthProvider)?.employerId ?? '');
+    final ok = notifier.clockIn(username,
+        lat: fix?.lat, lng: fix?.lng, employerId: employerId);
     if (!mounted) return;
     if (!ok) {
       showToast(context, 'כבר נרשמה כניסה להיום');
@@ -182,10 +184,11 @@ class _WorkerAttendanceScreenState
   }
 
   /// Contract 4 — clock-out WITH a GPS fix (same honest fallback).
+  /// Notifier captured before the await; the write is unconditional (see
+  /// [_clockIn]).
   Future<void> _clockOut(String username) async {
-    final fix = await currentGeoFix();
-    if (!mounted) return;
     final notifier = ref.read(workerAttendanceProvider.notifier);
+    final fix = await currentGeoFix();
     final ok = notifier.clockOut(username, lat: fix?.lat, lng: fix?.lng);
     if (!mounted) return;
     if (!ok) {

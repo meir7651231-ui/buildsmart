@@ -543,21 +543,26 @@ class _TasksTabState extends ConsumerState<_TasksTab> {
     final notifier = ref.read(workerAttendanceProvider.notifier);
     final today = notifier.todayFor(widget.username);
     final clockingOut = today != null && today.outTs == null;
+    // Captured BEFORE the GPS await: the clock write below is unconditional so
+    // a slow fix never drops the attendance stamp when the board is closed
+    // mid-lookup. Only the toasts are gated on `mounted`.
+    final username = widget.username;
+    final employerId = ref.read(boardAuthProvider)?.employerId ?? '';
 
     final fix = await currentGeoFix();
-    if (!mounted) return;
 
     final bool ok;
     if (clockingOut) {
-      ok = notifier.clockOut(widget.username, lat: fix?.lat, lng: fix?.lng);
+      ok = notifier.clockOut(username, lat: fix?.lat, lng: fix?.lng);
     } else {
       ok = notifier.clockIn(
-        widget.username,
+        username,
         lat: fix?.lat,
         lng: fix?.lng,
-        employerId: ref.read(boardAuthProvider)?.employerId ?? '',
+        employerId: employerId,
       );
     }
+    if (!mounted) return;
 
     if (!ok) {
       showToast(
