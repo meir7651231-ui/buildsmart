@@ -22,12 +22,13 @@ void main() {
     final seed1 = c1.read(tasksProvider).firstWhere((t) => t.id == 1);
     final otherWorker = seed1.worker == 0 ? 1 : 0;
 
-    n.editTask(1,
-        name: 'קו מים חם — שם חדש',
-        detail: 'פירוט חדש',
-        days: 5,
-        steps: const ['שלב א', 'שלב ב']);
-    n.assignTask(1, worker: otherWorker);
+    n
+      ..editTask(1,
+          name: 'קו מים חם — שם חדש',
+          detail: 'פירוט חדש',
+          days: 5,
+          steps: const ['שלב א', 'שלב ב'])
+      ..assignTask(1, worker: otherWorker);
     await _settle();
     c1.dispose();
 

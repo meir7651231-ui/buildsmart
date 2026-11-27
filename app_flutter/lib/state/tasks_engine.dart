@@ -357,7 +357,7 @@ Map<String, Object> _authoredDiff(TaskItem t, TaskItem? seed) {
 /// missing / wrong-typed key keeps the seed value, so pre-fix payloads load
 /// unchanged). Built directly because [TaskItem.copyWith] does not expose the
 /// authored fields — the [TasksNotifier.editTask] idiom.
-TaskItem _withAuthoredOverlay(Map o, TaskItem t) {
+TaskItem _withAuthoredOverlay(Map<dynamic, dynamic> o, TaskItem t) {
   final steps = o['steps'];
   return TaskItem(
     id: t.id,
