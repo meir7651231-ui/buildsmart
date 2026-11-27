@@ -1,3 +1,5 @@
+import 'package:buildsmart/data/repositories/firestore_cached_repo.dart';
+import 'package:buildsmart/data/repositories/orders_firebase.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,6 +28,16 @@ void main() {
       final o = base();
       expect(o.customerEmail, '');
       expect(o.toJson().containsKey('customerEmail'), isFalse);
+    });
+
+    // Nightly 2026-11-27 — toDoc wrote customerEmail but fromDoc never read it
+    // back, so every Firestore snapshot rebuilt the order with ''.
+    test('customerEmail survives the Firestore toDoc → fromDoc round-trip', () {
+      final repo = FirebaseOrdersRepository();
+      final o = base(customerEmail: 'buyer@example.com');
+      final back = repo.fromDoc(RemoteDoc(o.id, repo.toDoc(o)));
+      expect(back.customerEmail, 'buyer@example.com');
+      expect(repo.fromDoc(RemoteDoc('BS-2', repo.toDoc(base()))).customerEmail, '');
     });
 
     test('copyWith preserves customerEmail', () {

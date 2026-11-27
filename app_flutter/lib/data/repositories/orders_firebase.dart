@@ -122,6 +122,9 @@ class FirebaseOrdersRepository extends FirestoreCachedRepo<Order>
       storeUid: (j['storeUid'] as String?) ?? '',
       courierUid: (j['courierUid'] as String?) ?? '',
       customerPhone: (j['customerPhone'] as String?) ?? '',
+      // Nightly 2026-11-27 — toDoc writes it; the inverse must read it back or
+      // every snapshot (and the engine's prefs write-behind) drops the buyer email.
+      customerEmail: (j['customerEmail'] as String?) ?? '',
     );
   }
 
