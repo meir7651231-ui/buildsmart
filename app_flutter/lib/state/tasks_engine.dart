@@ -26,6 +26,7 @@ import 'package:buildsmart/data/repositories/tasks_firebase.dart';
 import 'package:buildsmart/state/orders_engine.dart';
 import 'package:buildsmart/state/rewards_state.dart';
 import 'package:buildsmart/state/worker_notifs.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -338,6 +339,50 @@ const String kTaskRejectNoteSideMapKey = 'bs.task-reject-note.v1';
 /// task. A fixed demo tariff — the real per-task value comes with the server.
 const int kTaskApprovalCoins = 20;
 
+/// The AUTHORED fields of a seed task that differ from the verbatim [seed]
+/// (empty when unedited, or for a runtime task with no seed counterpart —
+/// those persist as full records under [kTasksRuntimeKey]).
+Map<String, Object> _authoredDiff(TaskItem t, TaskItem? seed) {
+  if (seed == null) return const {};
+  return {
+    if (t.name != seed.name) 'name': t.name,
+    if (t.detail != seed.detail) 'detail': t.detail,
+    if (t.days != seed.days) 'days': t.days,
+    if (!listEquals(t.steps, seed.steps)) 'steps': t.steps,
+    if (t.worker != seed.worker) 'worker': t.worker,
+  };
+}
+
+/// Re-apply a persisted [_authoredDiff] onto seed [t] (defensive decode: a
+/// missing / wrong-typed key keeps the seed value, so pre-fix payloads load
+/// unchanged). Built directly because [TaskItem.copyWith] does not expose the
+/// authored fields — the [TasksNotifier.editTask] idiom.
+TaskItem _withAuthoredOverlay(Map o, TaskItem t) {
+  final steps = o['steps'];
+  return TaskItem(
+    id: t.id,
+    name: o['name'] is String ? o['name'] as String : t.name,
+    detail: o['detail'] is String ? o['detail'] as String : t.detail,
+    worker: o['worker'] is num ? (o['worker'] as num).toInt() : t.worker,
+    status: t.status,
+    days: o['days'] is num ? (o['days'] as num).toInt() : t.days,
+    steps: steps is List ? [for (final s in steps) if (s is String) s] : t.steps,
+    photo: t.photo,
+    note: t.note,
+    startedAt: t.startedAt,
+    completedAt: t.completedAt,
+    doneSteps: t.doneSteps,
+    orderId: t.orderId,
+    employerId: t.employerId,
+    assignedWorkerUid: t.assignedWorkerUid,
+    createdBy: t.createdBy,
+    scheduledStart: t.scheduledStart,
+    kind: t.kind,
+    location: t.location,
+    severity: t.severity,
+  );
+}
+
 class TasksNotifier extends StateNotifier<List<TaskItem>> {
   TasksNotifier({this.persist = true, Ref? ref})
       : _ref = ref,
@@ -377,7 +422,7 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
         super.state = [
           for (final t in _seedTasks())
             if (m['${t.id}'] is Map)
-              t.copyWith(
+              _withAuthoredOverlay(m['${t.id}'] as Map, t).copyWith(
                 status: (m['${t.id}'] as Map)['status'] as String?,
                 photo: (m['${t.id}'] as Map)['photo'] as String?,
                 note: (m['${t.id}'] as Map)['note'] as String?,
@@ -456,11 +501,19 @@ class TasksNotifier extends StateNotifier<List<TaskItem>> {
     if (!persist) return;
     try {
       final prefs = await SharedPreferences.getInstance();
+      final seeds = {for (final t in _seedTasks()) t.id: t};
       await prefs.setString(
         kTasksScreenKey,
         jsonEncode({
           for (final t in state)
             '${t.id}': {
+              // ✏️ Nightly 2026-11-27 — a contractor's editTask/assignTask on a
+              // SEED task (name/detail/days/steps/worker) was memory-only: the
+              // overlay never carried these and seed ids are excluded from the
+              // runtime full-record key, so F5 reverted the edit. Written
+              // WRITE-WHEN-DIFFERENT from the seed ⇒ an unedited seed's payload
+              // stays byte-identical.
+              ..._authoredDiff(t, seeds[t.id]),
               'status': t.status,
               'photo': t.photo,
               'note': t.note,
