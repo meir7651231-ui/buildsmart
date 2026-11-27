@@ -1502,6 +1502,10 @@ class _SupplierSettingsScreenState
     final current =
         ref.read(storeProfileProvider)[session.username] ??
         const StoreProfile();
+    // Captured BEFORE the await: if the user leaves the screen while the
+    // profile save is in flight, `ref` is disposed and a post-await
+    // `ref.read` would throw — the typed hours would be silently lost.
+    final hoursNotifier = ref.read(supplierSettingsProvider.notifier);
     // ONE awaited commit (F-18) — the store rolls back and returns false on
     // a persist failure (web localStorage quota), so '✓' is never faked.
     final ok = await ref
@@ -1518,9 +1522,7 @@ class _SupplierSettingsScreenState
         );
     // Legacy hours seam — a tiny string, committed once (not per keystroke);
     // the legacy notifier persists best-effort behind its own try/catch.
-    ref
-        .read(supplierSettingsProvider.notifier)
-        .update((s) => s.copyWith(hours: _hours.trim()));
+    hoursNotifier.update((s) => s.copyWith(hours: _hours.trim()));
     if (!mounted) return;
     setState(() => _saving = false);
     showToast(
