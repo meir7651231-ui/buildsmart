@@ -88,12 +88,37 @@ class WorkerNotif {
       };
 }
 
+/// Merge a fresh in-memory feed map over a persisted one: per username the
+/// [fresh] entries first, then the [persisted] entries whose id isn't already
+/// present, capped at [kWorkerNotifsCap]. Usernames present in only one side
+/// are kept as-is. Pure → unit-testable.
+Map<String, List<WorkerNotif>> mergeWorkerNotifFeeds(
+  Map<String, List<WorkerNotif>> fresh,
+  Map<String, List<WorkerNotif>> persisted,
+) {
+  final out = <String, List<WorkerNotif>>{...persisted};
+  for (final e in fresh.entries) {
+    final ids = {for (final n in e.value) n.id};
+    out[e.key] = [
+      ...e.value,
+      for (final n in persisted[e.key] ?? const <WorkerNotif>[])
+        if (!ids.contains(n.id)) n,
+    ].take(kWorkerNotifsCap).toList();
+  }
+  return out;
+}
+
 /// The full per-username store: `username → newest-first list`.
 class WorkerNotifsNotifier
     extends StateNotifier<Map<String, List<WorkerNotif>>> {
   WorkerNotifsNotifier({this.persist = true}) : super(const {}) {
-    if (persist) _load();
+    if (persist) _ready = _load();
   }
+
+  /// Completes once the initial prefs load (and any merge write-back) is done.
+  /// Every [_persist] waits on it, so a write that lands BEFORE the load never
+  /// hits disk first (which would make the load read back only that write).
+  Future<void> _ready = Future<void>.value();
 
   /// When false (tests), skip SharedPreferences entirely (engine pattern).
   final bool persist;
@@ -102,6 +127,11 @@ class WorkerNotifsNotifier
   /// async `_load()` must not clobber it.
   bool _userTouched = false;
 
+  /// True once [_load] finished; usernames whose feed was CLEARED before that
+  /// must not get their saved entries merged back in.
+  bool _loaded = false;
+  final Set<String> _clearedBeforeLoad = <String>{};
+
   /// Monotonic suffix so two adds in the same microsecond stay unique.
   int _seq = 0;
 
@@ -109,10 +139,9 @@ class WorkerNotifsNotifier
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(kWorkerNotifsKey);
-      if (raw == null || raw.isEmpty || _userTouched) return;
+      if (raw == null || raw.isEmpty) return;
       final m = jsonDecode(raw) as Map<String, dynamic>;
-      if (_userTouched) return;
-      state = {
+      final disk = <String, List<WorkerNotif>>{
         for (final e in m.entries)
           if (e.value is List)
             e.key: [
@@ -121,13 +150,36 @@ class WorkerNotifsNotifier
                   WorkerNotif.fromJson(j.cast<String, dynamic>()),
             ],
       };
+      if (!_userTouched) {
+        state = disk;
+        return;
+      }
+      // A write (e.g. a task approval's bell) landed BEFORE this load — the
+      // store is often first CREATED by that write (only the worker/courier
+      // boards watch it). Dropping the disk feed here and then persisting the
+      // in-memory map would silently wipe every OTHER saved feed (omer's
+      // bells, earlier HR decisions, store/courier bells). MERGE instead: the
+      // fresh in-memory entries first, then the persisted ones (deduped by id),
+      // capped — and write the merged map back.
+      state = mergeWorkerNotifFeeds(state, {
+        for (final e in disk.entries)
+          if (!_clearedBeforeLoad.contains(e.key)) e.key: e.value,
+      });
+      await _write();
     } on Object catch (_) {
       // Corrupt/old payload — start empty (the feed refills from live events).
+    } finally {
+      _loaded = true;
     }
   }
 
   Future<void> _persist() async {
     if (!persist) return;
+    await _ready;
+    await _write();
+  }
+
+  Future<void> _write() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -208,6 +260,7 @@ class WorkerNotifsNotifier
   /// (`confirmDestructive`).
   void clear(String username) {
     if ((state[username] ?? const []).isEmpty) return;
+    if (!_loaded) _clearedBeforeLoad.add(username);
     _set({...state, username: const []});
   }
 }
