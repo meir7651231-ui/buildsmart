@@ -109,7 +109,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
         : [
             for (final d in defects)
               if (workerIndex != null &&
-                  workerOwnsTask(d, workerIndex, session?.uid ?? ''))
+                  workerOwnsTask(d, workerIndex, session.uid))
                 d
           ];
 
@@ -144,12 +144,12 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               // Header row — title + a ✕ close (≥48dp tap target).
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: CfgText(
                       'defects_sheet.header',
                       '🔧 ליקויים',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                       ),
@@ -178,25 +178,25 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               const SizedBox(height: BsTokens.space3),
 
               // ══ LIST — רשימת ליקויים ══
-              const CfgText(
+              CfgText(
                 'defects_sheet.list_title',
                 'רשימת ליקויים',
                 style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
               if (scoped.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
                   child: CfgText(
                     'defects_sheet.empty',
                     'אין ליקויים',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: BsTokens.inkLight,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                     ),
@@ -323,8 +323,8 @@ class _DefectRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   defect.name,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
@@ -423,8 +423,8 @@ class _AddDefectForm extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: BsTokens.inkLight,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -452,11 +452,11 @@ class _AddDefectForm extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        const CfgText(
+        CfgText(
           'defects_sheet.severity',
           'חומרה',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w700,
             fontSize: 13.5,
           ),
@@ -540,7 +540,7 @@ class _SeverityChip extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? const Color(0xFFFFFFFF) : BsTokens.inkLight,
+              color: selected ? const Color(0xFFFFFFFF) : Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 13.5,
             ),

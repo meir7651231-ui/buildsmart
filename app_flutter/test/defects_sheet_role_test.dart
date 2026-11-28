@@ -5,7 +5,6 @@
 // the WORKER branch: "דווח ליקוי — יישלח לקבלן", an always-empty list (no
 // worker index), and a save button that silently did nothing. Only a WORKER
 // session may take the worker branch (mirrors tasks_gantt_sheet).
-import 'package:buildsmart/data/board_accounts_local.dart';
 import 'package:buildsmart/screens/defects_sheet.dart';
 import 'package:buildsmart/state/board_auth.dart';
 import 'package:buildsmart/state/tasks_engine.dart';
