@@ -84,8 +84,13 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     final session = ref.watch(boardAuthProvider);
     // The contractor board is the `manager`-role board that opens tasks_screen's
     // _managerView (BuildSmart has no separate BoardRole.contractor — the
-    // contractor is the main app / the manager board here).
-    final isContractor = session?.role == BoardRole.manager;
+    // contractor is the main app / the manager board here). The contractor's
+    // main app normally has NO board session (null) — and a lingering
+    // courier/store demo session doesn't make the user a worker either — so
+    // ONLY a worker session takes the worker branch (mirrors
+    // tasks_gantt_sheet's `session != null && role == worker` split).
+    final isWorker = session != null && session.role == BoardRole.worker;
+    final isContractor = !isWorker;
 
     // SCOPE the live defects to the acting persona (mirrors the existing
     // idioms): the contractor sees THIS employer's defects (the same
@@ -93,7 +98,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     // worker sees their OWN (the same `t.worker == <self index>` filter the
     // worker board's `_bucket`/`mine` uses). null session → empty (honest).
     final defects = ref.watch(defectsProvider);
-    final workerIndex = session == null ? null : workerIndexForSession(session);
+    final workerIndex = isWorker ? workerIndexForSession(session) : null;
     final scoped = isContractor
         ? [
             for (final d in defects)
@@ -104,7 +109,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
         : [
             for (final d in defects)
               if (workerIndex != null &&
-                  workerOwnsTask(d, workerIndex, session?.uid ?? ''))
+                  workerOwnsTask(d, workerIndex, session.uid))
                 d
           ];
 
@@ -139,12 +144,12 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               // Header row — title + a ✕ close (≥48dp tap target).
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: CfgText(
                       'defects_sheet.header',
                       '🔧 ליקויים',
                       style: TextStyle(
-                        color: BsTokens.inkLight,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w800,
                         fontSize: 18,
                       ),
@@ -173,25 +178,25 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
               const SizedBox(height: BsTokens.space3),
 
               // ══ LIST — רשימת ליקויים ══
-              const CfgText(
+              CfgText(
                 'defects_sheet.list_title',
                 'רשימת ליקויים',
                 style: TextStyle(
-                  color: BsTokens.inkLight,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
                 ),
               ),
               const SizedBox(height: BsTokens.space2),
               if (scoped.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: BsTokens.space4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: BsTokens.space4),
                   child: CfgText(
                     'defects_sheet.empty',
                     'אין ליקויים',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: BsTokens.inkLight,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                     ),
@@ -318,8 +323,8 @@ class _DefectRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   defect.name,
-                  style: const TextStyle(
-                    color: BsTokens.inkLight,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
@@ -418,8 +423,8 @@ class _AddDefectForm extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: BsTokens.inkLight,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -447,11 +452,11 @@ class _AddDefectForm extends StatelessWidget {
           ),
         ),
         const SizedBox(height: BsTokens.space3),
-        const CfgText(
+        CfgText(
           'defects_sheet.severity',
           'חומרה',
           style: TextStyle(
-            color: BsTokens.inkLight,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w700,
             fontSize: 13.5,
           ),
@@ -535,7 +540,7 @@ class _SeverityChip extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? const Color(0xFFFFFFFF) : BsTokens.inkLight,
+              color: selected ? const Color(0xFFFFFFFF) : Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w700,
               fontSize: 13.5,
             ),
