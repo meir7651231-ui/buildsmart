@@ -399,8 +399,11 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   /// Redeem a reward — spends [r.cost] coins if affordable. Returns true when
   /// the redemption succeeded — proto `redeemReward` @21640-21658.
   bool redeem(RwReward r) {
-    if (state.coins < r.cost) return false;
-    if (!_loaded) _coinsDeltaBeforeLoad -= r.cost;
+    // Spending is only checked against the REAL balance: before the load
+    // finishes `state.coins` is still the seed, so a redeem could overdraw
+    // the saved balance. (The rewards hub watches the store, so in practice
+    // the load is done long before a tap.)
+    if ((persist && !_loaded) || state.coins < r.cost) return false;
     final coins = state.coins - r.cost;
     state = state.copyWith(coins: coins, leaderboard: _syncMe(coins));
     _persist();

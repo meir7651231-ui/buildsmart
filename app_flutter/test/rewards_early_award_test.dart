@@ -85,4 +85,51 @@ void main() {
     expect(n.state.coins, 520);
     expect((await _saved(kRewardsKey))['coins'], 520);
   });
+
+  test('redeem before load is refused (no overdraw of the saved balance)',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      kRewardsKey: '{"coins":50,"claimedChallengeIds":[]}',
+    });
+    final n = RewardsNotifier();
+    addTearDown(n.dispose);
+    const r = RwReward(id: 'x', ic: '🎁', name: 'x', cost: 250);
+    expect(n.redeem(r), isFalse);
+    await _settle();
+    expect(n.state.coins, 50);
+    expect(n.redeem(r), isFalse, reason: 'still unaffordable after load');
+  });
+
+  test('a challenge claimed before load pays once and stays claimed',
+      () async {
+    final done = kMonthlyChallengesSeed.where((c) => c.done).toList();
+    if (done.isEmpty) return; // empty-seed build flavour
+    final ch = done.first;
+    SharedPreferences.setMockInitialValues({
+      kRewardsKey: '{"coins":500,"claimedChallengeIds":[]}',
+    });
+    final n = RewardsNotifier()..claimChallenge(ch.id);
+    addTearDown(n.dispose);
+    await _settle();
+    expect(n.state.coins, 500 + ch.reward);
+    expect(n.state.challenges.map((c) => c.id), isNot(contains(ch.id)));
+    expect((await _saved(kRewardsKey))['claimedChallengeIds'], [ch.id]);
+  });
+
+  test('re-claiming a challenge already claimed on disk does not pay twice',
+      () async {
+    final done = kMonthlyChallengesSeed.where((c) => c.done).toList();
+    if (done.isEmpty) return;
+    final ch = done.first;
+    SharedPreferences.setMockInitialValues({
+      kRewardsKey: jsonEncode({
+        'coins': 500,
+        'claimedChallengeIds': [ch.id],
+      }),
+    });
+    final n = RewardsNotifier()..claimChallenge(ch.id);
+    addTearDown(n.dispose);
+    await _settle();
+    expect(n.state.coins, 500);
+  });
 }

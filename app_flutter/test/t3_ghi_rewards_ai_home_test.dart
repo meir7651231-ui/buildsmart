@@ -60,10 +60,15 @@ void main() {
       expect(s.challenges, hasLength(2));
     });
 
-    test('redeem spends coins when affordable, refuses otherwise [L21640]', () {
+    test('redeem spends coins when affordable, refuses otherwise [L21640]',
+        () async {
       final c = ProviderContainer();
       addTearDown(c.dispose);
       final n = c.read(rewardsProvider.notifier);
+      // A redeem is only checked against the LOADED balance (a pre-load
+      // redeem is refused — it would overdraw the saved balance), so let the
+      // async prefs load settle first, as the hub's watch does in the app.
+      await Future<void>.delayed(const Duration(milliseconds: 60));
       // r3 = 180 (affordable from 340).
       expect(n.redeem(kRewardsCatalog[2]), isTrue);
       expect(c.read(rewardsProvider).coins, 160);
