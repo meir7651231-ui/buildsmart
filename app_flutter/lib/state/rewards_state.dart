@@ -15,8 +15,8 @@
 //
 // PERSISTENCE (#9): the runtime deltas survive a restart as a compact
 // `{coins, claimedChallengeIds}` overlay under [kRewardsKey] (the
-// `brand_history.dart` SharedPreferences idiom + the board_auth `_userTouched`
-// load-guard) — coins earned from approved tasks no longer evaporate.
+// `brand_history.dart` SharedPreferences idiom; a mutation that lands before
+// the load is merged as a delta on top of it) — coins earned from approved tasks no longer evaporate.
 
 import 'dart:convert';
 
@@ -232,8 +232,22 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
           challenges: kMonthlyChallengesSeed,
           leaderboard: kLeaderboardSeed,
         )) {
-    if (persist) _load();
+    if (persist) _ready = _load();
   }
+
+  /// Completes once the initial load (and any merge write-back) is done. Every
+  /// [_persist] waits on it, so a mutation that lands BEFORE the load never
+  /// writes the bare seed-based balance to storage first.
+  Future<void> _ready = Future<void>.value();
+
+  /// True once [_load] finished. Mutations before that are recorded as a
+  /// DELTA ([_coinsDeltaBeforeLoad], [_claimedBeforeLoad]) and re-applied ON
+  /// TOP of the loaded balance — the notifier is often CREATED by its first
+  /// write (e.g. a courier's delivery award before any rewards screen was
+  /// built), and dropping the load then saved seed+15 over the real balance.
+  bool _loaded = false;
+  int _coinsDeltaBeforeLoad = 0;
+  final Set<String> _claimedBeforeLoad = <String>{};
 
   /// When false (tests), skip SharedPreferences entirely (engine pattern).
   final bool persist;
@@ -252,10 +266,6 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   String get _storageKey =>
       username.isEmpty ? kRewardsKey : '$kRewardsKey.$username';
 
-  /// One-shot guard (the board_auth/brand_history idiom): once a user
-  /// mutation wrote state, a late async [_load] must not clobber it.
-  bool _userTouched = false;
-
   /// Re-apply the persisted `{coins, claimedChallengeIds}` overlay (#9) onto
   /// the verbatim seed — resilient to seed edits (a renamed/added challenge
   /// simply has no overlay entry). A corrupt payload keeps the seed.
@@ -263,12 +273,22 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   /// (shared by the server + SharedPreferences load paths). A late-load guard: a
   /// user mutation that already ran wins.
   void _applyOverlay(Map<String, dynamic> m) {
-    if (_userTouched) return;
-    final coins = (m['coins'] as num?)?.toInt() ?? kBuildCoinsSeed;
-    final claimed = <String>{
+    // A mutation that already ran wins — as a DELTA over the loaded overlay.
+    final diskClaimed = <String>{
       for (final id in (m['claimedChallengeIds'] as List? ?? const []))
         if (id is String) id,
     };
+    // A challenge claimed pre-load that was ALREADY claimed on disk must not
+    // pay out twice — take its reward back out of the delta.
+    var delta = _coinsDeltaBeforeLoad;
+    for (final c in kMonthlyChallengesSeed) {
+      if (_claimedBeforeLoad.contains(c.id) && diskClaimed.contains(c.id)) {
+        delta -= c.reward;
+      }
+    }
+    final coins =
+        ((m['coins'] as num?)?.toInt() ?? kBuildCoinsSeed) + delta;
+    final claimed = {...diskClaimed, ..._claimedBeforeLoad};
     state = state.copyWith(
       coins: coins,
       challenges: [
@@ -280,6 +300,16 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   }
 
   Future<void> _load() async {
+    try {
+      await _loadOverlay();
+    } finally {
+      _loaded = true;
+    }
+    // A pre-load mutation's persist is waiting on [_ready]; it writes the
+    // merged state. Nothing to write here when nothing was touched.
+  }
+
+  Future<void> _loadOverlay() async {
     final repo = _repo;
     if (repo != null) {
       // Server path: the overlay lives at `rewards/{uid}`. Absent ⇒ keep the seed
@@ -291,7 +321,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_storageKey);
-      if (raw == null || raw.isEmpty || _userTouched) return;
+      if (raw == null || raw.isEmpty) return;
       _applyOverlay(jsonDecode(raw) as Map<String, dynamic>);
     } on Object catch (_) {
       // corrupt/legacy payload — keep the verbatim seed
@@ -315,6 +345,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
 
   Future<void> _persist() async {
     if (!persist) return;
+    await _ready;
     final repo = _repo;
     if (repo != null) {
       // Server path: mirror the compact overlay to `rewards/{uid}`.
@@ -332,7 +363,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   /// Add [n] coins and keep the "me" leaderboard row in sync — proto
   /// `awardCoins` @21487-21494.
   void awardCoins(int n) {
-    _userTouched = true;
+    if (!_loaded) _coinsDeltaBeforeLoad += n;
     final coins = state.coins + n;
     state = state.copyWith(coins: coins, leaderboard: _syncMe(coins));
     _persist();
@@ -349,7 +380,10 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
       }
     }
     if (c == null || !c.done) return;
-    _userTouched = true;
+    if (!_loaded) {
+      _coinsDeltaBeforeLoad += c.reward;
+      _claimedBeforeLoad.add(id);
+    }
     final coins = state.coins + c.reward;
     state = state.copyWith(
       coins: coins,
@@ -366,7 +400,7 @@ class RewardsNotifier extends StateNotifier<RewardsState> {
   /// the redemption succeeded — proto `redeemReward` @21640-21658.
   bool redeem(RwReward r) {
     if (state.coins < r.cost) return false;
-    _userTouched = true;
+    if (!_loaded) _coinsDeltaBeforeLoad -= r.cost;
     final coins = state.coins - r.cost;
     state = state.copyWith(coins: coins, leaderboard: _syncMe(coins));
     _persist();
