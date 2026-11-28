@@ -84,8 +84,13 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     final session = ref.watch(boardAuthProvider);
     // The contractor board is the `manager`-role board that opens tasks_screen's
     // _managerView (BuildSmart has no separate BoardRole.contractor — the
-    // contractor is the main app / the manager board here).
-    final isContractor = session?.role == BoardRole.manager;
+    // contractor is the main app / the manager board here). The contractor's
+    // main app normally has NO board session (null) — and a lingering
+    // courier/store demo session doesn't make the user a worker either — so
+    // ONLY a worker session takes the worker branch (mirrors
+    // tasks_gantt_sheet's `session != null && role == worker` split).
+    final isWorker = session != null && session.role == BoardRole.worker;
+    final isContractor = !isWorker;
 
     // SCOPE the live defects to the acting persona (mirrors the existing
     // idioms): the contractor sees THIS employer's defects (the same
@@ -93,7 +98,7 @@ class _DefectsSheetState extends ConsumerState<_DefectsSheet> {
     // worker sees their OWN (the same `t.worker == <self index>` filter the
     // worker board's `_bucket`/`mine` uses). null session → empty (honest).
     final defects = ref.watch(defectsProvider);
-    final workerIndex = session == null ? null : workerIndexForSession(session);
+    final workerIndex = isWorker ? workerIndexForSession(session) : null;
     final scoped = isContractor
         ? [
             for (final d in defects)
