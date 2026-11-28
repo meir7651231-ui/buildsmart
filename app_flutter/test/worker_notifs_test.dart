@@ -140,7 +140,7 @@ void main() {
         reason: 'the bell badge counts only the own unread entries');
   });
 
-  test('late _load does not clobber a fresh add (#24 race guard)', () async {
+  test('late _load does not clobber a fresh add, and keeps the saved feed (#24)', () async {
     // Seed an OLD persisted feed, mutate synchronously before the lazy
     // notifier's async _load() resolves — the fresh write must survive.
     SharedPreferences.setMockInitialValues({
@@ -166,7 +166,60 @@ void main() {
 
     expect(n.state['ran']!.map((x) => x.title), contains('טרי'),
         reason: 'the fresh add must survive the late prefs load');
-    expect(n.state['ran']!.map((x) => x.title), isNot(contains('ישן')),
-        reason: 'the late load is dropped once a user write landed');
+    // The persisted history is NOT dropped — it is merged UNDER the fresh add
+    // (dropping it, then persisting, silently wiped every saved feed).
+    expect(n.state['ran']!.map((x) => x.title).toList(), ['טרי', 'ישן'],
+        reason: 'the late load merges the saved feed under the fresh add');
+  });
+
+  test("first write of a session keeps OTHER users' saved feeds on disk",
+      () async {
+    // Contractor approves a task on a cold start → the store is CREATED by
+    // that write. Before the fix, omer's whole saved feed was wiped.
+    Map<String, Object?> old(String id, String title) => {
+          'id': id,
+          'emoji': '🔔',
+          'title': title,
+          'body': '',
+          'ts': DateTime(2026, 1, 5, 8).toIso8601String(),
+          'read': true,
+        };
+    SharedPreferences.setMockInitialValues({
+      kWorkerNotifsKey: jsonEncode({
+        'omer': [old('o-1', 'חופשה אושרה')],
+        'ran': [old('r-1', 'משימה ישנה')],
+      }),
+    });
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    c.read(workerNotifsProvider.notifier)
+        .addForWorker(0, emoji: '✅', title: 'המשימה אושרה');
+    await _settle();
+
+    final st = c.read(workerNotifsProvider);
+    expect(st['omer']!.map((x) => x.title), ['חופשה אושרה']);
+    expect(st['ran']!.map((x) => x.title), ['המשימה אושרה', 'משימה ישנה']);
+
+    final prefs = await SharedPreferences.getInstance();
+    final saved =
+        jsonDecode(prefs.getString(kWorkerNotifsKey)!) as Map<String, dynamic>;
+    expect(((saved['omer'] as List).single as Map)['id'], 'o-1',
+        reason: 'the merged map is written back — omer survives a restart');
+    expect((saved['ran'] as List).length, 2);
+  });
+
+  test('mergeWorkerNotifFeeds dedupes by id and caps', () {
+    WorkerNotif n(String id) =>
+        WorkerNotif(id: id, emoji: '🔔', title: id, ts: DateTime(2026));
+    final merged = mergeWorkerNotifFeeds(
+      {'ran': [n('a'), n('b')]},
+      {
+        'ran': [n('b'), for (var i = 0; i < 60; i++) n('d$i')],
+        'gil': [n('g')],
+      },
+    );
+    expect(merged['ran']!.length, kWorkerNotifsCap);
+    expect(merged['ran']!.take(3).map((x) => x.id), ['a', 'b', 'd0']);
+    expect(merged['gil']!.single.id, 'g');
   });
 }
