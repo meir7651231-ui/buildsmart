@@ -222,4 +222,28 @@ void main() {
     expect(merged['ran']!.take(3).map((x) => x.id), ['a', 'b', 'd0']);
     expect(merged['gil']!.single.id, 'g');
   });
+
+  test('a clear before the load is not undone by the merge', () async {
+    SharedPreferences.setMockInitialValues({
+      kWorkerNotifsKey: jsonEncode({
+        'ran': [
+          {
+            'id': 'old-1',
+            'emoji': '🔔',
+            'title': 'ישן',
+            'body': '',
+            'ts': DateTime(2026, 1, 5, 8).toIso8601String(),
+            'read': false,
+          },
+        ],
+      }),
+    });
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    c.read(workerNotifsProvider.notifier)
+      ..addNotification(username: 'ran', emoji: '✅', title: 'טרי')
+      ..clear('ran');
+    await _settle();
+    expect(c.read(workerNotifsProvider)['ran'], isEmpty);
+  });
 }

@@ -127,6 +127,11 @@ class WorkerNotifsNotifier
   /// async `_load()` must not clobber it.
   bool _userTouched = false;
 
+  /// True once [_load] finished; usernames whose feed was CLEARED before that
+  /// must not get their saved entries merged back in.
+  bool _loaded = false;
+  final Set<String> _clearedBeforeLoad = <String>{};
+
   /// Monotonic suffix so two adds in the same microsecond stay unique.
   int _seq = 0;
 
@@ -156,10 +161,15 @@ class WorkerNotifsNotifier
       // bells, earlier HR decisions, store/courier bells). MERGE instead: the
       // fresh in-memory entries first, then the persisted ones (deduped by id),
       // capped — and write the merged map back.
-      state = mergeWorkerNotifFeeds(state, disk);
+      state = mergeWorkerNotifFeeds(state, {
+        for (final e in disk.entries)
+          if (!_clearedBeforeLoad.contains(e.key)) e.key: e.value,
+      });
       await _write();
     } on Object catch (_) {
       // Corrupt/old payload — start empty (the feed refills from live events).
+    } finally {
+      _loaded = true;
     }
   }
 
@@ -250,6 +260,7 @@ class WorkerNotifsNotifier
   /// (`confirmDestructive`).
   void clear(String username) {
     if ((state[username] ?? const []).isEmpty) return;
+    if (!_loaded) _clearedBeforeLoad.add(username);
     _set({...state, username: const []});
   }
 }
